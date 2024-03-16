@@ -1,5 +1,5 @@
 const formatJson = {
-    success(message, data) {
+    success(message, data = null) {
         return {
             statusCode: 200,
             success: true,
@@ -8,7 +8,7 @@ const formatJson = {
         };
     },
 
-    error(message, data) {
+    error(message, data = null) {
         return {
             statusCode: 400,
             success: false,
@@ -17,7 +17,7 @@ const formatJson = {
         };
     },
 
-    notFound(message, data) {
+    notFound(message, data = null) {
         return {
             statusCode: 404,
             success: false,
@@ -26,7 +26,7 @@ const formatJson = {
         };
     },
 
-    unauthorized(message, data) {
+    unauthorized(message, data = null) {
         return {
             statusCode: 401,
             success: false,
