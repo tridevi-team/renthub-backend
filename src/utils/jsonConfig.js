@@ -1,120 +1,37 @@
 const formatJson = {
-    success(data) {
+    success(message, data) {
         return {
             statusCode: 200,
             success: true,
+            message,
             data,
         };
     },
 
-    error(message) {
-        return {
-            statusCode: 500,
-            success: false,
-            message,
-        };
-    },
-
-    notFound(message) {
-        return {
-            statusCode: 404,
-            success: false,
-            message,
-        };
-    },
-
-    unauthorized(message) {
-        return {
-            statusCode: 401,
-            success: false,
-            message,
-        };
-    },
-
-    forbidden(message) {
-        return {
-            statusCode: 403,
-            success: false,
-            message,
-        };
-    },
-
-    badRequest(message) {
+    error(message, data) {
         return {
             statusCode: 400,
             success: false,
             message,
-        };
-    },
-
-    conflict(message) {
-        return {
-            statusCode: 409,
-            success: false,
-            message,
-        };
-    },
-
-    created(data) {
-        return {
-            statusCode: 201,
-            success: true,
             data,
         };
     },
 
-    noContent() {
+    notFound(message, data) {
         return {
-            statusCode: 204,
-            success: true,
-        };
-    },
-
-    accepted(data) {
-        return {
-            statusCode: 202,
-            success: true,
+            statusCode: 404,
+            success: false,
+            message,
             data,
         };
     },
 
-    notImplemented(message) {
+    unauthorized(message, data) {
         return {
-            statusCode: 501,
+            statusCode: 401,
             success: false,
             message,
-        };
-    },
-
-    serviceUnavailable(message) {
-        return {
-            statusCode: 503,
-            success: false,
-            message,
-        };
-    },
-
-    tooManyRequests(message) {
-        return {
-            statusCode: 429,
-            success: false,
-            message,
-        };
-    },
-
-    gone(message) {
-        return {
-            statusCode: 410,
-            success: false,
-            message,
-        };
-    },
-
-    methodNotAllowed(message) {
-        return {
-            statusCode: 405,
-            success: false,
-            message,
+            data,
         };
     },
 };
