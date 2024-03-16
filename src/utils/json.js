@@ -1,7 +1,8 @@
 const formatJson = {
-    success(message, data = null) {
+    success(code, message, data = null) {
         return {
-            statusCode: 200,
+            code,
+            httpCode: 200,
             success: true,
             message,
             data,
