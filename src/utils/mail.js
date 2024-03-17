@@ -1,4 +1,5 @@
 const mailConfig = require("../config/mailConfig");
+require("dotenv").config();
 
 const sendMail = async (to, subject, text, html) => {
     try {

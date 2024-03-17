@@ -9,9 +9,10 @@ const formatJson = {
         };
     },
 
-    error(message, data = null) {
+    error(code, message, data = null) {
         return {
-            statusCode: 400,
+            code,
+            httpCode: 400,
             success: false,
             message,
             data,
