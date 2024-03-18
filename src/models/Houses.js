@@ -1,6 +1,8 @@
 "use strict";
 const { Model } = require("objection");
 
+const { houseStatus } = require("../enum/Houses");
+
 class Houses extends Model {
     static get tableName() {
         return "houses";
@@ -9,16 +11,16 @@ class Houses extends Model {
     static get jsonSchema() {
         return {
             type: "object",
-            required: ["name", "address", "number_of_floors", "number_of_rooms", "status", "created_by"],
+            required: ["name", "address", "number_of_floors", "status", "created_by"],
             properties: {
                 id: { type: "integer" },
                 name: { type: "string", minLength: 1, maxLength: 50 },
                 address: { type: "string", minLength: 1, maxLength: 50 },
                 number_of_floors: { type: "integer" },
                 number_of_rooms: { type: "integer" },
-                status: { type: "string", minLength: 1, maxLength: 20 },
+                status: { type: "string", minLength: 1, maxLength: 20, default: houseStatus.AVAILABLE },
                 created_by: { type: "integer" },
-                created_date: { type: "datetime" },
+                created_date: { type: "string", format: "date-time" },
             },
         };
     }
