@@ -4,7 +4,7 @@ require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
 const jwtToken = {
-    sign: (payload, time = "1h") =>
+    sign: (payload, time = "10h") =>
         jwt.sign(payload, JWT_SECRET, {
             expiresIn: time,
         }),
