@@ -17,7 +17,7 @@ class Users extends Model {
                 email: { type: "string", minLength: 1, maxLength: 50 },
                 phone_number: { type: "string", minLength: 1, maxLength: 11 },
                 full_name: { type: "string", minLength: 1, maxLength: 50 },
-                birthday: { type: "string", pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" }, // Custom date format YYYY-MM-DD
+                birthday: { type: "string", pattern: "^[0-9]{4}/[0-9]{2}/[0-9]{2}$" }, // Custom date format YYYY/MM/DD
                 role: { type: "string", minLength: 1, maxLength: 10, default: accountRoles.USER },
                 type: { type: "string", minLength: 1, maxLength: 10, default: accountTypes.FREE },
                 status: { type: "boolean", default: true },

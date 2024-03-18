@@ -36,16 +36,19 @@ const resetPasswordValidator = [
 ];
 
 const updatePasswordValidator = [
-    check("oldPassword", "Please provide your old password.").isLength({ min: 8 }),
+    check("oldPassword", "Old password is missing or the length is less than 8.").isLength({ min: 8 }),
     check("newPassword", "Password must be at least 8 characters long and contain at least one letter and one number.")
         .isLength({ min: 8 })
         .matches(/^(?=.*\d)(?=.*[a-z]).{8,}$/),
-    check("confirmPassword", "Please confirm your password.").custom((value, { req }) => {
-        if (value !== req.body.newPassword) {
-            throw new Error("Passwords do not match.");
-        }
-        return true;
-    }),
+    check("confirmPassword", "Please confirm your password.")
+        .not()
+        .isEmpty()
+        .custom((value, { req }) => {
+            if (value !== req.body.newPassword) {
+                throw new Error("Passwords do not match.");
+            }
+            return true;
+        }),
 ];
 
 const updateProfileValidator = [

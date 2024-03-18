@@ -66,7 +66,7 @@ const userController = {
                     throw new ApiException(1019, "Your account has been disabled. Please contact the administrator.");
                 }
 
-                const token = jwtToken.sign({ user });
+                const token = jwtToken.sign({ ...user });
                 res.json(
                     formatJson.success(1003, "Logged in successfully", {
                         token,
@@ -226,11 +226,14 @@ const userController = {
 
             const { authorization } = req.headers;
 
-            if (!authorization) {
+            if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Invalid token");
             }
 
-            const { oldPassword, newPassword, email } = req.body;
+            const userInfo = jwtToken.verify(authorization);
+            const { email } = userInfo;
+
+            const { oldPassword, newPassword } = req.body;
 
             const user = await Users.query().findOne({ email, password: oldPassword });
 
@@ -238,7 +241,7 @@ const userController = {
                 await Users.query().findById(user.id).patch({ password: newPassword });
                 res.json(formatJson.success(1014, "Password updated successfully."));
             } else {
-                throw new ApiException(1015, "Invalid old password");
+                throw new ApiException(1015, "Old password is incorrect.");
             }
         } catch (err) {
             Exception.handle(err, req, res);
@@ -261,12 +264,14 @@ const userController = {
 
             const { fullName, phoneNumber, birthday } = req.body;
 
+            console.log(birthday);
+
             const user = jwtToken.verify(authorization);
 
             if (user) {
-                await Users.query().findById(user.id).patch({ full_name: fullName, phone_number: phoneNumber, birthday });
+                const userUpdate = await Users.query().findById(user.id).patch({ full_name: fullName, phone_number: phoneNumber, birthday });
 
-                const newToken = jwtToken.sign(user);
+                const newToken = jwtToken.sign({ ...userUpdate });
                 res.json(formatJson.success(1016, "Profile updated successfully.", { token: newToken }));
             } else {
                 throw new ApiException(1017, "Invalid user");
