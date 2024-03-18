@@ -33,8 +33,6 @@ const userController = {
 
             const user = jwtToken.verify(authorization);
 
-            console.log(user);
-
             if (user) {
                 res.json(formatJson.success(1001, "User found", user));
             } else {
@@ -263,8 +261,6 @@ const userController = {
             }
 
             const { fullName, phoneNumber, birthday } = req.body;
-
-            console.log(birthday);
 
             const user = jwtToken.verify(authorization);
 
