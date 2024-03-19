@@ -1,6 +1,6 @@
 const { check } = require("express-validator");
 
-const { houseStatus } = require("../../enum/Houses");
+const { houseStatus, housePermissions } = require("../../enum/Houses");
 
 const createHouse = [
     check("name", "Please provide a valid name").isString().isLength({ min: 1, max: 50 }),
@@ -23,9 +23,20 @@ const updateHouseStatus = [
     check("status", "Please provide a valid status").isIn([houseStatus.AVAILABLE, houseStatus.RENTED, houseStatus.PENDING, houseStatus.DEPOSIT]),
 ];
 
+const userPermissions = [check("id", "Please provide a valid house id").isInt()];
+
+const grantPermissions = [
+    check("id", "Please provide a valid house id").isInt(),
+    check("userId", "Please provide a valid user id").isInt(),
+    check("permissions", "Permissions must be an array").isArray({ min: 1, max: 20 }),
+    check("permissions.*", "The value in permissions must be in the defined list").isString().isIn(housePermissions),
+];
+
 module.exports = {
     createHouse,
     updateHouseDetails,
     deleteHouse,
     updateHouseStatus,
+    userPermissions,
+    grantPermissions,
 };

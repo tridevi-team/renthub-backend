@@ -1,7 +1,8 @@
 const { validationResult } = require("express-validator");
-const { Houses } = require("../models");
+const { Houses, HousePermissions } = require("../models");
 const { formatJson, jwtToken, checkHousePermissions, Exception, ApiException } = require("../utils");
 const { houseStatus, housePermissions } = require("../enum/Houses");
+const { raw } = require("objection");
 
 const HouseController = {
     async getHouseList(req, res) {
@@ -21,9 +22,9 @@ const HouseController = {
                 .orderBy("houses.id", "asc");
 
             if (!houses) {
-                throw new ApiException(1004, "The house list is empty.");
+                throw new ApiException(1007, "The house list is empty.");
             }
-            return res.json(formatJson.success(1001, "Get house list successful", houses));
+            return res.json(formatJson.success(1008, "Get house list successful", houses));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -107,9 +108,9 @@ const HouseController = {
                 status: updateStatus,
             });
             if (updateHouse) {
-                return res.json(formatJson.success(1001, "Update house successful", updateHouse));
+                return res.json(formatJson.success(1012, "Update house successful", updateHouse));
             } else {
-                throw new ApiException(1002, "Update house failed");
+                throw new ApiException(1011, "Update house failed");
             }
         } catch (err) {
             Exception.handle(err, req, res);
@@ -124,7 +125,6 @@ const HouseController = {
             }
 
             const { id } = req.params;
-
             const userVerify = await jwtToken.verify(authorization);
 
             const house = await Houses.query().findOne({ id });
@@ -138,12 +138,18 @@ const HouseController = {
                 throw new ApiException(500, "Unauthorized");
             }
 
+            // check constraint before delete
+            const rooms = await house.$relatedQuery("rooms");
+            if (rooms.length > 0) {
+                throw new ApiException(1010, "Delete house failed. The house has rooms.");
+            }
+
             const deleteHouse = await Houses.query().deleteById(id);
 
             if (deleteHouse) {
-                return res.json(formatJson.success(1001, "Delete house successful"));
+                return res.json(formatJson.success(1009, "Delete house successful"));
             } else {
-                throw new ApiException(1002, "Delete house failed");
+                throw new ApiException(1010, "Delete house failed");
             }
         } catch (err) {
             Exception.handle(err, req, res);
@@ -182,10 +188,136 @@ const HouseController = {
                 status: status,
             });
             if (updateHouse) {
-                return res.json(formatJson.success(1001, "Update house status successful", updateHouse));
+                return res.json(formatJson.success(1013, "Update house status successful", updateHouse));
             } else {
-                throw new ApiException(1002, "Update house status failed");
+                throw new ApiException(1014, "Update house status failed");
             }
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    },
+
+    async getHouseDetails(req, res) {
+        try {
+            const { authorization } = req.headers;
+            if (!jwtToken.verify(authorization)) {
+                throw new ApiException(500, "Unauthorized");
+            }
+
+            const { id } = req.params;
+
+            const userVerify = await jwtToken.verify(authorization);
+
+            const house = await Houses.query().findOne({ id });
+            if (!house) {
+                throw new ApiException(1004, "House not found");
+            }
+
+            // check permission
+            const isAccess = await checkHousePermissions(userVerify.id, id, housePermissions.HOUSE_DETAILS);
+
+            if (!isAccess) {
+                throw new ApiException(500, "Unauthorized");
+            }
+
+            return res.json(formatJson.success(1015, "Get house details successful", house));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    },
+
+    async getUserHasAccessToHouse(req, res) {
+        try {
+            const { authorization } = req.headers;
+            if (!jwtToken.verify(authorization)) {
+                throw new ApiException(500, "Unauthorized");
+            }
+
+            const { id } = req.params;
+
+            const userVerify = await jwtToken.verify(authorization);
+
+            const house = await Houses.query().findOne({ id });
+            if (!house) {
+                throw new ApiException(1004, "House not found");
+            }
+
+            const isAccess = await checkHousePermissions(userVerify.id, id);
+            if (!isAccess) {
+                throw new ApiException(500, "Unauthorized");
+            }
+
+            const usersList = await HousePermissions.query()
+                .joinRelated("permissions")
+                .joinRelated("users")
+                .where("house_id", id)
+                .select("users.id", "users.full_name", "users.email", raw(`CONCAT('[', GROUP_CONCAT('"', permissions.key, '"'), ']') AS permissions`));
+
+            if (!usersList) {
+                throw new ApiException(1016, "The user list is empty.");
+            }
+
+            const permissionsToArray = usersList.map((user) => {
+                return {
+                    id: user.id,
+                    full_name: user.full_name,
+                    email: user.email,
+                    permissions: JSON.parse(user.permissions),
+                };
+            });
+
+            console.log(permissionsToArray);
+
+            return res.json(formatJson.success(1017, "Get user has access to house successful", permissionsToArray));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    },
+
+    async grantPermissions(req, res) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                throw new ApiException(1005, "Invalid input", errors.array());
+            }
+
+            const { authorization } = req.headers;
+            if (!jwtToken.verify(authorization)) {
+                throw new ApiException(500, "Unauthorized");
+            }
+
+            const { id } = req.params;
+            const { userId, permissions } = req.body;
+
+            const userVerify = await jwtToken.verify(authorization);
+
+            const house = await Houses.query().findOne({ id, created_by: userVerify.id });
+            if (!house) {
+                throw new ApiException(1004, "House not found or you are not the owner of the house.");
+            }
+
+            // delete permissions not in the list
+            const deletePer = await HousePermissions.query().delete().joinRelated("permissions").whereNotIn("permissions.key", permissions).andWhere("house_id", id).andWhere("user_id", userId);
+            if (!deletePer) {
+                throw new ApiException(1019, "Revoke permissions failed");
+            }
+
+            // insert permissions not exist
+            permissions.forEach(async (per) => {
+                const permissionExist = await HousePermissions.query().joinRelated("permissions").where("house_id", id).andWhere("user_id", userId).andWhere("permissions.key", per);
+                if (!permissionExist) {
+                    const addPer = await HousePermissions.query().insert({
+                        house_id: id,
+                        user_id: userId,
+                        permission_id: per,
+                    });
+                    if (!addPer) {
+                        throw new ApiException(1018, "Grant permissions failed");
+                    }
+                }
+            });
+
+            return res.json(formatJson.success(1020, "Grant permissions successful"));
         } catch (err) {
             Exception.handle(err, req, res);
         }

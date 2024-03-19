@@ -6,6 +6,7 @@ const houseStatus = {
 };
 
 const housePermissions = {
+    HOUSE_DETAILS: "HOUSE_DETAILS",
     CREATE_ROOMS: "CREATE_ROOMS",
     READ_ROOMS: "READ_ROOMS",
     UPDATE_ROOMS: "UPDATE_ROOMS",
