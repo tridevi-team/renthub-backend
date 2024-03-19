@@ -1,3 +1,4 @@
+"use strict";
 const Exception = require("./Exception");
 
 class ApiException extends Exception {

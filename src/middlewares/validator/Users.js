@@ -1,3 +1,4 @@
+"use strict";
 const { check } = require("express-validator");
 
 // email, fullName, password: min 8 characters, least one number, one lowercase, confirmPassword

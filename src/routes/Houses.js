@@ -1,5 +1,6 @@
+"use strict";
 const houseRouter = require("express").Router();
-const houseController = require("../controllers/HouseController");
+const { houseController } = require("../controllers");
 const { createHouse, updateHouseDetails, deleteHouse, updateHouseStatus, userPermissions, grantPermissions } = require("../middlewares/validator");
 
 houseRouter.get("/list", houseController.getHouseList);

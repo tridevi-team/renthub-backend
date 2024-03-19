@@ -1,5 +1,5 @@
+"use strict";
 const ExceptionHandlerInstance = require("./ExceptionHandler");
-const { Response } = require("express");
 
 class Exception {
     constructor(code, message, data, httpCode) {

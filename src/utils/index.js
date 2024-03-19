@@ -1,3 +1,4 @@
+"use strict";
 const bcrypt = require("./bcrypt");
 const jwtToken = require("./jwt");
 const formatJson = require("./json");

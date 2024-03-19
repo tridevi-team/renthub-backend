@@ -1,3 +1,4 @@
+"use strict";
 const formatJson = {
     success(code, message, data = null) {
         return {

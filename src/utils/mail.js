@@ -1,3 +1,4 @@
+"use strict";
 const mailConfig = require("../config/mailConfig");
 require("dotenv").config();
 
