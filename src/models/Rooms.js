@@ -14,11 +14,11 @@ class Rooms extends Model {
                 id: { type: "integer" },
                 house_id: { type: "integer" },
                 name: { type: "string", minLength: 1, maxLength: 50 },
-                max_renters: { type: "integer" },
+                max_renters: { type: "integer", default: -1 },
                 floor: { type: "integer" },
-                price: { type: "float" },
+                price: { type: "number" },
                 created_by: { type: "integer" },
-                created_at: { type: "datetime" },
+                created_at: { type: "string", format: "date-time" },
             },
         };
     }

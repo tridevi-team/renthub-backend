@@ -15,7 +15,7 @@ class RoomImages extends Model {
                 room_id: { type: "integer" },
                 image_url: { type: "string", maxLength: 50 },
                 created_by: { type: "integer" },
-                created_date: { type: "datetime" },
+                created_date: { type: "string", format: "date-time" },
             },
         };
     }
