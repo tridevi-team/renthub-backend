@@ -6,6 +6,5 @@ const UserRoute = require("./Users");
 module.exports = {
     HouseRoute,
     ServiceRoute,
-    RoomRoute,
     UserRoute,
 };
