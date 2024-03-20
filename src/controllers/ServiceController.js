@@ -17,7 +17,7 @@ const serviceController = {
             }
 
             const { houseId } = req.params;
-            const { name, unitPrice, hasIndex, rules, type } = req.body;
+            const { name, unitPrice, rules, type } = req.body;
             const user = jwtToken.verify(authorization);
 
             const house = await Houses.query().findById(houseId);
@@ -34,7 +34,6 @@ const serviceController = {
                 house_id: Number(houseId),
                 name,
                 unit_price: parseFloat(unitPrice),
-                has_index: hasIndex,
                 rules: JSON.stringify(rules) || null,
                 type,
                 created_by: user.id,
@@ -134,7 +133,7 @@ const serviceController = {
             }
 
             const { houseId, serviceId } = req.params;
-            const { name, unitPrice, hasIndex, rules, type } = req.body;
+            const { name, unitPrice, rules, type } = req.body;
             const user = jwtToken.verify(authorization);
 
             const hasAccess = await checkHousePermissions(user.id, houseId, housePermissions.UPDATE_SERVICES);
@@ -157,7 +156,6 @@ const serviceController = {
                 .patch({
                     name,
                     unit_price: unitPrice,
-                    has_index: hasIndex,
                     rules: JSON.stringify(rules) || null,
                     type,
                 });

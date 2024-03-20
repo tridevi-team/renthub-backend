@@ -16,7 +16,6 @@ class Services extends Model {
                 name: { type: "string", minLength: 1, maxLength: 50 },
                 unit_price: { type: "number" },
                 type: { type: "string", minLength: 1, maxLength: 10 },
-                has_index: { type: "boolean", default: false },
                 rules: { type: "string", nullable: true },
                 created_by: { type: "integer" },
                 created_date: { type: "string", format: "date-time" },
