@@ -13,11 +13,11 @@ const serviceController = {
 
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
-                throw new ApiException(1001, "Invalid token");
+                throw new ApiException(500, "Invalid token");
             }
 
             const { houseId } = req.params;
-            const { name, unitPrice, hasIndex, rules } = req.body;
+            const { name, unitPrice, hasIndex, rules, type } = req.body;
             const user = jwtToken.verify(authorization);
 
             const house = await Houses.query().findById(houseId);
@@ -31,18 +31,20 @@ const serviceController = {
             }
 
             const service = await Services.query().insert({
-                houseId,
+                house_id: Number(houseId),
                 name,
-                unitPrice,
-                hasIndex,
-                rules: JSON.stringify(rules),
+                unit_price: parseFloat(unitPrice),
+                has_index: hasIndex,
+                rules: JSON.stringify(rules) || null,
+                type,
+                created_by: user.id,
             });
 
             if (!service) {
                 throw new ApiException(1002, "Ocurred an error while creating service");
             }
 
-            res.json(formatJson(1003, "Create service successful", service));
+            res.json(formatJson.success(1007, "Create service successful", service));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -57,7 +59,7 @@ const serviceController = {
 
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
-                throw new ApiException(1001, "Invalid token");
+                throw new ApiException(500, "Invalid token");
             }
 
             const { houseId } = req.params;
@@ -72,6 +74,12 @@ const serviceController = {
             if (!house) {
                 throw new ApiException(1003, "House not found");
             }
+
+            const services = await Services.query().where("house_id", houseId);
+            if (!services) {
+                throw new ApiException(1004, "Services not found");
+            }
+            res.json(formatJson.success(1006, "Get services by house successful", services));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -86,7 +94,7 @@ const serviceController = {
 
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
-                throw new ApiException(1001, "Invalid token");
+                throw new ApiException(500, "Invalid token");
             }
 
             const { houseId, serviceId } = req.params;
@@ -107,7 +115,7 @@ const serviceController = {
                 throw new ApiException(1003, "Service not found");
             }
 
-            res.json(formatJson(1003, "Get service details successful", service));
+            res.json(formatJson.success(1003, "Get service details successful", service));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -122,11 +130,11 @@ const serviceController = {
 
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
-                throw new ApiException(1001, "Invalid token");
+                throw new ApiException(500, "Invalid token");
             }
 
             const { houseId, serviceId } = req.params;
-            const { name, unitPrice, hasIndex, rules } = req.body;
+            const { name, unitPrice, hasIndex, rules, type } = req.body;
             const user = jwtToken.verify(authorization);
 
             const hasAccess = await checkHousePermissions(user.id, houseId, housePermissions.UPDATE_SERVICES);
@@ -145,19 +153,20 @@ const serviceController = {
             }
 
             const updated = await Services.query()
-                .findById(serviceId)
+                .findById(Number(serviceId))
                 .patch({
                     name,
-                    unitPrice,
-                    hasIndex,
-                    rules: JSON.stringify(rules),
+                    unit_price: unitPrice,
+                    has_index: hasIndex,
+                    rules: JSON.stringify(rules) || null,
+                    type,
                 });
 
             if (!updated) {
                 throw new ApiException(1002, "Ocurred an error while updating service");
             }
 
-            res.json(formatJson(1003, "Update service successful"));
+            res.json(formatJson.success(1003, "Update service successful"));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -172,7 +181,7 @@ const serviceController = {
 
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
-                throw new ApiException(1001, "Invalid token");
+                throw new ApiException(500, "Invalid token");
             }
 
             const { houseId, serviceId } = req.params;
@@ -198,7 +207,7 @@ const serviceController = {
                 throw new ApiException(1002, "Ocurred an error while deleting service");
             }
 
-            res.json(formatJson(1003, "Delete service successful"));
+            res.json(formatJson.success(1003, "Delete service successful"));
         } catch (err) {
             Exception.handle(err, req, res);
         }

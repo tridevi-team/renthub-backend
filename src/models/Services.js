@@ -14,13 +14,12 @@ class Services extends Model {
                 id: { type: "integer" },
                 house_id: { type: "integer" },
                 name: { type: "string", minLength: 1, maxLength: 50 },
-                unit_price: { type: "float" },
-                max_renters: { type: "integer" },
-                floor: { type: "integer" },
+                unit_price: { type: "number" },
                 type: { type: "string", minLength: 1, maxLength: 10 },
-                rules: { type: "text" },
+                has_index: { type: "boolean", default: false },
+                rules: { type: "string", nullable: true },
                 created_by: { type: "integer" },
-                created_date: { type: "datetime" },
+                created_date: { type: "string", format: "date-time" },
             },
         };
     }
