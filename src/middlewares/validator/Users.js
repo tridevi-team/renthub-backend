@@ -45,14 +45,26 @@ const resetPasswordValidator = [
     check("code", "Please provide the verification code.").isNumeric(),
     check("password", "Password must be at least 8 characters long and contain at least one letter and one number.")
         .isLength({ min: 8 })
-        .matches(/^(?=.*\d)(?=.*[a-z]).{8,}$/),
+        .custom((value) => {
+            if (!value.startsWith("$2") && !value.startsWith("$2a") && !value.startsWith("$2b") && !value.startsWith("$2y")) {
+                throw new Error("Password must be hashed.");
+            }
+
+            return true;
+        }),
 ];
 
 const updatePasswordValidator = [
     check("oldPassword", "Old password is missing or the length is less than 8.").isLength({ min: 8 }),
     check("newPassword", "Password must be at least 8 characters long and contain at least one letter and one number.")
         .isLength({ min: 8 })
-        .matches(/^(?=.*\d)(?=.*[a-z]).{8,}$/),
+        .custom((value) => {
+            if (!value.startsWith("$2") && !value.startsWith("$2a") && !value.startsWith("$2b") && !value.startsWith("$2y")) {
+                throw new Error("Password must be hashed.");
+            }
+
+            return true;
+        }),
     check("confirmPassword", "Please confirm your password.")
         .not()
         .isEmpty()
