@@ -91,9 +91,8 @@ const userController = {
     async signup(req, res) {
         try {
             const errors = validationResult(req);
-
             if (!errors.isEmpty()) {
-                return new ApiException(1005, "Invalid input", errors.array()); // Throw ApiException if there are validation errors
+                throw new ApiException(1005, "Invalid input", errors.array()); // Throw ApiException if there are validation errors
             }
 
             const { email, password, fullName } = req.body;
