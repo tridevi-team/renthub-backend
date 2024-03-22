@@ -24,10 +24,13 @@ const updateRoom = [
 
 const deleteRoom = [check("houseId").not().isEmpty().withMessage("House ID is required"), check("roomId").not().isEmpty().withMessage("Room ID is required")];
 
+const roomDetails = [check("houseId").not().isEmpty().withMessage("House ID is required"), check("roomId").not().isEmpty().withMessage("Room ID is required")];
+
 module.exports = {
     createRooms,
     getRoomList,
     getRoomDetails,
     updateRoom,
     deleteRoom,
+    roomDetails,
 };

@@ -1,4 +1,3 @@
-const { validationResult } = require("express-validator");
 const { Houses, HousePermissions } = require("../models");
 const { formatJson, jwtToken, checkHousePermissions, Exception, ApiException } = require("../utils");
 const { houseStatus, housePermissions } = require("../enum/Houses");
@@ -32,11 +31,6 @@ const HouseController = {
 
     async createHouse(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Unauthorized");
@@ -74,11 +68,6 @@ const HouseController = {
 
     async updateHouseDetails(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Unauthorized");
@@ -158,11 +147,6 @@ const HouseController = {
 
     async updateHouseStatus(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Unauthorized");
@@ -276,11 +260,6 @@ const HouseController = {
 
     async grantPermissions(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Unauthorized");

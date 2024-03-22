@@ -1,4 +1,3 @@
-const { validationResult } = require("express-validator");
 const { Rooms, RoomImages, RoomServices, Services } = require("../models");
 const { checkHousePermissions, jwtToken, formatJson, ApiException, Exception } = require("../utils");
 const { housePermissions } = require("../enum/Houses");
@@ -6,11 +5,6 @@ const { housePermissions } = require("../enum/Houses");
 const roomController = {
     async getRoomList(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Invalid token");
@@ -37,11 +31,6 @@ const roomController = {
 
     async createRoom(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Invalid token");
@@ -90,12 +79,7 @@ const roomController = {
 
     async updateRoom(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
-            const { authorization } = req.headers;
+           const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Invalid token");
             }
@@ -141,11 +125,6 @@ const roomController = {
 
     async deleteRoom(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Invalid token");
@@ -173,11 +152,6 @@ const roomController = {
 
     async getRoomDetails(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Invalid token");

@@ -1,4 +1,3 @@
-const { validationResult } = require("express-validator");
 const { Users } = require("../models");
 const { formatJson, jwtToken, sendMail, Exception, ApiException } = require("../utils");
 
@@ -45,12 +44,6 @@ const userController = {
 
     async login(req, res) {
         try {
-            const errors = validationResult(req);
-
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array()); // Throw ApiException if there are validation errors
-            }
-
             const { username, password } = req.body;
             // username can be email or phone number
             const user = await Users.query().findOne({ email: username, password }).orWhere("phone_number", username).andWhere("password", password);
@@ -90,11 +83,6 @@ const userController = {
 
     async signup(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array()); // Throw ApiException if there are validation errors
-            }
-
             const { email, password, fullName } = req.body;
 
             const checkUserExists = await Users.query().findOne({ email });
@@ -130,12 +118,6 @@ const userController = {
 
     async verifyAccount(req, res) {
         try {
-            const errors = validationResult(req);
-
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array()); // Throw ApiException if there are validation errors
-            }
-
             const { verifyCode, email } = req.body;
 
             let parseCode = typeof verifyCode === "string" ? parseInt(verifyCode) : verifyCode;
@@ -158,12 +140,6 @@ const userController = {
 
     async forgotPassword(req, res) {
         try {
-            const errors = validationResult(req);
-
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array()); // Throw ApiException if there are validation errors
-            }
-
             const { email } = req.body;
 
             const user = await Users.query().findOne({ email });
@@ -189,12 +165,6 @@ const userController = {
 
     async resetPassword(req, res) {
         try {
-            const errors = validationResult(req);
-
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array()); // Throw ApiException if there are validation errors
-            }
-
             const { code, email, password } = req.body;
 
             const user = await Users.query().findOne({
@@ -215,12 +185,6 @@ const userController = {
 
     async updatePassword(req, res) {
         try {
-            const errors = validationResult(req);
-
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array()); // Throw ApiException if there are validation errors
-            }
-
             const { authorization } = req.headers;
 
             if (!jwtToken.verify(authorization)) {
@@ -247,12 +211,6 @@ const userController = {
 
     async updateProfile(req, res) {
         try {
-            const errors = validationResult(req);
-
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array()); // Throw ApiException if there are validation errors
-            }
-
             const { authorization } = req.headers;
 
             if (!authorization) {

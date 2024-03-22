@@ -14,5 +14,5 @@ module.exports = {
     sendMail,
     checkHousePermissions,
     Exception,
-    ApiException,
+    ApiException
 };

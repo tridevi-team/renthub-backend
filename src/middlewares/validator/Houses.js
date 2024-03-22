@@ -33,6 +33,8 @@ const grantPermissions = [
     check("permissions.*", "The value in permissions must be in the defined list").isString().isIn(housePermissions),
 ];
 
+const houseDetails = [check("id", "Please provide a valid house id").isInt()];
+
 module.exports = {
     createHouse,
     updateHouseDetails,
@@ -40,4 +42,5 @@ module.exports = {
     updateHouseStatus,
     userPermissions,
     grantPermissions,
+    houseDetails,
 };

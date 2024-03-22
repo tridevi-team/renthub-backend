@@ -10,15 +10,16 @@ const {
     updatePasswordValidator,
     updateProfileValidator,
 } = require("../middlewares/validator");
+const handleErrors = require("../middlewares/handleErrors");
 
 usersRouter.get("/getAllUsers", userController.getAllUsers);
 usersRouter.get("/getInfoByToken", userController.getInfoByToken);
-usersRouter.post("/login", loginValidator, userController.login);
-usersRouter.post("/signup", registerValidator, userController.signup);
-usersRouter.post("/verifyAccount", verifyAccountValidator, userController.verifyAccount);
-usersRouter.post("/forgotPassword", forgotPasswordValidator, userController.forgotPassword);
-usersRouter.post("/resetPassword", resetPasswordValidator, userController.resetPassword);
-usersRouter.post("/updatePassword", updatePasswordValidator, userController.updatePassword);
-usersRouter.post("/updateProfile", updateProfileValidator, userController.updateProfile);
+usersRouter.post("/login", loginValidator, handleErrors, userController.login);
+usersRouter.post("/signup", registerValidator, handleErrors, userController.signup);
+usersRouter.post("/verifyAccount", verifyAccountValidator, handleErrors, userController.verifyAccount);
+usersRouter.post("/forgotPassword", forgotPasswordValidator, handleErrors, userController.forgotPassword);
+usersRouter.post("/resetPassword", resetPasswordValidator, handleErrors, userController.resetPassword);
+usersRouter.post("/updatePassword", updatePasswordValidator, handleErrors, userController.updatePassword);
+usersRouter.post("/updateProfile", updateProfileValidator, handleErrors, userController.updateProfile);
 
 module.exports = usersRouter;

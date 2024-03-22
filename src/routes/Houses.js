@@ -1,15 +1,16 @@
 "use strict";
 const houseRouter = require("express").Router();
 const { houseController } = require("../controllers");
-const { createHouse, updateHouseDetails, deleteHouse, updateHouseStatus, userPermissions, grantPermissions } = require("../middlewares/validator");
+const { createHouse, updateHouseDetails, deleteHouse, updateHouseStatus, userPermissions, grantPermissions, houseDetails } = require("../middlewares/validator");
+const handleErrors = require("../middlewares/handleErrors");
 
 houseRouter.get("/list", houseController.getHouseList);
-houseRouter.post("/create", createHouse, houseController.createHouse);
-houseRouter.post("/update/:id", updateHouseDetails, houseController.updateHouseDetails);
-houseRouter.post("/delete/:id", deleteHouse, houseController.deleteHouse);
-houseRouter.post("/updateStatus/:id", updateHouseStatus, houseController.updateHouseStatus);
-houseRouter.get("/details/:id", houseController.getHouseDetails);
-houseRouter.get("/permissions/:id", userPermissions, houseController.getUserHasAccessToHouse);
-houseRouter.post("/grantPermissions/:id", grantPermissions, houseController.grantPermissions);
+houseRouter.post("/create", createHouse, handleErrors, houseController.createHouse);
+houseRouter.post("/update/:id", updateHouseDetails, handleErrors, houseController.updateHouseDetails);
+houseRouter.post("/delete/:id", deleteHouse, handleErrors, houseController.deleteHouse);
+houseRouter.post("/updateStatus/:id", updateHouseStatus, handleErrors, houseController.updateHouseStatus);
+houseRouter.get("/details/:id", houseDetails, handleErrors, houseController.getHouseDetails);
+houseRouter.get("/permissions/:id", userPermissions, handleErrors, houseController.getUserHasAccessToHouse);
+houseRouter.post("/grantPermissions/:id", grantPermissions, handleErrors, houseController.grantPermissions);
 
 module.exports = houseRouter;

@@ -1,4 +1,3 @@
-const { validationResult } = require("express-validator");
 const { Houses, Services } = require("../models");
 const { formatJson, jwtToken, checkHousePermissions, Exception, ApiException } = require("../utils");
 const { houseStatus, housePermissions } = require("../enum/Houses");
@@ -6,11 +5,6 @@ const { houseStatus, housePermissions } = require("../enum/Houses");
 const serviceController = {
     async create(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Invalid token");
@@ -51,11 +45,6 @@ const serviceController = {
 
     async getServiceByHouse(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Invalid token");
@@ -86,11 +75,6 @@ const serviceController = {
 
     async getServiceDetails(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Invalid token");
@@ -122,11 +106,6 @@ const serviceController = {
 
     async update(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Invalid token");
@@ -172,11 +151,6 @@ const serviceController = {
 
     async delete(req, res) {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                throw new ApiException(1005, "Invalid input", errors.array());
-            }
-
             const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Invalid token");
