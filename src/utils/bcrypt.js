@@ -9,6 +9,7 @@ const bcryptConfig = {
         return await bcrypt.hash(password, salt);
     },
     compare: async (password, hash) => await bcrypt.compare(password, hash),
+    compareSync: async (password, hash) => bcrypt.compareSync(password, hash),
 };
 
 module.exports = bcryptConfig;

@@ -1,5 +1,5 @@
 const { Users } = require("../models");
-const { formatJson, jwtToken, sendMail, Exception, ApiException, bcrypt } = require("../utils");
+const { formatJson, jwtToken, sendMail, Exception, ApiException, bcrypt, crypto } = require("../utils");
 
 const userController = {
     async getAllUsers(req, res) {
@@ -49,8 +49,11 @@ const userController = {
             const user = await Users.query().findOne({ email: username }).orWhere("phone_number", username).andWhere("password", password);
 
             if (user) {
+                // decrypt password
+                const decryptPassword = crypto.decrypt(password);
+
                 // compare password
-                if (bcrypt.compare(password, user.password) === false) {
+                if (bcrypt.compare(decryptPassword, user.password) === false) {
                     throw new ApiException(1004, "Invalid username or password");
                 }
 
@@ -96,10 +99,13 @@ const userController = {
                 throw new ApiException(1006, "User already exists");
             }
 
+            const decryptPassword = crypto.decrypt(password);
+            const hashPassword = await bcrypt.hash(decryptPassword.trim());
+
             const newUser = await Users.query().insert({
                 email: email.toLowerCase().trim(),
                 full_name: fullName.trim(),
-                password,
+                password: hashPassword,
             });
 
             if (newUser) {
@@ -178,7 +184,10 @@ const userController = {
             });
 
             if (user) {
-                await Users.query().findById(user.id).patch({ password, code: -1 });
+                // decrypt password
+                const decryptPassword = crypto.decrypt(password);
+                const hashPassword = await bcrypt.hash(decryptPassword.trim());
+                await Users.query().findById(user.id).patch({ password: hashPassword, code: -1 });
                 res.json(formatJson.success(1013, "Password reset successfully."));
             } else {
                 throw new ApiException(1011, "Invalid verification code");
@@ -204,10 +213,15 @@ const userController = {
             const user = await Users.query().findOne({ email });
 
             if (user) {
-                if (bcrypt.compare(oldPassword, user.password) === false) {
+                // decrypt password
+                const decryptPassword = crypto.decrypt(oldPassword);
+                const decryptNewPassword = crypto.decrypt(newPassword);
+                const hashNewPassword = await bcrypt.hash(decryptNewPassword.trim());
+
+                if (bcrypt.compare(decryptPassword, user.password) === false) {
                     throw new ApiException(1015, "Old password is incorrect.");
                 }
-                await Users.query().findById(user.id).patch({ password: newPassword });
+                await Users.query().findById(user.id).patch({ password: hashNewPassword });
                 res.json(formatJson.success(1014, "Password updated successfully."));
             } else {
                 throw new ApiException(1017, "Invalid user.");

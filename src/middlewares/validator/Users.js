@@ -1,6 +1,7 @@
 "use strict";
 const { check } = require("express-validator");
-const { bcrypt } = require("../../utils");
+const { crypto } = require("../../utils");
+require("dotenv").config();
 
 // email, fullName, password: min 8 characters, least one number, one lowercase, confirmPassword
 const registerValidator = [
@@ -9,15 +10,25 @@ const registerValidator = [
     check("password", "Password must be at least 8 characters long and contain at least one letter and one number.")
         .isLength({ min: 8 })
         .custom((value) => {
-            if (!value.startsWith("$2") && !value.startsWith("$2a") && !value.startsWith("$2b") && !value.startsWith("$2y")) {
+            // Check if the password is cryptographically hashed
+            const decryptPassword = crypto.decrypt(value);
+            if (!decryptPassword) {
                 throw new Error("Password must be hashed.");
+            }
+
+            // validate password
+            const passwordRegex = /^(?=.*\d)(?=.*[a-z]).{8,}$/;
+            if (!passwordRegex.test(decryptPassword)) {
+                throw new Error("Password must be at least 8 characters long and contain at least one letter and one number.");
             }
 
             return true;
         }),
     check("confirmPassword", "Please confirm your password.").custom((value, { req }) => {
-        const checkPassword = bcrypt.compare(value, req.body.password);
-        if (!checkPassword) {
+        const decryptPassword = crypto.decrypt(req.body.password);
+        const decryptConfirmPassword = crypto.decrypt(value);
+
+        if (decryptPassword !== decryptConfirmPassword) {
             throw new Error("Passwords do not match.");
         }
         return true;
@@ -30,10 +41,17 @@ const loginValidator = [
     check("password", "Password must be at least 8 characters long and contain at least one letter and one number.")
         .isLength({ min: 8 })
         .custom((value) => {
-            if (!value.startsWith("$2") && !value.startsWith("$2a") && !value.startsWith("$2b") && !value.startsWith("$2y")) {
+            // Check if the password is cryptographically hashed
+            const decryptPassword = crypto.decrypt(value);
+            if (!decryptPassword) {
                 throw new Error("Password must be hashed.");
             }
 
+            // validate password
+            const passwordRegex = /^(?=.*\d)(?=.*[a-z]).{8,}$/;
+            if (!passwordRegex.test(decryptPassword)) {
+                throw new Error("Password must be at least 8 characters long and contain at least one letter and one number.");
+            }
             return true;
         }),
 ];
@@ -48,8 +66,16 @@ const resetPasswordValidator = [
     check("password", "Password must be at least 8 characters long and contain at least one letter and one number.")
         .isLength({ min: 8 })
         .custom((value) => {
-            if (!value.startsWith("$2") && !value.startsWith("$2a") && !value.startsWith("$2b") && !value.startsWith("$2y")) {
+            // Check if the password is cryptographically hashed
+            const decryptPassword = crypto.decrypt(value);
+            if (!decryptPassword) {
                 throw new Error("Password must be hashed.");
+            }
+
+            // validate password
+            const passwordRegex = /^(?=.*\d)(?=.*[a-z]).{8,}$/;
+            if (!passwordRegex.test(decryptPassword)) {
+                throw new Error("Password must be at least 8 characters long and contain at least one letter and one number.");
             }
 
             return true;
@@ -60,7 +86,9 @@ const updatePasswordValidator = [
     check("oldPassword", "Old password is missing or the length is less than 8.")
         .isLength({ min: 8 })
         .custom((value) => {
-            if (!value.startsWith("$2") && !value.startsWith("$2a") && !value.startsWith("$2b") && !value.startsWith("$2y")) {
+            // Check if the password is cryptographically hashed
+            const decryptPassword = crypto.decrypt(value);
+            if (!decryptPassword) {
                 throw new Error("Password must be hashed.");
             }
 
@@ -69,8 +97,16 @@ const updatePasswordValidator = [
     check("newPassword", "Password must be at least 8 characters long and contain at least one letter and one number.")
         .isLength({ min: 8 })
         .custom((value) => {
-            if (!value.startsWith("$2") && !value.startsWith("$2a") && !value.startsWith("$2b") && !value.startsWith("$2y")) {
+            // Check if the password is cryptographically hashed
+            const decryptPassword = crypto.decrypt(value);
+            if (!decryptPassword) {
                 throw new Error("Password must be hashed.");
+            }
+
+            // validate password
+            const passwordRegex = /^(?=.*\d)(?=.*[a-z]).{8,}$/;
+            if (!passwordRegex.test(decryptPassword)) {
+                throw new Error("Password must be at least 8 characters long and contain at least one letter and one number.");
             }
 
             return true;
@@ -79,10 +115,13 @@ const updatePasswordValidator = [
         .not()
         .isEmpty()
         .custom((value, { req }) => {
-            const checkPassword = bcrypt.compare(value, req.body.newPassword);
-            if (!checkPassword) {
+            const decryptPassword = crypto.decrypt(req.body.newPassword);
+            const decryptConfirmPassword = crypto.decrypt(value);
+
+            if (decryptPassword !== decryptConfirmPassword) {
                 throw new Error("Passwords do not match.");
             }
+
             return true;
         }),
 ];
