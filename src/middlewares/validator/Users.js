@@ -1,5 +1,6 @@
 "use strict";
 const { check } = require("express-validator");
+const { bcrypt } = require("../../utils");
 
 // email, fullName, password: min 8 characters, least one number, one lowercase, confirmPassword
 const registerValidator = [
@@ -15,7 +16,8 @@ const registerValidator = [
             return true;
         }),
     check("confirmPassword", "Please confirm your password.").custom((value, { req }) => {
-        if (value !== req.body.password) {
+        const checkPassword = bcrypt.compare(value, req.body.password);
+        if (!checkPassword) {
             throw new Error("Passwords do not match.");
         }
         return true;
@@ -55,7 +57,15 @@ const resetPasswordValidator = [
 ];
 
 const updatePasswordValidator = [
-    check("oldPassword", "Old password is missing or the length is less than 8.").isLength({ min: 8 }),
+    check("oldPassword", "Old password is missing or the length is less than 8.")
+        .isLength({ min: 8 })
+        .custom((value) => {
+            if (!value.startsWith("$2") && !value.startsWith("$2a") && !value.startsWith("$2b") && !value.startsWith("$2y")) {
+                throw new Error("Password must be hashed.");
+            }
+
+            return true;
+        }),
     check("newPassword", "Password must be at least 8 characters long and contain at least one letter and one number.")
         .isLength({ min: 8 })
         .custom((value) => {
@@ -69,7 +79,8 @@ const updatePasswordValidator = [
         .not()
         .isEmpty()
         .custom((value, { req }) => {
-            if (value !== req.body.newPassword) {
+            const checkPassword = bcrypt.compare(value, req.body.newPassword);
+            if (!checkPassword) {
                 throw new Error("Passwords do not match.");
             }
             return true;

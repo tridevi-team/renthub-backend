@@ -1,5 +1,5 @@
 const { Users } = require("../models");
-const { formatJson, jwtToken, sendMail, Exception, ApiException } = require("../utils");
+const { formatJson, jwtToken, sendMail, Exception, ApiException, bcrypt } = require("../utils");
 
 const userController = {
     async getAllUsers(req, res) {
@@ -46,9 +46,14 @@ const userController = {
         try {
             const { username, password } = req.body;
             // username can be email or phone number
-            const user = await Users.query().findOne({ email: username, password }).orWhere("phone_number", username).andWhere("password", password);
+            const user = await Users.query().findOne({ email: username }).orWhere("phone_number", username).andWhere("password", password);
 
             if (user) {
+                // compare password
+                if (bcrypt.compare(password, user.password) === false) {
+                    throw new ApiException(1004, "Invalid username or password");
+                }
+
                 if (user.verify === false) {
                     throw new ApiException(1018, "Please verify your account first.");
                 }
@@ -196,13 +201,16 @@ const userController = {
 
             const { oldPassword, newPassword } = req.body;
 
-            const user = await Users.query().findOne({ email, password: oldPassword });
+            const user = await Users.query().findOne({ email });
 
             if (user) {
+                if (bcrypt.compare(oldPassword, user.password) === false) {
+                    throw new ApiException(1015, "Old password is incorrect.");
+                }
                 await Users.query().findById(user.id).patch({ password: newPassword });
                 res.json(formatJson.success(1014, "Password updated successfully."));
             } else {
-                throw new ApiException(1015, "Old password is incorrect.");
+                throw new ApiException(1017, "Invalid user.");
             }
         } catch (err) {
             Exception.handle(err, req, res);
