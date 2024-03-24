@@ -50,7 +50,7 @@ const userController = {
 
             if (user) {
                 // decrypt password
-                const decryptPassword = crypto.decrypt(password);
+                const decryptPassword = jwtToken.verify(password).password;
 
                 // compare password
                 if (bcrypt.compare(decryptPassword, user.password) === false) {
@@ -99,7 +99,7 @@ const userController = {
                 throw new ApiException(1006, "User already exists");
             }
 
-            const decryptPassword = crypto.decrypt(password);
+            const decryptPassword = jwtToken.verify(password).password;
             const hashPassword = await bcrypt.hash(decryptPassword.trim());
 
             const newUser = await Users.query().insert({
@@ -185,7 +185,7 @@ const userController = {
 
             if (user) {
                 // decrypt password
-                const decryptPassword = crypto.decrypt(password);
+                const decryptPassword = jwtToken.verify(password).password;
                 const hashPassword = await bcrypt.hash(decryptPassword.trim());
                 await Users.query().findById(user.id).patch({ password: hashPassword, code: -1 });
                 res.json(formatJson.success(1013, "Password reset successfully."));
@@ -214,11 +214,11 @@ const userController = {
 
             if (user) {
                 // decrypt password
-                const decryptPassword = crypto.decrypt(oldPassword);
-                const decryptNewPassword = crypto.decrypt(newPassword);
-                const hashNewPassword = await bcrypt.hash(decryptNewPassword.trim());
+                const oldPasswordDecrypt = jwtToken.verify(oldPassword).password;
+                const newPasswordDecrypt = jwtToken.verify(newPassword).password;
+                const hashNewPassword = await bcrypt.hash(newPasswordDecrypt.trim());
 
-                if (bcrypt.compare(decryptPassword, user.password) === false) {
+                if (bcrypt.compare(oldPasswordDecrypt, user.password) === false) {
                     throw new ApiException(1015, "Old password is incorrect.");
                 }
                 await Users.query().findById(user.id).patch({ password: hashNewPassword });

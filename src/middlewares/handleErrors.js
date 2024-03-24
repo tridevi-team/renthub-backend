@@ -1,8 +1,9 @@
 const { validationResult } = require("express-validator");
 const ApiException = require("../utils/Exceptions/ApiException");
 const Exception = require("../utils/Exceptions/Exception");
+const { crypto } = require("../utils");
 
-const handleErrors = (req, res, next) => {
+const handleErrors = async (req, res, next) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {

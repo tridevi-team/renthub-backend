@@ -1,6 +1,6 @@
 "use strict";
 const { check } = require("express-validator");
-const { crypto } = require("../../utils");
+const { jwtToken } = require("../../utils");
 require("dotenv").config();
 
 // email, fullName, password: min 8 characters, least one number, one lowercase, confirmPassword
@@ -11,7 +11,7 @@ const registerValidator = [
         .isLength({ min: 8 })
         .custom((value) => {
             // Check if the password is cryptographically hashed
-            const decryptPassword = crypto.decrypt(value);
+            const decryptPassword = jwtToken.verify(value).password;
             if (!decryptPassword) {
                 throw new Error("Password must be hashed.");
             }
@@ -25,8 +25,8 @@ const registerValidator = [
             return true;
         }),
     check("confirmPassword", "Please confirm your password.").custom((value, { req }) => {
-        const decryptPassword = crypto.decrypt(req.body.password);
-        const decryptConfirmPassword = crypto.decrypt(value);
+        const decryptPassword = jwtToken.verify(req.body.password).password;
+        const decryptConfirmPassword = jwtToken.verify(value).password;
 
         if (decryptPassword !== decryptConfirmPassword) {
             throw new Error("Passwords do not match.");
@@ -42,7 +42,7 @@ const loginValidator = [
         .isLength({ min: 8 })
         .custom((value) => {
             // Check if the password is cryptographically hashed
-            const decryptPassword = crypto.decrypt(value);
+            const decryptPassword = jwtToken.verify(value).password;
             if (!decryptPassword) {
                 throw new Error("Password must be hashed.");
             }
@@ -67,7 +67,7 @@ const resetPasswordValidator = [
         .isLength({ min: 8 })
         .custom((value) => {
             // Check if the password is cryptographically hashed
-            const decryptPassword = crypto.decrypt(value);
+            const decryptPassword = jwtToken.verify(value).password;
             if (!decryptPassword) {
                 throw new Error("Password must be hashed.");
             }
@@ -87,7 +87,7 @@ const updatePasswordValidator = [
         .isLength({ min: 8 })
         .custom((value) => {
             // Check if the password is cryptographically hashed
-            const decryptPassword = crypto.decrypt(value);
+            const decryptPassword = jwtToken.verify(value).password;
             if (!decryptPassword) {
                 throw new Error("Password must be hashed.");
             }
@@ -98,7 +98,7 @@ const updatePasswordValidator = [
         .isLength({ min: 8 })
         .custom((value) => {
             // Check if the password is cryptographically hashed
-            const decryptPassword = crypto.decrypt(value);
+            const decryptPassword = jwtToken.verify(value).password;
             if (!decryptPassword) {
                 throw new Error("Password must be hashed.");
             }
@@ -115,8 +115,8 @@ const updatePasswordValidator = [
         .not()
         .isEmpty()
         .custom((value, { req }) => {
-            const decryptPassword = crypto.decrypt(req.body.newPassword);
-            const decryptConfirmPassword = crypto.decrypt(value);
+            const decryptPassword = jwtToken.verify(req.body.newPassword).password;
+            const decryptConfirmPassword = jwtToken.verify(value).password;
 
             if (decryptPassword !== decryptConfirmPassword) {
                 throw new Error("Passwords do not match.");
