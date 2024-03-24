@@ -6,7 +6,7 @@ const handleErrors = (req, res, next) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            throw new ApiException(1001, "Validation error", errors.array());
+            throw new ApiException(500, "Validation error", errors.array());
         }
         next();
     } catch (err) {
