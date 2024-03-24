@@ -26,13 +26,6 @@ app.use("/rooms", RoomRoute);
 
 app.post("/upload", uploadImages);
 
-// gen test data
-const password = "1234567a";
-const { jwtToken } = require("./src/utils");
-
-const hashedPassword = jwtToken.sign({ password });
-console.log("Hashed Password:", hashedPassword);
-
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
 });

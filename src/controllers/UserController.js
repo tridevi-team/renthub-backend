@@ -52,8 +52,9 @@ const userController = {
                 // decrypt password
                 const decryptPassword = jwtToken.verify(password).password;
 
-                // compare password
-                if (bcrypt.compare(decryptPassword, user.password) === false) {
+                const passwordCorrect = await bcrypt.compare(decryptPassword, user.password);
+
+                if (!passwordCorrect) {
                     throw new ApiException(1004, "Invalid username or password");
                 }
 
@@ -218,7 +219,9 @@ const userController = {
                 const newPasswordDecrypt = jwtToken.verify(newPassword).password;
                 const hashNewPassword = await bcrypt.hash(newPasswordDecrypt.trim());
 
-                if (bcrypt.compare(oldPasswordDecrypt, user.password) === false) {
+                const passwordCorrect = await bcrypt.compare(oldPasswordDecrypt, user.password);
+
+                if (!passwordCorrect) {
                     throw new ApiException(1015, "Old password is incorrect.");
                 }
                 await Users.query().findById(user.id).patch({ password: hashNewPassword });
