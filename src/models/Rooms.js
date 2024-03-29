@@ -15,6 +15,7 @@ class Rooms extends Model {
                 house_id: { type: "integer" },
                 name: { type: "string", minLength: 1, maxLength: 50 },
                 max_renters: { type: "integer", default: -1 },
+                num_of_renters: { type: "integer", default: 0 },
                 floor: { type: "integer" },
                 price: { type: "number" },
                 created_by: { type: "integer" },
@@ -29,7 +30,7 @@ class Rooms extends Model {
         const Services = require("./Services");
         const RoomServices = require("./RoomServices");
         const Renters = require("./Renters");
-        const Equipments = require("./Equipments");
+        const Equipment = require("./Equipment");
         const RoomImages = require("./RoomImages");
 
         return {
@@ -82,12 +83,12 @@ class Rooms extends Model {
                 },
             },
 
-            equipments: {
+            equipment: {
                 relation: Model.HasManyRelation,
-                modelClass: Equipments,
+                modelClass: Equipment,
                 join: {
                     from: "rooms.id",
-                    to: "equipments.room_id",
+                    to: "equipment.room_id",
                 },
             },
 

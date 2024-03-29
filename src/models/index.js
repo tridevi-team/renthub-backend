@@ -2,7 +2,7 @@ const Users = require("./Users");
 const Houses = require("./Houses");
 const BillDetails = require("./BillDetails");
 const Bills = require("./Bills");
-const Equipments = require("./Equipments");
+const Equipment = require("./Equipment");
 const HousePermissions = require("./HousePermissions");
 const Notifications = require("./Notifications");
 const NotificationRecipient = require("./NotificationRecipient");
@@ -19,7 +19,7 @@ module.exports = {
     Houses,
     BillDetails,
     Bills,
-    Equipments,
+    Equipment,
     HousePermissions,
     Notifications,
     NotificationRecipient,
