@@ -1,9 +1,9 @@
 "use strict";
 const { Model } = require("objection");
 
-class Equipments extends Model {
+class Equipment extends Model {
     static get tableName() {
-        return "equipments";
+        return "equipment";
     }
 
     static get jsonSchema() {
@@ -31,7 +31,7 @@ class Equipments extends Model {
                 relation: Model.BelongsToOneRelation,
                 modelClass: Users,
                 join: {
-                    from: "equipments.created_by",
+                    from: "equipment.created_by",
                     to: "users.id",
                 },
             },
@@ -40,7 +40,7 @@ class Equipments extends Model {
                 relation: Model.BelongsToOneRelation,
                 modelClass: Rooms,
                 join: {
-                    from: "equipments.room_id",
+                    from: "equipment.room_id",
                     to: "rooms.id",
                 },
             },
@@ -48,4 +48,4 @@ class Equipments extends Model {
     }
 }
 
-module.exports = Equipments;
+module.exports = Equipment;
