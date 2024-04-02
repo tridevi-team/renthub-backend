@@ -21,5 +21,6 @@ usersRouter.post("/forgotPassword", forgotPasswordValidator, handleErrors, userC
 usersRouter.post("/resetPassword", resetPasswordValidator, handleErrors, userController.resetPassword);
 usersRouter.post("/updatePassword", updatePasswordValidator, handleErrors, userController.updatePassword);
 usersRouter.post("/updateProfile", updateProfileValidator, handleErrors, userController.updateProfile);
+usersRouter.post("/resendCode", forgotPasswordValidator, handleErrors, userController.resendCode);
 
 module.exports = usersRouter;

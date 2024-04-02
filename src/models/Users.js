@@ -34,7 +34,7 @@ class Users extends Model {
         const Bills = require("./Bills");
         const Renters = require("./Renters");
         const Services = require("./Services");
-        const Equipments = require("./Equipments");
+        const Equipment = require("./Equipment");
         const RoomServices = require("./RoomServices");
         const RoomImages = require("./RoomImages");
 
@@ -93,12 +93,12 @@ class Users extends Model {
                 },
             },
 
-            equipments: {
+            equipment: {
                 relation: Model.HasManyRelation,
-                modelClass: Equipments,
+                modelClass: Equipment,
                 join: {
                     from: "users.id",
-                    to: "equipments.created_by",
+                    to: "equipment.created_by",
                 },
             },
 

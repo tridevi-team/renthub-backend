@@ -79,7 +79,7 @@ const roomController = {
 
     async updateRoom(req, res) {
         try {
-           const { authorization } = req.headers;
+            const { authorization } = req.headers;
             if (!jwtToken.verify(authorization)) {
                 throw new ApiException(500, "Invalid token");
             }

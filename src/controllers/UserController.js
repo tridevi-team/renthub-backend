@@ -150,6 +150,33 @@ const userController = {
         }
     },
 
+    async resendCode(req, res) {
+        try {
+            const { email } = req.body;
+            const user = await Users.query().findOne({ email });
+
+            if (!user) {
+                throw new ApiException(1002, "User not found");
+            }
+
+            if (user.verify === 1) {
+                throw new ApiException(1010, "Account already verified.");
+            }
+
+            const verifyCode = Math.floor(1000 + Math.random() * 9000);
+
+            const mail = await sendMail(email, "Verify your account", `Your verification code is: ${verifyCode}`);
+            if (mail) {
+                await Users.query().findById(user.id).patch({ code: verifyCode });
+                res.json(formatJson.success(1012, "Please check your email to verify your account."));
+            } else {
+                throw new ApiException(1009, "Failed to send email verification code. Please try again.");
+            }
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    },
+
     async forgotPassword(req, res) {
         try {
             const { email } = req.body;
