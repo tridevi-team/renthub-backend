@@ -1,5 +1,5 @@
 const { Users } = require("../models");
-const { formatJson, jwtToken, sendMail, Exception, ApiException, bcrypt, crypto } = require("../utils");
+const { formatJson, jwtToken, sendMail, Exception, ApiException, bcrypt, aesDecrypt } = require("../utils");
 
 const userController = {
     async getAllUsers(req, res) {
@@ -50,7 +50,7 @@ const userController = {
 
             if (user) {
                 // decrypt password
-                const decryptPassword = jwtToken.verify(password).password;
+                const decryptPassword = aesDecrypt(password);
 
                 const passwordCorrect = await bcrypt.compare(decryptPassword, user.password);
 
@@ -100,7 +100,7 @@ const userController = {
                 throw new ApiException(1006, "User already exists");
             }
 
-            const decryptPassword = jwtToken.verify(password).password;
+            const decryptPassword = aesDecrypt(password);
             const hashPassword = await bcrypt.hash(decryptPassword.trim());
 
             const newUser = await Users.query().insert({
@@ -213,7 +213,7 @@ const userController = {
 
             if (user) {
                 // decrypt password
-                const decryptPassword = jwtToken.verify(password).password;
+                const decryptPassword = aesDecrypt(password);
                 const hashPassword = await bcrypt.hash(decryptPassword.trim());
                 await Users.query().findById(user.id).patch({ password: hashPassword, code: -1 });
                 res.json(formatJson.success(1013, "Password reset successfully."));
@@ -242,8 +242,8 @@ const userController = {
 
             if (user) {
                 // decrypt password
-                const oldPasswordDecrypt = jwtToken.verify(oldPassword).password;
-                const newPasswordDecrypt = jwtToken.verify(newPassword).password;
+                const oldPasswordDecrypt = aesDecrypt(oldPassword);
+                const newPasswordDecrypt = aesDecrypt(newPassword);
                 const hashNewPassword = await bcrypt.hash(newPasswordDecrypt.trim());
 
                 const passwordCorrect = await bcrypt.compare(oldPasswordDecrypt, user.password);

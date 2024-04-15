@@ -1,6 +1,6 @@
 "use strict";
 const { check } = require("express-validator");
-const { jwtToken } = require("../../utils");
+const { validatePassword, comparePassword } = require("../../services/password");
 require("dotenv").config();
 
 // email, fullName, password: min 8 characters, least one number, one lowercase, confirmPassword
@@ -11,26 +11,12 @@ const registerValidator = [
         .isLength({ min: 8 })
         .custom((value) => {
             // Check if the password is cryptographically hashed
-            const decryptPassword = jwtToken.verify(value).password;
-            if (!decryptPassword) {
-                throw new Error("Password must be hashed.");
-            }
-
-            // validate password
-            const passwordRegex = /^(?=.*\d)(?=.*[a-z]).{8,}$/;
-            if (!passwordRegex.test(decryptPassword)) {
-                throw new Error("Password must be at least 8 characters long and contain at least one letter and one number.");
-            }
+            validatePassword(value);
 
             return true;
         }),
     check("confirmPassword", "Please confirm your password.").custom((value, { req }) => {
-        const decryptPassword = jwtToken.verify(req.body.password).password;
-        const decryptConfirmPassword = jwtToken.verify(value).password;
-
-        if (decryptPassword !== decryptConfirmPassword) {
-            throw new Error("Passwords do not match.");
-        }
+        comparePassword(req.body.password, value);
         return true;
     }),
 ];
@@ -42,16 +28,7 @@ const loginValidator = [
         .isLength({ min: 8 })
         .custom((value) => {
             // Check if the password is cryptographically hashed
-            const decryptPassword = jwtToken.verify(value).password;
-            if (!decryptPassword) {
-                throw new Error("Password must be hashed.");
-            }
-
-            // validate password
-            const passwordRegex = /^(?=.*\d)(?=.*[a-z]).{8,}$/;
-            if (!passwordRegex.test(decryptPassword)) {
-                throw new Error("Password must be at least 8 characters long and contain at least one letter and one number.");
-            }
+            validatePassword(value);
             return true;
         }),
 ];
@@ -67,16 +44,7 @@ const resetPasswordValidator = [
         .isLength({ min: 8 })
         .custom((value) => {
             // Check if the password is cryptographically hashed
-            const decryptPassword = jwtToken.verify(value).password;
-            if (!decryptPassword) {
-                throw new Error("Password must be hashed.");
-            }
-
-            // validate password
-            const passwordRegex = /^(?=.*\d)(?=.*[a-z]).{8,}$/;
-            if (!passwordRegex.test(decryptPassword)) {
-                throw new Error("Password must be at least 8 characters long and contain at least one letter and one number.");
-            }
+            validatePassword(value);
 
             return true;
         }),
@@ -87,10 +55,7 @@ const updatePasswordValidator = [
         .isLength({ min: 8 })
         .custom((value) => {
             // Check if the password is cryptographically hashed
-            const decryptPassword = jwtToken.verify(value).password;
-            if (!decryptPassword) {
-                throw new Error("Password must be hashed.");
-            }
+            validatePassword(value);
 
             return true;
         }),
@@ -98,16 +63,7 @@ const updatePasswordValidator = [
         .isLength({ min: 8 })
         .custom((value) => {
             // Check if the password is cryptographically hashed
-            const decryptPassword = jwtToken.verify(value).password;
-            if (!decryptPassword) {
-                throw new Error("Password must be hashed.");
-            }
-
-            // validate password
-            const passwordRegex = /^(?=.*\d)(?=.*[a-z]).{8,}$/;
-            if (!passwordRegex.test(decryptPassword)) {
-                throw new Error("Password must be at least 8 characters long and contain at least one letter and one number.");
-            }
+            validatePassword(value);
 
             return true;
         }),
@@ -115,12 +71,7 @@ const updatePasswordValidator = [
         .not()
         .isEmpty()
         .custom((value, { req }) => {
-            const decryptPassword = jwtToken.verify(req.body.newPassword).password;
-            const decryptConfirmPassword = jwtToken.verify(value).password;
-
-            if (decryptPassword !== decryptConfirmPassword) {
-                throw new Error("Passwords do not match.");
-            }
+            comparePassword(req.body.newPassword, value);
 
             return true;
         }),
