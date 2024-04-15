@@ -1,8 +1,9 @@
 const CryptoJS = require("crypto-js");
+require("dotenv").config();
 
 const aesEncrypt = (data) => {
-    const key = CryptoJS.enc.Base64.parse("NGYxYWFhZTY2NDA2ZTM1OA==");
-    const iv = CryptoJS.enc.Base64.parse("ZGYxZTE4MDk0OTc5Mzk3Mg==");
+    const key = CryptoJS.enc.Utf8.parse(process.env.CRYPTO_KEY);
+    const iv = CryptoJS.enc.Utf8.parse(process.env.CRYPTO_IV);
 
     const encrypted = CryptoJS.AES.encrypt(data, key, {
         iv: iv,
@@ -14,8 +15,9 @@ const aesEncrypt = (data) => {
 };
 
 const aesDecrypt = (encrypted) => {
-    const key = CryptoJS.enc.Base64.parse("NGYxYWFhZTY2NDA2ZTM1OA==");
-    const iv = CryptoJS.enc.Base64.parse("ZGYxZTE4MDk0OTc5Mzk3Mg==");
+    const key = CryptoJS.enc.Utf8.parse(process.env.CRYPTO_KEY);
+    const iv = CryptoJS.enc.Utf8.parse(process.env.CRYPTO_IV);
+
     const decrypted = CryptoJS.AES.decrypt(
         {
             ciphertext: CryptoJS.enc.Base64.parse(encrypted),
