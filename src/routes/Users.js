@@ -16,11 +16,11 @@ usersRouter.get("/getAllUsers", userController.getAllUsers);
 usersRouter.get("/getInfoByToken", userController.getInfoByToken);
 usersRouter.post("/login", loginValidator, handleErrors, userController.login);
 usersRouter.post("/signup", registerValidator, handleErrors, userController.signup);
-usersRouter.post("/verifyAccount", verifyAccountValidator, handleErrors, userController.verifyAccount);
+usersRouter.put("/verifyAccount", verifyAccountValidator, handleErrors, userController.verifyAccount);
 usersRouter.post("/forgotPassword", forgotPasswordValidator, handleErrors, userController.forgotPassword);
 usersRouter.post("/resetPassword", resetPasswordValidator, handleErrors, userController.resetPassword);
-usersRouter.post("/updatePassword", updatePasswordValidator, handleErrors, userController.updatePassword);
-usersRouter.post("/updateProfile", updateProfileValidator, handleErrors, userController.updateProfile);
-usersRouter.post("/resendCode", forgotPasswordValidator, handleErrors, userController.resendCode);
+usersRouter.put("/updatePassword", updatePasswordValidator, handleErrors, userController.updatePassword);
+usersRouter.put("/updateProfile", updateProfileValidator, handleErrors, userController.updateProfile);
+usersRouter.put("/resendCode", forgotPasswordValidator, handleErrors, userController.resendCode);
 
 module.exports = usersRouter;
