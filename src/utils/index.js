@@ -6,6 +6,7 @@ const sendMail = require("./mail");
 const checkHousePermissions = require("./permissions");
 const Exception = require("./Exceptions/Exception");
 const ApiException = require("./Exceptions/ApiException");
+const { aesEncrypt, aesDecrypt } = require("./crypto");
 
 module.exports = {
     formatJson,
@@ -15,4 +16,6 @@ module.exports = {
     checkHousePermissions,
     Exception,
     ApiException,
+    aesEncrypt,
+    aesDecrypt,
 };
