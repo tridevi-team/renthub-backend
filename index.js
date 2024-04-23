@@ -4,6 +4,7 @@ const fileUpload = require("express-fileupload");
 const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const { rateLimit } = require("express-rate-limit");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 3000;
@@ -16,6 +17,14 @@ const { aesEncrypt } = require("./src/utils");
 // import database config
 require("./src/config/database");
 
+// rate limit config
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: "Too many requests from this IP, please try again after 15 minutes",
+});
+
+app.use(limiter);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(fileUpload());
