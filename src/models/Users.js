@@ -1,5 +1,15 @@
 "use strict";
 const { Model } = require("objection");
+const Houses = require("./Houses");
+const HousePermissions = require("./HousePermissions");
+const Rooms = require("./Rooms");
+const Bills = require("./Bills");
+const Renters = require("./Renters");
+const Services = require("./Services");
+const Equipment = require("./Equipment");
+const RoomServices = require("./RoomServices");
+const RoomImages = require("./RoomImages");
+const UserHistory = require("./UserHistory");
 const { accountTypes, accountRoles } = require("../enum/Users");
 
 class Users extends Model {
@@ -28,16 +38,6 @@ class Users extends Model {
     }
 
     static relationMappings() {
-        const Houses = require("./Houses");
-        const HousePermissions = require("./HousePermissions");
-        const Rooms = require("./Rooms");
-        const Bills = require("./Bills");
-        const Renters = require("./Renters");
-        const Services = require("./Services");
-        const Equipment = require("./Equipment");
-        const RoomServices = require("./RoomServices");
-        const RoomImages = require("./RoomImages");
-
         return {
             houses: {
                 relation: Model.HasManyRelation,
@@ -117,6 +117,15 @@ class Users extends Model {
                 join: {
                     from: "users.id",
                     to: "room_images.created_by",
+                },
+            },
+
+            user_history: {
+                relation: Model.HasManyRelation,
+                modelClass: UserHistory,
+                join: {
+                    from: "users.id",
+                    to: "user_history.user_id",
                 },
             },
         };

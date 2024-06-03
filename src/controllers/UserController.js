@@ -92,7 +92,7 @@ const userController = {
 
     async signup(req, res) {
         try {
-            const { email, password, fullName } = req.body;
+            const { email, password, fullName, phoneNumber, birthday } = req.body;
 
             const checkUserExists = await Users.query().findOne({ email });
 
@@ -107,6 +107,8 @@ const userController = {
                 email: email.toLowerCase().trim(),
                 full_name: fullName.trim(),
                 password: hashPassword,
+                phone_number: phoneNumber?.trim(),
+                birthday: birthday,
             });
 
             if (newUser) {
