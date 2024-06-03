@@ -14,6 +14,7 @@ class Equipment extends Model {
                 id: { type: "integer" },
                 room_id: { type: "integer" },
                 name: { type: "string", minLength: 1, maxLength: 50 },
+                quantity: { type: "integer", default: 1 },
                 status: { type: "string", maxLength: 50 },
                 exp_date: { type: "date" },
                 created_by: { type: "integer" },
