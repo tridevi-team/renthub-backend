@@ -9,7 +9,11 @@ const jwtToken = {
         jwt.sign(payload, JWT_SECRET, {
             expiresIn: time,
         }),
-    verify: (token: any) => jwt.verify(token, JWT_SECRET),
+    verify: (token: any) => {
+        token = token.replace("Bearer ", "");
+
+        return jwt.verify(token, JWT_SECRET);
+    },
     decode: (token: any) => jwt.decode(token),
 };
 
