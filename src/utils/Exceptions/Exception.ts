@@ -1,25 +1,25 @@
 "use strict";
-const ExceptionHandlerInstance = require("./ExceptionHandler");
+import ExceptionHandler from "./ExceptionHandler";
 
 class Exception {
-    code: Number;
-    message: any;
+    code: number;
+    message: string;
     data: any;
-    httpCode: any;
+    httpCode: number;
     static request: any;
     static response: any;
 
-    constructor(code: Number, message: any, data: any, httpCode: any) {
+    constructor(code: number, message: string, data: any, httpCode: number) {
         this.code = code;
         this.message = message;
         this.data = data;
         this.httpCode = httpCode;
     }
 
-    static handle(error, request, response) {
+    static handle(error: any, request: any, response: any) {
         this.request = request;
         this.response = response;
-        if (typeof error == "string") {
+        if (typeof error === "string") {
             error = {
                 code: 500,
                 message: error,
@@ -29,8 +29,9 @@ class Exception {
         error.message = error.message || "";
         error.httpCode = error.httpCode || 500;
         error.data = error.data || error.stack || {};
-        let ExceptionHandler = new ExceptionHandlerInstance();
-        ExceptionHandler.handle(error, { request, response });
+
+        let exceptionHandler = new ExceptionHandler();
+        exceptionHandler.handle(error, { request, response });
     }
 }
 

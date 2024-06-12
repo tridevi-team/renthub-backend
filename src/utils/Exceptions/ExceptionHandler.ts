@@ -6,7 +6,7 @@ class ExceptionHandler {
      * @param request
      * @param response
      */
-    async handle(error, { request, response }) {
+    async handle(error: any, { request, response }: { request: any; response: any }) {
         let code = 500,
             message = "",
             data = {},
@@ -30,4 +30,4 @@ class ExceptionHandler {
     }
 }
 
-module.exports = ExceptionHandler;
+export default ExceptionHandler;
