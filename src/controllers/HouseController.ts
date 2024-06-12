@@ -7,14 +7,17 @@ import Objection from "objection";
 const raw = Objection.raw;
 
 const HouseController = {
-    async getHouseList(req, res) {
+    async getHouseList(req: any, res: any) {
         try {
             const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
+            if (!authorization) {
                 throw new ApiException(500, "Unauthorized");
             }
 
             const userVerify = await jwtToken.verify(authorization);
+            if (!userVerify) {
+                throw new ApiException(500, "Unauthorized");
+            }
 
             const houses = await Houses.query()
                 .leftJoin("house_permissions", "houses.id", "house_permissions.house_id")
@@ -23,7 +26,7 @@ const HouseController = {
                 .select("houses.*")
                 .orderBy("houses.id", "asc");
 
-            if (!houses) {
+            if (!houses || houses.length === 0) {
                 throw new ApiException(1007, "The house list is empty.");
             }
             return res.json(formatJson.success(1008, "Get house list successful", houses));
