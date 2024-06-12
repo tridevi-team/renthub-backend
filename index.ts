@@ -23,8 +23,11 @@ const limiter = rateLimit({
     message: "Too many requests from this IP, please try again after 15 minutes",
 });
 
+import ignoreAuth from "./src/middlewares/auth";
+
 app.use(limiter);
 app.use(cors());
+app.use(ignoreAuth);
 app.use(bodyParser.json());
 app.use(fileUpload());
 app.use(express.static("src/public"));
