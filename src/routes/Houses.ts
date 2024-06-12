@@ -1,7 +1,6 @@
 "use strict";
 import express from "express";
 import { houseController } from "../controllers";
-import { Houses } from "../models";
 import { houseValidator } from "../middlewares/validator";
 
 import handleErrors from "../middlewares/handleErrors";
@@ -17,4 +16,4 @@ houseRouter.get("/details/:id", houseValidator.houseDetails, handleErrors, house
 houseRouter.get("/permissions/:id", houseValidator.userPermissions, handleErrors, houseController.getUserHasAccessToHouse);
 houseRouter.put("/grantPermissions/:id", houseValidator.grantPermissions, handleErrors, houseController.grantPermissions);
 
-export default Houses;
+export default houseRouter;
