@@ -1,6 +1,6 @@
 "use strict";
 import { Model } from "objection";
-import Users from "./Users";
+import { Users } from ".";
 import { accountRoles, accountTypes } from "../enum/Users";
 
 class UserHistory extends Model {
@@ -19,7 +19,7 @@ class UserHistory extends Model {
                 email: { type: "string", minLength: 1, maxLength: 50 },
                 phone_number: { type: "string", minLength: 1, maxLength: 11, default: null },
                 full_name: { type: "string", minLength: 1, maxLength: 50 },
-                birthday: { type: "string", format: "date", default: null},
+                birthday: { type: "string", format: "date", default: null },
                 role: { type: "string", minLength: 1, maxLength: 10, default: accountRoles.USER },
                 type: { type: "string", minLength: 1, maxLength: 10, default: accountTypes.FREE },
                 status: { type: "boolean", default: true },

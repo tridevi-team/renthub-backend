@@ -2,28 +2,13 @@
 import { Model } from "objection";
 import { Bills, Services } from ".";
 
-class BillDetails extends Model {
+class BillDetailsHistory extends Model {
     old_value: number;
     new_value: number;
     prices: number;
 
     static get tableName() {
-        return "bill_details";
-    }
-
-    // before insert, get number of renters in room
-    async $beforeInsert() {
-        this.old_value = 0;
-        this.new_value = 0;
-
-        const service: any = await this.$relatedQuery("services");
-        this.old_value = service.old_value;
-
-        this.new_value = service.new_value;
-
-        this.prices = service.unit_price * (this.new_value - this.old_value);
-
-        return this;
+        return "bill_details_history";
     }
 
     static get jsonSchema() {
@@ -36,10 +21,7 @@ class BillDetails extends Model {
                 service_id: { type: "integer" },
                 old_value: { type: "float" },
                 new_value: { type: "float" },
-                amount: { type: "float" },
-                unit_price: { type: "float" },
-                total_price: { type: "float" },
-                description : { type: "string" },
+                prices: { type: "float" },
             },
         };
     }
@@ -67,4 +49,4 @@ class BillDetails extends Model {
     }
 }
 
-export default BillDetails;
+export default BillDetailsHistory;

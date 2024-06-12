@@ -1,5 +1,6 @@
 "use strict";
 import { Model } from "objection";
+import { Users, Houses } from ".";
 
 class Services extends Model {
     static get tableName() {
@@ -24,9 +25,6 @@ class Services extends Model {
     }
 
     static relationMappings() {
-        const Users = require("./Users");
-        const Houses = require("./Houses");
-
         return {
             users: {
                 relation: Model.BelongsToOneRelation,

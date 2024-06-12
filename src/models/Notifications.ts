@@ -1,5 +1,6 @@
 "use strict";
 import { Model } from "objection";
+import { Users, NotificationRecipient } from ".";
 
 class Notifications extends Model {
     static get tableName() {
@@ -21,8 +22,6 @@ class Notifications extends Model {
     }
 
     static relationMappings() {
-        const Users = require("./Users");
-        const NotificationRecipient = require("./NotificationRecipient");
 
         return {
             users: {

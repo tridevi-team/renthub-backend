@@ -1,5 +1,6 @@
 "use strict";
 import { Model } from "objection";
+import HousePermissions from "./HousePermissions";
 
 class Permissions extends Model {
     static get tableName() {
@@ -18,8 +19,6 @@ class Permissions extends Model {
     }
 
     static relationMappings() {
-        const HousePermissions = require("./HousePermissions");
-
         return {
             house_permissions: {
                 relation: Model.HasManyRelation,

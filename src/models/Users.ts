@@ -1,15 +1,6 @@
 "use strict";
 import { Model } from "objection";
-import { Houses } from ".";
-import { HousePermissions } from ".";
-import { Rooms } from ".";
-import { Bills } from ".";
-import { Renters } from ".";
-import { Services } from ".";
-import { Equipment } from ".";
-import { RoomServices } from ".";
-import { RoomImages } from ".";
-import { UserHistory } from ".";
+import { Houses, HousePermissions, Rooms, Bills, Renters, Services, Equipment, RoomServices, RoomImages, UserHistory } from ".";
 import { accountTypes, accountRoles } from "../enum/Users";
 
 class Users extends Model {

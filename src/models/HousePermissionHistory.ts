@@ -1,20 +1,23 @@
-"use strict";
 import { Model } from "objection";
-import { Houses, Users, Permissions } from ".";
-class HousePermissions extends Model {
+
+import { HousePermissions, Users, Houses, Permissions } from ".";
+
+class HousePermissionHistory extends Model {
     static get tableName() {
-        return "house_permissions";
+        return "house_permission_history";
     }
 
     static get jsonSchema() {
         return {
             type: "object",
-            required: ["user_id", "house_id", "permission_id", "created_by"],
+            required: ["house_permission_id", "user_id", "house_id", "permission_id", "type", "created_by"],
             properties: {
                 id: { type: "integer" },
+                house_permission_id: { type: "integer" },
                 user_id: { type: "integer" },
                 house_id: { type: "integer" },
                 permission_id: { type: "integer" },
+                type: { type: "string" },
                 created_by: { type: "integer" },
                 created_at: { type: "datetime" },
             },
@@ -23,11 +26,20 @@ class HousePermissions extends Model {
 
     static relationMappings() {
         return {
+            house_permissions: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: HousePermissions,
+                join: {
+                    from: "house_permission_history.house_permission_id",
+                    to: "house_permissions.id",
+                },
+            },
+
             users: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: Users,
                 join: {
-                    from: "house_permissions.user_id",
+                    from: "house_permission_history.user_id",
                     to: "users.id",
                 },
             },
@@ -36,7 +48,7 @@ class HousePermissions extends Model {
                 relation: Model.BelongsToOneRelation,
                 modelClass: Houses,
                 join: {
-                    from: "house_permissions.house_id",
+                    from: "house_permission_history.house_id",
                     to: "houses.id",
                 },
             },
@@ -45,7 +57,7 @@ class HousePermissions extends Model {
                 relation: Model.BelongsToOneRelation,
                 modelClass: Permissions,
                 join: {
-                    from: "house_permissions.permission_id",
+                    from: "house_permission_history.permission_id",
                     to: "permissions.id",
                 },
             },
@@ -53,4 +65,4 @@ class HousePermissions extends Model {
     }
 }
 
-export default HousePermissions;
+export default HousePermissionHistory;

@@ -1,5 +1,6 @@
 "use strict";
 import { Model } from "objection";
+import { Rooms, Users } from ".";
 
 class Equipment extends Model {
     static get tableName() {
@@ -18,15 +19,12 @@ class Equipment extends Model {
                 status: { type: "string", maxLength: 50 },
                 exp_date: { type: "date" },
                 created_by: { type: "integer" },
-                created_date: { type: "datetime" },
+                created_at: { type: "datetime" },
             },
         };
     }
 
     static relationMappings() {
-        const Users = require("./Users");
-        const Rooms = require("./Rooms");
-
         return {
             users: {
                 relation: Model.BelongsToOneRelation,

@@ -1,6 +1,7 @@
 "use strict";
 import { Model } from "objection";
 import { houseStatus } from "../enum/Houses";
+import { Users, HousePermissions } from ".";
 
 class Houses extends Model {
     static get tableName() {
@@ -18,16 +19,14 @@ class Houses extends Model {
                 number_of_floors: { type: "integer" },
                 number_of_rooms: { type: "integer" },
                 status: { type: "string", minLength: 1, maxLength: 20, default: houseStatus.AVAILABLE },
+                description: { type: "string" },
                 created_by: { type: "integer" },
-                created_date: { type: "string", format: "date-time" },
+                created_at: { type: "string", format: "date-time" },
             },
         };
     }
 
-    static relationMappings() {
-        const HousePermissions = require("./HousePermissions");
-        const Users = require("./Users");
-
+    static get relationMappings() {
         return {
             house_permissions: {
                 relation: Model.HasManyRelation,

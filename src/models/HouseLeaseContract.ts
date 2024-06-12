@@ -1,0 +1,55 @@
+import { Model } from "objection";
+
+import { Houses, Users } from ".";
+
+class HouseLeaseContract extends Model {
+    static get tableName() {
+        return "house_lease_contract";
+    }
+
+    static get jsonSchema() {
+        return {
+            type: "object",
+            required: ["house_id", "owner_name", "owner_phone", "owner_email", "price", "price_type", "start_date", "end_date", "created_by"],
+            properties: {
+                id: { type: "integer" },
+                house_id: { type: "integer" },
+                owner_name: { type: "string" },
+                owner_phone: { type: "string" },
+                owner_email: { type: "string" },
+                price: { type: "integer" },
+                price_type: { type: "integer" },
+                file_contract: { type: "string" },
+                start_date: { type: "date" },
+                end_date: { type: "date" },
+                description: { type: "string" },
+                created_by: { type: "integer" },
+                created_at: { type: "datetime" },
+            },
+        };
+    }
+
+    static relationMappings() {
+        return {
+            houses: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Houses,
+                join: {
+                    from: "house_lease_contract.house_id",
+                    to: "houses.id",
+                },
+            },
+
+            users: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Users,
+                join: {
+                    from: "house_lease_contract.created_by",
+                    to: "users.id",
+                },
+            },
+        };
+    }
+}
+
+export default HouseLeaseContract;
