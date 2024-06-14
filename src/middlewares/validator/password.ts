@@ -1,5 +1,5 @@
 "use strict";
-import { aesDecrypt } from "../utils";
+import { aesDecrypt } from "../../utils";
 
 const validatePassword = (password) => {
     // Check if the password is cryptographically hashed

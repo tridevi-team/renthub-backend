@@ -1,7 +1,7 @@
 "use strict";
 import { check } from "express-validator";
-import { validatePassword, comparePassword } from "../../services/password";
-import "dotenv/config"
+import { validatePassword, comparePassword } from "./password";
+import "dotenv/config";
 
 // email, fullName, password: min 8 characters, least one number, one lowercase, confirmPassword
 const registerValidator = [
