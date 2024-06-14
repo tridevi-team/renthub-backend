@@ -1,6 +1,6 @@
 "use strict";
 import { Model } from "objection";
-import { Bills, Services } from ".";
+import { Bills, Services, BillDetailsHistory } from ".";
 
 class BillDetails extends Model {
     old_value: number;
@@ -61,6 +61,15 @@ class BillDetails extends Model {
                 join: {
                     from: "bill_details.service_id",
                     to: "services.id",
+                },
+            },
+
+            bill_details_history: {
+                relation: Model.HasManyRelation,
+                modelClass: BillDetailsHistory,
+                join: {
+                    from: "bill_details.id",
+                    to: "bill_details_history.bill_detail_id",
                 },
             },
         };

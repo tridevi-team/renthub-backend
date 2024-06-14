@@ -1,6 +1,6 @@
 "use strict";
 import { Model } from "objection";
-import { Users, Rooms, PaymentMethods } from ".";
+import { Users, Rooms, PaymentMethods, BillHistory } from ".";
 
 class Bills extends Model {
     static get tableName() {
@@ -48,6 +48,15 @@ class Bills extends Model {
                 join: {
                     from: "bills.payment_method_id",
                     to: "payment_methods.id",
+                },
+            },
+
+            bill_history: {
+                relation: Model.HasManyRelation,
+                modelClass: BillHistory,
+                join: {
+                    from: "bills.id",
+                    to: "bill_history.bill_id",
                 },
             },
         };
