@@ -18,6 +18,7 @@ class Equipment extends Model {
                 quantity: { type: "integer", default: 1 },
                 status: { type: "string", maxLength: 50 },
                 exp_date: { type: "date" },
+                description: { type: "string" },
                 created_by: { type: "integer" },
                 created_at: { type: "datetime" },
             },
