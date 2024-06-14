@@ -1,6 +1,6 @@
 "use strict";
 import { Model } from "objection";
-import { Users, Houses, Services, RoomServices, Renters, Equipment, RoomImages } from ".";
+import { Users, Houses, Services, RoomServices, Renters, Equipment, RoomImages, RoomHistory } from ".";
 
 class Rooms extends Model {
     id: Number;
@@ -28,6 +28,7 @@ class Rooms extends Model {
                 max_renters: { type: "integer", default: -1 },
                 num_of_renters: { type: "integer", default: 0 },
                 floor: { type: "integer" },
+                square_meter: { type: "float" },
                 price: { type: "number" },
                 created_by: { type: "integer" },
                 created_at: { type: "string", format: "date-time" },
@@ -101,6 +102,15 @@ class Rooms extends Model {
                 join: {
                     from: "rooms.id",
                     to: "room_images.room_id",
+                },
+            },
+
+            room_history: {
+                relation: Model.HasManyRelation,
+                modelClass: RoomHistory,
+                join: {
+                    from: "rooms.id",
+                    to: "room_history.room_id",
                 },
             },
         };

@@ -19,6 +19,7 @@ class RoomHistory extends Model {
                 num_of_renters: { type: "integer" },
                 max_renters: { type: "integer" },
                 floor: { type: "integer" },
+                square_meter: { type: "float" },
                 price: { type: "float" },
                 description: { type: "string" },
                 type: { type: "string" },
