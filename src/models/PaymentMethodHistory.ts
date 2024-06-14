@@ -19,10 +19,11 @@ class PaymentMethodHistory extends Model {
                 status: { type: "integer" },
                 type: { type: "string" },
                 description: { type: "string" },
-                created_by: { type: "integer" },
-                created_at: { type: "datetime" },
                 api_key: { type: "string" },
                 client_ip: { type: "string" },
+                checksum: { type: "string" },
+                created_by: { type: "integer" },
+                created_at: { type: "datetime" },
             },
         };
     }
