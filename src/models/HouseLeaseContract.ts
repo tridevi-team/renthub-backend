@@ -1,6 +1,6 @@
 import { Model } from "objection";
 
-import { Houses, Users } from ".";
+import { Houses, Users, HouseLeaseContractHistory } from ".";
 
 class HouseLeaseContract extends Model {
     static get tableName() {
@@ -46,6 +46,15 @@ class HouseLeaseContract extends Model {
                 join: {
                     from: "house_lease_contract.created_by",
                     to: "users.id",
+                },
+            },
+
+            house_lease_contract_history: {
+                relation: Model.HasManyRelation,
+                modelClass: HouseLeaseContractHistory,
+                join: {
+                    from: "house_lease_contract.id",
+                    to: "house_lease_contract_history.house_lease_contract_id",
                 },
             },
         };

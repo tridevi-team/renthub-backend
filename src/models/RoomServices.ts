@@ -1,6 +1,6 @@
 "use strict";
 import { Model } from "objection";
-import { Rooms, Services } from ".";
+import { Rooms, Services, RoomServiceHistory } from ".";
 
 class RoomServices extends Model {
     static get tableName() {
@@ -36,6 +36,15 @@ class RoomServices extends Model {
                 join: {
                     from: "room_services.service_id",
                     to: "services.id",
+                },
+            },
+
+            room_service_history: {
+                relation: Model.HasManyRelation,
+                modelClass: RoomServiceHistory,
+                join: {
+                    from: "room_services.id",
+                    to: "room_service_history.room_service_id",
                 },
             },
         };

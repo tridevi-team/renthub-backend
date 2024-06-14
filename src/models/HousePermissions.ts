@@ -1,6 +1,6 @@
 "use strict";
 import { Model } from "objection";
-import { Houses, Users, Permissions } from ".";
+import { Houses, Users, Permissions, HousePermissionHistory } from ".";
 class HousePermissions extends Model {
     static get tableName() {
         return "house_permissions";
@@ -47,6 +47,15 @@ class HousePermissions extends Model {
                 join: {
                     from: "house_permissions.permission_id",
                     to: "permissions.id",
+                },
+            },
+
+            house_permission_history: {
+                relation: Model.HasManyRelation,
+                modelClass: HousePermissionHistory,
+                join: {
+                    from: "house_permissions.id",
+                    to: "house_permission_history.house_permission_id",
                 },
             },
         };

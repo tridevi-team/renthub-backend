@@ -1,6 +1,28 @@
 "use strict";
 import { Model } from "objection";
-import { Houses, HousePermissions, Rooms, Bills, Renters, Services, Equipment, RoomServices, RoomImages, UserHistory } from ".";
+import {
+    Houses,
+    HousePermissions,
+    Rooms,
+    Bills,
+    Renters,
+    Services,
+    Equipment,
+    RoomServices,
+    RoomImages,
+    UserHistory,
+    BillHistory,
+    EquipmentHistory,
+    HouseLeaseContract,
+    HouseLeaseContractHistory,
+    HousePermissionHistory,
+    PaymentMethods,
+    PaymentMethodHistory,
+    RoomHistory,
+    RoomServiceHistory,
+    ServiceHistory,
+    HouseHistory,
+} from ".";
 import { accountTypes, accountRoles } from "../enum/Users";
 
 class Users extends Model {
@@ -47,7 +69,34 @@ class Users extends Model {
                 modelClass: Houses,
                 join: {
                     from: "users.id",
-                    to: "houses.user_id",
+                    to: "houses.created_by",
+                },
+            },
+
+            house_history: {
+                relation: Model.HasManyRelation,
+                modelClass: HouseHistory,
+                join: {
+                    from: "users.id",
+                    to: "house_history.created_by",
+                },
+            },
+
+            house_lease_contracts: {
+                relation: Model.HasManyRelation,
+                modelClass: HouseLeaseContract,
+                join: {
+                    from: "users.id",
+                    to: "house_lease_contract.created_by",
+                },
+            },
+
+            house_lease_contract_history: {
+                relation: Model.HasManyRelation,
+                modelClass: HouseLeaseContractHistory,
+                join: {
+                    from: "users.id",
+                    to: "house_lease_contract_history.created_by",
                 },
             },
 
@@ -60,6 +109,15 @@ class Users extends Model {
                 },
             },
 
+            house_permission_history: {
+                relation: Model.HasManyRelation,
+                modelClass: HousePermissionHistory,
+                join: {
+                    from: "users.id",
+                    to: "house_permission_history.created_by",
+                },
+            },
+
             rooms: {
                 relation: Model.HasManyRelation,
                 modelClass: Rooms,
@@ -69,12 +127,66 @@ class Users extends Model {
                 },
             },
 
+            room_history: {
+                relation: Model.HasManyRelation,
+                modelClass: RoomHistory,
+                join: {
+                    from: "users.id",
+                    to: "room_history.created_by",
+                },
+            },
+
             bills: {
                 relation: Model.HasManyRelation,
                 modelClass: Bills,
                 join: {
                     from: "users.id",
                     to: "bills.created_by",
+                },
+            },
+
+            bill_history: {
+                relation: Model.HasManyRelation,
+                modelClass: BillHistory,
+                join: {
+                    from: "users.id",
+                    to: "bill_history.created_by",
+                },
+            },
+
+            payment_methods: {
+                relation: Model.HasManyRelation,
+                modelClass: PaymentMethods,
+                join: {
+                    from: "users.id",
+                    to: "payment_methods.created_by",
+                },
+            },
+
+            payment_method_history: {
+                relation: Model.HasManyRelation,
+                modelClass: PaymentMethodHistory,
+                join: {
+                    from: "users.id",
+                    to: "payment_method_history.created_by",
+                },
+            },
+
+            equipment: {
+                relation: Model.HasManyRelation,
+                modelClass: Equipment,
+                join: {
+                    from: "users.id",
+                    to: "equipment.created_by",
+                },
+            },
+
+            equipment_history: {
+                relation: Model.HasManyRelation,
+                modelClass: EquipmentHistory,
+                join: {
+                    from: "users.id",
+                    to: "equipment_history.created_by",
                 },
             },
 
@@ -96,12 +208,12 @@ class Users extends Model {
                 },
             },
 
-            equipment: {
+            service_history: {
                 relation: Model.HasManyRelation,
-                modelClass: Equipment,
+                modelClass: ServiceHistory,
                 join: {
                     from: "users.id",
-                    to: "equipment.created_by",
+                    to: "service_history.created_by",
                 },
             },
 
@@ -111,6 +223,15 @@ class Users extends Model {
                 join: {
                     from: "users.id",
                     to: "room_services.created_by",
+                },
+            },
+
+            room_service_history: {
+                relation: Model.HasManyRelation,
+                modelClass: RoomServiceHistory,
+                join: {
+                    from: "users.id",
+                    to: "room_service_history.created_by",
                 },
             },
 
