@@ -22,6 +22,7 @@ class RoomHistory extends Model {
                 square_meter: { type: "float" },
                 price: { type: "float" },
                 description: { type: "string" },
+                status: { type: "string", maxLength: 20 },
                 type: { type: "string" },
                 created_by: { type: "integer" },
                 created_at: { type: "datetime" },

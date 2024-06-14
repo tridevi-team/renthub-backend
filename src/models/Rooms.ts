@@ -29,6 +29,8 @@ class Rooms extends Model {
                 num_of_renters: { type: "integer", default: 0 },
                 floor: { type: "integer" },
                 square_meter: { type: "float" },
+                description: { type: "string" },
+                status: { type: "string", maxLength: 20 },
                 price: { type: "number" },
                 created_by: { type: "integer" },
                 created_at: { type: "string", format: "date-time" },
