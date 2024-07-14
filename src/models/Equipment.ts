@@ -1,6 +1,6 @@
 "use strict";
 import { Model } from "objection";
-import { Rooms, Users, EquipmentHistory } from ".";
+import { Houses, Users, EquipmentHistory } from ".";
 
 class Equipment extends Model {
     static get tableName() {
@@ -10,13 +10,14 @@ class Equipment extends Model {
     static get jsonSchema() {
         return {
             type: "object",
-            required: ["room_id", "name", "exp_date", "created_by"],
+            required: ["house_id", "name", "exp_date", "created_by"],
             properties: {
                 id: { type: "integer" },
-                room_id: { type: "integer" },
+                house_id: { type: "integer" },
                 name: { type: "string", minLength: 1, maxLength: 50 },
                 quantity: { type: "integer", default: 1 },
                 status: { type: "string", maxLength: 50 },
+                shared_type: { type: "string", maxLength: 10 },
                 exp_date: { type: "date" },
                 description: { type: "string" },
                 created_by: { type: "integer" },
@@ -36,12 +37,12 @@ class Equipment extends Model {
                 },
             },
 
-            rooms: {
+            houses: {
                 relation: Model.BelongsToOneRelation,
-                modelClass: Rooms,
+                modelClass: Houses,
                 join: {
-                    from: "equipment.room_id",
-                    to: "rooms.id",
+                    from: "equipment.house_id",
+                    to: "houses.id",
                 },
             },
 
