@@ -33,6 +33,8 @@ import RoomHistory from "./RoomHistory";
 import RoomImages from "./RoomImages";
 import RoomServices from "./RoomServices";
 import RoomServiceHistory from "./RoomServiceHistory";
+import RoomEquipment from "./RoomEquipment";
+import RoomEquipmentHistory from "./RoomEquipmentHistory";
 
 import Issues from "./Issues";
 import IssueImages from "./IssueImages";
@@ -66,6 +68,8 @@ export {
     RoomHistory,
     RoomServices,
     RoomServiceHistory,
+    RoomEquipment,
+    RoomEquipmentHistory,
     Issues,
     IssueImages,
     IssueHistory,
