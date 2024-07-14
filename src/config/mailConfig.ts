@@ -5,10 +5,18 @@ import "dotenv/config";
 const transporter = nodemailer.createTransport({
     host: process.env.HOST_EMAIL,
     port: 465,
-    service: "gmail",
     auth: {
         user: process.env.USERNAME_EMAIL,
         pass: process.env.PASSWORD_EMAIL,
+    },
+    sercure: true,
+    tls: {
+        rejectUnauthorized: false,
+    },
+    dkim: {
+        domainName: "default._domainkey.tmquang.com.",
+        keySelector: "default",
+        privateKey: process.env.PRIVATE_KEY_EMAIL,
     },
 });
 
