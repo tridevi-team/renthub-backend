@@ -1,15 +1,18 @@
 import { knexSnakeCaseMappers } from "objection";
 import type { Knex } from "knex";
+import dotenv from "dotenv";
 
-// Update with your config settings.
+dotenv.config();
 
 const config: { [key: string]: Knex.Config } = {
     development: {
         client: "mysql",
         connection: {
-            database: "renthouse",
-            user: "tmq",
-            password: "Matkhau123@@",
+            host: process.env.MYSQL_HOST,
+            port: 3306,
+            user: process.env.MYSQL_USERNAME,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE_DEV,
         },
         pool: {
             min: 2,
@@ -24,9 +27,10 @@ const config: { [key: string]: Knex.Config } = {
     staging: {
         client: "mysql",
         connection: {
-            database: "renthouse",
-            user: "tmq",
-            password: "Matkhau123@@",
+            host: process.env.MYSQL_HOST,
+            user: process.env.MYSQL_USERNAME,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE_DEV,
         },
         pool: {
             min: 2,
@@ -40,9 +44,10 @@ const config: { [key: string]: Knex.Config } = {
     production: {
         client: "mysql",
         connection: {
-            database: "renthouse",
-            user: "tmq",
-            password: "Matkhau123@@",
+            host: process.env.MYSQL_HOST,
+            user: process.env.MYSQL_USERNAME,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE_PRODUCT,
         },
         pool: {
             min: 2,
