@@ -58,6 +58,7 @@ class Users extends Model {
                 status: { type: "boolean", default: true },
                 verify: { type: "boolean", default: false },
                 code: { type: "integer", default: -1 },
+                createAt: { type: "string", format: "date-time" },
             },
         };
     }
