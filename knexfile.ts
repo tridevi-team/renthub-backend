@@ -21,6 +21,9 @@ const config: { [key: string]: Knex.Config } = {
         migrations: {
             tableName: "knex_migrations",
         },
+        seeds: {
+            directory: "src/database/seeds",
+        },
         ...knexSnakeCaseMappers(),
     },
 
@@ -37,7 +40,11 @@ const config: { [key: string]: Knex.Config } = {
             max: 10,
         },
         migrations: {
+            directory: "src/database/migrations",
             tableName: "knex_migrations",
+        },
+        seeds: {
+            directory: "src/database/seeds",
         },
     },
 
@@ -54,7 +61,11 @@ const config: { [key: string]: Knex.Config } = {
             max: 10,
         },
         migrations: {
+            directory: "src/database/migrations",
             tableName: "knex_migrations",
+        },
+        seeds: {
+            directory: "src/database/seeds",
         },
     },
 };
