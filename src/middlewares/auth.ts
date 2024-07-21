@@ -18,9 +18,7 @@ const ignoreAuth = async (req: any, res: any, next: Function) => {
 
         try {
             const user = await jwtToken.verify(token);
-
-            console.log("user", user);
-
+            req.user = user;
             return next();
         } catch (error) {
             return res.status(401).json({
