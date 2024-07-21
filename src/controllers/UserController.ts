@@ -115,7 +115,9 @@ const userController = {
             if (newUser) {
                 const verifyCode = Math.floor(1000 + Math.random() * 9000);
 
-                await Users.query().findById(Number(newUser.id)).patch({ code: Number(verifyCode) });
+                await Users.query()
+                    .findById(Number(newUser.id))
+                    .patch({ code: Number(verifyCode) });
 
                 const mail = await sendMail(email, "Verify your account", `Your verification code is: ${verifyCode}`);
                 if (mail) {
@@ -281,6 +283,21 @@ const userController = {
 
                 const newToken = jwtToken.sign({ userUpdate });
                 res.json(formatJson.success(1016, "Profile updated successfully.", { token: newToken }));
+            } else {
+                throw new ApiException(1017, "Invalid user");
+            }
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    },
+
+    async updateFirstLogin(req, res) {
+        try {
+            const { user } = req;
+
+            if (user) {
+                const userUpdate = await Users.query().findById(user.id).patch({ first_login: true });
+                res.json(formatJson.success(1016, "First login status updated successfully."));
             } else {
                 throw new ApiException(1017, "Invalid user");
             }

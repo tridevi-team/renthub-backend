@@ -37,6 +37,7 @@ class Users extends Model {
     status: Boolean;
     verify: Boolean;
     code: Number;
+    first_login: Boolean;
 
     static get tableName() {
         return "users";
@@ -58,7 +59,8 @@ class Users extends Model {
                 status: { type: "boolean", default: true },
                 verify: { type: "boolean", default: false },
                 code: { type: "integer", default: -1 },
-                createAt: { type: "string", format: "date-time" },
+                first_login: { type: "boolean", default: false },
+                create_at: { type: "string", format: "date-time" },
             },
         };
     }

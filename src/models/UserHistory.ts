@@ -24,6 +24,7 @@ class UserHistory extends Model {
                 type: { type: "string", minLength: 1, maxLength: 10, default: accountTypes.FREE },
                 status: { type: "boolean", default: true },
                 verify: { type: "boolean", default: false },
+                first_login: { type: "boolean", default: false },
                 created_at: { type: "string", default: new Date().toISOString() },
             },
         };

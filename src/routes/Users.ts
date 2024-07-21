@@ -16,5 +16,6 @@ usersRouter.post("/resetPassword", userValidator.resetPasswordValidator, handleE
 usersRouter.put("/updatePassword", userValidator.updatePasswordValidator, handleErrors, userController.updatePassword);
 usersRouter.put("/updateProfile", userValidator.updateProfileValidator, handleErrors, userController.updateProfile);
 usersRouter.put("/resendCode", userValidator.forgotPasswordValidator, handleErrors, userController.resendCode);
+usersRouter.put("/firstLogin", userController.updateFirstLogin);
 
 export default usersRouter;
