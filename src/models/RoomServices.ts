@@ -15,6 +15,7 @@ class RoomServices extends Model {
                 id: { type: "integer" },
                 room_id: { type: "integer" },
                 service_id: { type: "integer" },
+                start_index: { type: "integer" },
             },
         };
     }

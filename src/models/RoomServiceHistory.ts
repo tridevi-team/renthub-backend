@@ -16,6 +16,7 @@ class RoomServiceHistory extends Model {
                 room_service_id: { type: "integer" },
                 room_id: { type: "integer" },
                 service_id: { type: "integer" },
+                start_index: { type: "integer" },
                 type: { type: "string" },
                 created_by: { type: "integer" },
                 created_at: { type: "datetime" },
