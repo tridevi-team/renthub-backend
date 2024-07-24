@@ -18,6 +18,7 @@ class Houses extends Model {
                 address: { type: "string", minLength: 1, maxLength: 50 },
                 number_of_floors: { type: "integer" },
                 number_of_rooms: { type: "integer" },
+                contract_default: { type: "integer" },
                 status: { type: "string", minLength: 1, maxLength: 20, default: houseStatus.AVAILABLE },
                 description: { type: "string" },
                 created_by: { type: "integer" },
