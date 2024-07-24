@@ -9,6 +9,9 @@ import HousePermissionHistory from "./HousePermissionHistory";
 import HouseLeaseContract from "./HouseLeaseContract";
 import HouseLeaseContractHistory from "./HouseLeaseContractHistory";
 
+import ContractTemplate from "./ContractTemplate";
+import ContractTemplateHistory from "./ContractTemplateHistory";
+
 import BillDetails from "./BillDetails";
 import BillDetailsHistory from "./BillDetailsHistory";
 import Bills from "./Bills";
@@ -43,6 +46,8 @@ import IssueHistory from "./IssueHistory";
 export {
     Users,
     UserHistory,
+    ContractTemplate,
+    ContractTemplateHistory,
     Houses,
     HouseHistory,
     HouseLeaseContract,
