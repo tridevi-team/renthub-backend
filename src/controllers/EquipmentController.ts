@@ -6,15 +6,10 @@ import { housePermissions } from "../enum/Houses";
 const equipmentController = {
     async addEquipment(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-
             const { houseId, roomId } = req.params;
 
             // check permission
-            const userInfo = jwtToken.verify(authorization);
+            const userInfo = req.user;
             const isAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.CREATE_EQUIPMENTS);
             if (!isAccess) {
                 throw new ApiException(1007, "You don't have permission to access this house");
@@ -49,11 +44,7 @@ const equipmentController = {
 
     async getEquipmentDetail(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-            const userInfo = jwtToken.verify(authorization);
+            const userInfo = req.user;
             const { houseId, roomId, equipmentId } = req.params;
 
             // check permission
@@ -85,8 +76,7 @@ const equipmentController = {
     async getEquipmentList(req, res) {
         try {
             const { houseId, roomId } = req.params;
-            const { authorization } = req.headers;
-            const userInfo = jwtToken.verify(authorization);
+            const userInfo = req.user;
 
             const isAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.READ_EQUIPMENTS);
 
@@ -104,7 +94,7 @@ const equipmentController = {
             }
 
             const lists = await Equipment.query().where({ room_id: roomId });
-            
+
             res.json(formatJson.success(1004, "Get equipment list successfully", lists));
         } catch (err) {
             Exception.handle(err, req, res);

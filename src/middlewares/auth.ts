@@ -1,4 +1,4 @@
-import { jwtToken } from "../utils";
+import { ApiException, Exception, jwtToken } from "../utils";
 
 const ignoreAuth = async (req: any, res: any, next: Function) => {
     const urls = ["/users/login", "/users/signup", "/users/resendCode", "/users/forgotPassword", "/users/resetPassword", "/users/verifyAccount"];
@@ -8,22 +8,15 @@ const ignoreAuth = async (req: any, res: any, next: Function) => {
     } else {
         const { authorization } = req.headers;
 
-        if (!authorization) {
-            return res.status(401).json({
-                message: "Unauthorized",
-            });
-        }
-
-        const token = authorization.split(" ")[1];
-
         try {
-            const user = await jwtToken.verify(token);
+            if (!authorization) {
+                throw new ApiException(500, "Access token is required.", null);
+            }
+            const user = await jwtToken.verify(authorization);
             req.user = user;
             return next();
         } catch (error) {
-            return res.status(401).json({
-                message: "Unauthorized",
-            });
+            Exception.handle(error, req, res);
         }
     }
 };

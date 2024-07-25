@@ -5,12 +5,6 @@ const { formatJson, jwtToken, sendMail, Exception, ApiException, bcrypt, aesDecr
 const userController = {
     async getAllUsers(req, res) {
         try {
-            const { authorization } = req.headers;
-
-            if (jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-
             const users = await Users.query();
 
             if (users.length > 0 && users) {
@@ -25,13 +19,7 @@ const userController = {
 
     async getInfoByToken(req, res) {
         try {
-            const { authorization } = req.headers;
-
-            if (!authorization) {
-                throw new ApiException(500, "Invalid token");
-            }
-
-            const user = jwtToken.verify(authorization);
+            const user = req.user;
 
             if (user) {
                 res.json(formatJson.success(1001, "User found", user));
@@ -232,13 +220,7 @@ const userController = {
 
     async updatePassword(req, res) {
         try {
-            const { authorization } = req.headers;
-
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-
-            const userInfo = jwtToken.verify(authorization);
+            const userInfo = req.user;
             const { email } = userInfo;
 
             const { oldPassword, newPassword } = req.body;
@@ -268,15 +250,9 @@ const userController = {
 
     async updateProfile(req, res) {
         try {
-            const { authorization } = req.headers;
-
-            if (!authorization) {
-                throw new ApiException(500, "Invalid token");
-            }
-
             const { fullName, phoneNumber, birthday } = req.body;
 
-            const user = jwtToken.verify(authorization);
+            const user = req.user;
 
             if (user) {
                 const userUpdate = await Users.query().findById(user.id).patch({ full_name: fullName, phone_number: phoneNumber, birthday });

@@ -6,13 +6,8 @@ import { housePermissions } from "../enum/Houses";
 const roomController = {
     async getRoomList(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-
             const { houseId } = req.params;
-            const userInfo = jwtToken.verify(authorization);
+            const userInfo = req.user;
 
             const hasAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.READ_ROOMS);
             if (!hasAccess) {
@@ -32,15 +27,10 @@ const roomController = {
 
     async createRoom(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-
             let { houseId } = req.params;
             houseId = parseInt(houseId);
 
-            const userInfo = jwtToken.verify(authorization);
+            const userInfo = req.user;
 
             const hasAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.CREATE_ROOMS);
             if (!hasAccess) {
@@ -80,13 +70,8 @@ const roomController = {
 
     async updateRoom(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-
             const { houseId, roomId } = req.params;
-            const userInfo = jwtToken.verify(authorization);
+            const userInfo = req.user;
 
             const hasAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.UPDATE_ROOMS);
             if (!hasAccess) {
@@ -126,13 +111,8 @@ const roomController = {
 
     async deleteRoom(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-
             const { houseId, roomId } = req.params;
-            const userInfo = jwtToken.verify(authorization);
+            const userInfo = req.user;
 
             const hasAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.DELETE_ROOMS);
             if (!hasAccess) {
@@ -153,13 +133,8 @@ const roomController = {
 
     async getRoomDetails(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-
             const { houseId, roomId } = req.params;
-            const userInfo = jwtToken.verify(authorization);
+            const userInfo = req.user;
 
             const hasAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.READ_ROOMS);
             if (!hasAccess) {

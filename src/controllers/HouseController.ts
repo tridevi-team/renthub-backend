@@ -9,25 +9,17 @@ const raw = Objection.raw;
 const HouseController = {
     async getHouseList(req: any, res: any) {
         try {
-            const { authorization } = req.headers;
-            if (!authorization) {
-                throw new ApiException(500, "Unauthorized");
-            }
-
-            const userVerify = await jwtToken.verify(authorization);
-            if (!userVerify) {
-                throw new ApiException(500, "Unauthorized");
-            }
+            const { user } = req;
 
             const houses = await Houses.query()
                 .leftJoin("house_permissions", "houses.id", "house_permissions.house_id")
-                .where("houses.created_by", userVerify.id)
-                .orWhere("house_permissions.user_id", userVerify.id)
+                .where("houses.created_by", user.id)
+                .orWhere("house_permissions.user_id", user.id)
                 .select("houses.*")
                 .orderBy("houses.id", "asc");
 
             if (!houses || houses.length === 0) {
-                throw new ApiException(1007, "The house list is empty.");
+                return res.json(formatJson.success(1007, "The house list is empty", []));
             }
             return res.json(formatJson.success(1008, "Get house list successful", houses));
         } catch (err) {
@@ -37,16 +29,11 @@ const HouseController = {
 
     async createHouse(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Unauthorized");
-            }
-
             const { name, address, numberOfFloors, status } = req.body;
 
-            const userVerify = await jwtToken.verify(authorization);
+            const { user } = req;
 
-            const houseExist = await Houses.query().findOne({ name, created_by: userVerify.id });
+            const houseExist = await Houses.query().findOne({ name, created_by: user.id });
 
             if (houseExist) {
                 throw new ApiException(1003, "House already exist");
@@ -59,14 +46,14 @@ const HouseController = {
                 address,
                 number_of_floors: numberOfFloors,
                 status: statusDefault,
-                created_by: userVerify.id,
+                created_by: user.id,
             });
 
-            if (house) {
-                return res.json(formatJson.success(1001, "Create house successful", house));
-            } else {
+            if (!house) {
                 throw new ApiException(1002, "Create house failed");
             }
+
+            return res.json(formatJson.success(1001, "Create house successful", house));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -74,15 +61,10 @@ const HouseController = {
 
     async updateHouseDetails(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Unauthorized");
-            }
-
             const { id } = req.params;
             const { name, address, numberOfFloors, status } = req.body;
 
-            const userVerify = await jwtToken.verify(authorization);
+            const user = req.user;
 
             const house = await Houses.query().findOne({ id });
             if (!house) {
@@ -90,7 +72,7 @@ const HouseController = {
             }
 
             // check permission
-            const isAccess = await checkHousePermissions(userVerify.id, id, housePermissions.UPDATE_HOUSE);
+            const isAccess = await checkHousePermissions(user.id, id, housePermissions.UPDATE_HOUSE);
             if (!isAccess) {
                 throw new ApiException(500, "Unauthorized");
             }
@@ -114,13 +96,8 @@ const HouseController = {
 
     async deleteHouse(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Unauthorized");
-            }
-
             const { id } = req.params;
-            const userVerify = await jwtToken.verify(authorization);
+            const user = req.user;
 
             const house = await Houses.query().findOne({ id });
             if (!house) {
@@ -128,7 +105,7 @@ const HouseController = {
             }
 
             // check permission
-            const isAccess = await checkHousePermissions(userVerify.id, id, housePermissions.DELETE_HOUSE);
+            const isAccess = await checkHousePermissions(user.id, id, housePermissions.DELETE_HOUSE);
             if (!isAccess) {
                 throw new ApiException(500, "Unauthorized");
             }
@@ -141,11 +118,11 @@ const HouseController = {
 
             const deleteHouse = await Houses.query().deleteById(id);
 
-            if (deleteHouse) {
-                return res.json(formatJson.success(1009, "Delete house successful"));
-            } else {
+            if (!deleteHouse) {
                 throw new ApiException(1010, "Delete house failed");
             }
+
+            return res.json(formatJson.success(1009, "Delete house successful"));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -153,15 +130,10 @@ const HouseController = {
 
     async updateHouseStatus(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Unauthorized");
-            }
-
             const { id } = req.params;
             const { status } = req.body;
 
-            const userVerify = await jwtToken.verify(authorization);
+            const user = req.user;
 
             const house = await Houses.query().findOne({ id });
             if (!house) {
@@ -169,7 +141,7 @@ const HouseController = {
             }
 
             // check permission
-            const isAccess = await checkHousePermissions(userVerify.id, id, housePermissions.UPDATE_HOUSE);
+            const isAccess = await checkHousePermissions(user.id, id, housePermissions.UPDATE_HOUSE);
             if (!isAccess) {
                 throw new ApiException(500, "Unauthorized");
             }
@@ -177,11 +149,12 @@ const HouseController = {
             const updateHouse = await Houses.query().patchAndFetchById(id, {
                 status: status,
             });
-            if (updateHouse) {
-                return res.json(formatJson.success(1013, "Update house status successful", updateHouse));
-            } else {
+
+            if (!updateHouse) {
                 throw new ApiException(1014, "Update house status failed");
             }
+
+            return res.json(formatJson.success(1013, "Update house status successful", updateHouse));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -189,14 +162,9 @@ const HouseController = {
 
     async getHouseDetails(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Unauthorized");
-            }
-
             const { id } = req.params;
 
-            const userVerify = await jwtToken.verify(authorization);
+            const user = req.user;
 
             const house = await Houses.query().findOne({ id });
             if (!house) {
@@ -204,7 +172,7 @@ const HouseController = {
             }
 
             // check permission
-            const isAccess = await checkHousePermissions(userVerify.id, id, housePermissions.HOUSE_DETAILS);
+            const isAccess = await checkHousePermissions(user.id, id, housePermissions.HOUSE_DETAILS);
 
             if (!isAccess) {
                 throw new ApiException(500, "Unauthorized");
@@ -218,21 +186,16 @@ const HouseController = {
 
     async getUserHasAccessToHouse(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Unauthorized");
-            }
-
             const { id } = req.params;
 
-            const userVerify = await jwtToken.verify(authorization);
+            const user = req.user;
 
             const house = await Houses.query().findOne({ id });
             if (!house) {
                 throw new ApiException(1004, "House not found");
             }
 
-            const isAccess = await checkHousePermissions(userVerify.id, id);
+            const isAccess = await checkHousePermissions(user.id, id);
             if (!isAccess) {
                 throw new ApiException(500, "Unauthorized");
             }
@@ -266,17 +229,12 @@ const HouseController = {
 
     async grantPermissions(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Unauthorized");
-            }
-
             const { id } = req.params;
             const { userId, permissions } = req.body;
 
-            const userVerify = await jwtToken.verify(authorization);
+            const user = req.user;
 
-            const house = await Houses.query().findOne({ id, created_by: userVerify.id });
+            const house = await Houses.query().findOne({ id, created_by: user.id });
             if (!house) {
                 throw new ApiException(1004, "House not found or you are not the owner of the house.");
             }

@@ -6,15 +6,9 @@ import { housePermissions } from "../enum/Houses";
 const serviceController = {
     async create(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-
             const { houseId } = req.params;
             const { name, unitPrice, rules, type } = req.body;
-            const user = jwtToken.verify(authorization);
-
+            const user = req.user;
             const house = await Houses.query().findById(houseId);
             if (!house) {
                 throw new ApiException(1003, "House not found");
@@ -46,13 +40,8 @@ const serviceController = {
 
     async getServiceByHouse(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-
             const { houseId } = req.params;
-            const user = jwtToken.verify(authorization);
+            const user = req.user;
 
             const hasAccess = await checkHousePermissions(user.id, houseId, housePermissions.READ_SERVICES);
             if (!hasAccess) {
@@ -76,13 +65,8 @@ const serviceController = {
 
     async getServiceDetails(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-
             const { houseId, serviceId } = req.params;
-            const user = jwtToken.verify(authorization);
+            const user = req.user;
 
             const hasAccess = await checkHousePermissions(user.id, houseId, housePermissions.READ_SERVICES);
             if (!hasAccess) {
@@ -107,14 +91,9 @@ const serviceController = {
 
     async update(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-
             const { houseId, serviceId } = req.params;
             const { name, unitPrice, rules, type } = req.body;
-            const user = jwtToken.verify(authorization);
+            const user = req.user;
 
             const hasAccess = await checkHousePermissions(user.id, houseId, housePermissions.UPDATE_SERVICES);
             if (!hasAccess) {
@@ -152,13 +131,8 @@ const serviceController = {
 
     async delete(req, res) {
         try {
-            const { authorization } = req.headers;
-            if (!jwtToken.verify(authorization)) {
-                throw new ApiException(500, "Invalid token");
-            }
-
             const { houseId, serviceId } = req.params;
-            const user = jwtToken.verify(authorization);
+            const user = req.user;
 
             const hasAccess = await checkHousePermissions(user.id, houseId, housePermissions.DELETE_SERVICES);
             if (!hasAccess) {
