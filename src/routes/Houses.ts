@@ -3,7 +3,7 @@ import express from "express";
 import { houseController } from "../controllers";
 import { houseValidator } from "../middlewares/validator";
 
-import handleErrors from "../middlewares/handleErrors";
+import { handleErrors } from "../middlewares";
 
 const houseRouter = express.Router();
 

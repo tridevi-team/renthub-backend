@@ -2,7 +2,7 @@
 import express from "express";
 import { roomController } from "../controllers";
 import { roomsValidator } from "../middlewares/validator";
-import handleErrors from "../middlewares/handleErrors";
+import { handleErrors } from "../middlewares";
 
 const roomRouter = express.Router();
 

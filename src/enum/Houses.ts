@@ -6,7 +6,10 @@ const houseStatus = {
 };
 
 const housePermissions = {
+    HOUSE_OWNER: "HOUSE_OWNER",
     HOUSE_DETAILS: "HOUSE_DETAILS",
+    UPDATE_HOUSE: "UPDATE_HOUSE",
+    DELETE_HOUSE: "DELETE_HOUSE",
     CREATE_ROOMS: "CREATE_ROOMS",
     READ_ROOMS: "READ_ROOMS",
     UPDATE_ROOMS: "UPDATE_ROOMS",
@@ -23,8 +26,6 @@ const housePermissions = {
     READ_EQUIPMENTS: "READ_EQUIPMENTS",
     UPDATE_EQUIPMENTS: "UPDATE_EQUIPMENTS",
     DELETE_EQUIPMENTS: "DELETE_EQUIPMENTS",
-    UPDATE_HOUSE: "UPDATE_HOUSE",
-    DELETE_HOUSE: "DELETE_HOUSE",
 };
 
 export { houseStatus, housePermissions };

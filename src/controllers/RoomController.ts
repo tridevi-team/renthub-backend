@@ -1,18 +1,12 @@
 "use strict";
 import { Rooms, RoomImages, RoomServices, Services } from "../models";
-import { checkHousePermissions, jwtToken, formatJson, ApiException, Exception } from "../utils";
+import { formatJson, ApiException, Exception } from "../utils";
 import { housePermissions } from "../enum/Houses";
 
 const roomController = {
     async getRoomList(req, res) {
         try {
             const { houseId } = req.params;
-            const userInfo = req.user;
-
-            const hasAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.READ_ROOMS);
-            if (!hasAccess) {
-                throw new ApiException(1007, "You don't have permission to access this house");
-            }
 
             const roomList = await Rooms.query().where({ house_id: houseId });
             if (!roomList || roomList.length === 0) {
@@ -31,11 +25,6 @@ const roomController = {
             houseId = parseInt(houseId);
 
             const userInfo = req.user;
-
-            const hasAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.CREATE_ROOMS);
-            if (!hasAccess) {
-                throw new ApiException(1007, "You don't have permission to access this house");
-            }
 
             const { name, price, floor, maxRenters, services, images } = req.body;
             const newRoom = await Rooms.query().insert({ name, floor, max_renters: maxRenters, price, house_id: houseId, created_by: userInfo.id });
@@ -73,11 +62,6 @@ const roomController = {
             const { houseId, roomId } = req.params;
             const userInfo = req.user;
 
-            const hasAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.UPDATE_ROOMS);
-            if (!hasAccess) {
-                throw new ApiException(1006, "You don't have permission to access this house");
-            }
-
             const { name, floor, maxRenters, price, services, images } = req.body;
             const updatedRoom = await Rooms.query().patchAndFetchById(roomId, { name, floor, max_renters: maxRenters, price });
 
@@ -112,12 +96,6 @@ const roomController = {
     async deleteRoom(req, res) {
         try {
             const { houseId, roomId } = req.params;
-            const userInfo = req.user;
-
-            const hasAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.DELETE_ROOMS);
-            if (!hasAccess) {
-                throw new ApiException(1007, "You don't have permission to access this house");
-            }
 
             const deletedRoom = await Rooms.query().deleteById(roomId);
 
@@ -134,12 +112,6 @@ const roomController = {
     async getRoomDetails(req, res) {
         try {
             const { houseId, roomId } = req.params;
-            const userInfo = req.user;
-
-            const hasAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.READ_ROOMS);
-            if (!hasAccess) {
-                throw new ApiException(1007, "You don't have permission to access this house");
-            }
 
             const roomDetails = await Rooms.query().findOne({ id: roomId, house_id: houseId });
             if (!roomDetails) {

@@ -1,6 +1,6 @@
 "use strict";
 import { Houses, Services } from "../models";
-import { formatJson, jwtToken, checkHousePermissions, Exception, ApiException } from "../utils";
+import { formatJson, jwtToken, Exception, ApiException } from "../utils";
 import { housePermissions } from "../enum/Houses";
 
 const serviceController = {
@@ -12,11 +12,6 @@ const serviceController = {
             const house = await Houses.query().findById(houseId);
             if (!house) {
                 throw new ApiException(1003, "House not found");
-            }
-
-            const hasAccess = await checkHousePermissions(user.id, houseId, housePermissions.CREATE_SERVICES);
-            if (!hasAccess) {
-                throw new ApiException(1001, "You don't have permission to create services");
             }
 
             const service = await Services.query().insert({
@@ -41,12 +36,6 @@ const serviceController = {
     async getServiceByHouse(req, res) {
         try {
             const { houseId } = req.params;
-            const user = req.user;
-
-            const hasAccess = await checkHousePermissions(user.id, houseId, housePermissions.READ_SERVICES);
-            if (!hasAccess) {
-                throw new ApiException(1001, "You don't have permission to read services");
-            }
 
             const house = await Houses.query().findById(houseId);
             if (!house) {
@@ -66,12 +55,6 @@ const serviceController = {
     async getServiceDetails(req, res) {
         try {
             const { houseId, serviceId } = req.params;
-            const user = req.user;
-
-            const hasAccess = await checkHousePermissions(user.id, houseId, housePermissions.READ_SERVICES);
-            if (!hasAccess) {
-                throw new ApiException(1001, "You don't have permission to read services");
-            }
 
             const house = await Houses.query().findById(houseId);
             if (!house) {
@@ -93,12 +76,6 @@ const serviceController = {
         try {
             const { houseId, serviceId } = req.params;
             const { name, unitPrice, rules, type } = req.body;
-            const user = req.user;
-
-            const hasAccess = await checkHousePermissions(user.id, houseId, housePermissions.UPDATE_SERVICES);
-            if (!hasAccess) {
-                throw new ApiException(1001, "You don't have permission to update services");
-            }
 
             const house = await Houses.query().findById(houseId);
             if (!house) {
@@ -132,12 +109,6 @@ const serviceController = {
     async delete(req, res) {
         try {
             const { houseId, serviceId } = req.params;
-            const user = req.user;
-
-            const hasAccess = await checkHousePermissions(user.id, houseId, housePermissions.DELETE_SERVICES);
-            if (!hasAccess) {
-                throw new ApiException(1001, "You don't have permission to delete services");
-            }
 
             const house = await Houses.query().findById(houseId);
             if (!house) {

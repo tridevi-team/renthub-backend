@@ -2,7 +2,7 @@
 import express from "express";
 import { serviceController } from "../controllers";
 import { serviceValidator } from "../middlewares/validator";
-import handleErrors from "../middlewares/handleErrors";
+import { handleErrors } from "../middlewares";
 
 const serviceRouter = express.Router();
 

@@ -2,7 +2,7 @@
 import express from "express";
 import { userController } from "../controllers";
 import { userValidator } from "../middlewares/validator";
-import handleErrors from "../middlewares/handleErrors";
+import { handleErrors } from "../middlewares";
 
 const usersRouter = express.Router();
 

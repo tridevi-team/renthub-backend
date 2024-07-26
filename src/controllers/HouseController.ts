@@ -1,6 +1,6 @@
 "use strict";
 import { Houses, HousePermissions } from "../models";
-import { formatJson, jwtToken, checkHousePermissions, Exception, ApiException } from "../utils";
+import { formatJson, jwtToken, Exception, ApiException } from "../utils";
 import { houseStatus, housePermissions } from "../enum/Houses";
 import Objection from "objection";
 
@@ -71,12 +71,6 @@ const HouseController = {
                 throw new ApiException(1004, "House not found");
             }
 
-            // check permission
-            const isAccess = await checkHousePermissions(user.id, id, housePermissions.UPDATE_HOUSE);
-            if (!isAccess) {
-                throw new ApiException(500, "Unauthorized");
-            }
-
             const updateStatus = status || houseStatus.AVAILABLE;
             const updateHouse = await Houses.query().patchAndFetchById(id, {
                 name,
@@ -102,12 +96,6 @@ const HouseController = {
             const house = await Houses.query().findOne({ id });
             if (!house) {
                 throw new ApiException(1004, "House not found");
-            }
-
-            // check permission
-            const isAccess = await checkHousePermissions(user.id, id, housePermissions.DELETE_HOUSE);
-            if (!isAccess) {
-                throw new ApiException(500, "Unauthorized");
             }
 
             // check constraint before delete
@@ -140,12 +128,6 @@ const HouseController = {
                 throw new ApiException(1004, "House not found");
             }
 
-            // check permission
-            const isAccess = await checkHousePermissions(user.id, id, housePermissions.UPDATE_HOUSE);
-            if (!isAccess) {
-                throw new ApiException(500, "Unauthorized");
-            }
-
             const updateHouse = await Houses.query().patchAndFetchById(id, {
                 status: status,
             });
@@ -171,13 +153,6 @@ const HouseController = {
                 throw new ApiException(1004, "House not found");
             }
 
-            // check permission
-            const isAccess = await checkHousePermissions(user.id, id, housePermissions.HOUSE_DETAILS);
-
-            if (!isAccess) {
-                throw new ApiException(500, "Unauthorized");
-            }
-
             return res.json(formatJson.success(1015, "Get house details successful", house));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -193,11 +168,6 @@ const HouseController = {
             const house = await Houses.query().findOne({ id });
             if (!house) {
                 throw new ApiException(1004, "House not found");
-            }
-
-            const isAccess = await checkHousePermissions(user.id, id);
-            if (!isAccess) {
-                throw new ApiException(500, "Unauthorized");
             }
 
             const usersList = await HousePermissions.query()
