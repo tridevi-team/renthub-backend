@@ -1,5 +1,5 @@
 import ignoreAuth from "./auth";
-import houseAccess from "./houseAccess";
+import access from "./access";
 import handleErrors from "./handleErrors";
 
-export { ignoreAuth, houseAccess, handleErrors };
+export { ignoreAuth, access, handleErrors };

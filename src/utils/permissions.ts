@@ -2,16 +2,30 @@
 import { Houses, HousePermissions } from "../models";
 import { housePermissions } from "../enum/Houses";
 
-const checkPermissions = async (userId: Number, houseId: Number, permission: String = "") => {
+const checkPermissions = async (userId: Number, houseId: Number = -1, permission: String = "") => {
     let housePermission = null;
+
     if (permission === housePermissions.HOUSE_OWNER) {
-        return await Houses.query().findOne({ house_id: houseId, user_id: userId });
+        if (houseId === -1) {
+            housePermission = await Houses.query().where({ created_by: userId });
+            return !!housePermission;
+        }
+        housePermission = await HousePermissions.query().findOne({ id: houseId, user_id: userId });
+        return !!housePermission;
     } else if (permission !== housePermissions.HOUSE_DETAILS) {
-        housePermission = await HousePermissions.query().joinRelated("permissions").findOne({ house_id: houseId, user_id: userId, "permissions.name": permission });
+        housePermission = await HousePermissions.query().joinRelated("permissions").findOne({ house_id: houseId, user_id: userId, "permissions.key": permission });
     } else {
         housePermission = await HousePermissions.query().findOne({ house_id: houseId, user_id: userId });
+        console.log("permission", permission, housePermission);
     }
-    const isAuthor = await Houses.query().findOne({ id: houseId, created_by: userId });
+
+    let isAuthor = null;
+    if (houseId !== -1) {
+        isAuthor = await Houses.query().findOne({ id: houseId, created_by: userId });
+    } else {
+        isAuthor = await Houses.query().findOne({ created_by: userId });
+    }
+
     return !!housePermission || !!isAuthor;
 };
 
