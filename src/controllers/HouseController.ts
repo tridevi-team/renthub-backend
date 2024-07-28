@@ -18,7 +18,10 @@ const HouseController = {
                 .select("houses.*")
                 .orderBy("houses.id", "asc");
 
-            if (!houses || houses.length === 0) {
+            // const houses = (await Houses.query()).find((house) => house === user.id);
+            // let houses = [];
+
+            if (!houses) {
                 return res.json(formatJson.success(1007, "The house list is empty", []));
             }
             return res.json(formatJson.success(1008, "Get house list successful", houses));
@@ -29,7 +32,7 @@ const HouseController = {
 
     async createHouse(req, res) {
         try {
-            const { name, address, numberOfFloors, status } = req.body;
+            const { name, address, numberOfFloors, numberOfRooms, description, contractDefault, status } = req.body;
 
             const { user } = req;
 
@@ -45,6 +48,9 @@ const HouseController = {
                 name,
                 address,
                 number_of_floors: numberOfFloors,
+                number_of_rooms: numberOfRooms,
+                description: description,
+                contract_default: contractDefault,
                 status: statusDefault,
                 created_by: user.id,
             });
