@@ -1,11 +1,11 @@
 "use strict";
-import { Houses, Services } from "../models";
+import { Houses, Rooms, RoomServices, Services } from "../models";
 import { formatJson, jwtToken, Exception, ApiException } from "../utils";
 const serviceController = {
     async create(req, res) {
         try {
             const { houseId } = req.params;
-            const { name, unitPrice, rules, type } = req.body;
+            const { name, unitPrice, hasIndex, type } = req.body;
             const user = req.user;
             const house = await Houses.query().findById(houseId);
             if (!house) {
@@ -16,7 +16,7 @@ const serviceController = {
                 house_id: Number(houseId),
                 name,
                 unit_price: parseFloat(unitPrice),
-                rules: JSON.stringify(rules) || null,
+                has_index: hasIndex || false,
                 type,
                 created_by: user.id,
             });
@@ -26,6 +26,55 @@ const serviceController = {
             }
 
             res.json(formatJson.success(1007, "Create service successful", service));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    },
+
+    async createRoomService(req, res) {
+        try {
+            const {
+                houseId,
+                roomId,
+            }: {
+                houseId: number;
+                roomId: number;
+            } = req.params;
+
+            const user = req.user;
+
+            const { services } = req.body;
+
+            const house = await Houses.query().findById(houseId);
+            if (!house) {
+                throw new ApiException(1003, "House not found");
+            }
+
+            const room = await Rooms.query().findById(roomId);
+            if (!room) {
+                throw new ApiException(1003, "Room not found");
+            }
+
+            if (services && services.length > 0) {
+                for (const service of services) {
+                    const { serviceId, startIndex } = service;
+                    const checkService = await Services.query().findOne({ id: serviceId, house_id: houseId });
+                    if (!checkService) {
+                        throw new ApiException(1010, "Service not found");
+                    }
+                    console.log({ room_id: roomId, service_id: serviceId });
+
+                    const checkRoomService = await RoomServices.query().findOne({ room_id: roomId, service_id: serviceId });
+
+                    if (checkRoomService) {
+                        throw new ApiException(1011, "Service already exists in this room");
+                    }
+
+                    await RoomServices.query().insert({ room_id: Number(roomId), service_id: serviceId, start_index: startIndex, created_by: user.id });
+                }
+            }
+
+            res.json(formatJson.success(1007, "Create room service successful"));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -124,6 +173,43 @@ const serviceController = {
             }
 
             res.json(formatJson.success(1003, "Delete service successful"));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    },
+
+    async deleteRoomService(req, res) {
+        try {
+            const { houseId, roomId } = req.params;
+            const { services } = req.body;
+
+            const house = await Houses.query().findById(houseId);
+            if (!house) {
+                throw new ApiException(1003, "House not found");
+            }
+
+            const room = await Rooms.query().findById(roomId);
+            if (!room) {
+                throw new ApiException(1003, "Room not found");
+            }
+
+            if (services && services.length > 0) {
+                for (const service of services) {
+                    console.log(service);
+
+                    const checkRoomService = await RoomServices.query().findOne({ room_id: roomId, service_id: service });
+
+                    if (!checkRoomService) {
+                        throw new ApiException(1011, "Service not exists in this room");
+                    }
+
+                    await RoomServices.query()
+                        .delete()
+                        .where({ room_id: Number(roomId), service_id: service });
+                }
+            }
+
+            res.json(formatJson.success(1007, "Delete room service successful"));
         } catch (err) {
             Exception.handle(err, req, res);
         }
