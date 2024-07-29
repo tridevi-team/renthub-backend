@@ -9,6 +9,8 @@ class Rooms extends Model {
     max_renters: Number;
     num_of_renters: Number;
     floor: Number;
+    status: String;
+    square_meter: Number;
     price: Number;
     created_by: Number;
     created_at: Date;
@@ -28,10 +30,10 @@ class Rooms extends Model {
                 max_renters: { type: "integer", default: -1 },
                 num_of_renters: { type: "integer", default: 0 },
                 floor: { type: "integer" },
-                square_meter: { type: "float" },
+                square_meter: { type: "integer" },
                 description: { type: "string" },
                 status: { type: "string", maxLength: 20 },
-                price: { type: "number" },
+                price: { type: "integer" },
                 created_by: { type: "integer" },
                 created_at: { type: "string", format: "date-time" },
             },

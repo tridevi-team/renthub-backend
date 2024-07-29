@@ -1,7 +1,7 @@
 "use strict";
-import { Houses, HousePermissions } from "../models";
-import { formatJson, jwtToken, Exception, ApiException } from "../utils";
-import { houseStatus, housePermissions } from "../enum/Houses";
+import { Houses, HousePermissions, Rooms } from "../models";
+import { formatJson, Exception, ApiException } from "../utils";
+import { HouseStatus, RoomStatus } from "../enum";
 import Objection from "objection";
 
 const raw = Objection.raw;
@@ -18,9 +18,6 @@ const HouseController = {
                 .select("houses.*")
                 .orderBy("houses.id", "asc");
 
-            // const houses = (await Houses.query()).find((house) => house === user.id);
-            // let houses = [];
-
             if (!houses) {
                 return res.json(formatJson.success(1007, "The house list is empty", []));
             }
@@ -32,7 +29,10 @@ const HouseController = {
 
     async createHouse(req, res) {
         try {
-            const { name, address, numberOfFloors, numberOfRooms, description, contractDefault, status } = req.body;
+            const { name, address, numberOfFloors, numberOfRoomsPerFloor, description, contractDefault, status, maxRenters, squareMeter, avgPrice } = req.body;
+            const totalRooms = numberOfFloors ? numberOfFloors * numberOfRoomsPerFloor : 0;
+
+            console.log("avgPrice", avgPrice);
 
             const { user } = req;
 
@@ -42,13 +42,13 @@ const HouseController = {
                 throw new ApiException(1003, "House already exist");
             }
 
-            const statusDefault = status || houseStatus.AVAILABLE;
+            const statusDefault = status || HouseStatus.AVAILABLE.toString();
 
             const house = await Houses.query().insert({
                 name,
                 address,
                 number_of_floors: numberOfFloors,
-                number_of_rooms: numberOfRooms,
+                number_of_rooms: totalRooms,
                 description: description,
                 contract_default: contractDefault,
                 status: statusDefault,
@@ -57,6 +57,36 @@ const HouseController = {
 
             if (!house) {
                 throw new ApiException(1002, "Create house failed");
+            }
+
+            if (numberOfRoomsPerFloor) {
+                for (let i = 1; i <= numberOfFloors; i++) {
+                    for (let j = 1; j <= numberOfRoomsPerFloor; j++) {
+                        const roomNumber = j < 9 ? `0${j}` : j;
+                        const roomName = `Phòng ${i}${roomNumber}`;
+                        console.log({
+                            name: roomName,
+                            house_id: house.id,
+                            max_renters: maxRenters,
+                            num_of_renters: 0,
+                            floor: i,
+                            price: avgPrice,
+                            square_meter: squareMeter,
+                        });
+
+                        await Rooms.query().insert({
+                            name: roomName,
+                            house_id: house.id,
+                            max_renters: maxRenters,
+                            num_of_renters: 0,
+                            floor: i,
+                            price: avgPrice,
+                            square_meter: squareMeter,
+                            status: RoomStatus.AVAILABLE.toString(),
+                            created_by: user.id,
+                        });
+                    }
+                }
             }
 
             return res.json(formatJson.success(1001, "Create house successful", house));
@@ -77,7 +107,7 @@ const HouseController = {
                 throw new ApiException(1004, "House not found");
             }
 
-            const updateStatus = status || houseStatus.AVAILABLE;
+            const updateStatus = status || HouseStatus.AVAILABLE.toString();
             const updateHouse = await Houses.query().patchAndFetchById(id, {
                 name,
                 address,
