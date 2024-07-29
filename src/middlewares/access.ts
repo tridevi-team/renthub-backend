@@ -65,7 +65,7 @@ const access = async (req: Request, res: Response, next: NextFunction) => {
             }
 
             isAccess = await checkPermissions(user.id, house, permission);
-            console.log("Check access permission:", isAccess);
+            console.log("Check access permission:", permission, isAccess);
 
             if (!isAccess) throw new ApiException(500, "You don't have this permission.");
         }

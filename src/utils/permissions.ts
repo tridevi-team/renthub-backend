@@ -6,27 +6,23 @@ const checkPermissions = async (userId: Number, houseId: Number = -1, permission
     let housePermission = null;
 
     if (permission === EHousePermissions.HOUSE_OWNER) {
-        if (houseId === -1) {
-            housePermission = await Houses.query().where({ created_by: userId });
-            return !!housePermission;
+        housePermission = houseId === -1 ? await Houses.query().findOne({ created_by: userId }) : await HousePermissions.query().findOne({ id: houseId, user_id: userId });
+    } else {
+        const authorCondition = houseId !== -1 ? { id: houseId, created_by: userId } : { created_by: userId };
+
+        const isAuthor = await Houses.query().findOne(authorCondition);
+        if (isAuthor) return true;
+
+        if (permission !== EHousePermissions.HOUSE_DETAILS) {
+            housePermission = await HousePermissions.query().joinRelated("permissions").findOne({ house_id: houseId, user_id: userId, "permissions.key": permission });
+        } else {
+            housePermission = await HousePermissions.query().findOne({ house_id: houseId, user_id: userId });
+            console.log("permission", permission, housePermission);
         }
-        housePermission = await HousePermissions.query().findOne({ id: houseId, user_id: userId });
-        return !!housePermission;
-    } else if (permission !== EHousePermissions.HOUSE_DETAILS) {
-        housePermission = await HousePermissions.query().joinRelated("permissions").findOne({ house_id: houseId, user_id: userId, "permissions.key": permission });
-    } else {
-        housePermission = await HousePermissions.query().findOne({ house_id: houseId, user_id: userId });
-        console.log("permission", permission, housePermission);
     }
 
-    let isAuthor = null;
-    if (houseId !== -1) {
-        isAuthor = await Houses.query().findOne({ id: houseId, created_by: userId });
-    } else {
-        isAuthor = await Houses.query().findOne({ created_by: userId });
-    }
-
-    return !!housePermission || !!isAuthor;
+    if (housePermission) return true;
+    return false;
 };
 
 export default checkPermissions;
