@@ -6,7 +6,7 @@ const checkPermissions = async (userId: Number, houseId: Number = -1, permission
     let housePermission = null;
 
     if (permission === EHousePermissions.HOUSE_OWNER) {
-        housePermission = houseId === -1 ? await Houses.query().findOne({ created_by: userId }) : await HousePermissions.query().findOne({ id: houseId, user_id: userId });
+        housePermission = houseId === -1 ? await Houses.query().findOne({ created_by: userId }) : await Houses.query().findOne({ id: houseId, created_by: userId });
     } else {
         const authorCondition = houseId !== -1 ? { id: houseId, created_by: userId } : { created_by: userId };
 
