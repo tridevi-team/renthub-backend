@@ -1,7 +1,7 @@
 "use strict";
 import { check } from "express-validator";
 
-import { houseStatus, housePermissions } from "../../enum/Houses";
+import { HouseStatus, HousePermissions } from "../../enum";
 
 const createHouse = [
     check("name", "Please provide a valid name").isString().isLength({ min: 1, max: 50 }),
@@ -14,12 +14,12 @@ const updateHouseDetails = [
     check("name", "Please provide a valid name").isString().isLength({ min: 1, max: 50 }),
     check("address", "Please provide a valid address").isString().isLength({ min: 1, max: 200 }),
     check("numberOfFloors", "Please provide a valid number of floors").isInt(),
-    check("status", "Please provide a valid status").isIn([houseStatus.AVAILABLE, houseStatus.RENTED, houseStatus.PENDING, houseStatus.DEPOSIT]),
+    check("status", "Please provide a valid status").isIn([HouseStatus.AVAILABLE, HouseStatus.RENTED, HouseStatus.PENDING, HouseStatus.DEPOSIT]),
 ];
 
 const deleteHouse = [check("id", "Please provide a valid house id").isInt()];
 
-const housePermissionsArray = Object.values(housePermissions);
+const housePermissionsArray = Object.values(HousePermissions);
 
 const updateHouseStatus = [check("id", "Please provide a valid house id").isInt(), check("status", "Please provide a valid status").isIn(housePermissionsArray)];
 

@@ -1,7 +1,6 @@
 "use strict";
 import { Rooms, RoomImages, RoomServices, Services } from "../models";
 import { formatJson, ApiException, Exception } from "../utils";
-import { housePermissions } from "../enum/Houses";
 
 const roomController = {
     async getRoomList(req, res) {

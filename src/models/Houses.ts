@@ -1,9 +1,20 @@
 "use strict";
 import { Model } from "objection";
-import { houseStatus } from "../enum/Houses";
-import { Users, HousePermissions } from ".";
+import { HouseStatus } from "../enum";
+import { Users, HousePermissions, Rooms } from ".";
 
 class Houses extends Model {
+    id: Number;
+    name: String;
+    address: String;
+    number_of_floors: Number;
+    number_of_rooms: Number;
+    contract_default: Number;
+    status: Boolean;
+    description: String;
+    created_by: Number;
+    created_at: Date;
+
     static get tableName() {
         return "houses";
     }
@@ -19,7 +30,7 @@ class Houses extends Model {
                 number_of_floors: { type: "integer" },
                 number_of_rooms: { type: "integer", default: 0 },
                 contract_default: { type: "integer" },
-                status: { type: "string", minLength: 1, maxLength: 20, default: houseStatus.AVAILABLE },
+                status: { type: "string", minLength: 1, maxLength: 20, default: HouseStatus.AVAILABLE.toString() },
                 description: { type: "string" },
                 created_by: { type: "integer" },
                 created_at: { type: "string", format: "date-time" },
@@ -35,6 +46,15 @@ class Houses extends Model {
                 join: {
                     from: "houses.id",
                     to: "house_permissions.house_id",
+                },
+            },
+
+            rooms: {
+                relation: Model.HasManyRelation,
+                modelClass: Rooms,
+                join: {
+                    from: "houses.id",
+                    to: "rooms.house_id",
                 },
             },
 

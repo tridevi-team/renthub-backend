@@ -23,7 +23,7 @@ import {
     ServiceHistory,
     HouseHistory,
 } from ".";
-import { accountTypes, accountRoles } from "../enum/Users";
+import { AccountTypes, AccountRoles } from "../enum";
 
 class Users extends Model {
     id: Number;
@@ -54,8 +54,8 @@ class Users extends Model {
                 phone_number: { type: "string", minLength: 1, maxLength: 11 },
                 full_name: { type: "string", minLength: 1, maxLength: 50 },
                 birthday: { type: "string", format: "date" },
-                role: { type: "string", minLength: 1, maxLength: 10, default: accountRoles.USER },
-                type: { type: "string", minLength: 1, maxLength: 10, default: accountTypes.FREE },
+                role: { type: "string", minLength: 1, maxLength: 10, default: AccountRoles.USER },
+                type: { type: "string", minLength: 1, maxLength: 10, default: AccountTypes.FREE },
                 status: { type: "boolean", default: true },
                 verify: { type: "boolean", default: false },
                 code: { type: "integer", default: -1 },

@@ -1,7 +1,7 @@
 "use strict";
 import { Model } from "objection";
 import { Users } from ".";
-import { accountRoles, accountTypes } from "../enum/Users";
+import { AccountRoles, AccountTypes } from "../enum/Users";
 
 class UserHistory extends Model {
     static get tableName() {
@@ -20,8 +20,8 @@ class UserHistory extends Model {
                 phone_number: { type: "string", minLength: 1, maxLength: 11, default: null },
                 full_name: { type: "string", minLength: 1, maxLength: 50 },
                 birthday: { type: "string", format: "date", default: null },
-                role: { type: "string", minLength: 1, maxLength: 10, default: accountRoles.USER },
-                type: { type: "string", minLength: 1, maxLength: 10, default: accountTypes.FREE },
+                role: { type: "string", minLength: 1, maxLength: 10 },
+                type: { type: "string", minLength: 1, maxLength: 10 },
                 status: { type: "boolean", default: true },
                 verify: { type: "boolean", default: false },
                 first_login: { type: "boolean", default: false },

@@ -1,8 +1,6 @@
 "use strict";
 import { Houses, Services } from "../models";
 import { formatJson, jwtToken, Exception, ApiException } from "../utils";
-import { housePermissions } from "../enum/Houses";
-
 const serviceController = {
     async create(req, res) {
         try {
