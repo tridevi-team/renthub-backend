@@ -10,7 +10,7 @@ import { UserRoute, HouseRoute, ServiceRoute, RoomRoute } from "./src/routes";
 import uploadImages from "./src/services/uploadImages";
 import { aesEncrypt } from "./src/utils";
 
-import { ignoreAuth } from "./src/middlewares";
+import { ignoreAuth, requestLogger } from "./src/middlewares";
 
 import "./src/config/database";
 
@@ -25,6 +25,7 @@ const limiter = rateLimit({
     message: "Too many requests from this IP, please try again after 15 minutes",
 });
 
+app.use(requestLogger);
 app.use(limiter);
 app.use(cors());
 app.use(ignoreAuth);
