@@ -9,7 +9,7 @@ const roomController = {
 
             const roomList = await Rooms.query().where({ house_id: houseId });
             if (!roomList || roomList.length === 0) {
-                throw new ApiException(1001, "There are no rooms in this house", []);
+                return res.json(formatJson.success(1001, "There are no rooms in this house", []));
             }
 
             res.json(formatJson.success(1002, "Get room list successfully", roomList));
