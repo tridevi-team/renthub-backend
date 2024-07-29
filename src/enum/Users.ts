@@ -1,15 +1,15 @@
-const accountRoles = {
-    ADMIN: "admin",
-    USER: "user",
-    GUEST: "guest",
-    HOST: "host",
-};
+enum AccountRoles {
+    ADMIN,
+    USER,
+    GUEST,
+    HOST,
+}
 
-const accountTypes = {
-    FREE: "free",
-    STANDARD: "standard",
-    PREMIUM: "premium",
-    ENTERPRISE: "enterprise",
-};
+enum AccountTypes {
+    FREE,
+    STANDARD,
+    PREMIUM,
+    ENTERPRISE,
+}
 
-export { accountRoles, accountTypes };
+export { AccountRoles, AccountTypes };

@@ -1,9 +1,9 @@
-const billStatus = {
-    CREATED: "CREATED",
-    CONFIRMED: "CONFIRMED",
-    PAID: "PAID",
-    CANCELLED: "CANCELLED",
-    DELAY: "DELAY",
-};
+enum BillStatus {
+    CREATED,
+    CONFIRMED,
+    PAID,
+    CANCELLED,
+    DELAY,
+}
 
-export default billStatus;
+export default BillStatus;

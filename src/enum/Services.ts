@@ -1,7 +1,7 @@
-const serviceTypes = {
-    PEOPLE: "PEOPLE",
-    ROOM: "ROOM",
-    AMOUNT: "AMOUNT",
-};
+enum ServiceTypes {
+    PEOPLE,
+    ROOM,
+    AMOUNT,
+}
 
-export default serviceTypes;
+export default ServiceTypes;
