@@ -195,8 +195,6 @@ const serviceController = {
 
             if (services && services.length > 0) {
                 for (const service of services) {
-                    console.log(service);
-
                     const checkRoomService = await RoomServices.query().findOne({ room_id: roomId, service_id: service });
 
                     if (!checkRoomService) {
