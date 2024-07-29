@@ -1,35 +1,34 @@
 "use strict";
-import { Equipment, Rooms } from "../models";
-import { ApiException, Exception, formatJson, jwtToken, checkHousePermissions } from "../utils";
-import { housePermissions } from "../enum/Houses";
+import { EquipmentType } from "../enum";
+import { Equipment, RoomEquipment, Rooms } from "../models";
+import { ApiException, Exception, formatJson } from "../utils";
 
 const equipmentController = {
     async addEquipment(req, res) {
         try {
-            const { houseId, roomId } = req.params;
-
-            // check permission
+            const { houseId } = req.params;
             const userInfo = req.user;
-            const isAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.CREATE_EQUIPMENTS);
-            if (!isAccess) {
-                throw new ApiException(1007, "You don't have permission to access this house");
-            }
 
-            const { name, quantity, status, expDate, created_by } = req.body;
+            const { name, quantity, status, expDate, sharedType, description } = req.body;
 
-            // check house and room exists
-            const checkRoom = await Rooms.query().findOne({ id: roomId, house_id: houseId });
-            if (!checkRoom) {
-                throw new ApiException(1004, "Room not found", []);
+            const checkEquipment = await Equipment.query().findOne({
+                name: name || "",
+                house_id: houseId,
+            });
+
+            if (checkEquipment) {
+                throw new ApiException(1005, "Equipment already exists", checkEquipment);
             }
 
             const insertEquipment = await Equipment.query().insert({
                 name,
                 quantity: quantity || 1,
                 status,
+                shared_type: sharedType,
+                description,
                 exp_date: expDate,
-                room_id: roomId,
-                created_by,
+                house_id: Number(houseId),
+                created_by: userInfo.id,
             });
 
             if (!insertEquipment) {
@@ -42,60 +41,138 @@ const equipmentController = {
         }
     },
 
-    async getEquipmentDetail(req, res) {
+    async addEquipmentToRoom(req, res) {
         try {
             const userInfo = req.user;
-            const { houseId, roomId, equipmentId } = req.params;
-
-            // check permission
-            const isAccess = checkHousePermissions(userInfo.id, houseId, housePermissions.READ_EQUIPMENTS);
-            if (!isAccess) {
-                throw new ApiException(1007, "You don't have permission to access this house");
-            }
+            const { houseId, roomId } = req.params;
+            const { equipment } = req.body;
 
             // check house and room exists
             const checkRoom = await Rooms.query().findOne({
-                id: roomId,
+                id: Number(roomId),
                 house_id: houseId,
             });
             if (!checkRoom) {
                 throw new ApiException(1004, "Room not found", []);
             }
 
-            const details = await Equipment.query().findOne({ id: equipmentId });
-            if (!details) {
-                throw new ApiException(1001, "Equipment not found", []);
-            }
+            for (let equipmentId of equipment) {
+                const checkEquipment = await Equipment.query().findOne({ id: equipmentId });
+                if (!checkEquipment) {
+                    throw new ApiException(1001, "Equipment not found", []);
+                } else if (checkEquipment.shared_type === EquipmentType.HOUSE) {
+                    throw new ApiException(1006, "This equipment is shared in house", []);
+                }
 
-            res.json(formatJson.success(1003, "Get equipment details successfully", details));
+                const checkEquipmentInRoom = await RoomEquipment.query().findOne({
+                    room_id: Number(roomId),
+                    equipment_id: equipmentId,
+                });
+
+                if (checkEquipmentInRoom) {
+                    throw new ApiException(1005, "Equipment already exists in this room", checkEquipmentInRoom);
+                }
+
+                const insertEquipment = await RoomEquipment.query().insert({
+                    room_id: Number(roomId),
+                    equipment_id: equipmentId,
+                    created_by: userInfo.id,
+                });
+
+                if (!insertEquipment) {
+                    throw new ApiException(1003, "Error adding equipment to room");
+                }
+
+                res.json(formatJson.success(1002, "Add equipment to room successfully", insertEquipment));
+            }
         } catch (err) {
             Exception.handle(err, req, res);
         }
     },
 
-    async getEquipmentList(req, res) {
+    async getEquipmentListInHouse(req, res) {
+        try {
+            const { houseId } = req.params;
+
+            const lists = await Equipment.query().where("house_id", houseId);
+
+            res.json(formatJson.success(1004, "Get equipment list successfully", lists));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    },
+
+    async getEquipmentListInRoom(req, res) {
         try {
             const { houseId, roomId } = req.params;
-            const userInfo = req.user;
 
-            const isAccess = await checkHousePermissions(userInfo.id, houseId, housePermissions.READ_EQUIPMENTS);
-
-            if (!isAccess) {
-                throw new ApiException(1007, "You don't have permission to access this house");
-            }
-
-            // check house and room exists
             const checkRoom = await Rooms.query().findOne({
                 id: roomId,
                 house_id: houseId,
             });
+
             if (!checkRoom) {
                 throw new ApiException(1004, "Room not found", []);
             }
 
-            const lists = await Equipment.query().where({ room_id: roomId });
+            const equipments = await RoomEquipment.query().join("equipment", "room_equipment.equipment_id", "equipment.id").where("room_id", roomId).select("equipment.*");
 
-            res.json(formatJson.success(1004, "Get equipment list successfully", lists));
+            res.json(formatJson.success(1004, "Get equipment list successfully", equipments));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    },
+
+    async updateEquipment(req, res) {
+        try {
+            const userInfo = req.user;
+            const { houseId, equipmentId } = req.params;
+            const { name, quantity, status, expDate, sharedType, description } = req.body;
+
+            const checkEquipment = await Equipment.query().findOne({ id: equipmentId, house_id: houseId });
+
+            if (!checkEquipment) {
+                throw new ApiException(1001, "Equipment not found", []);
+            }
+
+            const updateEquipment = await Equipment.query().patchAndFetchById(equipmentId, {
+                name,
+                quantity: quantity || 1,
+                status,
+                shared_type: sharedType,
+                description,
+                exp_date: expDate,
+                house_id: Number(houseId),
+                created_by: userInfo.id,
+            });
+
+            if (!updateEquipment) {
+                throw new ApiException(1003, "Error updating equipment");
+            }
+
+            res.json(formatJson.success(1002, "Update equipment successfully", updateEquipment));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    },
+
+    async deleteEquipment(req, res) {
+        try {
+            const { houseId, equipmentId } = req.params;
+
+            const checkEquipment = await Equipment.query().findOne({ id: equipmentId, house_id: houseId });
+
+            if (!checkEquipment) {
+                throw new ApiException(1001, "Equipment not found", []);
+            }
+
+            const deleteEquipment = await Equipment.query().deleteById(equipmentId);
+
+            if (!deleteEquipment) {
+                throw new ApiException(1003, "Error deleting equipment");
+            }
+
+            res.json(formatJson.success(1002, "Delete equipment successfully", null));
         } catch (err) {
             Exception.handle(err, req, res);
         }

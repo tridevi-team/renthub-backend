@@ -1,6 +1,11 @@
-const equipmentStatus = {
-    NORMAL: "NORMAL",
-    BROKEN: "BROKEN",
-};
+enum EquipmentStatus {
+    NORMAL = "NORMAL",
+    BROKEN = "BROKEN",
+}
 
-export default equipmentStatus;
+enum EquipmentType {
+    HOUSE = "HOUSE",
+    ROOM = "ROOM",
+}
+
+export { EquipmentStatus, EquipmentType };

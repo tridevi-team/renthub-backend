@@ -3,6 +3,17 @@ import { Model } from "objection";
 import { Houses, Users, EquipmentHistory } from ".";
 
 class Equipment extends Model {
+    id: Number;
+    house_id: Number;
+    name: String;
+    quantity: Number;
+    status: String;
+    shared_type: String;
+    exp_date: String;
+    description: String;
+    created_by: Number;
+    created_at: String;
+
     static get tableName() {
         return "equipment";
     }
@@ -18,10 +29,10 @@ class Equipment extends Model {
                 quantity: { type: "integer", default: 1 },
                 status: { type: "string", maxLength: 50 },
                 shared_type: { type: "string", maxLength: 10 },
-                exp_date: { type: "date" },
+                exp_date: { type: "string" },
                 description: { type: "string" },
                 created_by: { type: "integer" },
-                created_at: { type: "datetime" },
+                created_at: { type: "string", format: "date-time" },
             },
         };
     }

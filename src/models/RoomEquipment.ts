@@ -16,7 +16,7 @@ class RoomEquipment extends Model {
                 equipment_id: { type: "integer" },
                 description: { type: "string" },
                 created_by: { type: "integer" },
-                created_at: { type: "datetime" },
+                created_at: { type: "string" },
             },
         };
     }
