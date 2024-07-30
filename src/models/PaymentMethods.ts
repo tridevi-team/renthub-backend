@@ -3,6 +3,18 @@ import { Model } from "objection";
 import { Users, Houses, Bills, PaymentMethodHistory } from ".";
 
 class PaymentMethods extends Model {
+    id: Number;
+    house_id: Number;
+    name: String;
+    account_number: String;
+    status: Boolean;
+    description: String;
+    api_key: String;
+    client_id: String;
+    checksum: String;
+    created_by: Number;
+    created_at: Date;
+
     static get tableName() {
         return "payment_methods";
     }
@@ -15,14 +27,14 @@ class PaymentMethods extends Model {
                 id: { type: "integer" },
                 house_id: { type: "integer" },
                 name: { type: "string", minLength: 1, maxLength: 50 },
-                account_number: { type: "integer" },
-                status: { type: "integer" },
+                account_number: { type: "string" },
+                status: { type: "boolean" },
                 description: { type: "string", maxLength: 200 },
                 api_key: { type: "string" },
                 client_id: { type: "string" },
                 checksum: { type: "string" },
                 created_by: { type: "integer" },
-                created_at: { type: "datetime" },
+                created_at: { type: "string" },
             },
         };
     }

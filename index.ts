@@ -6,7 +6,7 @@ import cors from "cors";
 import { rateLimit } from "express-rate-limit";
 import "dotenv/config";
 
-import { UserRoute, HouseRoute, ServiceRoute, RoomRoute, EquipmentRoute } from "./src/routes";
+import { UserRoute, HouseRoute, ServiceRoute, RoomRoute, EquipmentRoute, PaymentMethodRoute } from "./src/routes";
 import uploadImages from "./src/services/uploadImages";
 import { aesEncrypt } from "./src/utils";
 
@@ -38,6 +38,7 @@ app.use("/houses", HouseRoute);
 app.use("/services", ServiceRoute);
 app.use("/rooms", RoomRoute);
 app.use("/equipment", EquipmentRoute);
+app.use("/paymentMethods", PaymentMethodRoute);
 
 app.post("/upload", uploadImages);
 
