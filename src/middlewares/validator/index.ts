@@ -5,6 +5,7 @@ import serviceValidator from "./Services";
 import roomsValidator from "./Rooms";
 import equipmentValidator from "./Equipment";
 import paymentMethodValidator from "./PaymentMethod";
+import renterValidator from "./Renter";
 
 export {
     userValidator,
@@ -12,5 +13,6 @@ export {
     serviceValidator,
     roomsValidator,
     equipmentValidator,
-    paymentMethodValidator
+    paymentMethodValidator,
+    renterValidator
 };
