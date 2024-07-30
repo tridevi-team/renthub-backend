@@ -16,7 +16,6 @@ const updateEquipment = [
     check("quantity").isNumeric().notEmpty().withMessage("Quantity is required"),
     check("expDate").notEmpty().withMessage("Expire date is required"),
     check("sharedType").notEmpty().withMessage("Shared type is required"),
-    check("houseId").notEmpty().withMessage("House ID is required"),
     check("equipmentId").notEmpty().withMessage("Equipment ID is required"),
 ];
 

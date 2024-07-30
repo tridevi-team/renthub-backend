@@ -44,13 +44,12 @@ const equipmentController = {
     async addEquipmentToRoom(req, res) {
         try {
             const userInfo = req.user;
-            const { houseId, roomId } = req.params;
+            const { roomId } = req.params;
             const { equipment } = req.body;
 
             // check house and room exists
             const checkRoom = await Rooms.query().findOne({
                 id: Number(roomId),
-                house_id: houseId,
             });
             if (!checkRoom) {
                 throw new ApiException(1004, "Room not found", []);
@@ -104,11 +103,10 @@ const equipmentController = {
 
     async getEquipmentListInRoom(req, res) {
         try {
-            const { houseId, roomId } = req.params;
+            const { roomId } = req.params;
 
             const checkRoom = await Rooms.query().findOne({
                 id: roomId,
-                house_id: houseId,
             });
 
             if (!checkRoom) {
@@ -126,10 +124,10 @@ const equipmentController = {
     async updateEquipment(req, res) {
         try {
             const userInfo = req.user;
-            const { houseId, equipmentId } = req.params;
+            const { equipmentId } = req.params;
             const { name, quantity, status, expDate, sharedType, description } = req.body;
 
-            const checkEquipment = await Equipment.query().findOne({ id: equipmentId, house_id: houseId });
+            const checkEquipment = await Equipment.query().findOne({ id: equipmentId });
 
             if (!checkEquipment) {
                 throw new ApiException(1001, "Equipment not found", []);
@@ -142,7 +140,6 @@ const equipmentController = {
                 shared_type: sharedType,
                 description,
                 exp_date: expDate,
-                house_id: Number(houseId),
                 created_by: userInfo.id,
             });
 
@@ -158,9 +155,9 @@ const equipmentController = {
 
     async deleteEquipment(req, res) {
         try {
-            const { houseId, equipmentId } = req.params;
+            const { equipmentId } = req.params;
 
-            const checkEquipment = await Equipment.query().findOne({ id: equipmentId, house_id: houseId });
+            const checkEquipment = await Equipment.query().findOne({ id: equipmentId });
 
             if (!checkEquipment) {
                 throw new ApiException(1001, "Equipment not found", []);
