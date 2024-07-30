@@ -1,18 +1,18 @@
 import { HousePermissions } from "../enum/Houses";
+import { Equipment, Renters, Rooms } from "../models";
 import { ApiException, checkPermissions, Exception } from "../utils";
 import { Request, Response, NextFunction } from "express";
 
 const access = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const url = req.originalUrl;
-        const { id, houseId } = req.params;
-        const user = req.user;
-        const house = houseId || id;
+        console.log("Check access");
 
-        if (!house) return next(); // If house ID is not present, move to the next middleware
+        const url = req.originalUrl;
+        let id: Number = req.params.id || req.params.houseId;
+        const user = req.user;
 
         let permission: String = HousePermissions.HOUSE_OWNER;
-        let isAccess = await checkPermissions(user.id, house, permission);
+        let isAccess = await checkPermissions(user.id, id, permission);
 
         console.log("Check house owner permission:", isAccess);
 
@@ -57,6 +57,29 @@ const access = async (req: Request, res: Response, next: NextFunction) => {
                 if (url.includes(entity)) {
                     for (const [action, perm] of Object.entries(actions)) {
                         if (url.includes(action)) {
+                            if (url.includes("houses")) {
+                                id = req.params.id;
+                            } else if (url.includes("rooms") || url.includes("services") || url.includes("equipments")) {
+                                id = req.params.houseId;
+                            } else if (url.includes("renters")) {
+                                const houseId = req.params.houseId;
+                                const roomId = req.params.roomId;
+                                const renterId = req.params.renterId;
+                                const equipmentId = req.params.equipmentId;
+
+                                if (houseId) {
+                                    id = houseId;
+                                } else if (roomId) {
+                                    const roomInfo = await Rooms.query().findById(roomId);
+                                    id = roomInfo.house_id;
+                                } else if (renterId) {
+                                    const renterInfo = await Renters.query().join("rooms", "renters.room_id", "rooms.id").select("rooms.house_id").where("renters.id", renterId).first();
+                                    id = renterInfo.house_id;
+                                } else if (equipmentId) {
+                                    const equipmentInfo = await Equipment.query().findById(equipmentId);
+                                    id = equipmentInfo.house_id;
+                                }
+                            }
                             permission = perm;
                             break;
                         }
@@ -64,7 +87,7 @@ const access = async (req: Request, res: Response, next: NextFunction) => {
                 }
             }
 
-            isAccess = await checkPermissions(user.id, house, permission);
+            isAccess = await checkPermissions(user.id, id, permission);
             console.log("Check access permission:", permission, isAccess);
 
             if (!isAccess) throw new ApiException(500, "You don't have this permission.");
