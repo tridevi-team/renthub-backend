@@ -1,0 +1,18 @@
+"use strict";
+import express from "express";
+import { houseController } from "../controllers";
+import { houseValidator } from "../middlewares/validator";
+import { access, handleErrors } from "../middlewares";
+
+const houseRouter = express.Router();
+
+houseRouter.get("/list", access, houseController.getHouseList);
+houseRouter.post("/create", access, houseValidator.createHouse, handleErrors, houseController.createHouse);
+houseRouter.put("/update/:id", access, houseValidator.updateHouseDetails, handleErrors, houseController.updateHouseDetails);
+houseRouter.delete("/delete/:id", access, houseValidator.deleteHouse, handleErrors, houseController.deleteHouse);
+houseRouter.put("/updateStatus/:id", access, houseValidator.updateHouseStatus, handleErrors, houseController.updateHouseStatus);
+houseRouter.get("/details/:id", access, houseValidator.houseDetails, handleErrors, houseController.getHouseDetails);
+houseRouter.get("/permissions/:id", access, houseValidator.userPermissions, handleErrors, houseController.getUserHasAccessToHouse);
+houseRouter.put("/grantPermissions/:id", access, houseValidator.grantPermissions, handleErrors, houseController.grantPermissions);
+
+export default houseRouter;
