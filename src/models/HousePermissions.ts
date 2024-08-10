@@ -2,6 +2,17 @@
 import { Model } from "objection";
 import { Houses, Users, Permissions, HousePermissionHistory } from ".";
 class HousePermissions extends Model {
+    id: Number;
+    user_id: Number;
+    house_id: Number;
+    permission_id: Number;
+    created_by: Number;
+    created_at: Date;
+    full_name: String;
+    email: String;
+    permissions: any;
+    key: any;
+
     static get tableName() {
         return "house_permissions";
     }
@@ -16,7 +27,7 @@ class HousePermissions extends Model {
                 house_id: { type: "integer" },
                 permission_id: { type: "integer" },
                 created_by: { type: "integer" },
-                created_at: { type: "datetime" },
+                created_at: { type: "string" },
             },
         };
     }

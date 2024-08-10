@@ -30,7 +30,7 @@ app.use(limiter);
 app.use(cors());
 app.use(ignoreAuth);
 app.use(bodyParser.json());
-// app.use(fileUpload());
+app.use(fileUpload());
 app.use(express.static("src/public"));
 
 app.use("/users", UserRoute);

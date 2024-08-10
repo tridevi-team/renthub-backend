@@ -1,5 +1,5 @@
 "use strict";
-import { Houses, HousePermissions, Rooms } from "../models";
+import { Houses, HousePermissions, Rooms, Permissions } from "../models";
 import { formatJson, Exception, ApiException } from "../utils";
 import { HouseStatus, RoomStatus } from "../enum";
 import Objection from "objection";
@@ -199,13 +199,6 @@ const HouseController = {
         try {
             const { id } = req.params;
 
-            const user = req.user;
-
-            const house = await Houses.query().findOne({ id });
-            if (!house) {
-                throw new ApiException(1004, "House not found");
-            }
-
             const usersList = await HousePermissions.query()
                 .joinRelated("permissions")
                 .joinRelated("users")
@@ -216,18 +209,69 @@ const HouseController = {
                 throw new ApiException(1016, "The user list is empty.");
             }
 
-            // const permissionsToArray = usersList.map((user) => {
-            //     return {
-            //         id: user.id,
-            //         full_name: user.full_name,
-            //         email: user.email,
-            //         permissions: JSON.parse(user.permissions),
-            //     };
-            // });
+            const permissionsToArray = usersList.map((user) => {
+                return {
+                    id: user.id,
+                    full_name: user.full_name,
+                    email: user.email,
+                    permissions: JSON.parse(user.permissions),
+                };
+            });
 
-            // console.log(permissionsToArray);
+            return res.json(formatJson.success(1017, "Get user has access to house successful", permissionsToArray));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    },
 
-            return res.json(formatJson.success(1017, "Get user has access to house successful", null));
+    async getPermissionsByToken(req, res) {
+        try {
+            const { id } = req.params;
+            const user = req.user;
+
+            // Fetch permissions associated with the user
+            const permissions: {
+                key: string;
+            }[] = await HousePermissions.query().joinRelated("permissions").where("user_id", user.id).andWhere("house_id", id).select("permissions.key");
+
+            const checkHouseOwner = await Houses.query().findOne({ id, created_by: user.id });
+
+            if (checkHouseOwner) permissions.push({ key: "HOUSE_OWNER" });
+
+            console.log("permissions", permissions);
+            console.log("checkHouseOwner", checkHouseOwner);
+
+            if (!permissions && !checkHouseOwner) {
+                throw new ApiException(1018, "The permissions list is empty.");
+            }
+
+            // Fetch all permissions
+            const permissionsList = await Permissions.query().select("key");
+
+            // Initialize the permissions object
+            const list = permissionsList.reduce((acc, per) => {
+                if (per.key === "HOUSE_OWNER") return acc;
+
+                const [action, key] = per.key.split("_");
+                if (!acc[key]) acc[key] = {};
+                acc[key][action] = false;
+
+                return acc;
+            }, {});
+
+            // Update the list with the user's permissions
+            if (checkHouseOwner) {
+                Object.keys(list).forEach((key) => {
+                    list[key] = { CREATE: true, READ: true, UPDATE: true, DELETE: true };
+                });
+            } else {
+                permissions.forEach(({ key }) => {
+                    const [action, keyName] = key.split("_");
+                    if (list[keyName]) list[keyName][action] = true;
+                });
+            }
+
+            return res.json(formatJson.success(1019, "Get permissions by token successful", list));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -246,27 +290,36 @@ const HouseController = {
             }
 
             // delete permissions not in the list
-            const deletePer = await HousePermissions.query().delete().joinRelated("permissions").whereNotIn("permissions.key", permissions).andWhere("house_id", id).andWhere("user_id", userId);
-            if (!deletePer) {
-                throw new ApiException(1019, "Revoke permissions failed");
-            }
+            // const deletePer = await HousePermissions.query().delete().joinRelated("permissions").whereNotIn("permissions.key", permissions).andWhere("house_id", id).andWhere("user_id", userId);
+            // if (!deletePer) {
+            //     throw new ApiException(1019, "Revoke permissions failed");
+            // }
 
             // insert permissions not exist
-            permissions.forEach(async (per) => {
-                const permissionExist = await HousePermissions.query().joinRelated("permissions").where("house_id", id).andWhere("user_id", userId).andWhere("permissions.key", per);
-                if (!permissionExist) {
-                    const addPer = await HousePermissions.query().insert({
-                        house_id: id,
-                        user_id: userId,
-                        permission_id: per,
-                    });
-                    if (!addPer) {
-                        throw new ApiException(1018, "Grant permissions failed");
-                    }
-                }
-            });
+            var list = await Promise.all(
+                permissions.map(async (per: String) => {
+                    const permissionExist = await HousePermissions.query().joinRelated("permissions").where("house_id", id).andWhere("user_id", userId).andWhere("permissions.key", per.toString());
 
-            return res.json(formatJson.success(1020, "Grant permissions successful"));
+                    if (permissionExist.length === 0) {
+                        const getPer = await Permissions.query().findOne({ key: per });
+
+                        const addPer = await HousePermissions.query().insert({
+                            house_id: Number(id),
+                            user_id: userId,
+                            permission_id: getPer.id,
+                            created_by: user.id,
+                        });
+
+                        if (!addPer) {
+                            throw new ApiException(1018, "Grant permissions failed");
+                        }
+
+                        return addPer;
+                    }
+                })
+            );
+
+            return res.json(formatJson.success(1020, "Grant permissions successful", list));
         } catch (err) {
             Exception.handle(err, req, res);
         }

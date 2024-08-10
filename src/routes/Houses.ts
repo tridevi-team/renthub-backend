@@ -13,6 +13,7 @@ houseRouter.delete("/delete/:id", access, houseValidator.deleteHouse, handleErro
 houseRouter.put("/updateStatus/:id", access, houseValidator.updateHouseStatus, handleErrors, houseController.updateHouseStatus);
 houseRouter.get("/details/:id", access, houseValidator.houseDetails, handleErrors, houseController.getHouseDetails);
 houseRouter.get("/permissions/:id", access, houseValidator.userPermissions, handleErrors, houseController.getUserHasAccessToHouse);
+houseRouter.get("/permissionsByUser/:id", access, houseValidator.userPermissions, handleErrors, houseController.getPermissionsByToken);
 houseRouter.put("/grantPermissions/:id", access, houseValidator.grantPermissions, handleErrors, houseController.grantPermissions);
 
 export default houseRouter;

@@ -3,6 +3,10 @@ import { Model } from "objection";
 import HousePermissions from "./HousePermissions";
 
 class Permissions extends Model {
+    id: Number;
+    name: String;
+    key: String;
+
     static get tableName() {
         return "permissions";
     }
@@ -14,6 +18,7 @@ class Permissions extends Model {
             properties: {
                 id: { type: "integer" },
                 name: { type: "string", minLength: 1, maxLength: 50 },
+                key: { type: "string", minLength: 1, maxLength: 50 },
             },
         };
     }

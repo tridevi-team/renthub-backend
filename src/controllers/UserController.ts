@@ -1,5 +1,5 @@
 "use strict";
-import { Users } from "../models";
+import { HousePermissions, Houses, Permissions, Users } from "../models";
 const { formatJson, jwtToken, sendMail, Exception, ApiException, bcrypt, aesDecrypt } = require("../utils");
 
 const userController = {
@@ -34,48 +34,110 @@ const userController = {
     async login(req, res) {
         try {
             const { username, password } = req.body;
-            // username can be email or phone number
+
+            // Find user by email or phone number
             const user = await Users.query().findOne({ email: username }).orWhere("phone_number", username).andWhere("password", password);
 
-            if (user) {
-                // decrypt password
-                const decryptPassword = aesDecrypt(password);
-
-                const passwordCorrect = await bcrypt.compare(decryptPassword, user.password);
-
-                if (!passwordCorrect) {
-                    throw new ApiException(1004, "Invalid username or password");
-                }
-
-                if (user.verify === false) {
-                    throw new ApiException(1018, "Please verify your account first.");
-                }
-
-                if (user.status === false) {
-                    throw new ApiException(1019, "Your account has been disabled. Please contact the administrator.");
-                }
-
-                const token = jwtToken.sign({ ...user });
-                res.json(
-                    formatJson.success(1003, "Logged in successfully", {
-                        token,
-                        user: {
-                            id: user.id,
-                            email: user.email,
-                            phone_number: user.phone_number,
-                            full_name: user.full_name,
-                            birthday: user.birthday,
-                            role: user.role,
-                            type: user.type,
-                            status: user.status,
-                        },
-                    })
-                );
-            } else {
-                throw new ApiException(1004, "Invalid username or password"); // Throw ApiException if user is not found
+            if (!user) {
+                throw new ApiException(1004, "Invalid username or password");
             }
+
+            // Decrypt password and compare with stored hash
+            const decryptPassword = aesDecrypt(password);
+            const passwordCorrect = await bcrypt.compare(decryptPassword, user.password);
+
+            if (!passwordCorrect) {
+                throw new ApiException(1004, "Invalid username or password");
+            }
+
+            if (!user.verify) {
+                throw new ApiException(1018, "Please verify your account first.");
+            }
+
+            if (!user.status) {
+                throw new ApiException(1019, "Your account has been disabled. Please contact the administrator.");
+            }
+
+            // Get houses the user can access
+            const houses = await Houses.query()
+                .distinct("houses.*")
+                .leftJoin("house_permissions", "houses.id", "house_permissions.house_id")
+                .where("houses.created_by", user.id as number)
+                .orWhere("house_permissions.user_id", user.id as number);
+
+            // Process permissions for each house
+            const permissionsAccess = await Promise.all(
+                houses.map(async (house: Houses) => {
+                    // Fetch permissions associated with the user for the house
+                    const accessible = await HousePermissions.query()
+                        .joinRelated("permissions")
+                        .where("user_id", user.id as number)
+                        .andWhere("house_id", house.id as number)
+                        .select("permissions.key");
+
+                    // Fetch all permissions
+                    const permissionsList = await Permissions.query().select("key");
+
+                    // Initialize permissions
+                    const permissions = permissionsList.reduce((acc, per) => {
+                        if (per.key === "HOUSE_OWNER") return acc;
+
+                        const [action, key] = per.key.split("_");
+                        if (!acc[key]) acc[key] = {};
+                        acc[key][action] = false;
+
+                        return acc;
+                    }, {});
+
+                    // Update the list with the user's permissions
+                    if (user.id === house.createdBy) {
+                        Object.keys(permissions).forEach((key) => {
+                            permissions[key].CREATE = true;
+                            permissions[key].READ = true;
+                            permissions[key].UPDATE = true;
+                            permissions[key].DELETE = true;
+                        });
+                    } else {
+                        accessible.forEach(({ key }) => {
+                            const [action, keyName] = key.split("_");
+                            if (permissions[keyName]) permissions[keyName][action] = true;
+                        });
+                    }
+
+                    return { [house.id as number]: permissions };
+                })
+            );
+
+            // Combine all permissions into a single object
+            const permissionsAccessObj = permissionsAccess.reduce((acc, cur) => ({ ...acc, ...cur }), {});
+
+            const token = jwtToken.sign({
+                id: user.id,
+                email: user.email,
+                role: user.role,
+                type: user.type,
+                status: user.status,
+            });
+
+            return res.json(
+                formatJson.success(1003, "Logged in successfully", {
+                    token,
+                    user: {
+                        id: user.id,
+                        email: user.email,
+                        phone_number: user.phone_number,
+                        full_name: user.full_name,
+                        birthday: user.birthday,
+                        role: user.role,
+                        type: user.type,
+                        status: user.status,
+                    },
+                    houses,
+                    permissions: permissionsAccessObj,
+                })
+            );
         } catch (err) {
-            Exception.handle(err, req, res); // Call Exception.handle to handle the error
+            Exception.handle(err, req, res);
         }
     },
 

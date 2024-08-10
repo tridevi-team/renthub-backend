@@ -31,6 +31,7 @@
         "nodemailer": "^6.9.12",
         "nodemon": "^3.1.0",
         "objection": "^3.1.4",
+        "renthouse": "file:",
         "ssh2": "^1.15.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.4.5",

@@ -14,6 +14,7 @@ class Houses extends Model {
     description: String;
     created_by: Number;
     created_at: Date;
+    createdBy: Number;
 
     static get tableName() {
         return "houses";
