@@ -15,6 +15,7 @@ class Houses extends Model {
     created_by: Number;
     created_at: Date;
     createdBy: Number;
+    houseKey: number;
 
     static get tableName() {
         return "houses";

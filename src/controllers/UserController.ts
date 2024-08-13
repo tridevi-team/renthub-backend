@@ -1,4 +1,5 @@
 "use strict";
+import { raw } from "objection";
 import { HousePermissions, Houses, Permissions, Users } from "../models";
 const { formatJson, jwtToken, sendMail, Exception, ApiException, bcrypt, aesDecrypt } = require("../utils");
 
@@ -60,7 +61,7 @@ const userController = {
 
             // Get houses the user can access
             const houses = await Houses.query()
-                .distinct("houses.*")
+                .distinct("houses.id", "houses.name", "houses.status", raw(`CONCAT("house_", houses.id) as house_key`))
                 .leftJoin("house_permissions", "houses.id", "house_permissions.house_id")
                 .where("houses.created_by", user.id as number)
                 .orWhere("house_permissions.user_id", user.id as number);
@@ -79,7 +80,7 @@ const userController = {
                     const permissionsList = await Permissions.query().select("key");
 
                     // Initialize permissions
-                    const permissions = permissionsList.reduce((acc, per) => {
+                    const permissions = permissionsList.reduce((acc: {}, per: Permissions) => {
                         if (per.key === "HOUSE_OWNER") return acc;
 
                         const [action, key] = per.key.split("_");
@@ -91,25 +92,25 @@ const userController = {
 
                     // Update the list with the user's permissions
                     if (user.id === house.createdBy) {
-                        Object.keys(permissions).forEach((key) => {
+                        Object.keys(permissions).forEach((key: string) => {
                             permissions[key].CREATE = true;
                             permissions[key].READ = true;
                             permissions[key].UPDATE = true;
                             permissions[key].DELETE = true;
                         });
                     } else {
-                        accessible.forEach(({ key }) => {
+                        accessible.forEach(({ key }: HousePermissions) => {
                             const [action, keyName] = key.split("_");
                             if (permissions[keyName]) permissions[keyName][action] = true;
                         });
                     }
 
-                    return { [house.id as number]: permissions };
+                    return { [house.houseKey as number]: permissions };
                 })
             );
 
             // Combine all permissions into a single object
-            const permissionsAccessObj = permissionsAccess.reduce((acc, cur) => ({ ...acc, ...cur }), {});
+            const permissionsAccessObj = permissionsAccess.reduce((acc: { [x: number]: {} }, cur: { [x: number]: {} }) => ({ ...acc, ...cur }), {});
 
             const token = jwtToken.sign({
                 id: user.id,
