@@ -1,0 +1,28 @@
+enum messageResponse {
+    UNKNOWN_ERROR = "Unknown error",
+    GET_USERS_LIST_SUCCESS = "Get users list successfully",
+    NO_USERS_FOUND = "No users found",
+    GET_USER_SUCCESS = "Get user successfully",
+    GET_USER_FAIL = "Get user failed",
+    GET_USER_NOT_FOUND = "User not found",
+    INVALID_USER = "Invalid username or password",
+    VERIFY_ACCOUNT_FIRST = "Please verify your account first",
+    ACCOUNT_DISABLED = "Your account has been disabled. Please contact the administrator",
+    LOGIN_SUCCESS = "Login successfully",
+    USER_ALREADY_EXISTS = "User already exists",
+    FAILED_EMAIL_VERIFICATION = "Failed to send email verification code. Please try again",
+    CHECK_EMAIL_VERIFY_ACCOUNT = "Please check your email to verify your account",
+    FAILED_CREATE_USER = "Failed to create user",
+    VALIDATION_ERROR = "Validation error",
+    INVALID_VERIFICATION_CODE = "Invalid verification code",
+    ACCOUNT_VERIFIED_SUCCESSFULLY = "Account verified successfully",
+    ACCOUNT_PREVIOUSLY_VERIFIED = "The account has been previously verified",
+    CHECK_EMAIL_RESET_PASSWORD = "Please check your email to reset your password",
+    PASSWORD_RESET_SUCCESS = "Password reset successfully",
+    INCORRECT_OLD_PASSWORD = "Old password is incorrect",
+    PASSWORD_UPDATE_SUCCESS = "Password updated successfully",
+    PROFILE_UPDATE_SUCCESS = "Profile updated successfully",
+    FIRST_LOGIN_STATUS_UPDATE_SUCCESS = "First login status updated successfully",
+}
+
+export default messageResponse;

@@ -1,4 +1,7 @@
 "use strict";
+
+import messageResponse from "../../enum/message.enum";
+
 class ExceptionHandler {
     /**
      *
@@ -7,14 +10,17 @@ class ExceptionHandler {
      * @param response
      */
     async handle(error: any, { request, response }: { request: any; response: any }) {
-        let code = 500,
+        let success = false,
+            code = "UNKNOWN_ERROR",
             message = "",
             data = {},
             httpCode = 200;
         if (typeof error !== "object") {
             error = new Error(error);
         }
-        code = Number(error.code) || 500;
+
+        success = error.success || false;
+        code = error.code || "UNKNOWN_ERROR";
         message = error.message || "";
         data = error.data || error.stack || {};
         httpCode = error.httpCode || 200;
@@ -23,6 +29,7 @@ class ExceptionHandler {
         const exceptionName = error.constructor.name;
 
         response.status(httpCode).send({
+            success,
             code,
             message,
             data,

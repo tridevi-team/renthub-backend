@@ -2,7 +2,7 @@
 
 import bcrypt from "./bcrypt";
 import jwtToken from "./jwt";
-import formatJson from "./json";
+import formatJson from "./apiResponse";
 import sendMail from "./mail";
 import checkPermissions from "./permissions";
 import Exception from "./Exceptions/Exception";
