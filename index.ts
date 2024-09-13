@@ -7,12 +7,11 @@ import { rateLimit } from "express-rate-limit";
 import "dotenv/config";
 
 import { UserRoute, HouseRoute, ServiceRoute, RoomRoute, EquipmentRoute, PaymentMethodRoute, renterRoute } from "./src/routes";
-import uploadImages from "./src/services/uploadImages";
 import { aesEncrypt } from "./src/utils";
 
 import { ignoreAuth, requestLogger } from "./src/middlewares";
 
-import "./src/config/database";
+import "./src/config/database.config";
 
 const PORT = process.env.PORT || 3000;
 
@@ -40,8 +39,6 @@ app.use("/rooms", RoomRoute);
 app.use("/equipment", EquipmentRoute);
 app.use("/paymentMethods", PaymentMethodRoute);
 app.use("/renters", renterRoute);
-
-app.post("/upload", uploadImages);
 
 console.log("===== DATA TEST =====");
 console.log("Plain text 1: TMQuang_test01");

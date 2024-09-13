@@ -1,5 +1,6 @@
 enum BillStatus {
     CREATED,
+    UNPAID,
     CONFIRMED,
     PAID,
     CANCELLED,

@@ -11,7 +11,7 @@ const ignoreAuth = async (req: Request, res: Response, next: NextFunction) => {
 
         try {
             if (!authorization) {
-                throw new ApiException(500, "Access token is required.", null);
+                // throw new ApiException(500, "Access token is required.", null);
             }
             const user = await jwtToken.verify(authorization);
             req.user = user;
