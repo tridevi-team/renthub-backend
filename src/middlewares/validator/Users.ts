@@ -12,18 +12,18 @@ const registerValidator = [
         .custom((value) => {
             // Check if the password is cryptographically hashed
             validatePassword(value);
-
             return true;
         }),
     check("confirmPassword", "Please confirm your password.").custom((value, { req }) => {
         comparePassword(req.body.password, value);
         return true;
     }),
+    check("gender", "Please provide gender.").notEmpty().withMessage("Gender must be required.").isIn(["male", "female", "other"]).withMessage("Please select only a gender from the list."),
 ];
 
 // username is email/ phone number, password
 const loginValidator = [
-    check("username", "Please provide a valid email address or phone number.").not(),
+    check("username", "Please provide a valid email address or phone number.").notEmpty(),
     check("password", "Password must be at least 8 characters long and contain at least one letter and one number.")
         .isLength({ min: 8 })
         .custom((value) => {
@@ -35,7 +35,7 @@ const loginValidator = [
 
 const verifyAccountValidator = [check("email", "Please provide a valid email address.").isEmail(), check("verifyCode", "Please provide the verification code.").isNumeric()];
 
-const forgotPasswordValidator = [check("email", "Please provide a valid email address.").isEmail()];
+const emailValidator = [check("email", "Please provide a valid email address.").isEmail()];
 
 const resetPasswordValidator = [
     check("email", "Please provide a valid email address.").isEmail(),
@@ -45,7 +45,6 @@ const resetPasswordValidator = [
         .custom((value) => {
             // Check if the password is cryptographically hashed
             validatePassword(value);
-
             return true;
         }),
 ];
@@ -56,7 +55,6 @@ const updatePasswordValidator = [
         .custom((value) => {
             // Check if the password is cryptographically hashed
             validatePassword(value);
-
             return true;
         }),
     check("newPassword", "Password must be at least 8 characters long and contain at least one letter and one number.")
@@ -64,15 +62,12 @@ const updatePasswordValidator = [
         .custom((value) => {
             // Check if the password is cryptographically hashed
             validatePassword(value);
-
             return true;
         }),
     check("confirmPassword", "Please confirm your password.")
-        .not()
-        .isEmpty()
+        .notEmpty()
         .custom((value, { req }) => {
             comparePassword(req.body.newPassword, value);
-
             return true;
         }),
 ];
@@ -84,13 +79,13 @@ const updateProfileValidator = [
 ];
 
 const userValidator = {
-    registerValidator,
-    loginValidator,
-    verifyAccountValidator,
-    forgotPasswordValidator,
-    resetPasswordValidator,
-    updatePasswordValidator,
-    updateProfileValidator,
+    register: registerValidator,
+    login: loginValidator,
+    verifyAccount: verifyAccountValidator,
+    email: emailValidator,
+    resetPassword: resetPasswordValidator,
+    updatePassword: updatePasswordValidator,
+    updateProfile: updateProfileValidator,
 };
 
 export default userValidator;
