@@ -1,24 +1,18 @@
-/**
-Table: notifications
-Columns:
-id char(36) PK
-title varchar(255)
-content text
-type varchar(10)
-navigate_to varchar(255)
-params json
-created_by char(36)
-created_at datetime */
-
-import { Model } from "objection";
-
+import { Model, QueryContext } from "objection";
+import { v4 as uuidv4 } from "uuid";
 class Notifications extends Model {
+    id: string;
+
     static get tableName() {
         return "notifications";
     }
 
     static get idColumn() {
         return "id";
+    }
+
+    $beforeInsert(queryContext: QueryContext): Promise<any> | void {
+        this.id = this.id || uuidv4();
     }
 
     static get jsonSchema() {
