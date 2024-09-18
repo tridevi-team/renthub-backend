@@ -2,8 +2,7 @@
 
 import messageResponse from "../enums/message.enum";
 import { UserService } from "../services";
-import { bcrypt, Exception } from "../utils";
-import apiResponse from "../utils/apiResponse";
+import { apiResponse, bcrypt, Exception } from "../utils";
 
 class UserController {
     static async getAllUsers(req, res) {

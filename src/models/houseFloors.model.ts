@@ -1,5 +1,7 @@
 import { Model, QueryContext } from "objection";
 import { v4 as uuidv4 } from "uuid";
+import Rooms from "./rooms.model";
+import Houses from "./houses.model";
 
 class HouseFloors extends Model {
     id: string;
@@ -27,6 +29,27 @@ class HouseFloors extends Model {
                 description: { type: "string", maxLength: 255 },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
+            },
+        };
+    }
+
+    static get relationMappings() {
+        return {
+            house: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Houses,
+                join: {
+                    from: "house_floors.house_id",
+                    to: "houses.id",
+                },
+            },
+            rooms: {
+                relation: Model.HasManyRelation,
+                modelClass: Rooms,
+                join: {
+                    from: "house_floors.id",
+                    to: "rooms.floor_id",
+                },
             },
         };
     }

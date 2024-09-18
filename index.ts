@@ -10,7 +10,7 @@ import path from "path";
 import swaggerJSDoc from "swagger-jsdoc";
 import { serve, setup } from "swagger-ui-express";
 
-import { AuthRoute, EquipmentRoute, HouseRoute, PaymentMethodRoute, renterRoute, RoomRoute, ServiceRoute, UserRoute } from "./src/routes";
+import { AuthRoute, EquipmentRoute, HouseRoute, PaymentMethodRoute, renterRoute, RoleRoute, RoomRoute, ServiceRoute, UserRoute } from "./src/routes";
 import { aesEncrypt } from "./src/utils";
 
 import { authentication, requestLogger } from "./src/middlewares";
@@ -80,6 +80,7 @@ app.use("/encrypt", (req, res) => {
 app.use("/auth", AuthRoute);
 app.use("/users", authentication, UserRoute);
 app.use("/houses", authentication, HouseRoute);
+app.use("/roles", authentication, RoleRoute)
 app.use("/services", ServiceRoute);
 app.use("/rooms", RoomRoute);
 app.use("/equipment", EquipmentRoute);

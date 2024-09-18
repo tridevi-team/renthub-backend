@@ -1,6 +1,6 @@
-import { knexSnakeCaseMappers } from "objection";
-import type { Knex } from "knex";
 import dotenv from "dotenv";
+import type { Knex } from "knex";
+import { knexSnakeCaseMappers } from "objection";
 
 dotenv.config();
 
@@ -48,6 +48,7 @@ const config: { [key: string]: Knex.Config } = {
         seeds: {
             directory: "src/database/seeds",
         },
+        ...knexSnakeCaseMappers(),
     },
 
     production: {
@@ -70,6 +71,7 @@ const config: { [key: string]: Knex.Config } = {
         seeds: {
             directory: "src/database/seeds",
         },
+        ...knexSnakeCaseMappers(),
     },
 };
 
