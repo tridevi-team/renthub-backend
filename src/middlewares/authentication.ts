@@ -1,25 +1,19 @@
+import messageResponse from "../enums/message.enum";
+import UserService from "../services/user.service";
 import { ApiException, Exception, jwtToken } from "../utils";
-import { Request, Response, NextFunction } from "express";
 
-const ignoreAuth = async (req: Request, res: Response, next: NextFunction) => {
-    const urls = ["/users/login", "/users/signup", "/users/resendCode", "/users/forgotPassword", "/users/resetPassword", "/users/verifyAccount"];
+const authentication = async (req, res, next) => {
+    const { authorization } = req.headers;
+    try {
+        if (!authorization) throw new ApiException(messageResponse.ACCESS_TOKEN_REQUIRED, 500);
 
-    if (urls.includes(req.originalUrl)) {
+        const data = await jwtToken.verifyAccessToken(authorization);
+        const user = await UserService.getUserById(data.id);
+        req.user = user;
         return next();
-    } else {
-        const { authorization } = req.headers;
-
-        try {
-            if (!authorization) {
-                // throw new ApiException(500, "Access token is required.", null);
-            }
-            const user = await jwtToken.verify(authorization);
-            req.user = user;
-            return next();
-        } catch (error) {
-            Exception.handle(error, req, res);
-        }
+    } catch (error) {
+        Exception.handle(error, req, res);
     }
 };
 
-export default ignoreAuth;
+export default authentication;

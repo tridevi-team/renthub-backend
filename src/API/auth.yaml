@@ -1,0 +1,252 @@
+tags:
+    name: Auth
+    description: Auth API
+
+paths:
+    /auth/login:
+        post:
+            tags: [Auth]
+            summary: Login to the application
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/LoginRequest"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/LoginSuccess"
+                "400":
+                    description: Input data is invalid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+
+                "401":
+                    description: Login failed. Username or password is incorrect
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/InvalidUser"
+
+                "403":
+                    description: Login failed. User is not activated or account is disabled
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/VerifyAccountFirst"
+                                    - $ref: "#/components/schemas/AccountDisabled"
+
+    /auth/signup:
+        post:
+            tags: [Auth]
+            summary: Register a new user
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/SignupRequest"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SendCodeSuccess"
+                "400":
+                    description: Input data is invalid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+
+                "409":
+                    description: User already exists
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserExists"
+
+    /auth/verify-account:
+        put:
+            tags: [Auth]
+            summary: Verify account
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/VerifyAccountRequest"
+
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/VerifyAccountSuccess"
+                "400":
+                    description: Input data is invalid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+
+                "401":
+                    description: Verification code is incorrect
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/InvalidVerificationCode"
+
+                "404":
+                    description: User not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetUserNotFound"
+                "409":
+                    description: User already verified
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AccountVerified"
+    /auth/resend-code:
+        put:
+            tags: [Auth]
+            summary: Resend verification code
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                    example: example@gmail.com
+
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SendCodeSuccess"
+                "400":
+                    description: Input data is invalid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+
+                "404":
+                    description: User not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetUserNotFound"
+
+                "409":
+                    description: User already verified
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AccountVerified"
+
+    /auth/forgot-password:
+        post:
+            tags: [Auth]
+            summary: Forgot password
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                    example: example@gmail.com
+
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CheckMailResetPassword"
+                "400":
+                    description: Input data is invalid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "404":
+                    description: User not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetUserNotFound"
+
+    /auth/reset-password:
+        put:
+            tags: [Auth]
+            summary: Reset password
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                    example: example@gmail.com
+                                code:
+                                    type: string
+                                    example: 1234
+                                password:
+                                    type: string
+                                    example: 123456
+                                confirmPassword:
+                                    type: string
+                                    example: 123456
+
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResetPasswordSuccess"
+                "400":
+                    description: Input data is invalid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+
+                "401":
+                    description: Verification code is incorrect
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/InvalidVerificationCode"
+
+                "404":
+                    description: User not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetUserNotFound"
