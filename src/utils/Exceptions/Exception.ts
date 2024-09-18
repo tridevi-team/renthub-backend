@@ -1,5 +1,5 @@
 "use strict";
-import messageResponse from "../../enum/message.enum";
+import messageResponse from "../../enums/message.enum";
 import ExceptionHandler from "./ExceptionHandler";
 
 class Exception {

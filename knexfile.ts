@@ -8,10 +8,10 @@ const config: { [key: string]: Knex.Config } = {
     development: {
         client: "mysql",
         connection: {
-            host: process.env.MYSQL_HOST,
-            port: 3306,
-            user: process.env.MYSQL_USERNAME,
-            password: process.env.MYSQL_PASSWORD,
+            host: process.env.MYSQL_HOST_DEV,
+            port: parseInt(process.env.MYSQL_PORT_DEV),
+            user: process.env.MYSQL_USERNAME_DEV,
+            password: process.env.MYSQL_PASSWORD_DEV,
             database: process.env.MYSQL_DATABASE_DEV,
         },
         pool: {
@@ -31,10 +31,11 @@ const config: { [key: string]: Knex.Config } = {
     staging: {
         client: "mysql",
         connection: {
-            host: process.env.MYSQL_HOST,
-            user: process.env.MYSQL_USERNAME,
-            password: process.env.MYSQL_PASSWORD,
-            database: process.env.MYSQL_DATABASE_DEV,
+            host: process.env.MYSQL_HOST_LOCAL,
+            port: parseInt(process.env.MYSQL_PORT_LOCAL),
+            user: process.env.MYSQL_USERNAME_LOCAL,
+            password: process.env.MYSQL_PASSWORD_LOCAL,
+            database: process.env.MYSQL_DATABASE_LOCAL,
         },
         pool: {
             min: 2,
@@ -52,10 +53,11 @@ const config: { [key: string]: Knex.Config } = {
     production: {
         client: "mysql",
         connection: {
-            host: process.env.MYSQL_HOST,
-            user: process.env.MYSQL_USERNAME,
-            password: process.env.MYSQL_PASSWORD,
-            database: process.env.MYSQL_DATABASE_PRODUCT,
+            host: process.env.MYSQL_HOST_PROD,
+            port: parseInt(process.env.MYSQL_PORT_PROD),
+            user: process.env.MYSQL_USERNAME_PROD,
+            password: process.env.MYSQL_PASSWORD_PROD,
+            database: process.env.MYSQL_DATABASE_PROD,
         },
         pool: {
             min: 2,

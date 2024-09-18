@@ -1,6 +1,6 @@
 "use strict";
 
-import messageResponse from "../enum/message.enum";
+import messageResponse from "../enums/message.enum";
 
 type ApiResponse = {
     success: boolean;
