@@ -1,0 +1,370 @@
+components:
+    securitySchemes:
+        BearerAuth:
+            type: http
+            scheme: bearer
+
+    schemas:
+        LoginRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                    example: tmquang0209@gmail.com
+                    description: Email or phone number
+                password:
+                    type: string
+                    example: 123456Aa
+                    description: Password is required
+            required:
+                - username
+                - password
+
+        LoginSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: LOGIN_SUCCESS
+                message:
+                    type: string
+                    example: Login successfully
+                data:
+                    type: object
+                    properties:
+                        user:
+                            type: object
+                            properties:
+                                id:
+                                    type: string
+                                    example: 57e849a3-7195-11ef-9fb3-fa163e149ed1
+                                email:
+                                    type: string
+                                    example: demo@renthub.com
+                                password:
+                                    type: string
+                                    example: $2b$10$/QzTs7TUuytiekNbPqEAKeJoLbpxsWXNmwT7PMAocDiPj8GHzWZGW
+                                fullName:
+                                    type: string
+                                    example: Tran Minh Quang
+                                gender:
+                                    type: string
+                                    example: male
+                                phoneNumber:
+                                    type: string
+                                    example: 0293847562
+                                address:
+                                    type: string
+                                    example: 123 Nguyen Van Linh, District 7, Ho Chi Minh City
+                                birthday:
+                                    type: string
+                                    example: 1969-12-31T16:00:00.000Z
+                                role:
+                                    type: string
+                                    example: user
+                                type:
+                                    type: string
+                                    example: free
+                                status:
+                                    type: integer
+                                    example: 1
+                                verify:
+                                    type: integer
+                                    example: 1
+                                firstLogin:
+                                    type: integer
+                                    example: 1
+                                code:
+                                    type: string
+                                    example: ""
+                                createdAt:
+                                    type: string
+                                    example: 2024-09-13T05:59:31.000Z
+                        token:
+                            type: string
+                            example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3ZTg0OWEzLTcxOTUtMTFlZi05ZmIzLWZhMTYzZTE0OWVkMSIsImVtYWlsIjoidG1xdWFuZzAyMDlAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJzdGF0dXMiOjEsImlhdCI6MTcyNjIxNTI0MiwiZXhwIjoxNzI2MjUxMjQyfQ.orkLKKyPFxG6XQii0mBXP8eZ3LKgO3NCpDNDquNEe-s
+                        houses:
+                            type: array
+                            items:
+                                type: object
+            required:
+                - success
+                - code
+                - message
+                - data
+
+        InvalidUser:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    example: INVALID_USER
+                message:
+                    type: string
+                    example: Invalid user
+            required:
+                - success
+                - code
+                - message
+
+        VerifyAccountFirst:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    example: VERIFY_ACCOUNT_FIRST
+                message:
+                    type: string
+                    example: Please verify your account first
+            required:
+                - success
+                - code
+                - message
+
+        AccountDisabled:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    example: ACCOUNT_DISABLED
+                message:
+                    type: string
+                    example: Account is disabled
+            required:
+                - success
+                - code
+                - message
+
+        ValidationError:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    example: VALIDATION_ERROR
+                message:
+                    type: string
+                    example: Validation error
+                data:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            type:
+                                type: string
+                            value:
+                                type: string
+                            msg:
+                                type: string
+            required:
+                - message
+
+        SignupRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                    example: example@gmail.com
+                fullName:
+                    type: string
+                    example: John Doe
+                gender:
+                    type: string
+                    enum: [male, female, other]
+                phoneNumber:
+                    type: string
+                    example: 0123456789
+                password:
+                    type: string
+                    example: 123456Aa
+                confirmPassword:
+                    type: string
+                    example: 123456Aa
+
+        SendCodeSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: CHECK_EMAIL_VERIFY_ACCOUNT
+                message:
+                    type: string
+                    example: Please check your email to verify your account
+                data:
+                    type: object
+                    example: {}
+            required:
+                - success
+                - code
+                - message
+
+        UserExists:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    example: USER_ALREADY_EXISTS
+                message:
+                    type: string
+                    example: User already exists
+                data:
+                    type: object
+                    example: {}
+            required:
+                - success
+                - code
+                - message
+
+        VerifyAccountRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                    example: example@gmail.com
+                code:
+                    type: string
+                    example: 1234
+                    description: Verification code sent to email. It have 4 digits
+            required:
+                - email
+                - code
+
+        VerifyAccountSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: VERIFY_ACCOUNT_SUCCESS
+                message:
+                    type: string
+                    example: Verify account successfully
+                data:
+                    type: object
+                    example: {}
+            required:
+                - success
+                - code
+                - message
+
+        InvalidVerificationCode:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    example: INVALID_VERIFICATION_CODE
+                message:
+                    type: string
+                    example: Verification code is incorrect
+                data:
+                    type: object
+                    example: {}
+            required:
+                - success
+                - code
+                - message
+
+        AccountVerified:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    example: ACCOUNT_PREVIOUSLY_VERIFIED
+                message:
+                    type: string
+                    example: The account has been previously verified
+                data:
+                    type: object
+                    example: {}
+            required:
+                - success
+                - code
+                - message
+
+        GetUserNotFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    example: GET_USER_NOT_FOUND
+                message:
+                    type: string
+                    example: User not found
+                data:
+                    type: object
+                    example: {}
+            required:
+                - success
+                - code
+                - message
+
+        CheckMailResetPassword:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: CHECK_EMAIL_RESET_PASSWORD
+                message:
+                    type: string
+                    example: Please check your email to reset your password
+                data:
+                    type: object
+                    example: {}
+            required:
+                - success
+                - code
+                - message
+
+        ResetPasswordSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: RESET_PASSWORD_SUCCESS
+                message:
+                    type: string
+                    example: Password reset successfully
+                data:
+                    type: object
+                    example: {}
+            required:
+                - success
+                - code
+                - message

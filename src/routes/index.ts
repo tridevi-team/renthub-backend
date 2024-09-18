@@ -1,10 +1,11 @@
 "use strict";
-import UserRoute from "./Users";
-import HouseRoute from "./Houses";
-import ServiceRoute from "./Services";
-import RoomRoute from "./Rooms";
-import EquipmentRoute from "./Equipment";
-import PaymentMethodRoute from "./PaymentMethod";
-import renterRoute from "./Renters";
+import AuthRoute from "./auth.route";
+import UserRoute from "./user.route";
+import HouseRoute from "./house.route";
+import ServiceRoute from "./service.route";
+import RoomRoute from "./room.route";
+import EquipmentRoute from "./equipment.route";
+import PaymentMethodRoute from "./payment.route";
+import renterRoute from "./renter.route";
 
-export { HouseRoute, ServiceRoute, UserRoute, RoomRoute, EquipmentRoute, PaymentMethodRoute, renterRoute };
+export { AuthRoute, HouseRoute, ServiceRoute, UserRoute, RoomRoute, EquipmentRoute, PaymentMethodRoute, renterRoute };

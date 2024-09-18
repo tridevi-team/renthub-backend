@@ -1,8 +1,8 @@
 "use strict";
 
-import messageResponse from "../enum/message.enum";
-import UserService from "../services/user.services";
-import { aesDecrypt, bcrypt, Exception } from "../utils";
+import messageResponse from "../enums/message.enum";
+import { UserService } from "../services";
+import { bcrypt, Exception } from "../utils";
 import apiResponse from "../utils/apiResponse";
 
 class UserController {
@@ -29,8 +29,12 @@ class UserController {
     static async login(req, res) {
         const { username, password } = req.body;
         try {
+            // const decryptPassword = aesDecrypt(password);
+            // const user = await UserService.login(username, decryptPassword);
             const user = await UserService.login(username, password);
-            return res.status(200).json(apiResponse(messageResponse.LOGIN_SUCCESS, true, user));
+            res.cookie("accessToken", user.token.refreshToken, { httpOnly: true });
+            const userInfo = { ...user, token: user.token.accessToken };
+            return res.status(200).json(apiResponse(messageResponse.LOGIN_SUCCESS, true, userInfo));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -40,8 +44,9 @@ class UserController {
         try {
             const { email, password, fullName, gender, phoneNumber, birthday, address } = req.body;
 
-            const decryptPassword = aesDecrypt(password);
-            const hashPassword = await bcrypt.hash(decryptPassword.trim());
+            // const decryptPassword = aesDecrypt(password);
+            // const hashPassword = await bcrypt.hash(decryptPassword.trim());
+            const hashPassword = await bcrypt.hash(password.trim());
             const newUser = {
                 email: email.toLowerCase().trim(),
                 full_name: fullName.trim(),
