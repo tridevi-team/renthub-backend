@@ -1,8 +1,8 @@
 "use strict";
-import mailConfig from "../config/mailConfig";
+import mailConfig from "../config/mail.config";
 import "dotenv/config";
 
-const sendMail = async (to, subject, text, html) => {
+const sendMail = async (to: string, subject: string, text: string, html = "") => {
     try {
         const mailOptions = {
             from: process.env.USERNAME_EMAIL,

@@ -13,7 +13,7 @@ const checkPermissions = async (userId: Number, houseId: Number = -1, permission
         const isAuthor = await Houses.query().findOne(authorCondition);
         if (isAuthor) return true;
 
-        if (permission !== EHousePermissions.HOUSE_DETAILS) {
+        if (permission !== EHousePermissions.READ_HOUSE) {
             housePermission = await HousePermissions.query().joinRelated("permissions").findOne({ house_id: houseId, user_id: userId, "permissions.key": permission });
         } else {
             housePermission = await HousePermissions.query().findOne({ house_id: houseId, user_id: userId });

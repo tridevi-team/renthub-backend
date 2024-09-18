@@ -1,12 +1,13 @@
 "use strict";
 import { validationResult } from "express-validator";
 import { ApiException, Exception } from "../utils";
+import messageResponse from "../enum/message.enum";
 
 const handleErrors = async (req, res, next) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            throw new ApiException(500, "Validation error", errors.array());
+            throw new ApiException(messageResponse.VALIDATION_ERROR, 400, errors.array());
         }
         next();
     } catch (err) {

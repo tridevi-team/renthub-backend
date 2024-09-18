@@ -1,83 +1,100 @@
-"use strict";
-import Users from "./Users";
-import UserHistory from "./UserHistory";
+// bill model
+import BillDetails from "./billDetails.model";
+import BillHistory from "./billHistory.model";
+import Bills from "./bills.model";
 
-import Houses from "./Houses";
-import HouseHistory from "./HouseHistory";
-import HousePermissions from "./HousePermissions";
-import HousePermissionHistory from "./HousePermissionHistory";
-import HouseLeaseContract from "./HouseLeaseContract";
-import HouseLeaseContractHistory from "./HouseLeaseContractHistory";
+// contract model
+import ContractKeyReplace from "./contractKeyReplace.model";
+import ContractTemplate from "./contractTemplate.model";
+import ContractTemplateHistory from "./contractTemplateHistory.model";
 
-import ContractKeyReplace from "./ContractKeyReplace";
-import ContractTemplate from "./ContractTemplate";
-import ContractTemplateHistory from "./ContractTemplateHistory";
+// equipment model
+import Equipment from "./equipment.model";
+import EquipmentHistory from "./equipmentHistory.model";
 
-import BillDetails from "./BillDetails";
-import BillDetailsHistory from "./BillDetailsHistory";
-import Bills from "./Bills";
-import BillHistory from "./BillHistory";
+// house model
+import HouseFloorHistory from "./houseFloorHistory.model";
+import HouseFloors from "./houseFloors.model";
+import HouseHistory from "./houseHistory.model";
+import Houses from "./houses.model";
 
-import Equipment from "./Equipment";
-import EquipmentHistory from "./EquipmentHistory";
+// issue model
+import IssueHistory from "./issueHistory.model";
+import Issues from "./issues.model";
 
-import Notifications from "./Notifications";
-import NotificationRecipient from "./NotificationRecipient";
+// logs model
+import Logs from "./logs.model";
 
-import PaymentMethods from "./PaymentMethods";
-import PaymentMethodHistory from "./PaymentMethodHistory";
+// notification model
+import NotificationRecipients from "./notificationRecipients.model";
+import Notifications from "./notifications.model";
 
-import Permissions from "./Permissions";
-import Renters from "./Renters";
-import Services from "./Services";
-import ServiceHistory from "./ServiceHistory";
+// payment method model
+import PaymentMethodHistory from "./paymentMethodHistory.model";
+import PaymentMethods from "./paymentMethods.model";
 
-import Rooms from "./Rooms";
-import RoomHistory from "./RoomHistory";
-import RoomImages from "./RoomImages";
-import RoomServices from "./RoomServices";
-import RoomServiceHistory from "./RoomServiceHistory";
-import RoomEquipment from "./RoomEquipment";
-import RoomEquipmentHistory from "./RoomEquipmentHistory";
+// renter model
+import RenterHistory from "./renterHistory.model";
+import Renters from "./renters.model";
 
-import Issues from "./Issues";
-import IssueImages from "./IssueImages";
-import IssueHistory from "./IssueHistory";
+// role model
+import RoleHistory from "./roleHistory.model";
+import Roles from "./roles.model";
+
+// room model
+import RoomContractHistory from "./roomContractHistory.model";
+import RoomContracts from "./roomContracts.model";
+import RoomHistory from "./roomHistory.model";
+import RoomImages from "./roomImages.model";
+import Rooms from "./rooms.model";
+import RoomServiceHistory from "./roomServiceHistory.model";
+import RoomServices from "./roomServices.model";
+
+// service model
+import ServiceHistory from "./serviceHistory.model";
+import Services from "./services.model";
+
+// user model
+import UserHistory from "./userHistory.model";
+import UserRoleHistory from "./userRoleHistory.model";
+import UserRoles from "./userRoles.model";
+import Users from "./users.models";
 
 export {
-    Users,
-    UserHistory,
+    BillDetails,
+    BillHistory,
+    Bills,
     ContractKeyReplace,
     ContractTemplate,
     ContractTemplateHistory,
-    Houses,
-    HouseHistory,
-    HouseLeaseContract,
-    HouseLeaseContractHistory,
-    HousePermissions,
-    HousePermissionHistory,
-    BillDetails,
-    BillDetailsHistory,
-    Bills,
-    BillHistory,
     Equipment,
     EquipmentHistory,
-    Notifications,
-    NotificationRecipient,
-    PaymentMethods,
-    PaymentMethodHistory,
-    Permissions,
-    Renters,
-    RoomImages,
-    Services,
-    ServiceHistory,
-    Rooms,
-    RoomHistory,
-    RoomServices,
-    RoomServiceHistory,
-    RoomEquipment,
-    RoomEquipmentHistory,
-    Issues,
-    IssueImages,
+    HouseFloorHistory,
+    HouseFloors,
+    HouseHistory,
+    Houses,
     IssueHistory,
+    Issues,
+    Logs,
+    NotificationRecipients,
+    Notifications,
+    PaymentMethodHistory,
+    PaymentMethods,
+    RenterHistory,
+    Renters,
+    RoleHistory,
+    Roles,
+    RoomContractHistory,
+    RoomContracts,
+    RoomHistory,
+    RoomImages,
+    Rooms,
+    RoomServiceHistory,
+    RoomServices,
+    ServiceHistory,
+    Services,
+    UserHistory,
+    UserRoleHistory,
+    UserRoles,
+    Users,
 };
