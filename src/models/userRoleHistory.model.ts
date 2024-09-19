@@ -25,8 +25,12 @@ class UserRoleHistory extends Model {
                 user_id: { type: "string", format: "uuid" },
                 house_id: { type: "string", format: "uuid" },
                 role_id: { type: "string", format: "uuid" },
+                action: { type: "string", maxLength: 10 },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
+                updated_by: { type: "string", format: "uuid" },
+                updated_at: { type: "string", format: "date-time" },
+                action_at: { type: "string", format: "date-time" },
             },
         };
     }
