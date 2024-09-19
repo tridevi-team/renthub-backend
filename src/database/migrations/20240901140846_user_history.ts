@@ -16,10 +16,11 @@ export async function up(knex: Knex): Promise<void> {
         table.boolean("status");
         table.boolean("verify");
         table.boolean("first_login");
-        table.string("code", 4).nullable();
-        table.string("action", 10).notNullable(); // create, update, delete
+        table.string("action", 10).notNullable(); // create, update, delete, rollback
         table.uuid("created_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE").nullable();
-        table.datetime("created_date").defaultTo(knex.fn.now());
+        table.datetime("created_at").nullable();
+        table.uuid("updated_by").nullable();
+        table.datetime("updated_at").nullable();
     });
 }
 
