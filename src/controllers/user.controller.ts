@@ -2,7 +2,7 @@
 
 import messageResponse from "../enums/message.enum";
 import { UserService } from "../services";
-import { apiResponse, bcrypt, Exception } from "../utils";
+import { ApiException, apiResponse, bcrypt, Exception, sendMail } from "../utils";
 
 class UserController {
     static async getAllUsers(req, res) {
@@ -56,7 +56,24 @@ class UserController {
                 address: address || "",
             };
 
-            const result = await UserService.createUser(newUser);
+            const user = await UserService.createUser(newUser);
+
+            if (user) {
+                let verifyCode = Math.floor(1000 + Math.random() * 9000);
+                while (verifyCode.toString().length !== 4) {
+                    verifyCode = Math.floor(1000 + Math.random() * 9000);
+                }
+
+                const mail = await sendMail(user.email, "Verify your account", `Your verification code is: ${verifyCode}`);
+                if (mail) {
+                    return user;
+                } else {
+                    throw new ApiException(messageResponse.FAILED_EMAIL_VERIFICATION, 200);
+                }
+            } else {
+                throw new ApiException(messageResponse.FAILED_CREATE_USER, 200);
+            }
+
             return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_VERIFY_ACCOUNT, true, null));
         } catch (err) {
             Exception.handle(err, req, res);

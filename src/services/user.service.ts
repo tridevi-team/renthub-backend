@@ -1,4 +1,5 @@
 import messageResponse from "../enums/message.enum";
+import { UserCreate } from "../interfaces/user.interface";
 import { Houses, Users } from "../models";
 import { ApiException, bcrypt, jwtToken, sendMail } from "../utils";
 
@@ -90,28 +91,13 @@ class UserService {
         return { accessToken, refreshToken };
     }
 
-    static async createUser(data: { email: string; full_name: string; password: string; phone_number: string; birthday: string; gender: string; address: string }) {
+    static async createUser(data: UserCreate) {
         const isExists = await this.checkUserExist({ email: data.email });
         if (isExists) throw new ApiException(messageResponse.USER_ALREADY_EXISTS, 200);
-        const userTest = await Users.query().insertAndFetch(data).select("id", "email", "full_name", "phone_number", "birthday");
 
-        const user = await Users.query().findOne({ email: data.email });
-        if (user) {
-            let verifyCode = Math.floor(1000 + Math.random() * 9000);
-            while (verifyCode.toString().length !== 4) {
-                verifyCode = Math.floor(1000 + Math.random() * 9000);
-            }
+        const user = await Users.query().insertAndFetch(data).select("id", "email", "full_name", "phone_number", "birthday");
 
-            await user.$query().patch({ code: String(verifyCode) });
-            const mail = await sendMail(data.email, "Verify your account", `Your verification code is: ${verifyCode}`);
-            if (mail) {
-                return user;
-            } else {
-                throw new ApiException(messageResponse.FAILED_EMAIL_VERIFICATION, 200);
-            }
-        } else {
-            throw new ApiException(messageResponse.FAILED_CREATE_USER, 200);
-        }
+        return user;
     }
 
     static async verifyAccount(data: { email: string; verifyCode: string }) {
