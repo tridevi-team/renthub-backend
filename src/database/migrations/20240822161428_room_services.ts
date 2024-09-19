@@ -8,8 +8,10 @@ export async function up(knex: Knex): Promise<void> {
         table.integer("quantity").unsigned().defaultTo(1);
         table.integer("start_index").unsigned().nullable();
         table.specificType("description", "text").nullable();
-        table.uuid("created_by").references("id").inTable("users").onDelete("CASCADE").onUpdate("CASCADE");
+        table.uuid("created_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
         table.datetime("created_at").defaultTo(knex.fn.now());
+        table.uuid("updated_by").references("id").inTable("users");
+        table.datetime("updated_at");
     });
 }
 
