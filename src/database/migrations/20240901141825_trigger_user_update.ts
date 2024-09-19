@@ -7,9 +7,9 @@ export async function up(knex: Knex): Promise<void> {
         ON users
         FOR EACH ROW
         INSERT INTO user_history (
-            user_id, email, password, full_name, phone_number, address, birthday, role, type, status, verify, first_login, code, action, created_by, created_at, updated_by, updated_at
+            user_id, email, password, full_name, phone_number, address, birthday, role, type, status, verify, first_login, action, created_at, updated_by, updated_at
         ) VALUES (
-            OLD.id, OLD.email, OLD.password, OLD.full_name, OLD.phone_number, OLD.address, OLD.birthday, OLD.role, OLD.type, OLD.status, OLD.verify, OLD.first_login, OLD.code, 'UPDATE', OLD.created_by, OLD.created_at, OLD.updated_by, OLD.updated_at
+            OLD.id, OLD.email, OLD.password, OLD.full_name, OLD.phone_number, OLD.address, OLD.birthday, OLD.role, OLD.type, OLD.status, OLD.verify, OLD.first_login, 'UPDATE', OLD.created_at, OLD.updated_by, OLD.updated_at
         );
     `);
 }
