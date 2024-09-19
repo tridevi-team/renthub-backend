@@ -6,8 +6,8 @@ export async function up(knex: Knex): Promise<void> {
         AFTER INSERT
         ON house_floors
         FOR EACH ROW
-        INSERT INTO house_floor_history (floor_id, house_id, name, description, action, created_by)
-        VALUES (NEW.id, NEW.house_id, NEW.name, NEW.description, "CREATE", @.created_by);
+        INSERT INTO house_floor_history (floor_id, house_id, name, description, action, created_by, created_at, updated_by, updated_at)
+        VALUES (NEW.id, NEW.house_id, NEW.name, NEW.description, "CREATE", NEW.created_by, NEW.created_at, NEW.updated_by, NEW.updated_at);
         `);
 }
 
