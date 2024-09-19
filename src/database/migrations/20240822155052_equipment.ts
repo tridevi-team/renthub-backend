@@ -10,8 +10,10 @@ export async function up(knex: Knex): Promise<void> {
         table.string("status").defaultTo("NORMAL"); // NORMAL/ MAINTENANCE/ BROKEN / LOST / DISPOSED
         table.string("shared_type").defaultTo("HOUSE"); // HOUSE/ ROOM
         table.specificType("description", "text").nullable();
-        table.uuid("created_by").references("id").inTable("users").onDelete("CASCADE").onUpdate("CASCADE");
+        table.uuid("created_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
         table.datetime("created_at").defaultTo(knex.fn.now());
+        table.uuid("updated_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
+        table.datetime("updated_at").defaultTo(knex.fn.now());
     });
 }
 
