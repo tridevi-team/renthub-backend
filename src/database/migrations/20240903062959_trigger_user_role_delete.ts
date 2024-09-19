@@ -7,9 +7,9 @@ export async function up(knex: Knex): Promise<void> {
         ON user_roles
         FOR EACH ROW
         INSERT INTO user_role_history
-        (user_role_id, user_id, house_id, role_id, action, created_by)
+        (user_role_id, user_id, house_id, role_id, action, created_by, created_at, updated_by, updated_at)
         VALUES
-        (OLD.id, OLD.user_id, OLD.house_id, OLD.role_id, 'DELETE', @created_by);
+        (OLD.id, OLD.user_id, OLD.house_id, OLD.role_id, 'DELETE', OLD.created_by, OLD.created_at, OLD.updated_by, OLD.updated_at);
         `);
 }
 

@@ -8,8 +8,11 @@ export async function up(knex: Knex): Promise<void> {
         table.uuid("house_id").references("id").inTable("houses").notNullable();
         table.uuid("role_id").references("id").inTable("roles").notNullable();
         table.string("action", 10).notNullable();
-        table.uuid("created_by").references("id").inTable("users").notNullable();
+        table.uuid("created_by").references("id").inTable("users");
         table.datetime("created_at").defaultTo(knex.fn.now());
+        table.uuid("updated_by").references("id").inTable("users");
+        table.datetime("updated_at");
+        table.datetime("action_at").defaultTo(knex.fn.now());
     });
 }
 
