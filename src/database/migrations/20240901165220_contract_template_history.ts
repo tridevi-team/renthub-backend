@@ -9,10 +9,17 @@ export async function up(knex: Knex): Promise<void> {
         table.specificType("content", "text").nullable();
         table.boolean("is_active").nullable();
         table.string("action", 10).notNullable();
+<<<<<<< Updated upstream
         table.uuid("created_by").references("id").inTable("users");
         table.datetime("created_at").defaultTo(knex.fn.now());
         table.uuid("updated_by").references("id").inTable("users");
         table.datetime("updated_at").defaultTo(knex.fn.now());
+=======
+        table.uuid("created_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
+        table.datetime("created_at").nullable();
+        table.uuid("updated_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
+        table.datetime("updated_at").nullable();
+>>>>>>> Stashed changes
         table.datetime("action_at").defaultTo(knex.fn.now());
     });
 }
