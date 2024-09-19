@@ -10,6 +10,8 @@ class Roles extends Model {
     status: boolean;
     created_by: string;
     created_at: string;
+    updated_by: string;
+    updated_at: string;
 
     static get tableName() {
         return "roles";
@@ -36,6 +38,8 @@ class Roles extends Model {
                 status: { type: "boolean" },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
+                updated_by: { type: "string", format: "uuid" },
+                updated_at: { type: "string", format: "date-time" },
             },
         };
     }
