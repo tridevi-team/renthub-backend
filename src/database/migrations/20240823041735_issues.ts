@@ -10,8 +10,10 @@ export async function up(knex: Knex): Promise<void> {
         table.specificType("description", "text").nullable();
         table.json("files").nullable(); // include image, video, pdf, word, etc...
         table.uuid("assign_to").references("id").inTable("users").nullable().onDelete("SET NULL").onUpdate("CASCADE");
-        table.uuid("created_by").references("id").inTable("renters").onDelete("CASCADE").onUpdate("CASCADE");
+        table.uuid("created_by").references("id").inTable("renters").onDelete("SET NULL").onUpdate("CASCADE");
         table.datetime("created_at").defaultTo(knex.fn.now());
+        table.uuid("updated_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
+        table.datetime("updated_at").defaultTo(knex.fn.now());
     });
 }
 
