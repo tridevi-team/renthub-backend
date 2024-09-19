@@ -6,8 +6,8 @@ export async function up(knex: Knex): Promise<void> {
         BEFORE UPDATE
         ON room_services
         FOR EACH ROW
-        INSERT INTO room_service_history (room_id, service_id, quantity, start_index, description, action, created_by)
-        VALUES (OLD.room_id, OLD.service_id, OLD.quantity, OLD.start_index, OLD.description, "UPDATE", @created_by);
+        INSERT INTO room_service_history (room_id, service_id, quantity, start_index, description, action, created_by, created_at, updated_by, updated_at)
+        VALUES (OLD.room_id, OLD.service_id, OLD.quantity, OLD.start_index, OLD.description, "UPDATE", OLD.created_by, OLD.created_at, OLD.updated_by, OLD.updated_at);
         `);
 }
 
