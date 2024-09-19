@@ -13,6 +13,8 @@ export async function up(knex: Knex): Promise<void> {
         table.boolean("status").defaultTo(true);
         table.uuid("created_by").references("id").inTable("users").onDelete("CASCADE").onUpdate("CASCADE");
         table.datetime("created_at").defaultTo(knex.fn.now());
+        table.uuid("updated_by").references("id").inTable("users");
+        table.datetime("updated_at").defaultTo(knex.fn.now());
     });
 }
 

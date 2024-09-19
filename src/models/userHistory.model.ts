@@ -36,10 +36,10 @@ class UserHistory extends Model {
                 verify: { type: "boolean" },
                 first_login: { type: "boolean" },
                 action: { type: "string", maxLength: 10 },
-                created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
                 updated_by: { type: "string", format: "uuid" },
                 updated_at: { type: "string", format: "date-time" },
+                action_at: { type: "string", format: "date-time" },
             },
         };
     }

@@ -14,6 +14,8 @@ class Houses extends Model {
     status: boolean;
     created_by: string;
     created_at: string;
+    updated_by: string;
+    updated_at: string;
     createdBy: string;
     permissions: object;
 
@@ -45,6 +47,8 @@ class Houses extends Model {
                 status: { type: "boolean" },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
+                updated_by: { type: "string", format: "uuid" },
+                updated_at: { type: "string", format: "date-time" },
             },
         };
     }
