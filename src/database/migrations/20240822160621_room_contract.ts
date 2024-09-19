@@ -13,8 +13,10 @@ export async function up(knex: Knex): Promise<void> {
         table.datetime("rental_start_date").defaultTo(knex.fn.now());
         table.datetime("rental_end_date").defaultTo(knex.fn.now());
         table.string("status").defaultTo("ACTIVE");
-        table.uuid("created_by").references("id").inTable("users").onDelete("CASCADE").onUpdate("CASCADE");
+        table.uuid("created_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
         table.datetime("created_at").defaultTo(knex.fn.now());
+        table.uuid("updated_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
+        table.datetime("updated_at").defaultTo(knex.fn.now());
     });
 }
 

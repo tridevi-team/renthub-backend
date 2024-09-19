@@ -14,10 +14,11 @@ export async function up(knex: Knex): Promise<void> {
         table.date("move_in_date").notNullable();
         table.boolean("represent").defaultTo(false);
         table.specificType("note", "text").nullable();
-        table.string("otp", 6).nullable();
-        table.datetime("expired_otp").nullable();
         table.uuid("created_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
         table.datetime("created_at").defaultTo(knex.fn.now());
+        table.uuid("updated_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
+        table.datetime("updated_at").defaultTo(knex.fn.now());
+        table.unique(["citizen_id", "phone_number"]);
     });
 }
 
