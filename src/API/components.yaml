@@ -241,13 +241,13 @@ components:
                 email:
                     type: string
                     example: example@gmail.com
-                code:
+                verifyCode:
                     type: string
                     example: 1234
                     description: Verification code sent to email. It have 4 digits
             required:
                 - email
-                - code
+                - verifyCode
 
         VerifyAccountSuccess:
             type: object

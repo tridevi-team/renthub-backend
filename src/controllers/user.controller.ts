@@ -1,5 +1,6 @@
 "use strict";
 
+import redisClient from "../config/redis.config";
 import messageResponse from "../enums/message.enum";
 import { UserService } from "../services";
 import { ApiException, apiResponse, bcrypt, Exception, sendMail } from "../utils";
@@ -64,17 +65,19 @@ class UserController {
                     verifyCode = Math.floor(1000 + Math.random() * 9000);
                 }
 
+                const redis = await redisClient;
+                await redis.set(`verify-account:${user.email}`, verifyCode);
+                await redis.expire(`verify-account:${user.email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
+
                 const mail = await sendMail(user.email, "Verify your account", `Your verification code is: ${verifyCode}`);
                 if (mail) {
-                    return user;
+                    return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_VERIFY_ACCOUNT, true, null));
                 } else {
                     throw new ApiException(messageResponse.FAILED_EMAIL_VERIFICATION, 200);
                 }
             } else {
                 throw new ApiException(messageResponse.FAILED_CREATE_USER, 200);
             }
-
-            return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_VERIFY_ACCOUNT, true, null));
         } catch (err) {
             Exception.handle(err, req, res);
         }
