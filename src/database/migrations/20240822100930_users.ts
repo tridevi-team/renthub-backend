@@ -15,8 +15,9 @@ export async function up(knex: Knex): Promise<void> {
         table.boolean("status").defaultTo(true);
         table.boolean("verify").defaultTo(false);
         table.boolean("first_login").defaultTo(true);
-        table.string("code", 4).nullable();
         table.datetime("created_at").defaultTo(knex.fn.now());
+        table.uuid("updated_by").nullable();
+        table.datetime("updated_at").defaultTo(knex.fn.now());
     });
 }
 
