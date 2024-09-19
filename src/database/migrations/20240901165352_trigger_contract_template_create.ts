@@ -6,8 +6,8 @@ export async function up(knex: Knex): Promise<void> {
         AFTER INSERT
         ON contract_template
         FOR EACH ROW
-        INSERT INTO contract_template_history (contract_template_id, house_id, name, content, is_active, action, created_by)
-        VALUES (NEW.id, NEW.house_id, NEW.name, NEW.content, NEW.is_active, "CREATE", @created_by);`);
+        INSERT INTO contract_template_history (contract_template_id, house_id, name, content, is_active, action, created_by, created_at, updated_by, updated_at)
+        VALUES (NEW.id, NEW.house_id, NEW.name, NEW.content, NEW.is_active, "CREATE", NEW.created_by, NEW.created_at, NEW.updated_by, NEW.updated_at);`);
 }
 
 export async function down(knex: Knex): Promise<void> {
