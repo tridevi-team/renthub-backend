@@ -12,9 +12,11 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            ${{ github.actor }} created commit to renthub-backend:
-            Commit message: ${{ github.event.commits[0].message }}
-            
-            Repository: ${{ github.repository }}
-            
-            See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
+            🚀 New Commit by: *${{ github.actor }}*
+
+            📝 Commit Message: _ ${{ github.event.commits[0].message }} _
+
+            📂 Repository: [${{ github.repository }}](https://github.com/${{ github.repository }})
+
+            🔗 View Changes: [Click here](https://github.com/${{ github.repository }}/commit/${{ github.sha}})
+          format: markdown
