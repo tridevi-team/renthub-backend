@@ -1,5 +1,7 @@
 enum messageResponse {
     UNKNOWN_ERROR = "Unknown error",
+    FILE_UPLOAD_SUCCESS = "File uploaded successfully",
+    FILE_UPLOAD_FAILED = "File upload failed",
     GET_USERS_LIST_SUCCESS = "Get users list successfully",
     NO_USERS_FOUND = "No users found",
     GET_USER_SUCCESS = "Get user successfully",
