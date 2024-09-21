@@ -1,8 +1,10 @@
 import { Model, QueryContext } from "objection";
 import { v4 as uuidv4 } from "uuid";
+import knex from "../config/database.config";
 
 class UserRoles extends Model {
     id: string;
+    created_by: string;
 
     static get tableName() {
         return "user_roles";
@@ -27,6 +29,8 @@ class UserRoles extends Model {
                 role_id: { type: "string", format: "uuid" },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
+                updated_by: { type: "string", format: "uuid" },
+                updated_at: { type: "string", format: "date-time" },
             },
         };
     }

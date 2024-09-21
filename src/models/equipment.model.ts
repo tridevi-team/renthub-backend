@@ -31,6 +31,8 @@ class Equipment extends Model {
                 description: { type: "string" },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
+                updated_by: { type: "string", format: "uuid" },
+                updated_at: { type: "string", format: "date-time" },
             },
         };
     }

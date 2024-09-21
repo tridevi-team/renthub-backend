@@ -6,8 +6,8 @@ export async function up(knex: Knex): Promise<void> {
         AFTER INSERT
         ON payment_methods
         FOR EACH ROW
-        INSERT INTO payment_method_history (payment_method_id, house_id, name, account_number, status, description, payos_client_id, payos_api_key, payos_checksum, action, created_by)
-        VALUES (NEW.id, NEW.house_id, NEW.name, NEW.account_number, NEW.status, NEW.description, NEW.payos_client_id, NEW.payos_api_key, NEW.payos_checksum, "CREATE", @created_by);
+        INSERT INTO payment_method_history (payment_method_id, house_id, name, account_number, status, description, payos_client_id, payos_api_key, payos_checksum, action, created_by, created_at, updated_by, updated_at)
+        VALUES (NEW.id, NEW.house_id, NEW.name, NEW.account_number, NEW.status, NEW.description, NEW.payos_client_id, NEW.payos_api_key, NEW.payos_checksum, "CREATE", NEW.created_by, NEW.created_at, NEW.updated_by, NEW.updated_at);
         `);
 }
 

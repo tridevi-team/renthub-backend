@@ -15,6 +15,9 @@ export async function up(knex: Knex): Promise<void> {
             table.string("action", 10).notNullable(); // ADD, UPDATE, DELETE
             table.uuid("created_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
             table.datetime("created_at").defaultTo(knex.fn.now());
+            table.uuid("updated_by").references("id").inTable("users");
+            table.datetime("updated_at");
+            table.datetime("action_at").defaultTo(knex.fn.now());
         })
         .createTable("room_service_history", (table) => {
             table.uuid("id").primary().defaultTo(knex.raw("(uuid())"));
@@ -26,6 +29,9 @@ export async function up(knex: Knex): Promise<void> {
             table.string("action", 10).notNullable(); // ADD, UPDATE, DELETE
             table.uuid("created_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
             table.datetime("created_at").defaultTo(knex.fn.now());
+            table.uuid("updated_by").references("id").inTable("users");
+            table.datetime("updated_at");
+            table.datetime("action_at").defaultTo(knex.fn.now());
         });
 }
 

@@ -33,10 +33,10 @@ class Renters extends Model {
                 move_in_date: { type: "string", format: "date" },
                 represent: { type: "boolean" },
                 note: { type: "string" },
-                otp: { type: "string", maxLength: 6 },
-                expired_otp: { type: "string", format: "date-time" },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
+                updated_by: { type: "string", format: "uuid" },
+                updated_at: { type: "string", format: "date-time" },
             },
         };
     }

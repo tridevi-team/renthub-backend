@@ -6,8 +6,9 @@ export async function up(knex: Knex): Promise<void> {
         BEFORE UPDATE
         ON issues
         FOR EACH ROW
-        INSERT INTO issue_history (issue_id, equipment_id, title, content, status, description, files, assign_to, action, created_by)
-        VALUES (NEW.id, NEW.equipment_id, NEW.title, NEW.content, NEW.status, NEW.description, NEW.files, NEW.assign_to, "UPDATE", @created_by);`);
+        INSERT INTO issue_history (issue_id, equipment_id, title, content, status, description, files, assign_to, action, created_by, created_at, updated_by, updated_at)
+        VALUES (OLD.id, OLD.equipment_id, OLD.title, OLD.content, OLD.status, OLD.description, OLD.files, OLD.assign_to, "UPDATE", OLD.created_by, OLD.created_at, OLD.updated_by, OLD.updated_at);
+        `);
 }
 
 export async function down(knex: Knex): Promise<void> {

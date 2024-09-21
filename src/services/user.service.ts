@@ -1,4 +1,7 @@
+import "dotenv/config";
+import redisConfig from "../config/redis.config";
 import messageResponse from "../enums/message.enum";
+import { UserCreate } from "../interfaces/user.interface";
 import { Houses, Users } from "../models";
 import { ApiException, bcrypt, jwtToken, sendMail } from "../utils";
 
@@ -90,40 +93,30 @@ class UserService {
         return { accessToken, refreshToken };
     }
 
-    static async createUser(data: { email: string; full_name: string; password: string; phone_number: string; birthday: string; gender: string; address: string }) {
+    static async createUser(data: UserCreate) {
         const isExists = await this.checkUserExist({ email: data.email });
         if (isExists) throw new ApiException(messageResponse.USER_ALREADY_EXISTS, 200);
-        const userTest = await Users.query().insertAndFetch(data).select("id", "email", "full_name", "phone_number", "birthday");
 
-        const user = await Users.query().findOne({ email: data.email });
-        if (user) {
-            let verifyCode = Math.floor(1000 + Math.random() * 9000);
-            while (verifyCode.toString().length !== 4) {
-                verifyCode = Math.floor(1000 + Math.random() * 9000);
-            }
+        const user = await Users.query().insertAndFetch(data).select("id", "email", "full_name", "phone_number", "birthday");
 
-            await user.$query().patch({ code: String(verifyCode) });
-            const mail = await sendMail(data.email, "Verify your account", `Your verification code is: ${verifyCode}`);
-            if (mail) {
-                return user;
-            } else {
-                throw new ApiException(messageResponse.FAILED_EMAIL_VERIFICATION, 200);
-            }
-        } else {
-            throw new ApiException(messageResponse.FAILED_CREATE_USER, 200);
-        }
+        return user;
     }
 
     static async verifyAccount(data: { email: string; verifyCode: string }) {
         const user = await Users.query().findOne({ email: data.email });
+        const redis = await redisConfig;
+
+        const code = await redis.get(`verify-account:${data.email}`);
+
         if (!user) {
             throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 404);
         } else if (user.verify) {
             throw new ApiException(messageResponse.ACCOUNT_PREVIOUSLY_VERIFIED, 409);
-        } else if (user.code !== String(data.verifyCode)) {
+        } else if (code !== String(data.verifyCode)) {
             throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 401);
         }
-        await user.$query().patch({ verify: true, code: "" });
+        await redis.del(`verify-account:${data.email}`);
+        await user.$query().patch({ verify: true });
         return user;
     }
 
@@ -134,12 +127,15 @@ class UserService {
         } else if (user.verify) {
             throw new ApiException(messageResponse.ACCOUNT_PREVIOUSLY_VERIFIED, 409);
         }
+
         const newCode = Math.floor(1000 + Math.random() * 9000);
         const mail = await sendMail(email, "Verify your account", `Your verification code is: ${newCode}`);
         if (!mail) {
             throw new ApiException(messageResponse.FAILED_EMAIL_VERIFICATION, 500);
         }
-        await user.$query().patch({ code: String(newCode) });
+        const redis = await redisConfig;
+        await redis.set(`verify-account:${email}`, newCode);
+        await redis.expire(`verify-account:${email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
     }
 
     static async forgotPassword(email: string) {
@@ -152,7 +148,9 @@ class UserService {
         if (!mail) {
             throw new ApiException(messageResponse.FAILED_EMAIL_VERIFICATION, 500);
         }
-        await user.$query().patch({ code: String(verifyCode) });
+        const redis = await redisConfig;
+        await redis.set(`reset-password:${email}`, verifyCode);
+        await redis.expire(`reset-password:${email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
     }
 
     static async resetPassword(data: { code: string; email: string; password: string }) {

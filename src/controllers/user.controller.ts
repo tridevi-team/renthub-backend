@@ -1,9 +1,9 @@
 "use strict";
 
+import redisClient from "../config/redis.config";
 import messageResponse from "../enums/message.enum";
 import { UserService } from "../services";
-import { bcrypt, Exception } from "../utils";
-import apiResponse from "../utils/apiResponse";
+import { ApiException, apiResponse, bcrypt, Exception, sendMail } from "../utils";
 
 class UserController {
     static async getAllUsers(req, res) {
@@ -57,8 +57,27 @@ class UserController {
                 address: address || "",
             };
 
-            const result = await UserService.createUser(newUser);
-            return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_VERIFY_ACCOUNT, true, null));
+            const user = await UserService.createUser(newUser);
+
+            if (user) {
+                let verifyCode = Math.floor(1000 + Math.random() * 9000);
+                while (verifyCode.toString().length !== 4) {
+                    verifyCode = Math.floor(1000 + Math.random() * 9000);
+                }
+
+                const redis = await redisClient;
+                await redis.set(`verify-account:${user.email}`, verifyCode);
+                await redis.expire(`verify-account:${user.email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
+
+                const mail = await sendMail(user.email, "Verify your account", `Your verification code is: ${verifyCode}`);
+                if (mail) {
+                    return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_VERIFY_ACCOUNT, true, null));
+                } else {
+                    throw new ApiException(messageResponse.FAILED_EMAIL_VERIFICATION, 200);
+                }
+            } else {
+                throw new ApiException(messageResponse.FAILED_CREATE_USER, 200);
+            }
         } catch (err) {
             Exception.handle(err, req, res);
         }

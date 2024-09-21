@@ -3,6 +3,15 @@ import { v4 as uuidv4 } from "uuid";
 
 class Roles extends Model {
     id: string;
+    house_id: string;
+    name: string;
+    permissions: object;
+    description?: string;
+    status: boolean;
+    created_by: string;
+    created_at: string;
+    updated_by: string;
+    updated_at: string;
 
     static get tableName() {
         return "roles";
@@ -24,11 +33,13 @@ class Roles extends Model {
                 id: { type: "string", format: "uuid" },
                 house_id: { type: "string", format: "uuid" },
                 name: { type: "string", maxLength: 255 },
-                permissions: { type: "json" },
+                permissions: { type: "object" },
                 description: { type: "string" },
                 status: { type: "boolean" },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
+                updated_by: { type: "string", format: "uuid" },
+                updated_at: { type: "string", format: "date-time" },
             },
         };
     }
