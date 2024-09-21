@@ -29,7 +29,7 @@ const swaggerDefinition = {
 
 const swaggerOptions = {
     swaggerDefinition,
-    apis: [path.join(__dirname, "./src/API/*.yaml")],
+    apis: [path.join(__dirname, "/*.yaml")],
 };
 
 // Continue with the rest of your code
