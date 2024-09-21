@@ -1,9 +1,15 @@
 export interface UserCreate {
     email: string;
-    full_name: string;
+    fullName: string;
     password: string;
-    phone_number: string;
+    phoneNumber: string;
     birthday: string;
     gender: string;
     address: string;
+}
+
+export interface UserUpdate {
+    fullName: string;
+    phoneNumber: string;
+    birthday: string;
 }

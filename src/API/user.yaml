@@ -1,0 +1,253 @@
+openapi: "3.0.3"
+info:
+    title: User API
+    version: 1.0.0
+    description: User API
+tags:
+    - name: User
+      description: User API
+components:
+    schemas:
+        GetUserSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    default: true
+                code:
+                    type: string
+                    example: GET_USER_SUCCESS
+                message:
+                    type: string
+                    example: Get user successfully
+                data:
+                    $ref: "#/components/schemas/UserInfo"
+
+        UserUpdateInfo:
+            type: object
+            properties:
+                fullName:
+                    type: string
+                    example: John Doe
+                phoneNumber:
+                    type: string
+                    example: 0123456789
+                birthday:
+                    type: string
+                    example: 1999-01-01
+
+        UserChangePassword:
+            type: object
+            properties:
+                oldPassword:
+                    type: string
+                    example: oldPassword
+                newPassword:
+                    type: string
+                    example: newPassword
+                confirmPassword:
+                    type: string
+                    example: newPassword
+
+        OldPasswordIncorrect:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    default: false
+                code:
+                    type: string
+                    example: OLD_PASSWORD_INCORRECT
+                message:
+                    type: string
+                    example: Old password is incorrect
+
+        ChangePasswordSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    default: true
+                code:
+                    type: string
+                    example: CHANGE_PASSWORD_SUCCESS
+                message:
+                    type: string
+                    default: Password updated successfully
+
+        UpdateInfoSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    default: true
+                code:
+                    type: string
+                    example: PROFILE_UPDATE_SUCCESS
+                message:
+                    type: string
+                    example: Profile updated successfully
+                data:
+                    $ref: "#/components/schemas/UserInfo"
+
+        FirstLoginSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    default: true
+                code:
+                    type: string
+                    example: FIRST_LOGIN_STATUS_UPDATE_SUCCESS
+                message:
+                    type: string
+                    example: First login status updated successfully
+                data:
+                    type: object
+                    nullable: true
+paths:
+    /users/get-info:
+        get:
+            tags:
+                - User
+            summary: Get user information
+            security:
+                - BearerAuth: []
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetUserSuccess"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "404":
+                    description: User not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetUserNotFound"
+    /users/update-info:
+        put:
+            tags:
+                - User
+            summary: Update user information
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserUpdateInfo"
+
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UpdateInfoSuccess"
+                "400":
+                    description: Input data is invalid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "404":
+                    description: User not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetUserNotFound"
+
+    /users/change-password:
+        put:
+            tags:
+                - User
+            summary: Change user password
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserChangePassword"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ChangePasswordSuccess"
+                "400":
+                    description: Input data is invalid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "404":
+                    description: User not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetUserNotFound"
+                "422":
+                    description: Old password is incorrect
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/OldPasswordIncorrect"
+
+    /users/first-login:
+        patch:
+            tags:
+                - User
+            summary: Update first login status if user login successfully for the first time
+            security:
+                - BearerAuth: []
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FirstLoginSuccess"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "404":
+                    description: User not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetUserNotFound"

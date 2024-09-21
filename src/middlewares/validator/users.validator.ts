@@ -22,16 +22,7 @@ const registerValidator = [
 ];
 
 // username is email/ phone number, password
-const loginValidator = [
-    check("username", "Please provide a valid email address or phone number.").notEmpty(),
-    check("password", "Password must be at least 8 characters long and contain at least one letter and one number.")
-        .isLength({ min: 8 })
-        .custom((value) => {
-            // Check if the password is cryptographically hashed
-            validatePassword(value);
-            return true;
-        }),
-];
+const loginValidator = [check("username", "Please provide a valid email address or phone number.").notEmpty(), check("password", "Password is required.").notEmpty()];
 
 const verifyAccountValidator = [check("email", "Please provide a valid email address.").isEmail(), check("verifyCode", "Please provide the verification code.").isNumeric()];
 
@@ -54,13 +45,7 @@ const resetPasswordValidator = [
 ];
 
 const updatePasswordValidator = [
-    check("oldPassword", "Old password is missing or the length is less than 8.")
-        .isLength({ min: 8 })
-        .custom((value) => {
-            // Check if the password is cryptographically hashed
-            validatePassword(value);
-            return true;
-        }),
+    check("oldPassword", "Old password is required.").notEmpty(),
     check("newPassword", "Password must be at least 8 characters long and contain at least one letter and one number.")
         .isLength({ min: 8 })
         .custom((value) => {
