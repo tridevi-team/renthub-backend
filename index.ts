@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import "dotenv/config";
 import express from "express";
-import fileUpload from "express-fileupload";
 import { rateLimit } from "express-rate-limit";
 import { serve, setup } from "swagger-ui-express";
 import { swaggerSpec } from "./src/API/swagger";
@@ -30,7 +29,6 @@ app.use(limiter);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(fileUpload());
 app.use(express.static("src/public"));
 
 app.use("/encrypt", (req, res) => {

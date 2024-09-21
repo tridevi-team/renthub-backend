@@ -1,9 +1,8 @@
 "use strict";
-import * as jwt from "jsonwebtoken";
 import "dotenv/config";
-import ApiException from "./Exceptions/ApiException";
+import * as jwt from "jsonwebtoken";
 import messageResponse from "../enums/message.enum";
-import { verify } from "crypto";
+import ApiException from "./Exceptions/ApiException";
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
 const JWT_SECRET_REFRESH = process.env.JWT_SECRET_REFRESH || "";
