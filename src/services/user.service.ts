@@ -1,15 +1,16 @@
 import "dotenv/config";
 import redisConfig from "../config/redis.config";
 import messageResponse from "../enums/message.enum";
-import { UserCreate } from "../interfaces/user.interface";
+import { UserCreate, UserUpdate } from "../interfaces/user.interface";
 import { Houses, Users } from "../models";
 import { ApiException, bcrypt, jwtToken, sendMail } from "../utils";
+import camelToSnake from "../utils/camelToSnake";
 
 class UserService {
     static async getUserById(id: string) {
         const user = await Users.query().findById(id);
         if (!user) {
-            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 200);
+            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 404);
         }
         return user;
     }
@@ -22,7 +23,7 @@ class UserService {
     static async getUsers(filter: any = {}) {
         const users = await Users.query().where(filter);
         if (users.length === 0) {
-            throw new ApiException(messageResponse.NO_USERS_FOUND, 200);
+            throw new ApiException(messageResponse.NO_USERS_FOUND, 404);
         }
         return users;
     }
@@ -72,12 +73,12 @@ class UserService {
     static async verifyPassword(email: string, password: string) {
         const user = await Users.query().findOne({ email });
         if (!user) {
-            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 200);
+            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 400);
         }
 
         const checkPassword = await bcrypt.compare(password, user.password);
         if (!checkPassword) {
-            throw new ApiException(messageResponse.INCORRECT_OLD_PASSWORD, 200);
+            throw new ApiException(messageResponse.INCORRECT_OLD_PASSWORD, 422);
         }
         return true;
     }
@@ -97,7 +98,7 @@ class UserService {
         const isExists = await this.checkUserExist({ email: data.email });
         if (isExists) throw new ApiException(messageResponse.USER_ALREADY_EXISTS, 200);
 
-        const user = await Users.query().insertAndFetch(data).select("id", "email", "full_name", "phone_number", "birthday");
+        const user = await Users.query().insertAndFetch(camelToSnake(data)).select("id", "email", "full_name", "phone_number", "birthday");
 
         return user;
     }
@@ -173,19 +174,19 @@ class UserService {
         return true;
     }
 
-    static async updateProfile(id: string, data: { email: string; full_name: string; phone_number: string; birthday: string }) {
+    static async updateProfile(id: string, data: UserUpdate) {
         const user = await Users.query().findById(id);
         if (!user) {
-            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 200);
+            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 404);
         }
-        await user.$query().patch(data);
+        await user.$query().patch(camelToSnake(data));
         return user;
     }
 
     static async updateFirstLoginStatus(id: string) {
         const user = await Users.query().findById(id);
         if (!user) {
-            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 200);
+            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 404);
         }
         await user.$query().patch({ first_login: false });
         return user;

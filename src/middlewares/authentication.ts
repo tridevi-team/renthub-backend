@@ -6,7 +6,7 @@ import { ApiException, Exception, jwtToken } from "../utils";
 const authentication = async (req, res, next) => {
     const { authorization } = req.headers;
     try {
-        if (!authorization) throw new ApiException(messageResponse.ACCESS_TOKEN_REQUIRED, 500);
+        if (!authorization) throw new ApiException(messageResponse.ACCESS_TOKEN_REQUIRED, 401);
 
         const data = await jwtToken.verifyAccessToken(authorization);
         const user = await UserService.getUserById(data.id);

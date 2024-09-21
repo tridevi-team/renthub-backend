@@ -49,9 +49,9 @@ class UserController {
             const hashPassword = await bcrypt.hash(password.trim());
             const newUser = {
                 email: email.toLowerCase().trim(),
-                full_name: fullName.trim(),
+                fullName: fullName.trim(),
                 password: hashPassword,
-                phone_number: phoneNumber?.trim(),
+                phoneNumber: phoneNumber?.trim(),
                 gender,
                 birthday: birthday || "1970-01-01",
                 address: address || "",
@@ -145,8 +145,8 @@ class UserController {
         const { fullName, phoneNumber, birthday } = req.body;
         const user = req.user;
         try {
-            const updateInfo = await UserService.updateProfile(user.id, { email: user.email, full_name: fullName, phone_number: phoneNumber, birthday });
-            return res.status(200).json(apiResponse(messageResponse.PROFILE_UPDATE_SUCCESS, true, null));
+            const updateInfo = await UserService.updateProfile(user.id, { fullName, phoneNumber, birthday });
+            return res.status(200).json(apiResponse(messageResponse.PROFILE_UPDATE_SUCCESS, true, updateInfo));
         } catch (err) {
             Exception.handle(err, req, res);
         }

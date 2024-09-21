@@ -26,7 +26,6 @@ const jwtToken = {
             if (e.name === "TokenExpiredError") throw new ApiException(messageResponse.TOKEN_EXPIRED, 401);
             throw new ApiException(messageResponse.TOKEN_INVALID, 401);
         }
-        const currentDate = new Date();
     },
     verifyRefreshToken: (token: any) => {
         const data = jwt.verify(token, JWT_SECRET_REFRESH);
