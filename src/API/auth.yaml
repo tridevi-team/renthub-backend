@@ -242,6 +242,19 @@ components:
                     type: string
                     example: Account has been verified
 
+        ResetPasswordSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: PASSWORD_RESET_SUCCESS
+                message:
+                    type: string
+                    example: Password reset successfully
+
 paths:
     /auth/login:
         post:
