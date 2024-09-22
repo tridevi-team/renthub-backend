@@ -95,6 +95,22 @@ class RoleService {
             })
         );
     }
+
+    static async isAccessible(userId: string, roleId: string, action: string): Promise<boolean> {
+        const role = await Roles.query().findById(roleId);
+
+        if (!role) throw new ApiException(messageResponse.ROLE_NOT_FOUND, 404);
+
+        // get house permissions
+        const housePermissions = await Roles.query().leftJoin("user_roles", "roles.id", "user_roles.role_id").findById(roleId).select("roles.permissions");
+
+        if (!housePermissions.permissions) return false;
+        else if (action === "read") {
+            return housePermissions.permissions.role.read || housePermissions.permissions.role.update || housePermissions.permissions.role.delete;
+        }
+
+        return true;
+    }
 }
 
 export default RoleService;

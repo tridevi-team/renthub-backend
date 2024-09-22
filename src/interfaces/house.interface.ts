@@ -26,16 +26,25 @@ export interface HouseUpdate {
     status: boolean;
 }
 
-export interface Permissions {
+export interface CRUDPermissions {
     create: boolean;
     read: boolean;
     update: boolean;
     delete: boolean;
 }
 
+export interface Permissions {
+    house: CRUDPermissions;
+    role: CRUDPermissions;
+    room: CRUDPermissions;
+    service: CRUDPermissions;
+    bill: CRUDPermissions;
+    equipment: CRUDPermissions;
+}
+
 export interface Role {
     id?: string;
-    houseId?: string,
+    houseId?: string;
     name: string;
     permissions: {
         house: Permissions;

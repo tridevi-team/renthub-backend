@@ -1,17 +1,17 @@
 "use strict";
 import express from "express";
 import { HouseController } from "../controllers";
-import { access, handleErrors } from "../middlewares";
+import { Action, Module } from "../enums";
+import { authorize, handleErrors } from "../middlewares";
 import { houseValidator } from "../middlewares/validator";
 
 const houseRouter = express.Router();
 
-houseRouter.post("/create", access, houseValidator.createHouse, handleErrors, HouseController.createHouse);
-
-houseRouter.get("/list", access, HouseController.getHouseList);
-houseRouter.get("/details/:id", access, houseValidator.houseIdValidator, handleErrors, HouseController.getHouseDetails);
-houseRouter.put("/update/:id", access, houseValidator.updateHouseDetails, handleErrors, HouseController.updateHouseDetails);
-houseRouter.put("/updateStatus/:id", access, houseValidator.updateHouseStatus, handleErrors, HouseController.updateHouseStatus);
-houseRouter.delete("/delete/:id", access, houseValidator.deleteHouse, handleErrors, HouseController.deleteHouse);
+houseRouter.post("/create", houseValidator.createHouse, handleErrors, HouseController.createHouse);
+houseRouter.get("/list", HouseController.getHouseList);
+houseRouter.get("/:houseId/details", authorize(Module.HOUSE, Action.READ), houseValidator.houseIdValidator, handleErrors, HouseController.getHouseDetails);
+houseRouter.put("/:houseId/update", authorize(Module.HOUSE, Action.UPDATE), houseValidator.updateHouseDetails, handleErrors, HouseController.updateHouseDetails);
+houseRouter.put("/:houseId/updateStatus", authorize(Module.HOUSE, Action.UPDATE), houseValidator.updateHouseStatus, handleErrors, HouseController.updateHouseStatus);
+houseRouter.delete("/:houseId/delete", authorize(Module.HOUSE, Action.DELETE), houseValidator.deleteHouse, handleErrors, HouseController.deleteHouse);
 
 export default houseRouter;

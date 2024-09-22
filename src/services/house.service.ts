@@ -1,3 +1,4 @@
+import { Action } from "../enums";
 import messageResponse from "../enums/message.enum";
 import { HouseCreate, HouseUpdate } from "../interfaces";
 import { HouseFloors, Houses, Rooms } from "../models";
@@ -33,9 +34,7 @@ class HouseService {
     }
 
     static async getHouseById(houseId: string) {
-        const details = await Houses.query().findOne({
-            id: houseId,
-        });
+        const details = await Houses.query().findById(houseId);
         if (!details) throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
 
         return details;
@@ -110,6 +109,24 @@ class HouseService {
 
         const isDelete = deletedRow > 0;
         return isDelete;
+    }
+
+    static async isOwner(userId: string, houseId: string) {
+        const house = await Houses.query().findOne(camelToSnake({ id: houseId, createdBy: userId }));
+        return !!house;
+    }
+
+    static async isAccessible(userId: string, houseId: string, action: string) {
+        const housePermissions = await Houses.query()
+            .leftJoin("user_roles", "houses.id", "user_roles.house_id")
+            .leftJoin("roles", "user_roles.role_id", "roles.id")
+            .findById(houseId)
+            .select("roles.permissions");
+        if (!housePermissions.permissions) return false;
+        else if (action === Action.READ) {
+            return housePermissions.permissions.house.read || housePermissions.permissions.house.update || housePermissions.permissions.house.delete;
+        }
+        return housePermissions.permissions.house[action];
     }
 }
 

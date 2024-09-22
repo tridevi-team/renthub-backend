@@ -1,11 +1,12 @@
 import { Model, QueryContext } from "objection";
 import { v4 as uuidv4 } from "uuid";
+import { Permissions } from "../interfaces";
 
 class Roles extends Model {
     id: string;
     house_id: string;
     name: string;
-    permissions: object;
+    permissions: Permissions;
     description?: string;
     status: boolean;
     created_by: string;

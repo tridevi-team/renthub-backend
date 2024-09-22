@@ -28,9 +28,9 @@ class HouseController {
     }
 
     static async getHouseDetails(req, res) {
-        const { id } = req.params;
+        const { houseId } = req.params;
         try {
-            const details = await HouseService.getHouseById(id);
+            const details = await HouseService.getHouseById(houseId);
             return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, details));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -38,9 +38,9 @@ class HouseController {
     }
 
     static async updateHouseDetails(req, res) {
-        const { id } = req.params;
+        const { houseId } = req.params;
         try {
-            const update = await HouseService.update(id, req.body);
+            const update = await HouseService.update(houseId, req.body);
             if (!update) throw new ApiException(messageResponse.UPDATE_HOUSE_FAIL, 500);
 
             return res.json(apiResponse(messageResponse.UPDATE_HOUSE_SUCCESS, true, update));
@@ -50,9 +50,9 @@ class HouseController {
     }
 
     static async updateHouseStatus(req, res) {
-        const { id } = req.params;
+        const { houseId } = req.params;
         try {
-            const isUpdate = await HouseService.updateStatus(id, req.body.status);
+            const isUpdate = await HouseService.updateStatus(houseId, req.body.status);
             if (!isUpdate) throw new ApiException(messageResponse.UPDATE_HOUSE_STATUS_FAIL, 500);
 
             return res.json(apiResponse(messageResponse.UPDATE_HOUSE_STATUS_SUCCESS, true));
@@ -62,9 +62,9 @@ class HouseController {
     }
 
     static async deleteHouse(req, res) {
-        const { id } = req.params;
+        const { houseId } = req.params;
         try {
-            const isDelete = await HouseService.delete(id);
+            const isDelete = await HouseService.delete(houseId);
             if (!isDelete) throw new ApiException(messageResponse.DELETE_HOUSE_FAIL, 500);
 
             return res.json(apiResponse(messageResponse.DELETE_HOUSE_SUCCESS, true));

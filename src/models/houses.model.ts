@@ -1,5 +1,6 @@
 import { Model, QueryContext } from "objection";
 import { v4 as uuidv4 } from "uuid";
+import { Permissions } from "../interfaces";
 import HouseFloors from "./houseFloors.model";
 
 class Houses extends Model {
@@ -17,7 +18,7 @@ class Houses extends Model {
     updated_by: string;
     updated_at: string;
     createdBy: string;
-    permissions: object;
+    permissions: Permissions;
 
     static get tableName() {
         return "houses";

@@ -1,7 +1,9 @@
 enum messageResponse {
     UNKNOWN_ERROR = "Unknown error",
+    UNAUTHORIZED = "You are not authorized to access this resource",
     FILE_UPLOAD_SUCCESS = "File uploaded successfully",
     FILE_UPLOAD_FAILED = "File upload failed",
+    PERMISSION_DENIED = "Permission denied",
     GET_USERS_LIST_SUCCESS = "Get users list successfully",
     NO_USERS_FOUND = "No users found",
     GET_USER_SUCCESS = "Get user successfully",
