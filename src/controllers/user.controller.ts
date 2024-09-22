@@ -1,13 +1,18 @@
 "use strict";
 
 import redisClient from "../config/redis.config";
+import { AccountRoles } from "../enums";
 import messageResponse from "../enums/message.enum";
 import { UserService } from "../services";
 import { ApiException, apiResponse, bcrypt, Exception, sendMail } from "../utils";
 
 class UserController {
     static async getAllUsers(req, res) {
+        const user = req.user;
         try {
+            if (user.role !== AccountRoles.ADMIN) {
+                throw new ApiException(messageResponse.PERMISSION_DENIED, 403);
+            }
             const users = await UserService.getUsers();
             return res.status(200).json(apiResponse(messageResponse.GET_USERS_LIST_SUCCESS, true, users));
         } catch (err) {
