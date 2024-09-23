@@ -21,6 +21,7 @@ class HouseController {
         const user = req.user;
         try {
             const list = await HouseService.getHouseByUser(user.id);
+            if (list.length === 0) throw new ApiException(messageResponse.NO_HOUSES_FOUND, 404);
             return res.json(apiResponse(messageResponse.GET_HOUSE_LIST_SUCCESS, true, list));
         } catch (err) {
             Exception.handle(err, req, res);

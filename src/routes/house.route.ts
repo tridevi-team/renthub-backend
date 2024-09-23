@@ -11,7 +11,7 @@ houseRouter.post("/create", houseValidator.createHouse, handleErrors, HouseContr
 houseRouter.get("/list", HouseController.getHouseList);
 houseRouter.get("/:houseId/details", authorize(Module.HOUSE, Action.READ), houseValidator.houseIdValidator, handleErrors, HouseController.getHouseDetails);
 houseRouter.put("/:houseId/update", authorize(Module.HOUSE, Action.UPDATE), houseValidator.updateHouseDetails, handleErrors, HouseController.updateHouseDetails);
-houseRouter.patch("/:houseId/updateStatus", authorize(Module.HOUSE, Action.UPDATE), houseValidator.updateHouseStatus, handleErrors, HouseController.updateHouseStatus);
+houseRouter.patch("/:houseId/update-status", authorize(Module.HOUSE, Action.UPDATE), houseValidator.updateHouseStatus, handleErrors, HouseController.updateHouseStatus);
 houseRouter.delete("/:houseId/delete", authorize(Module.HOUSE, Action.DELETE), HouseController.deleteHouse);
 
 export default houseRouter;

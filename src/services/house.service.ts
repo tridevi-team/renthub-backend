@@ -13,7 +13,6 @@ class HouseService {
             .where("houses.created_by", userId)
             .orWhere("user_roles.user_id", userId)
             .select("houses.*", "roles.permissions");
-        if (list.length === 0) throw new ApiException(messageResponse.NO_HOUSES_FOUND, 404);
 
         const fullPermissions = {
             house: { create: false, read: true, update: true, delete: true },
