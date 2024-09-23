@@ -5,6 +5,7 @@ import { UserCreate, UserUpdate } from "../interfaces/user.interface";
 import { Houses, Users } from "../models";
 import { ApiException, bcrypt, jwtToken, sendMail } from "../utils";
 import camelToSnake from "../utils/camelToSnake";
+import HouseService from "./house.service";
 
 class UserService {
     static async getUserById(id: string) {
@@ -44,13 +45,7 @@ class UserService {
             }
         }
 
-        const housePermissions = await Houses.query()
-            .leftJoin("user_roles", "houses.id", "user_roles.house_id")
-            .leftJoin("roles", "user_roles.role_id", "roles.id")
-            .where("user_roles.user_id", user.id)
-            .orWhere("houses.created_by", user.id)
-            .select("houses.id", "houses.name", "houses.address", "houses.status", "roles.permissions");
-
+        const housePermissions = await HouseService.getHouseByUser(user.id);
         const { accessToken, refreshToken } = await this.generateToken({
             id: user.id,
             email: user.email,

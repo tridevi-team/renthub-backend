@@ -23,7 +23,8 @@ export interface HouseUpdate {
     invoiceDate: number;
     numCollectDays: number;
     contractDefault?: string;
-    status: boolean;
+    status?: boolean;
+    updatedBy?: string;
 }
 
 export interface CRUDPermissions {

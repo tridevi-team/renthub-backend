@@ -41,6 +41,7 @@ class HouseService {
     }
 
     static async create(data: HouseCreate) {
+        console.log("🚀 ~ HouseService ~ create ~ data:", data);
         const house = await Houses.query().findOne({
             name: data.name,
             created_by: data.createdBy,
@@ -82,7 +83,7 @@ class HouseService {
             }
         }
 
-        const dataCreated = await Houses.query().withGraphFetched("floors.rooms").findById(addNewHouse.id);
+        const dataCreated = await Houses.query().withGraphJoined("floors.rooms").findById(addNewHouse.id);
         return dataCreated;
     }
 
@@ -97,9 +98,8 @@ class HouseService {
     static async updateStatus(houseId: string, status: boolean) {
         const details = await this.getHouseById(houseId);
 
-        const updatedRow = await details.$query().patch({ status });
-        const isUpdate = updatedRow > 0;
-        return isUpdate;
+        await details.$query().patch({ status });
+        return { houseId, status: details.status };
     }
 
     static async delete(houseId: string) {

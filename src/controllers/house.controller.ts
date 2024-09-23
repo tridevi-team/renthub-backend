@@ -39,8 +39,19 @@ class HouseController {
 
     static async updateHouseDetails(req, res) {
         const { houseId } = req.params;
+        const { user } = req;
+        const { name, address, description, collectionCycle, invoiceDate, numCollectDays } = req.body;
         try {
-            const update = await HouseService.update(houseId, req.body);
+            const data = {
+                name,
+                address,
+                description: description,
+                collectionCycle,
+                invoiceDate,
+                numCollectDays,
+                updatedBy: user.id,
+            };
+            const update = await HouseService.update(houseId, data);
             if (!update) throw new ApiException(messageResponse.UPDATE_HOUSE_FAIL, 500);
 
             return res.json(apiResponse(messageResponse.UPDATE_HOUSE_SUCCESS, true, update));
@@ -55,7 +66,7 @@ class HouseController {
             const isUpdate = await HouseService.updateStatus(houseId, req.body.status);
             if (!isUpdate) throw new ApiException(messageResponse.UPDATE_HOUSE_STATUS_FAIL, 500);
 
-            return res.json(apiResponse(messageResponse.UPDATE_HOUSE_STATUS_SUCCESS, true));
+            return res.json(apiResponse(messageResponse.UPDATE_HOUSE_STATUS_SUCCESS, true, isUpdate));
         } catch (err) {
             Exception.handle(err, req, res);
         }

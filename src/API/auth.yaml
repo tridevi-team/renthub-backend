@@ -1,12 +1,7 @@
-openapi: "3.0.3"
-info:
-    title: API for authentication
-    version: 1.0.0
 tags:
     - name: Auth
       description: Authentication API
-servers:
-    - url: http://localhost:3000
+
 components:
     schemas:
         LoginRequest:

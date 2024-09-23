@@ -1,6 +1,7 @@
-import { Model, QueryContext } from "objection";
+import { Model, ModelOptions, QueryContext } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { Permissions } from "../interfaces";
+import { currentDateTime } from "../utils/currentTime";
 import HouseFloors from "./houseFloors.model";
 
 class Houses extends Model {
@@ -30,6 +31,10 @@ class Houses extends Model {
 
     $beforeInsert(queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
+    }
+
+    $beforeUpdate(opt: ModelOptions, queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
     }
 
     static get jsonSchema() {

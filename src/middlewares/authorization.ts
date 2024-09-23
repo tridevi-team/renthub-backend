@@ -31,7 +31,7 @@ const authorizationMiddleware = (module: Module, action: string) => {
             if (houseId) {
                 const isOwner = await HouseService.isOwner(user.id, houseId);
                 const isAccess = await HouseService.isAccessible(user.id, houseId, action);
-                if (!isOwner || !isAccess) {
+                if (!isOwner && !isAccess) {
                     throw new ApiException(messageResponse.UNAUTHORIZED, 403);
                 }
             }
