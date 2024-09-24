@@ -13,6 +13,7 @@ class Roles extends Model {
     created_at: string;
     updated_by: string;
     updated_at: string;
+    createdBy: string;
 
     static get tableName() {
         return "roles";

@@ -119,9 +119,11 @@ class HouseService {
         const housePermissions = await Houses.query()
             .leftJoin("user_roles", "houses.id", "user_roles.house_id")
             .leftJoin("roles", "user_roles.role_id", "roles.id")
-            .findById(houseId)
-            .select("roles.permissions");
-        if (!housePermissions.permissions) return false;
+            .where("houses.id", houseId)
+            .andWhere("user_roles.user_id", userId)
+            .select("roles.permissions")
+            .first();
+        if (!housePermissions?.permissions) return false;
         else if (action === Action.READ) {
             return housePermissions.permissions.house.read || housePermissions.permissions.house.update || housePermissions.permissions.house.delete;
         }

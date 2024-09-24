@@ -1,10 +1,11 @@
 import { check } from "express-validator";
 
 const createRoleValidator = [
-    check("houseId").isUUID().withMessage("houseId is not in the correct format"),
     check("name").isString().withMessage("name must be a string"),
     check("permissions")
-        .isObject()
+        .isObject({
+            strict: true,
+        })
         .withMessage("permissions must be an object")
         .custom((value: object) => {
             const keys = ["house", "role", "room", "service", "bill", "equipment"];
@@ -22,7 +23,9 @@ const createRoleValidator = [
                     throw new Error(`permissions.${key} must contain create, read, update, delete`);
                 }
             }
+            return true;
         }),
+    check("description").optional().isString().withMessage("description must be a string"),
     check("status").isBoolean().withMessage("status must be a boolean"),
 ];
 
@@ -47,7 +50,9 @@ const updateRoleValidator = [
                     throw new Error(`permissions.${key} must contain create, read, update, delete`);
                 }
             }
+            return true;
         }),
+    check("description").optional().isString().withMessage("Description must be a string"),
     check("status").isBoolean().withMessage("status must be a boolean"),
 ];
 

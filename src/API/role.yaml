@@ -1,0 +1,661 @@
+openapi: "3.0.3"
+tags:
+    - name: Role
+      description: Role API
+components:
+    schemas:
+        CRUDPermissions:
+            type: object
+            properties:
+                create:
+                    type: boolean
+                    example: true
+                read:
+                    type: boolean
+                    example: true
+                update:
+                    type: boolean
+                    example: true
+                delete:
+                    type: boolean
+                    example: true
+        RoleInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    description: Role ID
+                    example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                houseId:
+                    type: string
+                    format: uuid
+                    description: House ID
+                    example: 225cb910-7894-433e-97d8-0be99cdb7953
+                name:
+                    type: string
+                    description: Role name
+                    example: Room manager
+                permissions:
+                    type: object
+                    description: Role permissions
+                    properties:
+                        house:
+                            $ref: "#/components/schemas/CRUDPermissions"
+                        room:
+                            $ref: "#/components/schemas/CRUDPermissions"
+                        role:
+                            $ref: "#/components/schemas/CRUDPermissions"
+                        service:
+                            $ref: "#/components/schemas/CRUDPermissions"
+                        bill:
+                            $ref: "#/components/schemas/CRUDPermissions"
+                        equipment:
+                            $ref: "#/components/schemas/CRUDPermissions"
+                description:
+                    type: string
+                    description: Role description
+                    example: Responsible for managing rooms
+                status:
+                    type: boolean
+                    description: Role status
+                    example: true
+                createdBy:
+                    type: string
+                    format: uuid
+                    description: User ID
+                    example: 231c665c-dc53-42c6-88cc-e36490cb52a8
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: Role creation date
+                    example: "2021-07-01T00:00:00Z"
+                updatedBy:
+                    type: string
+                    format: uuid
+                    description: User ID
+                    example: 231c665c-dc53-42c6-88cc-e36490cb52a8
+                updatedAt:
+                    type: string
+                    format: date-time
+                    description: Role update date
+                    example: "2021-07-01T00:00:00Z"
+            required:
+                - id
+                - name
+                - description
+
+        CreateRoleSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: "CREATE_ROLE_SUCCESS"
+                message:
+                    type: string
+                    example: "Create new role successfully"
+                data:
+                    $ref: "#/components/schemas/RoleInfo"
+                description:
+                    type: string
+                    example: "Create new role successfully"
+                status:
+                    type: boolean
+                    example: true
+                createdBy:
+                    type: string
+                    format: uuid
+                    example: 231c665c-dc53-42c6-88cc-e36490cb52a8
+                createdAt:
+                    type: string
+                    format: date-time
+                    example: "2021-07-01T00:00:00Z"
+            required:
+                - success
+                - code
+                - message
+                - data
+        RoleNameExists:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    example: "ROLE_NAME_ALREADY_EXISTS"
+                message:
+                    type: string
+                    example: "Role name already exists"
+                data:
+                    type: object
+            required:
+                - success
+                - code
+                - message
+
+        RoleByHouse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: "GET_ROLES_BY_HOUSE_SUCCESS"
+                message:
+                    type: string
+                    example: "Get roles list by house successful"
+                data:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RoleInfo"
+                description:
+                    type: string
+                    example: "Get roles list by house successful"
+                status:
+                    type: boolean
+                    example: true
+                createdBy:
+                    type: string
+                    format: uuid
+                    example: 231c665c-dc53-42c6-88cc-e36490cb52a8
+                createdAt:
+                    type: string
+                    format: date-time
+                    example: "2021-07-01T00:00:00Z"
+                updatedBy:
+                    type: string
+                    format: uuid
+                    example: 231c665c-dc53-42c6-88cc-e36490cb52a8
+                updatedAt:
+                    type: string
+                    format: date-time
+                    example: "2021-07-01T00:00:00Z"
+            required:
+                - success
+                - code
+                - message
+                - data
+        NoRolesFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    example: "NO_ROLES_FOUND"
+                message:
+                    type: string
+                    example: "No roles found in the house"
+                data:
+                    type: object
+                    example: {}
+            required:
+                - success
+                - code
+                - message
+        RoleDetailsSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: "GET_ROLE_DETAILS_SUCCESS"
+                message:
+                    type: string
+                    example: "Get role details successfully"
+                data:
+                    $ref: "#/components/schemas/RoleInfo"
+        RoleNotFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    default: false
+                code:
+                    type: boolean
+                    default: ROLE_NOT_FOUND
+                message:
+                    type: string
+                    default: Role not found
+        RoleUpdateRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: Role name
+                    example: "Room manager"
+                description:
+                    type: string
+                    description: Role description
+                    example: "Responsible for managing rooms"
+                permissions:
+                    type: object
+                    description: Role permissions
+                    properties:
+                        house:
+                            $ref: "#/components/schemas/CRUDPermissions"
+                        room:
+                            $ref: "#/components/schemas/CRUDPermissions"
+                        role:
+                            $ref: "#/components/schemas/CRUDPermissions"
+                        service:
+                            $ref: "#/components/schemas/CRUDPermissions"
+                        bill:
+                            $ref: "#/components/schemas/CRUDPermissions"
+                        equipment:
+                            $ref: "#/components/schemas/CRUDPermissions"
+                status:
+                    type: boolean
+                    description: Role status
+                    example: true
+        RoleUpdateSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: "UPDATE_ROLE_SUCCESS"
+                message:
+                    type: string
+                    example: "Update role successfully"
+                data:
+                    $ref: "#/components/schemas/RoleInfo"
+        AssignRoleRequest:
+            type: object
+            properties:
+                roleId:
+                    type: string
+                    format: uuid
+                    example: 93737dcf-8657-4e58-9f02-84c28ad874f5
+                userId:
+                    type: string
+                    format: uuid
+                    example: 7f4f9dcb-7990-11ef-a1bc-6018953af69a
+
+        AssignRoleSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    default: true
+                code:
+                    type: string
+                    default: ASSIGN_ROLE_SUCCESS
+                message:
+                    type: string
+                    default: Role assigned successfully
+                data:
+                    type: object
+                    properties:
+                        id:
+                            type: string
+                            format: uuid
+                            example: dac95551-c877-4b39-a641-ab9a91d4a649
+                        userId:
+                            type: string
+                            format: uuid
+                            example: 7f4f9dcb-7990-11ef-a1bc-6018953af69a
+                        houseId:
+                            type: string
+                            format: uuid
+                            example: 695668a2-d7cc-4443-a472-ae2713f0005b
+                        roleId:
+                            type: string
+                            format: uuid
+                            example: 93737dcf-8657-4e58-9f02-84c28ad874f5
+                        createdBy:
+                            type: string
+                            format: date-time
+                            example: 2021-07-01T00:00:00Z
+        RoleDeleteSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: "DELETE_ROLE_SUCCESS"
+                message:
+                    type: string
+                    example: Role deleted successfully
+                data:
+                    type: object
+        RoleDeleteFail:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    default: false
+                code:
+                    type: string
+                    default: CANNOT_DELETE_ROLE_ASSIGNED_TO_USER
+                message:
+                    type: string
+                    default: Cannot delete role because it is assigned to another user
+        RoleStatusUpdateSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: "UPDATE_ROLE_STATUS_SUCCESS"
+                message:
+                    type: string
+                    example: "Role status updated successfully"
+                data:
+                    $ref: "#/components/schemas/RoleInfo"
+paths:
+    /roles/{houseId}/create/role:
+        post:
+            tags:
+                - Role
+            summary: Create a new role
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  description: House ID
+                  schema:
+                      type: string
+                      format: uuid
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                    description: Role name
+                                    example: "Room manager"
+                                description:
+                                    type: string
+                                    description: Role description
+                                    example: "Responsible for managing rooms"
+                                permissions:
+                                    type: object
+                                    description: Role permissions
+                                    properties:
+                                        house:
+                                            $ref: "#/components/schemas/CRUDPermissions"
+                                        room:
+                                            $ref: "#/components/schemas/CRUDPermissions"
+                                        role:
+                                            $ref: "#/components/schemas/CRUDPermissions"
+                                        service:
+                                            $ref: "#/components/schemas/CRUDPermissions"
+                                        bill:
+                                            $ref: "#/components/schemas/CRUDPermissions"
+                                        equipment:
+                                            $ref: "#/components/schemas/CRUDPermissions"
+                                status:
+                                    type: boolean
+                                    description: Role status
+                                    example: true
+            responses:
+                "200":
+                    description: Role created successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CreateRoleSuccess"
+
+                "400":
+                    description: Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: "#/components/schemas/ValidationError"
+                "409":
+                    description: Role already exists
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: "#/components/schemas/RoleNameExists"
+    /roles/{houseId}/list:
+        get:
+            tags:
+                - Role
+            summary: Get all roles
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  description: House ID
+                  schema:
+                      type: string
+                      format: uuid
+            security:
+                - BearerAuth: []
+            responses:
+                "200":
+                    description: Get all roles successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RoleByHouse"
+                "400":
+                    description: Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: "#/components/schemas/ValidationError"
+                "404":
+                    description: No roles found in the house
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoRolesFound"
+
+    /roles/{roleId}/details:
+        get:
+            tags:
+                - Role
+            summary: Get role details
+            parameters:
+                - in: path
+                  name: roleId
+                  required: true
+                  description: Role ID
+                  schema:
+                      type: string
+                      format: uuid
+            security:
+                - BearerAuth: []
+            responses:
+                "200":
+                    description: Get role details successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RoleDetailsSuccess"
+                "400":
+                    description: Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "404":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RoleNotFound"
+
+    /roles/{roleId}/update:
+        put:
+            tags:
+                - Role
+            summary: Update role
+            parameters:
+                - in: path
+                  name: roleId
+                  required: true
+                  description: Role ID
+                  schema:
+                      type: string
+                      format: uuid
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/RoleUpdateRequest"
+            responses:
+                "200":
+                    description: Role updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RoleUpdateSuccess"
+                "400":
+                    description: Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "404":
+                    description: Role not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RoleNotFound"
+    /roles/{roleId}/update-status:
+        patch:
+            tags:
+                - Role
+            summary: Update role status
+            parameters:
+                - in: path
+                  name: roleId
+                  required: true
+                  description: Role ID
+                  schema:
+                      type: string
+                      format: uuid
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                status:
+                                    type: boolean
+                                    description: Role status
+                                    example: true
+            responses:
+                "200":
+                    description: Role status updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RoleStatusUpdateSuccess"
+                "400":
+                    description: Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "404":
+                    description: Role not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RoleNotFound"
+    /roles/{houseId}/assign-role:
+        post:
+            tags:
+                - Role
+            summary: Assign role to user
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  description: House ID
+                  schema:
+                      type: string
+                      format: uuid
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AssignRoleRequest"
+            security:
+                - BearerAuth: []
+            responses:
+                "200":
+                    description: Assign role to user successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AssignRoleSuccess"
+                "400":
+                    description: Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "404":
+                    description: Role not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RoleNotFound"
+    /roles/{roleId}/delete:
+        delete:
+            tags:
+                - Role
+            summary: Delete role
+            parameters:
+                - in: path
+                  name: roleId
+                  required: true
+                  description: Role ID
+                  schema:
+                      type: string
+                      format: uuid
+            security:
+                - BearerAuth: []
+            responses:
+                "200":
+                    description: Role deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RoleDeleteSuccess"
+                "400":
+                    description: Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+
+                "409":
+                    description: Role is assigned to another user
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RoleDeleteFail"
