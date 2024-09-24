@@ -30,8 +30,9 @@ const authorizationMiddleware = (module: Module, action: string) => {
             // Check if user is owner or has access to the resource (if applicable)
             if (houseId) {
                 const isOwner = await HouseService.isOwner(user.id, houseId);
+                if (isOwner) return next();
                 const isAccess = await HouseService.isAccessible(user.id, houseId, action);
-                if (!isOwner && !isAccess) {
+                if (!isAccess) {
                     throw new ApiException(messageResponse.UNAUTHORIZED, 403);
                 }
             }
