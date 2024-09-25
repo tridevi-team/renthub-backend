@@ -1,8 +1,8 @@
 import "dotenv/config";
 import redisConfig from "../config/redis.config";
 import messageResponse from "../enums/message.enum";
-import { UserCreate, UserUpdate } from "../interfaces/user.interface";
-import { Houses, Users } from "../models";
+import { UserCreate, UserUpdate } from "../interfaces";
+import { Users } from "../models";
 import { ApiException, bcrypt, jwtToken, sendMail } from "../utils";
 import camelToSnake from "../utils/camelToSnake";
 import HouseService from "./house.service";

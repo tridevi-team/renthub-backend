@@ -137,3 +137,27 @@ components:
                     default: CHECK_MAIL_RESET_PASSWORD
                 message:
                     default: Check your mail to reset password
+
+        Address:
+            type: object
+            properties:
+                city:
+                    type: string
+                    minLength: 1
+                    maxLength: 50
+                    example: "Ha Noi"
+                district:
+                    type: string
+                    minLength: 1
+                    maxLength: 50
+                    example: "Cau Giay"
+                ward:
+                    type: string
+                    minLength: 1
+                    maxLength: 50
+                    example: "Xuan Thuy"
+                street:
+                    type: string
+                    minLength: 1
+                    maxLength: 50
+                    example: "1234 Main St"

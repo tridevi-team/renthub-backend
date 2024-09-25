@@ -15,8 +15,8 @@ components:
                     type: string
                     example: "House 5"
                 address:
-                    type: string
-                    example: "1234 Main St"
+                    type: object
+                    $ref: "#/components/schemas/Address"
                 contractDefault:
                     type: string
                     nullable: true
@@ -60,11 +60,9 @@ components:
                     minLength: 1
                     example: "House 1"
                 address:
-                    description: The address of the house
-                    type: string
-                    maxLength: 200
-                    minLength: 1
-                    example: "1234 Main St"
+                    description: The address of the house. Use API https://provinces.tmquang.com/api/?depth=3 to get the address
+                    type: object
+                    $ref: "#/components/schemas/Address"
                 numOfFloors:
                     description: The number of floors in the house
                     type: integer
@@ -132,8 +130,8 @@ components:
                             type: string
                             example: "House 5"
                         address:
-                            type: string
-                            example: "1234 Main St"
+                            type: object
+                            $ref: "#/components/schemas/Address"
                         contractDefault:
                             type: string
                             nullable: true
@@ -272,8 +270,8 @@ components:
                                 type: string
                                 example: "House 1"
                             address:
-                                type: string
-                                example: "1234 Main St"
+                                type: object
+                                $ref: "#/components/schemas/Address"
                             contractDefault:
                                 type: string
                                 nullable: true
@@ -410,10 +408,8 @@ components:
                     example: "House 1"
                 address:
                     description: The address of the house
-                    type: string
-                    maxLength: 200
-                    minLength: 1
-                    example: "1234 Main St"
+                    type: object
+                    $ref: "#/components/schemas/Address"
                 description:
                     description: The description of the house, it is optional
                     type: string

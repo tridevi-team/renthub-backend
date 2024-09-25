@@ -3,7 +3,17 @@ import { check } from "express-validator";
 
 const createHouse = [
     check("name", "Please provide a valid name").isString().isLength({ min: 1, max: 50 }),
-    check("address", "Please provide a valid address").isString().isLength({ min: 1, max: 200 }),
+    check("address", "Please provide a valid address")
+        .isObject()
+        .custom((value) => {
+            const keys = ["city", "district", "street", "ward"];
+            for (const key of keys) {
+                if (!value.hasOwnProperty(key)) {
+                    throw new Error(`address must have a ${key} property`);
+                }
+            }
+            return true;
+        }),
     check("numOfFloors", "Please provide a valid number of floors").isInt(),
     check("numOfRoomsPerFloor", "Please provide a valid number of rooms per floor").isInt(),
     check("maxRenters", "Please provide a valid number of max renters").isInt(),
@@ -17,7 +27,17 @@ const createHouse = [
 //
 const updateHouseDetails = [
     check("name", "Please provide a valid name").isString().isLength({ min: 1, max: 50 }),
-    check("address", "Please provide a valid address").isString().isLength({ min: 1, max: 200 }),
+    check("address", "Please provide a valid address")
+        .isObject()
+        .custom((value) => {
+            const keys = ["city", "district", "street", "ward"];
+            for (const key of keys) {
+                if (!value.hasOwnProperty(key)) {
+                    throw new Error(`address must have a ${key} property`);
+                }
+            }
+            return true;
+        }),
     check("description", "Please provide a valid description").optional().isString(),
     check("collectionCycle", "Please provide a valid collection cycle").optional().isInt(),
     check("invoiceDate", "Please provide a valid invoice date").optional().isInt(),

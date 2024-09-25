@@ -1,6 +1,8 @@
+import { Address } from ".";
+
 export interface HouseCreate {
     name: string;
-    address: string;
+    address: Address;
     numOfFloors: number;
     numOfRoomsPerFloor: number;
     maxRenters: number;

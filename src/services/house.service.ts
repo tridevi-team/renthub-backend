@@ -40,7 +40,6 @@ class HouseService {
     }
 
     static async create(data: HouseCreate) {
-        console.log("🚀 ~ HouseService ~ create ~ data:", data);
         const house = await Houses.query().findOne({
             name: data.name,
             created_by: data.createdBy,
@@ -88,6 +87,16 @@ class HouseService {
 
     static async update(houseId: string, data: HouseUpdate) {
         const details = await this.getHouseById(houseId);
+
+        // check if house name already exists
+        if (data.name && data.name !== details.name) {
+            const house = await Houses.query().findOne({
+                name: data.name,
+                created_by: details.createdBy,
+            });
+
+            if (house) throw new ApiException(messageResponse.HOUSE_ALREADY_EXISTS, 409);
+        }
 
         await details.$query().patch(camelToSnake(data));
 

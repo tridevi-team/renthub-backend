@@ -1,13 +1,13 @@
 import { Model, ModelOptions, QueryContext } from "objection";
 import { v4 as uuidv4 } from "uuid";
-import { Permissions } from "../interfaces";
+import { Address, Permissions } from "../interfaces";
 import { currentDateTime } from "../utils/currentTime";
 import HouseFloors from "./houseFloors.model";
 
 class Houses extends Model {
     id: string;
     name: string;
-    address: string;
+    address: Address;
     contract_default: string;
     description?: string;
     collection_cycle: number;
@@ -44,7 +44,7 @@ class Houses extends Model {
             properties: {
                 id: { type: "string", format: "uuid" },
                 name: { type: "string", maxLength: 50 },
-                address: { type: "string", maxLength: 255 },
+                address: { type: "object" },
                 contract_default: { type: "string" },
                 description: { type: "string" },
                 collection_cycle: { type: "integer" },
