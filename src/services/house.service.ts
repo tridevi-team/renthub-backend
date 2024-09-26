@@ -1,7 +1,7 @@
 import { Action, RoomStatus } from "../enums";
 import messageResponse from "../enums/message.enum";
-import { HouseCreate, HouseFilter, HouseUpdate } from "../interfaces";
-import { HouseFloors, Houses, Rooms } from "../models";
+import { HouseCreate, HouseFilter, HouseServiceInfo, HouseUpdate } from "../interfaces";
+import { HouseFloors, Houses, Rooms, Services } from "../models";
 import { ApiException } from "../utils";
 import camelToSnake from "../utils/camelToSnake";
 
@@ -209,6 +209,64 @@ class HouseService {
             return housePermissions.permissions.house.read || housePermissions.permissions.house.update || housePermissions.permissions.house.delete;
         }
         return housePermissions.permissions.house[action];
+    }
+
+    static async createService(houseId: string, data: HouseServiceInfo) {
+        const serviceDetails = await Services.query().findOne(
+            camelToSnake({
+                name: data.name,
+                houseId,
+            })
+        );
+        if (serviceDetails) throw new ApiException(messageResponse.SERVICE_ALREADY_EXISTS, 409);
+
+        const newService = await Services.query().insertAndFetch(camelToSnake({ ...data, houseId }));
+
+        return newService;
+    }
+
+    static async getServiceDetails(serviceId: string) {
+        const serviceDetails = await Services.query().findById(serviceId);
+        if (!serviceDetails) throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
+
+        return serviceDetails;
+    }
+
+    static async listServicesByHouse(houseId: string) {
+        const services = await Services.query().where("house_id", houseId);
+        if (services.length === 0) throw new ApiException(messageResponse.NO_SERVICES_FOUND, 404);
+
+        return services;
+    }
+
+    static async updateService(serviceId: string, data: HouseServiceInfo) {
+        const serviceDetails = await Services.query().findById(serviceId);
+        const serviceNameExists = await Services.query().findOne(
+            camelToSnake({
+                name: data.name,
+                houseId: serviceDetails.houseId,
+            })
+        );
+
+        if (serviceNameExists && serviceDetails.id !== serviceId) throw new ApiException(messageResponse.SERVICE_ALREADY_EXISTS, 409);
+
+        if (!serviceDetails) throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
+
+        const updatedService = await serviceDetails.$query().patchAndFetch(camelToSnake(data));
+
+        return updatedService;
+    }
+
+    static async deleteService(serviceId: string, deletedBy: string) {
+        const serviceDetails = await Services.query().findById(serviceId);
+        if (!serviceDetails) throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
+
+        await serviceDetails.$query().patch(camelToSnake({ updatedBy: deletedBy }));
+
+        const deletedService = await serviceDetails.$query().delete();
+
+        const isDeleted = deletedService > 0;
+        return isDeleted;
     }
 }
 

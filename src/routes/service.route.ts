@@ -1,17 +1,17 @@
 "use strict";
 import express from "express";
-import { serviceController } from "../controllers";
-import { serviceValidator } from "../middlewares/validator";
-import { handleErrors, access } from "../middlewares";
+import { ServiceController } from "../controllers";
+import { authentication, handleErrors } from "../middlewares";
+import { houseValidator, roomsValidator, serviceValidator } from "../middlewares/validator";
 
 const serviceRouter = express.Router();
 
-// serviceRouter.get("/list/:houseId", access, serviceValidator.getServiceByHouse, handleErrors, serviceController.getServiceByHouse);
-// serviceRouter.get("/details/:houseId/:serviceId", access, serviceValidator.getServiceDetails, handleErrors, serviceController.getServiceDetails);
-// serviceRouter.post("/create/:houseId", access, serviceValidator.createService, handleErrors, serviceController.create);
-// serviceRouter.post("/create/:houseId/:roomId", access, serviceValidator.createRoomService, handleErrors, serviceController.createRoomService);
-// serviceRouter.put("/update/:houseId/:serviceId", access, serviceValidator.updateService, handleErrors, serviceController.update);
-// serviceRouter.delete("/delete/:houseId/:serviceId", access, serviceValidator.deleteService, handleErrors, serviceController.delete);
-// serviceRouter.delete("/deleteRoomService/:houseId/:roomId", access, serviceValidator.deleteRoomService, handleErrors, serviceController.deleteRoomService);
+serviceRouter.get("/:houseId/list", authentication, houseValidator.houseIdValidator, handleErrors, ServiceController.getServicesByHouse);
+serviceRouter.get("/:serviceId/details", authentication, serviceValidator.serviceIdValidator, handleErrors, ServiceController.getServiceDetails);
+serviceRouter.post("/:houseId/create", authentication, serviceValidator.createService, handleErrors, ServiceController.createServiceForHouse);
+serviceRouter.put("/:serviceId/update", authentication, serviceValidator.serviceIdValidator, serviceValidator.updateService, handleErrors, ServiceController.updateService);
+serviceRouter.delete("/:serviceId/delete", authentication, serviceValidator.serviceIdValidator, handleErrors, ServiceController.deleteService);
+serviceRouter.post("/:roomId/add", authentication, roomsValidator.roomId, handleErrors, ServiceController.addServiceToRoom);
+serviceRouter.delete("/:roomId/deleteRoomService", authentication,  roomsValidator.roomId, handleErrors, ServiceController.removeServiceFromRoom);
 
 export default serviceRouter;

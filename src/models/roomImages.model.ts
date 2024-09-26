@@ -1,8 +1,15 @@
 import { Model, QueryContext } from "objection";
 import { v4 as uuidv4 } from "uuid";
+import { Rooms } from "./";
 
 class RoomImages extends Model {
     id: string;
+    room_id: string;
+    image_url: string;
+    description: string;
+    created_by: string;
+    created_at: string;
+    imageUrl: string;
 
     static get tableName() {
         return "room_images";
@@ -27,6 +34,19 @@ class RoomImages extends Model {
                 description: { type: "string", maxLength: 255 },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
+            },
+        };
+    }
+
+    static get relationMappings() {
+        return {
+            room: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Rooms,
+                join: {
+                    from: "room_images.room_id",
+                    to: "rooms.id",
+                },
             },
         };
     }

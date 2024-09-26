@@ -1,217 +1,103 @@
 "use strict";
-import { Houses, Rooms, RoomServices, Services } from "../models";
-import { apiResponse, jwtToken, Exception, ApiException } from "../utils";
-const serviceController = {
-    // async create(req, res) {
-    //     try {
-    //         const { houseId } = req.params;
-    //         const { name, unitPrice, hasIndex, type } = req.body;
-    //         const user = req.user;
-    //         const house = await Houses.query().findById(houseId);
-    //         if (!house) {
-    //             throw new ApiException(1003, "House not found");
-    //         }
 
-    //         const service = await Services.query().insert({
-    //             house_id: Number(houseId),
-    //             name,
-    //             unit_price: parseFloat(unitPrice),
-    //             has_index: hasIndex || false,
-    //             type,
-    //             created_by: user.id,
-    //         });
+import messageResponse from "../enums/message.enum";
+import { HouseService, RoomService } from "../services";
+import { apiResponse, Exception } from "../utils";
 
-    //         if (!service) {
-    //             throw new ApiException(1002, "Ocurred an error while creating service");
-    //         }
+class ServiceController {
+    static async createServiceForHouse(req, res) {
+        const { houseId } = req.params;
+        const { name, unitPrice, hasIndex, type } = req.body;
+        const user = req.user;
+        try {
+            const service = await HouseService.createService(houseId, {
+                name,
+                unitPrice,
+                hasIndex,
+                type,
+                createdBy: user.id,
+            });
 
-    //         res.json(formatJson.success(1007, "Create service successful", service));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+            return res.json(apiResponse(messageResponse.CREATE_SERVICE_SUCCESS, true, service));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    // async createRoomService(req, res) {
-    //     try {
-    //         const {
-    //             houseId,
-    //             roomId,
-    //         }: {
-    //             houseId: number;
-    //             roomId: number;
-    //         } = req.params;
+    static async addServiceToRoom(req, res) {
+        const { roomId } = req.params;
+        const user = req.user;
+        const { services } = req.body;
+        try {
+            await RoomService.addServiceToRoom(roomId, services, user.id);
+            return res.json(apiResponse(messageResponse.CREATE_ROOM_SERVICE_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         const user = req.user;
+    static async removeServiceFromRoom(req, res) {
+        const { roomId } = req.params;
+        const user = req.user;
+        const { servicesId } = req.body;
+        try {
+            await RoomService.removeServicesFromRoom(roomId, servicesId, user.id);
+            return res.json(apiResponse(messageResponse.DELETE_ROOM_SERVICE_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         const { services } = req.body;
+    static async getServicesByHouse(req, res) {
+        const { houseId } = req.params;
+        try {
+            const services = await HouseService.listServicesByHouse(houseId);
+            return res.json(apiResponse(messageResponse.GET_SERVICES_BY_HOUSE_SUCCESS, true, services));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         const house = await Houses.query().findById(houseId);
-    //         if (!house) {
-    //             throw new ApiException(1003, "House not found");
-    //         }
+    static async getServiceDetails(req, res) {
+        const { serviceId } = req.params;
+        try {
+            const service = await HouseService.getServiceDetails(serviceId);
+            return res.json(apiResponse(messageResponse.GET_SERVICE_DETAILS_SUCCESS, true, service));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         const room = await Rooms.query().findById(roomId);
-    //         if (!room) {
-    //             throw new ApiException(1003, "Room not found");
-    //         }
+    static async updateService(req, res) {
+        const { serviceId } = req.params;
+        const { name, unitPrice, hasIndex, type, description } = req.body;
+        const user = req.user;
+        try {
+            const updatedService = await HouseService.updateService(serviceId, {
+                name,
+                unitPrice,
+                type,
+                hasIndex,
+                description,
+                updatedBy: user.id,
+            });
 
-    //         if (services && services.length > 0) {
-    //             for (const service of services) {
-    //                 const { serviceId, startIndex } = service;
-    //                 const checkService = await Services.query().findOne({ id: serviceId, house_id: houseId });
-    //                 if (!checkService) {
-    //                     throw new ApiException(1010, "Service not found");
-    //                 }
-    //                 console.log({ room_id: roomId, service_id: serviceId });
+            return res.json(apiResponse(messageResponse.UPDATE_SERVICE_SUCCESS, true, updatedService));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //                 const checkRoomService = await RoomServices.query().findOne({ room_id: roomId, service_id: serviceId });
+    static async deleteService(req, res) {
+        const { serviceId } = req.params;
+        const user = req.user;
+        try {
+            await HouseService.deleteService(serviceId, user.id);
+            return res.json(apiResponse(messageResponse.DELETE_SERVICE_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+}
 
-    //                 if (checkRoomService) {
-    //                     throw new ApiException(1011, "Service already exists in this room");
-    //                 }
-
-    //                 await RoomServices.query().insert({ room_id: Number(roomId), service_id: serviceId, start_index: startIndex, created_by: user.id });
-    //             }
-    //         }
-
-    //         res.json(formatJson.success(1007, "Create room service successful"));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-
-    // async getServiceByHouse(req, res) {
-    //     try {
-    //         const { houseId } = req.params;
-
-    //         const house = await Houses.query().findById(houseId);
-    //         if (!house) {
-    //             throw new ApiException(1003, "House not found");
-    //         }
-
-    //         const services = await Services.query().where("house_id", houseId);
-    //         if (!services) {
-    //             throw new ApiException(1004, "Services not found");
-    //         }
-    //         res.json(formatJson.success(1006, "Get services by house successful", services));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-
-    // async getServiceDetails(req, res) {
-    //     try {
-    //         const { houseId, serviceId } = req.params;
-
-    //         const house = await Houses.query().findById(houseId);
-    //         if (!house) {
-    //             throw new ApiException(1003, "House not found");
-    //         }
-
-    //         const service = await Services.query().findById(serviceId);
-    //         if (!service) {
-    //             throw new ApiException(1003, "Service not found");
-    //         }
-
-    //         res.json(formatJson.success(1003, "Get service details successful", service));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-
-    // async update(req, res) {
-    //     try {
-    //         const { houseId, serviceId } = req.params;
-    //         const { name, unitPrice, rules, type } = req.body;
-
-    //         const house = await Houses.query().findById(houseId);
-    //         if (!house) {
-    //             throw new ApiException(1003, "House not found");
-    //         }
-
-    //         const service = await Services.query().findById(serviceId);
-    //         if (!service) {
-    //             throw new ApiException(1003, "Service not found");
-    //         }
-
-    //         const updated = await Services.query()
-    //             .findById(Number(serviceId))
-    //             .patch({
-    //                 name,
-    //                 unit_price: unitPrice,
-    //                 rules: JSON.stringify(rules) || null,
-    //                 type,
-    //             });
-
-    //         if (!updated) {
-    //             throw new ApiException(1002, "Ocurred an error while updating service");
-    //         }
-
-    //         res.json(formatJson.success(1003, "Update service successful"));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-
-    // async delete(req, res) {
-    //     try {
-    //         const { houseId, serviceId } = req.params;
-
-    //         const house = await Houses.query().findById(houseId);
-    //         if (!house) {
-    //             throw new ApiException(1003, "House not found");
-    //         }
-
-    //         const service = await Services.query().findById(serviceId);
-    //         if (!service) {
-    //             throw new ApiException(1003, "Service not found");
-    //         }
-
-    //         const deleted = await Services.query().deleteById(serviceId);
-    //         if (!deleted) {
-    //             throw new ApiException(1002, "Ocurred an error while deleting service");
-    //         }
-
-    //         res.json(formatJson.success(1003, "Delete service successful"));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-
-    // async deleteRoomService(req, res) {
-    //     try {
-    //         const { houseId, roomId } = req.params;
-    //         const { services } = req.body;
-
-    //         const house = await Houses.query().findById(houseId);
-    //         if (!house) {
-    //             throw new ApiException(1003, "House not found");
-    //         }
-
-    //         const room = await Rooms.query().findById(roomId);
-    //         if (!room) {
-    //             throw new ApiException(1003, "Room not found");
-    //         }
-
-    //         if (services && services.length > 0) {
-    //             for (const service of services) {
-    //                 const checkRoomService = await RoomServices.query().findOne({ room_id: roomId, service_id: service });
-
-    //                 if (!checkRoomService) {
-    //                     throw new ApiException(1011, "Service not exists in this room");
-    //                 }
-
-    //                 await RoomServices.query()
-    //                     .delete()
-    //                     .where({ room_id: Number(roomId), service_id: service });
-    //             }
-    //         }
-
-    //         res.json(formatJson.success(1007, "Delete room service successful"));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-};
-
-export default serviceController;
+export default ServiceController;

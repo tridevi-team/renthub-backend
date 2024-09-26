@@ -145,7 +145,7 @@ class UserService {
             throw new ApiException(messageResponse.FAILED_EMAIL_VERIFICATION, 500);
         }
         const redis = await redisConfig;
-        await redis.set(`reset-password:${email}`, verifyCode);
+        await redis.set(`reset-password:${email}`, String(verifyCode));
         await redis.expire(`reset-password:${email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
     }
 
