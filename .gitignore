@@ -1,8 +1,7 @@
 node_modules
 .env
-.env.production
-.env.development
-.env.test
+.env.*
+!.env.*.example
 package-lock.json
 yarn.lock
 **/uploads/*
