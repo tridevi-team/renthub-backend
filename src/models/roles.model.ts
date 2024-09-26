@@ -4,6 +4,7 @@ import { Permissions } from "../interfaces";
 
 class Roles extends Model {
     id: string;
+    houseId: string;
     house_id: string;
     name: string;
     permissions: Permissions;
