@@ -540,6 +540,12 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/RoleNotFound"
+                "409":
+                    description: Role name already exists
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RoleNameExists"
     /roles/{roleId}/update-status:
         patch:
             tags:

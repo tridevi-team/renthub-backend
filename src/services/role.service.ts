@@ -39,6 +39,15 @@ class RoleService {
 
     static async update(roleId: string, data: Role) {
         const roleDetails = await this.getById(roleId);
+        // check name by house
+        const isNameExists = await Roles.query().findOne(
+            camelToSnake({
+                houseId: roleDetails.houseId,
+                name: data.name,
+            })
+        );
+
+        if (isNameExists && isNameExists.id !== roleId) throw new ApiException(messageResponse.ROLE_NAME_ALREADY_EXISTS, 409);
 
         const updatedRow = await roleDetails.$query().patch(camelToSnake(data));
 
