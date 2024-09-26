@@ -1,7 +1,6 @@
 "use strict";
-import UserController from "./user.controller";
-import HouseController from "./house.controller";
-import serviceController from "./service.controller";
-import roomController from "./room.controller";
-
-export { UserController, HouseController, serviceController, roomController };
+export { default as FloorController } from "./floor.controller";
+export { default as HouseController } from "./house.controller";
+export { default as RoomController } from "./room.controller";
+export { default as ServiceController } from "./service.controller";
+export { default as UserController } from "./user.controller";

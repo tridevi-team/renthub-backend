@@ -71,7 +71,7 @@ class UserController {
                 }
 
                 const redis = await redisClient;
-                await redis.set(`verify-account:${user.email}`, verifyCode);
+                await redis.set(`verify-account:${user.email}`, String(verifyCode));
                 await redis.expire(`verify-account:${user.email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
 
                 const mail = await sendMail(user.email, "Verify your account", `Your verification code is: ${verifyCode}`);

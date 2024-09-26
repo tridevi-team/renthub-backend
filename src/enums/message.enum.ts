@@ -58,6 +58,8 @@ enum messageResponse {
     CANNOT_ASSIGN_ROLE_TO_HOUSE_OWNER = "You cannot assign a role to the house owner",
     ASSIGN_ROLE_SUCCESS = "Role assigned successfully",
     CANNOT_DELETE_ROLE_ASSIGNED_TO_USER = "Cannot delete role because it is assigned to another user",
+    GET_ROOMS_BY_HOUSE_SUCCESS = "Rooms by house retrieved successfully",
+    GET_ROOM_DETAILS_SUCCESS = "Room details retrieved successfully",
     ROOM_ALREADY_EXISTS = "Room already exists",
     ROOM_NOT_FOUND = "Room not found",
     NO_ROOMS_FOUND = "No rooms found",
@@ -76,6 +78,17 @@ enum messageResponse {
     CREATE_FLOOR_SUCCESS = "Floor created successfully",
     UPDATE_FLOOR_SUCCESS = "Floor updated successfully",
     DELETE_FLOOR_SUCCESS = "Floor deleted successfully",
+    CREATE_ROOM_SERVICE_SUCCESS = "Room service created successfully",
+    SERVICE_ALREADY_EXISTS = "Service already exists",
+    SERVICE_NOT_FOUND = "Service not found",
+    NO_SERVICES_FOUND = "No services found",
+    CREATE_SERVICE_SUCCESS = "Service created successfully",
+    UPDATE_SERVICE_SUCCESS = "Service updated successfully",
+    DELETE_SERVICE_SUCCESS = "Service deleted successfully",
+    DELETE_ROOM_SERVICE_SUCCESS = "Room service deleted successfully",
+    GET_SERVICE_DETAILS_SUCCESS = "Service details retrieved successfully",
+    GET_SERVICES_BY_HOUSE_SUCCESS = "Services by house retrieved successfully",
+    GET_SERVICES_BY_ROOM_SUCCESS = "Services by room retrieved successfully",
 }
 
 export default messageResponse;

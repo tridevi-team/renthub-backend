@@ -1,4 +1,5 @@
 import { Address } from ".";
+import { ServiceTypes } from "../enums";
 
 export interface HouseCreate {
     name: string;
@@ -76,4 +77,14 @@ export interface HouseFilter {
         from: number;
         to: number;
     };
+}
+
+export interface HouseServiceInfo {
+    name: string;
+    unitPrice: number;
+    type: ServiceTypes;
+    hasIndex?: boolean;
+    description?: string;
+    createdBy?: string;
+    updatedBy?: string;
 }

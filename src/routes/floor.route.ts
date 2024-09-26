@@ -1,5 +1,5 @@
 import express from "express";
-import FloorController from "../controllers/floor.controller";
+import { FloorController } from "../controllers";
 import { authentication, handleErrors } from "../middlewares";
 import { houseValidator } from "../middlewares/validator";
 import floorValidator from "../middlewares/validator/floor.validator";

@@ -1,5 +1,5 @@
 import messageResponse from "../enums/message.enum";
-import FloorService from "../services/floor.service";
+import { FloorService } from "../services";
 import { apiResponse, Exception } from "../utils";
 
 class FloorController {

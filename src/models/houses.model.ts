@@ -2,7 +2,7 @@ import { Model, ModelOptions, QueryContext } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { Address, Permissions } from "../interfaces";
 import { currentDateTime } from "../utils/currentTime";
-import HouseFloors from "./houseFloors.model";
+import { HouseFloors } from "./";
 
 class Houses extends Model {
     id: string;

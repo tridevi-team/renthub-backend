@@ -13,7 +13,7 @@ import { swaggerSpec } from "./src/API/swagger";
 import "./src/config/database.config";
 import messageResponse from "./src/enums/message.enum";
 import { authentication, requestLogger } from "./src/middlewares";
-import { AuthRoute, EquipmentRoute, FloorRoute, HouseRoute, PaymentMethodRoute, renterRoute, RoleRoute, RoomRoute, ServiceRoute, UserRoute } from "./src/routes";
+import { AuthRoute, EquipmentRoute, FloorRoute, HouseRoute, PaymentMethodRoute, RenterRoute, RoleRoute, RoomRoute, ServiceRoute, UserRoute } from "./src/routes";
 import { aesEncrypt, apiResponse } from "./src/utils";
 
 const PORT = process.env.PORT || 3000;
@@ -74,7 +74,7 @@ app.use("/users", authentication, UserRoute);
 app.use("/houses", HouseRoute);
 app.use("/floors", FloorRoute);
 app.use("/roles", authentication, RoleRoute);
-app.use("/renters", authentication, renterRoute);
+app.use("/renters", authentication, RenterRoute);
 app.use("/services", ServiceRoute);
 app.use("/rooms", RoomRoute);
 app.use("/equipment", EquipmentRoute);

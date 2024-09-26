@@ -1,6 +1,6 @@
 "use strict";
-import * as nodemailer from "nodemailer";
 import "dotenv/config";
+import * as nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
     host: process.env.HOST_EMAIL,

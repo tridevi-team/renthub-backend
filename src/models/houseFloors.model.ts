@@ -1,7 +1,6 @@
 import { Model, QueryContext } from "objection";
 import { v4 as uuidv4 } from "uuid";
-import Houses from "./houses.model";
-import Rooms from "./rooms.model";
+import { Houses, Rooms } from "./";
 
 class HouseFloors extends Model {
     id: string;
