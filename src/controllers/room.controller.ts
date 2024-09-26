@@ -1,130 +1,120 @@
 "use strict";
-import { RoomImages, Rooms, RoomServices, Services } from "../models";
-import { ApiException, apiResponse, Exception } from "../utils";
 
-const roomController = {
-    // async getRoomList(req, res) {
-    //     try {
-    //         const { houseId } = req.params;
+import { RoomStatus } from "../enums";
+import messageResponse from "../enums/message.enum";
+import { RoomService } from "../services";
+import { apiResponse, Exception } from "../utils";
 
-    //         const roomList = await Rooms.query().where({ house_id: houseId });
-    //         if (!roomList || roomList.length === 0) {
-    //             return res.json(formatJson.success(1001, "There are no rooms in this house", []));
-    //         }
+class RoomController {
+    static async getRoomsByHouse(req, res) {
+        const { houseId } = req.params;
+        const { page, limit } = req.query;
+        try {
+            const rooms = await RoomService.listByHouse(houseId, { page: parseInt(page), limit: parseInt(limit) });
+            return res.json(apiResponse(messageResponse.GET_ROOMS_BY_HOUSE_SUCCESS, true, rooms));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         res.json(formatJson.success(1002, "Get room list successfully", roomList));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+    static async createRoom(req, res) {
+        const { houseId } = req.params;
+        const { name, floor, maxRenters, price, services, images, description, status } = req.body;
+        const userId = req.user.id;
+        try {
+            const newRoom = await RoomService.create(houseId, {
+                name,
+                floorId: floor,
+                maxRenters,
+                price,
+                description,
+                status: status || RoomStatus.AVAILABLE,
+                createdBy: userId,
+                updatedBy: userId,
+            });
 
-    // async createRoom(req, res) {
-    //     try {
-    //         let { houseId } = req.params;
-    //         houseId = parseInt(houseId);
+            RoomService.addServiceToRoom(newRoom.id, services, userId);
 
-    //         const userInfo = req.user;
+            RoomService.addImagesToRoom(newRoom.id, images, userId);
 
-    //         const { name, price, floor, maxRenters, services, images } = req.body;
-    //         const newRoom = await Rooms.query().insert({ name, floor, max_renters: maxRenters, price, house_id: houseId, created_by: userInfo.id });
+            const room = await RoomService.getRoomById(newRoom.id);
 
-    //         if (!newRoom) {
-    //             throw new ApiException(1003, "Error creating room");
-    //         }
+            const cleanData = {
+                ...room,
+                services: room.services.map((service) => {
+                    return {
+                        id: service.serviceId,
+                        name: service.service.name,
+                        quantity: service.quantity,
+                        unitPrice: service.service.unitPrice,
+                        type: service.service.type,
+                        description: service.description,
+                    };
+                }),
+                images: room.images.map((image) => image.imageUrl),
+            };
 
-    //         await RoomServices.query().delete().whereNotIn("service_id", services).andWhere({ room_id: newRoom.id });
-    //         if (services && services.length > 0) {
-    //             services.forEach(async (service) => {
-    //                 const checkService = await Services.query().findOne({ id: service, house_id: houseId });
-    //                 if (!checkService) {
-    //                     throw new ApiException(1010, "Service not found");
-    //                 }
-    //                 await RoomServices.query().insert({ room_id: newRoom.id, service_id: service });
-    //             });
-    //         }
+            return res.json(apiResponse(messageResponse.CREATE_ROOM_SUCCESS, true, cleanData));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         await RoomImages.query().delete().whereNotIn("image_url", images).andWhere({ room_id: newRoom.id });
-    //         if (images && images.length > 0) {
-    //             images.forEach(async (image) => {
-    //                 await RoomImages.query().insert({ room_id: newRoom.id, image_url: image, created_by: userInfo.id });
-    //             });
-    //         }
+    static async getRoomDetails(req, res) {
+        const { roomId } = req.params;
+        try {
+            const room = await RoomService.getRoomById(roomId);
+            const cleanData = {
+                ...room,
+                services: room.services.map((service) => {
+                    return {
+                        id: service.serviceId,
+                        name: service.service.name,
+                        quantity: service.quantity,
+                        unitPrice: service.service.unitPrice,
+                        type: service.service.type,
+                        description: service.description,
+                    };
+                }),
+                images: room.images.map((image) => image.imageUrl),
+            };
+            return res.json(apiResponse(messageResponse.GET_ROOM_DETAILS_SUCCESS, true, cleanData));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         res.json(formatJson.success(1007, "Room created successfully", newRoom));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+    static async updateRoom(req, res) {
+        const { roomId } = req.params;
+        const { name, floor, maxRenters, price, services, images } = req.body;
+        const userId = req.user.id;
+        try {
+            const updatedRoom = await RoomService.updateRoom(roomId, {
+                name,
+                floorId: floor,
+                maxRenters,
+                price,
+                services,
+                images,
+                updatedBy: userId,
+            });
 
-    // async updateRoom(req, res) {
-    //     try {
-    //         const { houseId, roomId } = req.params;
-    //         const userInfo = req.user;
+            return res.json(apiResponse(messageResponse.UPDATE_ROOM_SUCCESS, true, updatedRoom));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         const { name, floor, maxRenters, price, services, images } = req.body;
-    //         const updatedRoom = await Rooms.query().patchAndFetchById(roomId, { name, floor, max_renters: maxRenters, price });
+    static async deleteRoom(req, res) {
+        const { roomId } = req.params;
+        const userId = req.user.id;
+        try {
+            const deletedRoom = await RoomService.deleteRoom(roomId, userId);
+            return res.json(apiResponse(messageResponse.DELETE_ROOM_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+}
 
-    //         if (!updatedRoom) {
-    //             throw new ApiException(1004, "Error updating room");
-    //         }
-
-    //         await RoomServices.query().delete().whereNotIn("service_id", services).andWhere({ room_id: roomId });
-    //         if (services && services.length > 0) {
-    //             services.forEach(async (service) => {
-    //                 const checkService = await Services.query().findOne({ id: service });
-    //                 if (!checkService) {
-    //                     throw new ApiException(1010, "Service not found");
-    //                 }
-    //                 await RoomServices.query().insert({ room_id: roomId, service_id: service });
-    //             });
-    //         }
-
-    //         await RoomImages.query().delete().whereNotIn("image_url", images).andWhere({ room_id: roomId });
-    //         if (images && images.length > 0) {
-    //             images.forEach(async (image) => {
-    //                 await RoomImages.query().insert({ room_id: roomId, image_url: image, created_by: userInfo.id });
-    //             });
-    //         }
-
-    //         res.json(formatJson.success(1008, "Room updated successfully", updatedRoom));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-
-    // async deleteRoom(req, res) {
-    //     try {
-    //         const { houseId, roomId } = req.params;
-
-    //         const deletedRoom = await Rooms.query().deleteById(roomId);
-
-    //         if (!deletedRoom) {
-    //             throw new ApiException(1006, "Error deleting room");
-    //         }
-
-    //         res.json(formatJson.success(1009, "Room deleted successfully", deletedRoom));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-
-    // async getRoomDetails(req, res) {
-    //     try {
-    //         const { houseId, roomId } = req.params;
-
-    //         const roomDetails = await Rooms.query().findOne({ id: roomId, house_id: houseId });
-    //         if (!roomDetails) {
-    //             throw new ApiException(1001, "Room not found", []);
-    //         }
-
-    //         const roomServices = await RoomServices.query().where({ room_id: roomId });
-    //         const roomImages = await RoomImages.query().where({ room_id: roomId });
-
-    //         res.json(formatJson.success(1002, "Get room details successfully", { roomDetails, roomServices, roomImages }));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-};
-
-export default roomController;
+export default RoomController;
