@@ -64,11 +64,18 @@ enum messageResponse {
     CREATE_ROOM_SUCCESS = "Room created successfully",
     UPDATE_ROOM_SUCCESS = "Room updated successfully",
     DELETE_ROOM_SUCCESS = "Room deleted successfully",
-
     RENTER_ALREADY_EXISTS = "Renter already exists in this room",
     CREATE_RENTER_SUCCESS = "Renter created successfully",
     RENTER_NOT_FOUND = "Renter not found",
     NO_RENTERS_FOUND = "No renters found",
+    GET_FLOOR_BY_HOUSE_SUCCESS = "Floors by house retrieved successfully",
+    GET_FLOOR_DETAILS_SUCCESS = "Floor details retrieved successfully",
+    FLOOR_ALREADY_EXISTS = "Floor already exists",
+    FLOOR_NOT_FOUND = "Floor not found",
+    NO_FLOORS_FOUND = "No floors found",
+    CREATE_FLOOR_SUCCESS = "Floor created successfully",
+    UPDATE_FLOOR_SUCCESS = "Floor updated successfully",
+    DELETE_FLOOR_SUCCESS = "Floor deleted successfully",
 }
 
 export default messageResponse;
