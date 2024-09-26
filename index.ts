@@ -71,13 +71,13 @@ app.post(
 
 app.use("/auth", AuthRoute);
 app.use("/users", authentication, UserRoute);
-app.use("/houses", authentication, HouseRoute);
+app.use("/houses", HouseRoute);
 app.use("/roles", authentication, RoleRoute);
+app.use("/renters", authentication, renterRoute);
 app.use("/services", ServiceRoute);
 app.use("/rooms", RoomRoute);
 app.use("/equipment", EquipmentRoute);
 app.use("/paymentMethods", PaymentMethodRoute);
-app.use("/renters", renterRoute);
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);

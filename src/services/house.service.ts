@@ -1,6 +1,6 @@
-import { Action } from "../enums";
+import { Action, RoomStatus } from "../enums";
 import messageResponse from "../enums/message.enum";
-import { HouseCreate, HouseUpdate } from "../interfaces";
+import { HouseCreate, HouseFilter, HouseUpdate } from "../interfaces";
 import { HouseFloors, Houses, Rooms } from "../models";
 import { ApiException } from "../utils";
 import camelToSnake from "../utils/camelToSnake";
@@ -18,6 +18,7 @@ class HouseService {
             house: { create: false, read: true, update: true, delete: true },
             role: { create: true, read: true, update: true, delete: true },
             room: { create: true, read: true, update: true, delete: true },
+            renter: { create: true, read: true, update: true, delete: true },
             service: { create: true, read: true, update: true, delete: true },
             bill: { create: true, read: true, update: true, delete: true },
             equipment: { create: true, read: true, update: true, delete: true },
@@ -30,6 +31,77 @@ class HouseService {
             return house;
         });
         return enhancedList;
+    }
+
+    static async search(data: HouseFilter) {
+        // Start building the query with necessary joins
+        const query = Houses.query().withGraphJoined("floors.rooms").where("houses.status", true);
+
+        // Filter by keyword if provided
+        if (data.keyword) {
+            query.where("houses.name", "like", `%${data.keyword}%`);
+        }
+
+        // Filter by room status (e.g., AVAILABLE)
+        if (RoomStatus.AVAILABLE) {
+            query.where("floors:rooms.status", "=", RoomStatus.AVAILABLE);
+        }
+
+        // Filter by number of beds in room description
+        if (data.numOfBeds) {
+            query.where((builder) => {
+                builder.where("floors:rooms.description", "like", `%${data.numOfBeds} ngu`).orWhere("floors:rooms.description", "like", `%${data.numOfBeds}n`);
+            });
+        }
+
+        // Filter by address components if provided
+        if (data.address) {
+            if (data.address.city) {
+                query.where("houses.address", "like", `%${data.address.city}%`);
+            }
+            if (data.address.district) {
+                query.where("houses.address", "like", `%${data.address.district}%`);
+            }
+            if (data.address.ward) {
+                query.where("houses.address", "like", `%${data.address.ward}%`);
+            }
+            if (data.address.street) {
+                query.where("houses.address", "like", `%${data.address.street}%`);
+            }
+        }
+
+        // Filter by max renters
+        if (data.numOfRenters) {
+            query.where("floors:rooms.max_renters", ">=", data.numOfRenters);
+        }
+
+        // Filter by price range if provided
+        if (data.price?.from) {
+            query.where("floors:rooms.price", ">=", data.price.from);
+        }
+        if (data.price?.to) {
+            query.where("floors:rooms.price", "<=", data.price.to);
+        }
+
+        // Filter by room area if provided
+        if (data.roomArea) {
+            query.where("floors:rooms.room_area", ">=", data.roomArea);
+        }
+
+        // Apply sorting if requested
+        if (data.sortBy && data.orderBy) {
+            query.orderBy(`houses.${data.sortBy}`, data.orderBy);
+        }
+
+        // Execute the query with pagination
+        const result = await query.page(data.page - 1, data.limit);
+
+        // Throw exception if no results are found
+        if (!result.results.length) {
+            throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
+        }
+
+        return result;
     }
 
     static async getHouseById(houseId: string) {

@@ -8,7 +8,7 @@ const createRoleValidator = [
         })
         .withMessage("permissions must be an object")
         .custom((value: object) => {
-            const keys = ["house", "role", "room", "service", "bill", "equipment"];
+            const keys = ["house", "role", "room", "renter", "service", "bill", "equipment"];
             const permissions = Object.keys(value);
             const isValid = keys.every((key) => permissions.includes(key));
             if (!isValid) {
@@ -35,7 +35,7 @@ const updateRoleValidator = [
         .isObject()
         .withMessage("permissions must be an object")
         .custom((value: object) => {
-            const keys = ["house", "role", "room", "service", "bill", "equipment"];
+            const keys = ["house", "role", "room", "renter", "service", "bill", "equipment"];
             const permissions = Object.keys(value);
             const isValid = keys.every((key) => permissions.includes(key));
             if (!isValid) {

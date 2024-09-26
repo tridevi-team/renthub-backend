@@ -20,6 +20,7 @@ class Houses extends Model {
     updated_at: string;
     createdBy: string;
     permissions: Permissions;
+    floors: any;
 
     static get tableName() {
         return "houses";

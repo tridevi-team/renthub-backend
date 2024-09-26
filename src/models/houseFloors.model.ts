@@ -5,6 +5,7 @@ import Rooms from "./rooms.model";
 
 class HouseFloors extends Model {
     id: string;
+    rooms: Rooms[];
 
     static get tableName() {
         return "house_floors";

@@ -10,6 +10,7 @@ export const authorize = (module: Module, action: Action) => {
         case Module.HOUSE:
         case Module.ROLE:
         case Module.ROOM:
+        case Module.RENTER:
         case Module.BILL:
         case Module.SERVICE:
         case Module.EQUIPMENT:

@@ -61,3 +61,19 @@ export interface Role {
     status: boolean;
     createdBy?: string;
 }
+
+export interface HouseFilter {
+    keyword: string;
+    limit: number;
+    page: number;
+    sortBy: "name" | "numOfBeds" | "numOfRenters" | "roomArea" | "price" | "street" | "ward" | "district" | "city";
+    orderBy: "asc" | "desc";
+    numOfBeds: number;
+    address: Address;
+    numOfRenters: number;
+    roomArea: number;
+    price: {
+        from: number;
+        to: number;
+    };
+}
