@@ -22,6 +22,7 @@ class Renters extends Model {
             required: ["name"],
             properties: {
                 id: { type: "string", format: "uuid" },
+                room_id: { type: "string", format: "uuid" },
                 name: { type: "string", maxLength: 255 },
                 citizen_id: { type: "string", maxLength: 255 },
                 birthday: { type: "string", format: "date" },
