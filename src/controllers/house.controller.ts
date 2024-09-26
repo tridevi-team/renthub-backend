@@ -139,6 +139,9 @@ class HouseController {
                                 return {
                                     id: room.id,
                                     name: room.name,
+                                    price: room.price,
+                                    area: room.area,
+                                    maxRenters: room.maxRenters,
                                     status: room.status,
                                     images: room.images || [],
                                     services: room.services

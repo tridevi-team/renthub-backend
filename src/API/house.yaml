@@ -426,6 +426,15 @@ components:
                                                             name:
                                                                 type: string
                                                                 example: "Phòng 3"
+                                                            price:
+                                                                type: number
+                                                                example: 3500000
+                                                            area:
+                                                                type: number
+                                                                example: 25
+                                                            maxRenters:
+                                                                type: integer
+                                                                example: 6
                                                             status:
                                                                 type: string
                                                                 enum:
