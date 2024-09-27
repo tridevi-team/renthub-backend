@@ -39,22 +39,7 @@ class RoomController {
 
             const room = await RoomService.getRoomById(newRoom.id);
 
-            const cleanData = {
-                ...room,
-                services: room.services.map((service) => {
-                    return {
-                        id: service.serviceId,
-                        name: service.service.name,
-                        quantity: service.quantity,
-                        unitPrice: service.service.unitPrice,
-                        type: service.service.type,
-                        description: service.description,
-                    };
-                }),
-                images: room.images.map((image) => image.imageUrl),
-            };
-
-            return res.json(apiResponse(messageResponse.CREATE_ROOM_SUCCESS, true, cleanData));
+            return res.json(apiResponse(messageResponse.CREATE_ROOM_SUCCESS, true, room));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -64,21 +49,8 @@ class RoomController {
         const { roomId } = req.params;
         try {
             const room = await RoomService.getRoomById(roomId);
-            const cleanData = {
-                ...room,
-                services: room.services.map((service) => {
-                    return {
-                        id: service.serviceId,
-                        name: service.service.name,
-                        quantity: service.quantity,
-                        unitPrice: service.service.unitPrice,
-                        type: service.service.type,
-                        description: service.description,
-                    };
-                }),
-                images: room.images.map((image) => image.imageUrl),
-            };
-            return res.json(apiResponse(messageResponse.GET_ROOM_DETAILS_SUCCESS, true, cleanData));
+
+            return res.json(apiResponse(messageResponse.GET_ROOM_DETAILS_SUCCESS, true, room));
         } catch (err) {
             Exception.handle(err, req, res);
         }

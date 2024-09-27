@@ -19,6 +19,13 @@ class Rooms extends Model {
     houseId: string;
     services: RoomServices[];
     images: RoomImages[];
+    floor: HouseFloors;
+    maxRenters: number;
+    roomArea: number;
+    createdBy: string;
+    createdAt: string;
+    updatedBy: string;
+    updatedAt: string;
 
     static get tableName() {
         return "rooms";
