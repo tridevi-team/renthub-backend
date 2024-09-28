@@ -91,7 +91,7 @@ class UserService {
 
     static async createUser(data: UserCreate) {
         const isExists = await this.checkUserExist({ email: data.email });
-        if (isExists) throw new ApiException(messageResponse.USER_ALREADY_EXISTS, 200);
+        if (isExists) throw new ApiException(messageResponse.USER_ALREADY_EXISTS, 409);
 
         const user = await Users.query().insertAndFetch(camelToSnake(data)).select("id", "email", "full_name", "phone_number", "birthday");
 

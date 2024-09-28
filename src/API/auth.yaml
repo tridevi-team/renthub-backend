@@ -321,6 +321,12 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/ValidationError"
+                "409":
+                    description: User already exists
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserExists"
 
     /auth/verify-account:
         put:
