@@ -4,6 +4,14 @@ import { Houses, Rooms } from "./";
 
 class HouseFloors extends Model {
     id: string;
+    house_id: string;
+    name: string;
+    description: string;
+    created_by: string;
+    created_at: string;
+    updated_by: string;
+    updated_at: string;
+    house: Houses;
     rooms: Rooms[];
 
     static get tableName() {

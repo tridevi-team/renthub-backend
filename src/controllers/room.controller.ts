@@ -33,9 +33,9 @@ class RoomController {
                 updatedBy: userId,
             });
 
-            RoomService.addServiceToRoom(newRoom.id, services, userId);
+            await RoomService.addServiceToRoom(newRoom.id, services, userId);
 
-            RoomService.addImagesToRoom(newRoom.id, images, userId);
+            await RoomService.addImagesToRoom(newRoom.id, images, userId);
 
             const room = await RoomService.getRoomById(newRoom.id);
 

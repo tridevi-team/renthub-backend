@@ -12,13 +12,13 @@ const createRoom = [
         .custom((value) => {
             for (const service of value) {
                 // check quantity, start_index, description
-                const acceptedKeys = ["serviceId", "quantity", "start_index", "description"];
+                const acceptedKeys = ["serviceId", "quantity", "startIndex", "description"];
                 if (typeof service !== "object") {
                     throw new Error("Service must be an object");
                 }
                 for (const key of Object.keys(service)) {
                     if (!acceptedKeys.includes(key)) {
-                        throw new Error("Invalid key in service");
+                        throw new Error(`Invalid key in service: ${key}`);
                     }
                 }
             }
@@ -52,13 +52,13 @@ const updateRoom = [
         .custom((value) => {
             for (const service of value) {
                 // check quantity, start_index, description
-                const acceptedKeys = ["quantity", "start_index", "description"];
+                const acceptedKeys = ["serviceId", "quantity", "startIndex", "description"];
                 if (typeof service !== "object") {
                     throw new Error("Service must be an object");
                 }
                 for (const key of Object.keys(service)) {
                     if (!acceptedKeys.includes(key)) {
-                        throw new Error("Invalid key in service");
+                        throw new Error(`Invalid key in service: ${key}`);
                     }
                 }
             }

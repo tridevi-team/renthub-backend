@@ -1,24 +1,31 @@
+import { ForeignKeyViolationError } from "objection";
 import messageResponse from "../enums/message.enum";
 import { Pagination, Room, RoomServiceInfo } from "../interfaces";
-import { RoomImages, Rooms, RoomServices, Services } from "../models";
+import { Roles, RoomImages, Rooms, RoomServices, Services } from "../models";
 import { ApiException } from "../utils";
 import camelToSnake from "../utils/camelToSnake";
 
 class RoomService {
     static async create(houseId: string, data: Room) {
-        // check if room exists
-        const room = await Rooms.query().join("house_floors", "rooms.floor_id", "house_floors.id").findOne({
-            "rooms.name": data.name,
-            "house_floors.house_id": houseId,
-        });
+        try {
+            // check if room exists
+            const room = await Rooms.query().join("house_floors", "rooms.floor_id", "house_floors.id").findOne({
+                "rooms.name": data.name,
+                "house_floors.house_id": houseId,
+            });
 
-        if (room) {
-            throw new ApiException(messageResponse.ROOM_ALREADY_EXISTS, 409);
+            if (room) {
+                throw new ApiException(messageResponse.ROOM_ALREADY_EXISTS, 409);
+            }
+
+            // create room
+            const newRoom = await Rooms.query().insertAndFetch(camelToSnake(data));
+            return newRoom;
+        } catch (err) {
+            if (err instanceof ForeignKeyViolationError) {
+                throw new ApiException(messageResponse.FLOOR_NOT_FOUND, 404);
+            }
         }
-
-        // create room
-        const newRoom = await Rooms.query().insertAndFetch(camelToSnake(data));
-        return newRoom;
     }
 
     static async getRoomById(id: string) {
@@ -116,12 +123,18 @@ class RoomService {
     }
 
     static async updateRoom(id: string, data: Room) {
-        const room = await Rooms.query().findById(id);
-        if (!room) {
-            throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
+        try {
+            const room = await Rooms.query().findById(id);
+            if (!room) {
+                throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
+            }
+            const updatedRoom = await room.$query().patchAndFetch(camelToSnake(data));
+            return updatedRoom;
+        } catch (err) {
+            if (err instanceof ForeignKeyViolationError) {
+                throw new ApiException(messageResponse.FLOOR_NOT_FOUND, 404);
+            }
         }
-        const updatedRoom = await room.$query().patchAndFetch(camelToSnake(data));
-        return updatedRoom;
     }
 
     static async deleteRoom(id: string, deletedBy: string) {
@@ -203,6 +216,32 @@ class RoomService {
         await room.$relatedQuery("images").unrelate().whereIn("id", images);
 
         return room;
+    }
+
+    static async isRoomAccessible(userId: string, roomId: string, action: string) {
+        const room = await Rooms.query().findById(roomId);
+
+        if (!room) throw new ApiException(messageResponse.ROLE_NOT_FOUND, 404);
+        // get houseId
+        const houseDetails = await Rooms.query()
+            .join("house_floors", "rooms.floor_id", "house_floors.id")
+            .join("houses", "house_floors.house_id", "houses.id")
+            .where("rooms.id", roomId)
+            .select("houses.created_by", "houses.id")
+            .first();
+        if (houseDetails.createdBy === userId) return true;
+
+        // get house permissions
+        const housePermissions = await Roles.query()
+            .leftJoin("user_roles", "roles.id", "user_roles.role_id")
+            .findOne(camelToSnake({ "roles.house_id": houseDetails.id, "user_roles.user_id": userId }));
+        console.log("🚀 ~ RoomService ~ isRoomAccessible ~ housePermissions:", housePermissions)
+        if (!housePermissions?.permissions) return false;
+        else if (action === "read") {
+            return housePermissions.permissions.role.read || housePermissions.permissions.role.update || housePermissions.permissions.role.delete;
+        }
+
+        return true;
     }
 }
 
