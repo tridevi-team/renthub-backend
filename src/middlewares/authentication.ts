@@ -1,4 +1,5 @@
 import messageResponse from "../enums/message.enum";
+import { RenterService } from "../services";
 import UserService from "../services/user.service";
 import { ApiException, Exception, jwtToken } from "../utils";
 
@@ -8,7 +9,14 @@ const authentication = async (req, res, next) => {
         if (!authorization) throw new ApiException(messageResponse.ACCESS_TOKEN_REQUIRED, 401);
 
         const data = await jwtToken.verifyAccessToken(authorization);
-        const user = await UserService.getUserById(data.id);
+
+        // check type user or renter
+        let user = null;
+        if (data.type === "renter") {
+            user = await RenterService.get(data.id);
+        } else {
+            user = await UserService.getUserById(data.id);
+        }
         req.user = user;
 
         return next();

@@ -1,11 +1,14 @@
 import { Action, Module } from "../enums";
 import messageResponse from "../enums/message.enum";
-import { HouseService, RoomService } from "../services";
+import { HouseService, RenterService, RoomService } from "../services";
 import RoleService from "../services/role.service";
 import { ApiException, Exception } from "../utils";
 
 // Generic authorization function
 export const authorize = (module: Module, action: Action) => {
+    // check renter permissions
+    if (module === Module.RENTER) renterAuthorize(action);
+
     switch (module) {
         case Module.HOUSE:
         case Module.ROLE:
@@ -19,6 +22,42 @@ export const authorize = (module: Module, action: Action) => {
         default:
             throw new ApiException(messageResponse.UNKNOWN_ERROR, 500);
     }
+};
+
+const renterAuthorize = (action: Action) => {
+    return async (req, res, next) => {
+        const user = req.user;
+        const { roomId, houseId, renterId } = req.params;
+        try {
+            if (user.type === "renter") {
+                switch (action) {
+                    case Action.CREATE:
+                    case Action.UPDATE:
+                    case Action.DELETE:
+                        if (user.represent) {
+                            const hasAccessRoom = await RenterService.isOwner(user.id, roomId);
+                            if (hasAccessRoom) next();
+                            else throw new ApiException(messageResponse.UNAUTHORIZED, 403);
+                        } else throw new ApiException(messageResponse.UNAUTHORIZED, 403);
+                        break;
+                    case Action.READ:
+                        const hasAccessRoom = await RenterService.isOwner(user.id, roomId);
+                        const hasAccessHouse = await RenterService.accessHouse(user.id, houseId);
+                        if (!hasAccessRoom && !hasAccessHouse) {
+                            throw new ApiException(messageResponse.UNAUTHORIZED, 403);
+                        }
+                        next();
+                        break;
+                    default:
+                        throw new ApiException(messageResponse.UNKNOWN_ERROR, 500);
+                }
+            } else {
+                next();
+            }
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    };
 };
 
 // Main authorization middleware handler

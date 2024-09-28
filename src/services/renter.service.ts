@@ -1,7 +1,7 @@
 import { ConstraintViolationError } from "objection";
 import messageResponse from "../enums/message.enum";
 import { Pagination, Renter } from "../interfaces";
-import { Renters } from "../models";
+import { Houses, Renters } from "../models";
 import { ApiException, jwtToken } from "../utils";
 import camelToSnake from "../utils/camelToSnake";
 
@@ -114,6 +114,29 @@ class RenterService {
         }
         const updatedRenter = await Renters.query().patchAndFetchById(renterId, { represent: true });
         return updatedRenter;
+    }
+
+    static async isOwner(renterId: string, roomId: string) {
+        // Check if renter is owner of room
+        const renter = await Renters.query().findById(renterId);
+        if (renter.roomId === roomId) {
+            return true;
+        }
+    }
+
+    static async accessHouse(renterId: string, houseId: string) {
+        // Check if renter has access to house
+        const room = await Houses.query()
+            .join("rooms", "houses.id", "rooms.house_id")
+            .join("renters", "rooms.id", "renters.room_id")
+            .where("renters.id", renterId)
+            .andWhere("houses.id", houseId)
+            .first();
+        if (room) {
+            return true;
+        }
+
+        return false;
     }
 }
 
