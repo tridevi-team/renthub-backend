@@ -1,6 +1,6 @@
 import { Action, Module } from "../enums";
 import messageResponse from "../enums/message.enum";
-import { HouseService } from "../services";
+import { HouseService, RoomService } from "../services";
 import RoleService from "../services/role.service";
 import { ApiException, Exception } from "../utils";
 
@@ -24,7 +24,7 @@ export const authorize = (module: Module, action: Action) => {
 // Main authorization middleware handler
 const authorizationMiddleware = (module: Module, action: string) => {
     return async (req, res, next) => {
-        const { houseId, roleId } = req.params;
+        const { houseId, roleId, roomId } = req.params;
         const user = req.user;
 
         try {
@@ -42,6 +42,14 @@ const authorizationMiddleware = (module: Module, action: string) => {
             if (roleId && module === Module.ROLE) {
                 const isAccessRole = await RoleService.isAccessible(user.id, roleId, action);
                 if (!isAccessRole) {
+                    throw new ApiException(messageResponse.UNAUTHORIZED, 403);
+                }
+            }
+
+            // Specific check for rooms (when roomId is provided)
+            if (roomId && module === Module.ROOM) {
+                const isAccessRoom = await RoomService.isRoomAccessible(user.id, roomId, action);
+                if (!isAccessRoom) {
                     throw new ApiException(messageResponse.UNAUTHORIZED, 403);
                 }
             }
