@@ -1,5 +1,5 @@
 export interface Renter {
-    roomId: string;
+    roomId?: string;
     name: string;
     citizenId?: string;
     birthday?: string;
@@ -11,5 +11,6 @@ export interface Renter {
     moveInDate: string;
     represent: boolean;
     note?: string;
-    createdBy: string;
+    createdBy?: string;
+    updatedBy?: string;
 }

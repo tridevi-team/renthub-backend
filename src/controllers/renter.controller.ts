@@ -1,144 +1,178 @@
 "use strict";
 
-import { Renters } from "../models";
-import { ApiException, Exception, formatJson } from "../utils";
+import redisConfig from "../config/redis.config";
+import messageResponse from "../enums/message.enum";
+import { RenterService } from "../services";
+import { apiResponse, Exception, sendMail } from "../utils";
 
-const RenterController = {
-    // async addNewRenter(req, res) {
-    //     try {
-    //         const {
-    //             roomId,
-    //         }: {
-    //             roomId: Number;
-    //         } = req.params;
-    //         const user = req.user;
+class RenterController {
+    static async addNewRenter(req, res) {
+        const { roomId } = req.params;
+        const user = req.user;
+        const { name, citizenId, birthday, gender, email, phoneNumber, address, tempReg, moveInDate, represent, note } = req.body;
+        try {
+            // check max renter
+            const data = {
+                roomId,
+                name,
+                citizenId,
+                birthday,
+                gender,
+                email,
+                phoneNumber,
+                address,
+                tempReg,
+                moveInDate,
+                represent,
+                note,
+                createdBy: user.id,
+            };
+            const createRenter = await RenterService.create(data);
+            return res.json(apiResponse(messageResponse.CREATE_RENTER_SUCCESS, true, createRenter));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         const { name, citizenId, phoneNumber, email, licensePlates, temporaryRegistration, moveInDate, represent } = req.body;
-    //         console.log({
-    //             name: name,
-    //             citizen_id: citizenId,
-    //             phone_number: phoneNumber,
-    //             email: email || null,
-    //             license_plates: licensePlates,
-    //             temporary_registration: temporaryRegistration,
-    //             move_in_date: moveInDate,
-    //             represent: represent || false,
-    //             room_id: Number(roomId),
-    //             created_by: user.id,
-    //         });
+    static async getRentersByRoom(req, res) {
+        const { roomId } = req.params;
+        try {
+            const renters = await RenterService.listByRoom(roomId);
+            return res.json(apiResponse(messageResponse.GET_RENTERS_BY_ROOM_SUCCESS, true, renters));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         const renter = await Renters.query().insert({
-    //             name: name,
-    //             citizen_id: citizenId,
-    //             phone_number: phoneNumber,
-    //             email: email || null,
-    //             license_plates: licensePlates,
-    //             temporary_registration: temporaryRegistration,
-    //             move_in_date: moveInDate,
-    //             represent: represent || false,
-    //             room_id: Number(roomId),
-    //             created_by: user.id,
-    //         });
+    static async getRentersByHouse(req, res) {
+        const { houseId } = req.params;
+        const { page, limit } = req.query;
+        try {
+            const renters = await RenterService.listByHouse(houseId, { page: parseInt(page), limit: parseInt(limit) });
+            return res.json(apiResponse(messageResponse.GET_RENTERS_BY_HOUSE_SUCCESS, true, renters));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         if (!renter) {
-    //             throw new ApiException(1001, "Failed to add renter");
-    //         }
+    static async getRenterDetails(req, res) {
+        const { renterId } = req.params;
+        try {
+            const renter = await RenterService.get(renterId);
+            return res.json(apiResponse(messageResponse.GET_RENTER_DETAILS_SUCCESS, true, renter));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         return res.json(formatJson.success(1002, "Renter added successfully", renter));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+    static async updateRenterDetails(req, res) {
+        const { renterId } = req.params;
+        const user = req.user;
+        const { name, citizenId, birthday, gender, email, phoneNumber, address, tempReg, moveInDate, represent, note } = req.body;
+        try {
+            const data = {
+                name,
+                citizenId,
+                birthday,
+                gender,
+                email,
+                phoneNumber,
+                address,
+                tempReg,
+                moveInDate,
+                represent,
+                note,
+                updatedBy: user.id,
+            };
 
-    // async getRenterList(req, res) {
-    //     try {
-    //         const { roomId } = req.params;
+            const updateRenter = await RenterService.update(renterId, data);
 
-    //         const renters = await Renters.query().where("room_id", roomId);
+            return res.json(apiResponse(messageResponse.UPDATE_RENTER_SUCCESS, true, updateRenter));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         return res.json(formatJson.success(1003, "Renter list retrieved successfully", renters));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+    static async deleteRenter(req, res) {
+        const { renterId } = req.params;
+        try {
+            const deleteRenter = await RenterService.delete(renterId);
+            return res.json(apiResponse(messageResponse.DELETE_RENTER_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    // async getRenterListByHouse(req, res) {
-    //     try {
-    //         const { houseId } = req.params;
+    static async changeRepresent(req, res) {
+        const { renterId } = req.params;
+        const user = req.user;
+        try {
+            const changeRepresent = await RenterService.changeRepresent(renterId, user.id);
+            return res.json(apiResponse(messageResponse.CHANGE_REPRESENT_SUCCESS, true, changeRepresent));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         const renters = await Renters.query().whereExists(function () {
-    //             this.select("*").from("rooms").whereRaw("rooms.id = renters.room_id").where("house_id", houseId);
-    //         });
+    static async login(req, res) {
+        const { email, phoneNumber } = req.body;
+        try {
+            const login = await RenterService.checkExists({ email, phoneNumber });
+            const redis = await redisConfig;
+            const code = Math.floor(1000 + Math.random() * 9000);
+            const username = email || phoneNumber;
+            if (email) {
+                const mail = await sendMail(username, "Verify your account", `Your verification code is: ${code}`);
+                if (mail) {
+                    await redis.set(`verify-renter:${username}`, String(code));
+                    return res.json(apiResponse(messageResponse.SEND_CODE_SUCCESS, true));
+                }
+            } else if (phoneNumber) {
+                await redis.set(`verify-renter:${username}`, String(code));
+                return res.json(apiResponse(messageResponse.SEND_CODE_SUCCESS, true));
+            }
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         return res.json(formatJson.success(1003, "Renter list retrieved successfully", renters));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+    static async resendCode(req, res) {
+        const { email, phoneNumber } = req.body;
+        try {
+            const redis = await redisConfig;
+            const code = Math.floor(1000 + Math.random() * 9000);
+            const username = email || phoneNumber;
+            if (email) {
+                const mail = await sendMail(username, "Verify your account", `Your verification code is: ${code}`);
+                if (mail) {
+                    await redis.set(`verify-renter:${username}`, String(code));
+                    return res.json(apiResponse(messageResponse.SEND_CODE_SUCCESS, true));
+                }
+            } else if (phoneNumber) {
+                await redis.set(`verify-renter:${username}`, String(code));
+                return res.json(apiResponse(messageResponse.SEND_CODE_SUCCESS, true));
+            }
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    // async getRenterDetails(req, res) {
-    //     try {
-    //         const { renterId } = req.params;
-
-    //         const renter = await Renters.query().findById(renterId);
-
-    //         if (!renter) {
-    //             throw new ApiException(1004, "Renter not found");
-    //         }
-
-    //         return res.json(formatJson.success(1005, "Renter details retrieved successfully", renter));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-
-    // async updateRenterDetails(req, res) {
-    //     try {
-    //         const { renterId } = req.params;
-    //         const user = req.user;
-
-    //         const { name, citizenId, phoneNumber, email, licensePlates, temporaryRegistration, moveInDate, represent } = req.body;
-
-    //         const renter = await Renters.query().findById(renterId);
-
-    //         if (!renter) {
-    //             throw new ApiException(1004, "Renter not found");
-    //         }
-
-    //         const updatedRenter = await renter.$query().patchAndFetch({
-    //             name,
-    //             citizen_id: citizenId,
-    //             phone_number: phoneNumber,
-    //             email: email || null,
-    //             license_plates: licensePlates,
-    //             temporary_registration: temporaryRegistration,
-    //             move_in_date: moveInDate,
-    //             represent: represent || false,
-    //         });
-
-    //         return res.json(formatJson.success(1006, "Renter details updated successfully", updatedRenter));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-
-    // async deleteRenter(req, res) {
-    //     try {
-    //         const { renterId } = req.params;
-
-    //         const renter = await Renters.query().findById(renterId);
-
-    //         if (!renter) {
-    //             throw new ApiException(1004, "Renter not found");
-    //         }
-
-    //         const deletedRenter = await renter.$query().delete();
-
-    //         return res.json(formatJson.success(1007, "Renter deleted successfully", deletedRenter));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-};
+    static async verifyLogin(req, res) {
+        const { email, phoneNumber, code } = req.body;
+        try {
+            const redis = await redisConfig;
+            const username = email || phoneNumber;
+            const verifyCode = await redis.get(`verify-renter:${username}`);
+            if (verifyCode === code) {
+                await redis.del(`verify-renter:${username}`);
+                const renter = await RenterService.login({ email, phoneNumber });
+                return res.json(apiResponse(messageResponse.LOGIN_SUCCESS, true, renter));
+            }
+            return res.json(apiResponse(messageResponse.VERIFY_CODE_FAIL, false));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+}
 
 export default RenterController;
