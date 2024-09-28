@@ -151,12 +151,13 @@ class UserService {
 
     static async resetPassword(data: { code: string; email: string; password: string }) {
         const user = await Users.query().findOne({ email: data.email });
+        const redis = await redisConfig;
+        const code = await redis.get(`reset-password:${data.email}`);
         if (!user) {
             throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 200);
-        } else if (user.code !== data.code) {
+        } else if (String(code) !== data.code) {
             throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 200);
         }
-        await user.$query().patch({ code: "" });
         this.changePassword(data.email, data.password);
         return user;
     }

@@ -235,7 +235,7 @@ class RoomService {
         const housePermissions = await Roles.query()
             .leftJoin("user_roles", "roles.id", "user_roles.role_id")
             .findOne(camelToSnake({ "roles.house_id": houseDetails.id, "user_roles.user_id": userId }));
-        console.log("🚀 ~ RoomService ~ isRoomAccessible ~ housePermissions:", housePermissions)
+
         if (!housePermissions?.permissions) return false;
         else if (action === "read") {
             return housePermissions.permissions.role.read || housePermissions.permissions.role.update || housePermissions.permissions.role.delete;
