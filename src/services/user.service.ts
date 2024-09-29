@@ -116,37 +116,12 @@ class UserService {
         return user;
     }
 
-    static async resendCode(email: string) {
+    static async getUserByEmail(email: string) {
         const user = await Users.query().findOne({ email });
         if (!user) {
             throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 404);
-        } else if (user.verify) {
-            throw new ApiException(messageResponse.ACCOUNT_PREVIOUSLY_VERIFIED, 409);
         }
-
-        const newCode = Math.floor(1000 + Math.random() * 9000);
-        const mail = await sendMail(email, "Verify your account", `Your verification code is: ${newCode}`);
-        if (!mail) {
-            throw new ApiException(messageResponse.FAILED_EMAIL_VERIFICATION, 500);
-        }
-        const redis = await redisConfig;
-        await redis.set(`verify-account:${email}`, newCode);
-        await redis.expire(`verify-account:${email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
-    }
-
-    static async forgotPassword(email: string) {
-        const user = await Users.query().findOne({ email });
-        if (!user) {
-            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 200);
-        }
-        const verifyCode = Math.floor(1000 + Math.random() * 9000);
-        const mail = await sendMail(email, "Reset your password", `Your verification code is: ${verifyCode}`);
-        if (!mail) {
-            throw new ApiException(messageResponse.FAILED_EMAIL_VERIFICATION, 500);
-        }
-        const redis = await redisConfig;
-        await redis.set(`reset-password:${email}`, String(verifyCode));
-        await redis.expire(`reset-password:${email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
+        return user;
     }
 
     static async resetPassword(data: { code: string; email: string; password: string }) {

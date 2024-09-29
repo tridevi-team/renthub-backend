@@ -76,6 +76,9 @@ class RenterService {
 
     static async checkExists(data: { email?: string; phoneNumber?: string }) {
         const renter = await Renters.query().where("email", data.email).orWhere("phone_number", data.phoneNumber).first();
+        if (renter) {
+            throw new ApiException(messageResponse.RENTER_ALREADY_EXISTS, 409);
+        }
         return renter;
     }
 

@@ -3,7 +3,8 @@
 import redisConfig from "../config/redis.config";
 import messageResponse from "../enums/message.enum";
 import { RenterService } from "../services";
-import { apiResponse, Exception, sendMail } from "../utils";
+import MailService from "../services/mail.service";
+import { apiResponse, Exception } from "../utils";
 
 class RenterController {
     static async addNewRenter(req, res) {
@@ -117,12 +118,12 @@ class RenterController {
     static async login(req, res) {
         const { email, phoneNumber } = req.body;
         try {
-            const login = await RenterService.checkExists({ email, phoneNumber });
+            const renterDetails = await RenterService.checkExists({ email, phoneNumber });
             const redis = await redisConfig;
             const code = Math.floor(1000 + Math.random() * 9000);
             const username = email || phoneNumber;
             if (email) {
-                const mail = await sendMail(username, "Verify your account", `Your verification code is: ${code}`);
+                const mail = await MailService.sendLoginMail(email, renterDetails.name, String(code));
                 if (mail) {
                     await redis.set(`verify-renter:${username}`, String(code));
                     return res.json(apiResponse(messageResponse.SEND_CODE_SUCCESS, true));
@@ -142,8 +143,9 @@ class RenterController {
             const redis = await redisConfig;
             const code = Math.floor(1000 + Math.random() * 9000);
             const username = email || phoneNumber;
+            const renterDetails = await RenterService.checkExists({ email, phoneNumber });
             if (email) {
-                const mail = await sendMail(username, "Verify your account", `Your verification code is: ${code}`);
+                const mail = await MailService.sendLoginMail(email, renterDetails.name, String(code));
                 if (mail) {
                     await redis.set(`verify-renter:${username}`, String(code));
                     return res.json(apiResponse(messageResponse.SEND_CODE_SUCCESS, true));

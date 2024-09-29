@@ -4,7 +4,8 @@ import redisClient from "../config/redis.config";
 import { AccountRoles } from "../enums";
 import messageResponse from "../enums/message.enum";
 import { UserService } from "../services";
-import { ApiException, apiResponse, bcrypt, Exception, sendMail } from "../utils";
+import MailService from "../services/mail.service";
+import { ApiException, apiResponse, bcrypt, Exception } from "../utils";
 
 class UserController {
     static async getAllUsers(req, res) {
@@ -65,16 +66,13 @@ class UserController {
             const user = await UserService.createUser(newUser);
 
             if (user) {
-                let verifyCode = Math.floor(1000 + Math.random() * 9000);
-                while (verifyCode.toString().length !== 4) {
-                    verifyCode = Math.floor(1000 + Math.random() * 9000);
-                }
+                let verifyCode = String(Math.floor(1000 + Math.random() * 9000));
 
                 const redis = await redisClient;
-                await redis.set(`verify-account:${user.email}`, String(verifyCode));
+                await redis.set(`verify-account:${user.email}`, verifyCode);
                 await redis.expire(`verify-account:${user.email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
 
-                const mail = await sendMail(user.email, "Verify your account", `Your verification code is: ${verifyCode}`);
+                const mail = await MailService.sendVerificationMail(user.email, verifyCode);
                 if (mail) {
                     return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_VERIFY_ACCOUNT, true, null));
                 } else {
@@ -99,9 +97,10 @@ class UserController {
     }
 
     static async resendCode(req, res) {
+        const { email } = req.body;
         try {
-            const { email } = req.body;
-            await UserService.resendCode(email);
+            const verifyCode = String(Math.floor(1000 + Math.random() * 9000));
+            await MailService.sendVerificationMail(email, verifyCode);
             return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_VERIFY_ACCOUNT, true, null));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -111,7 +110,15 @@ class UserController {
     static async forgotPassword(req, res) {
         try {
             const { email } = req.body;
-            await UserService.forgotPassword(email);
+            const userDetails = await UserService.getUserByEmail(email);
+
+            const verifyCode = String(Math.floor(1000 + Math.random() * 9000));
+            const mail = await MailService.sendResetPasswordMail(email, verifyCode);
+
+            const redis = await redisClient;
+            await redis.set(`reset-password:${email}`, verifyCode);
+            await redis.expire(`reset-password:${email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
+
             return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_RESET_PASSWORD, true, null));
         } catch (err) {
             Exception.handle(err, req, res);
