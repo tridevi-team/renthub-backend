@@ -128,9 +128,11 @@ class UserController {
     static async resetPassword(req, res) {
         try {
             const { code, email, password } = req.body;
-
-            const user = await UserService.resetPassword({ code, email, password });
-
+            await UserService.getUserByEmail(email);
+            const isReset = await UserService.resetPassword({ code, email, password });
+            if (!isReset) {
+                throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 401);
+            }
             return res.status(200).json(apiResponse(messageResponse.PASSWORD_RESET_SUCCESS, true, null));
         } catch (err) {
             Exception.handle(err, req, res);

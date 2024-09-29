@@ -3,7 +3,7 @@ import redisConfig from "../config/redis.config";
 import messageResponse from "../enums/message.enum";
 import { UserCreate, UserUpdate } from "../interfaces";
 import { Users } from "../models";
-import { ApiException, bcrypt, jwtToken, sendMail } from "../utils";
+import { ApiException, bcrypt, jwtToken } from "../utils";
 import camelToSnake from "../utils/camelToSnake";
 import HouseService from "./house.service";
 
@@ -125,16 +125,13 @@ class UserService {
     }
 
     static async resetPassword(data: { code: string; email: string; password: string }) {
-        const user = await Users.query().findOne({ email: data.email });
         const redis = await redisConfig;
         const code = await redis.get(`reset-password:${data.email}`);
-        if (!user) {
-            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 200);
-        } else if (String(code) !== data.code) {
-            throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 200);
+        if (String(code) !== data.code) {
+            throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 401);
         }
         this.changePassword(data.email, data.password);
-        return user;
+        return true;
     }
 
     static async changePassword(email: string, newPassword: string) {
