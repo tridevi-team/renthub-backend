@@ -123,7 +123,6 @@ class HouseController {
                 return res.json(apiResponse(messageResponse.SEARCH_HOUSE_SUCCESS, true, JSON.parse(result[0])));
             }
 
-            const result = await HouseService.search(data);
             // clean result
             const cleanResult = result.results.map((house: Houses) => {
                 return {
@@ -140,17 +139,19 @@ class HouseController {
                                     id: room.id,
                                     name: room.name,
                                     price: room.price,
-                                    area: room.area,
+                                    area: room.roomArea,
                                     maxRenters: room.maxRenters,
                                     status: room.status,
-                                    images: room.images || [],
+                                    images: room.images.map((image) => image.imageUrl),
                                     services: room.services
                                         ? room.services.map((service) => {
                                               return {
                                                   id: service.id,
                                                   name: service.name,
-                                                  price: service.price,
-                                                  description: service.description,
+                                                  quantity: service.quantity,
+                                                  price: service.service.unitPrice,
+                                                  type: service.service.type,
+                                                  description: service.description || service.service.description,
                                               };
                                           })
                                         : [],

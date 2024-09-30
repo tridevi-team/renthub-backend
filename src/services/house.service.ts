@@ -35,7 +35,7 @@ class HouseService {
 
     static async search(data: HouseFilter) {
         // Start building the query with necessary joins
-        const query = Houses.query().withGraphJoined("floors.rooms").where("houses.status", true);
+        const query = Houses.query().withGraphJoined("floors.rooms").withGraphJoined("floors.rooms.services.service").withGraphJoined("floors.rooms.images").where("houses.status", true);
 
         // Filter by keyword if provided
         if (data.keyword) {
