@@ -37,9 +37,24 @@ class UserController {
         try {
             // const decryptPassword = aesDecrypt(password);
             // const user = await UserService.login(username, decryptPassword);
-            const user = await UserService.login(username, password);
-            res.cookie("accessToken", user.token.refreshToken, { httpOnly: true });
-            const userInfo = { ...user, token: user.token.accessToken };
+            const userData = await UserService.login(username, password);
+            res.cookie("accessToken", userData.token.refreshToken, { httpOnly: true });
+            const userInfo = {
+                id: userData.user.id,
+                email: userData.user.email,
+                fullName: userData.user.email,
+                gender: userData.user.gender,
+                phoneNumber: userData.user.phoneNumber,
+                address: userData.user.address,
+                birthday: userData.user.birthday,
+                role: userData.user.role,
+                type: userData.user.type,
+                status: userData.user.status,
+                verify: userData.user.verify,
+                firstLogin: userData.user.firstLogin,
+                token: userData.token.accessToken,
+                houses: userData.houses,
+            };
             return res.status(200).json(apiResponse(messageResponse.LOGIN_SUCCESS, true, userInfo));
         } catch (err) {
             Exception.handle(err, req, res);

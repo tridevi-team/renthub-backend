@@ -16,10 +16,11 @@ class Users extends Model {
     status!: boolean;
     verify!: boolean;
     first_login!: boolean;
-    code!: string;
     created_at!: string;
     updated_by!: string;
     updated_at!: string;
+    phoneNumber: string;
+    firstLogin: boolean;
 
     static get tableName() {
         return "users";

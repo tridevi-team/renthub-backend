@@ -123,6 +123,8 @@ class HouseController {
                 return res.json(apiResponse(messageResponse.SEARCH_HOUSE_SUCCESS, true, JSON.parse(result[0])));
             }
 
+            const result = await HouseService.search(data);
+
             // clean result
             const cleanResult = result.results.map((house: Houses) => {
                 return {

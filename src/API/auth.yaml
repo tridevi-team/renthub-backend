@@ -45,12 +45,72 @@ components:
                 data:
                     type: object
                     required:
-                        - user
+                        - id
+                        - email
+                        - fullName
+                        - gender
+                        - phoneNumber
+                        - address
+                        - birthday
+                        - role
+                        - type
+                        - status
+                        - verify
+                        - firstLogin
                         - token
                         - houses
                     properties:
-                        user:
-                            $ref: "#/components/schemas/UserInfo"
+                        id:
+                            type: string
+                            example: 231c665c-dc53-42c6-88cc-e36490cb52a8
+                        email:
+                            type: string
+                            example: example@gmail.com
+                        fullName:
+                            type: string
+                            example: John Doe
+                        gender:
+                            type: string
+                            enum:
+                                - male
+                                - female
+                                - other
+                            example: male
+                        phoneNumber:
+                            type: string
+                            example: 0123456789
+                            maxLength: 11
+                            pattern: ^0\d{9,10}$
+                        address:
+                            type: string
+                            example: 123 Nguyen Van Linh, District 7, Ho Chi Minh City
+                            maxLength: 255
+                        birthday:
+                            type: string
+                            example: 1969-12-31
+                            maxLength: 10
+                            pattern: ^\d{4}-\d{2}-\d{2}$
+                        role:
+                            type: string
+                            example: user
+                            enum:
+                                - user
+                                - admin
+                        type:
+                            type: string
+                            example: free
+                            enum:
+                                - free
+                                - premium
+                        status:
+                            type: integer
+                            example: 1
+                        verify:
+                            type: integer
+                            example: 1
+                        firstLogin:
+                            type: integer
+                            example: 1
                         token:
                             type: string
                             example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMzFjNjY1Yy1kYzUzLTQyYzYtODhjYy1lMzY0OTBjYjUyYTgiLCJpYXQiOjE2MjYwNjYwNzYsImV4cCI6MTYyNjA2NjA3N30.7qkjhwkhjweyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIzMWM2NjVjLWRjNTMtNDJjNi04OGNjLWUzNjQ5MGNiNTJhOCIsImVtYWlsIjoidG1xdWFuZzAyMDlAZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkRlEyenA1TjJpeDFyWWxBanVRTWtZLnpiWFFFQ1VtZU1wMHgzRDVsRnJtNnZUOVFtb0lmdnkiLCJyb2xlIjoidXNlciIsInN0YXR1cyI6MSwiaWF0IjoxNzI2OTI4MjUzLCJleHAiOjE3MjY5MzE4NTN9.bC3TooxQsvvdBucF_QR2I14c1OKBBAUrUlEKHx0jbvc
