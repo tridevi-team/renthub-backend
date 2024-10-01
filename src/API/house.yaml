@@ -404,68 +404,15 @@ components:
                                     description:
                                         type: string
                                         example: "This is a beautiful house"
-                                    floors:
-                                        type: array
-                                        items:
-                                            type: object
-                                            properties:
-                                                id:
-                                                    type: string
-                                                    example: 6e21fac3-6460-44cc-a93f-a16a62c59417
-                                                name:
-                                                    type: string
-                                                    example: "Tầng 2"
-                                                rooms:
-                                                    type: array
-                                                    items:
-                                                        type: object
-                                                        properties:
-                                                            id:
-                                                                type: string
-                                                                example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
-                                                            name:
-                                                                type: string
-                                                                example: "Phòng 3"
-                                                            price:
-                                                                type: number
-                                                                example: 3500000
-                                                            area:
-                                                                type: number
-                                                                example: 25
-                                                            maxRenters:
-                                                                type: integer
-                                                                example: 6
-                                                            status:
-                                                                type: string
-                                                                enum:
-                                                                    - AVAILABLE
-                                                                    - PENDING
-                                                                    - RENTED
-                                                                    - EXPIRED
-                                                                    - MAINTENANCE
-                                                                example: "AVAILABLE"
-                                                            images:
-                                                                type: array
-                                                                items:
-                                                                    type: string
-                                                                    example: "https://example.com/image.jpg"
-                                                            services:
-                                                                type: array
-                                                                items:
-                                                                    type: object
-                                                                    properties:
-                                                                        id:
-                                                                            type: string
-                                                                            example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
-                                                                        name:
-                                                                            type: string
-                                                                            example: "Electricity"
-                                                                        price:
-                                                                            type: number
-                                                                            example: 100000
-                                                                        description:
-                                                                            type: string
-                                                                            nullable: true
+                                    minPrice:
+                                        type: number
+                                        example: 3000000
+                                    maxPrice:
+                                        type: number
+                                        example: 5000000
+                                    numOfRooms:
+                                        type: integer
+                                        example: 3
                         total:
                             type: integer
                             example: 24
@@ -668,7 +615,6 @@ paths:
                                 $ref: "#/components/schemas/NoHousesFound"
 
     /houses/search:
-        #  { keyword, limit, page, sortBy, orderBy, numOfBeds, street, ward, district, city, numOfRenters, roomArea, priceFrom, priceTo }
         get:
             tags:
                 - House

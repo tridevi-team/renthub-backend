@@ -1,7 +1,6 @@
 "use strict";
 import redisConfig from "../config/redis.config";
 import messageResponse from "../enums/message.enum";
-import { Houses } from "../models";
 import { HouseService } from "../services";
 import { ApiException, apiResponse, Exception } from "../utils";
 
@@ -125,64 +124,17 @@ class HouseController {
 
             const result = await HouseService.search(data);
 
-            // clean result
-            const cleanResult = result.results.map((house: Houses) => {
-                return {
-                    id: house.id,
-                    name: house.name,
-                    address: house.address,
-                    description: house.description,
-                    floors: house.floors.map((floor) => {
-                        return {
-                            id: floor.id,
-                            name: floor.name,
-                            rooms: floor.rooms.map((room) => {
-                                return {
-                                    id: room.id,
-                                    name: room.name,
-                                    price: room.price,
-                                    area: room.roomArea,
-                                    maxRenters: room.maxRenters,
-                                    status: room.status,
-                                    images: room.images.map((image) => image.imageUrl),
-                                    services: room.services
-                                        ? room.services.map((service) => {
-                                              return {
-                                                  id: service.id,
-                                                  name: service.name,
-                                                  quantity: service.quantity,
-                                                  price: service.service.unitPrice,
-                                                  type: service.service.type,
-                                                  description: service.description || service.service.description,
-                                              };
-                                          })
-                                        : [],
-                                };
-                            }),
-                        };
-                    }),
-                };
-            });
-
             // save to cache
             redis.sAdd(
                 `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`,
-                JSON.stringify({
-                    results: cleanResult,
-                    total: result.total,
-                })
+                JSON.stringify(result)
             );
             redis.expire(
                 `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`,
                 300
             );
 
-            return res.json(
-                apiResponse(messageResponse.SEARCH_HOUSE_SUCCESS, true, {
-                    results: cleanResult,
-                    total: result.total,
-                })
-            );
+            return res.json(apiResponse(messageResponse.SEARCH_HOUSE_SUCCESS, true, result));
         } catch (err) {
             Exception.handle(err, req, res);
         }
