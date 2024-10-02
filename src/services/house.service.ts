@@ -90,9 +90,15 @@ class HouseService {
                 raw("houses.name as name"),
                 raw("houses.address as address"),
                 raw("houses.description as description"),
+                raw("houses.collection_cycle as collection_cycle"),
+                raw("MIN(max_renters) as min_renters"),
+                raw("MAX(max_renters) as max_renters"),
                 raw("MIN(price) as min_price"),
                 raw("MAX(price) as max_price"),
-                raw("COUNT(`floors:rooms`.`id`) as num_of_rooms")
+                raw("COUNT(`floors:rooms`.`id`) as num_of_rooms"),
+                raw("MIN(`floors:rooms`.`room_area`) as min_room_area"),
+                raw("MAX(`floors:rooms`.`room_area`) as max_room_area"),
+                raw("(SELECT room_images.image_url FROM room_images WHERE room_images.room_id = `floors:rooms`.id ORDER BY RAND() LIMIT 1) as thumbnail")
             )
             .groupBy("houses.id", "houses.name", "houses.address", "houses.description");
 
@@ -115,6 +121,45 @@ class HouseService {
         if (!details) throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
 
         return details;
+    }
+
+    static async getHouseWithRooms(houseId: string) {
+        const details = await Houses.query()
+            .withGraphJoined("floors.rooms.[services.service, images]")
+            .findById(houseId)
+            .select("houses.id", "houses.name", "houses.address", "houses.description", "houses.collection_cycle")
+            .modifyGraph("floors", (builder) => {
+                builder.select("id", "name");
+            })
+            .modifyGraph("floors.rooms", (builder) => {
+                builder.select("id", "name", "max_renters", "room_area", "price", "description", "status");
+            })
+            .modifyGraph("floors.rooms.services.service", (builder) => {
+                builder.select("id", "name", "unit_price", "description");
+            })
+            .modifyGraph("floors.rooms.images", (builder) => {
+                builder.select("id", "imageUrl");
+            });
+
+        if (!details) {
+            throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
+        }
+
+        // Flatten the data structure and return a simplified object
+        return {
+            ...details,
+            floors: details.floors.map((floor) => ({
+                ...floor,
+                rooms: floor.rooms.map((room) => ({
+                    ...room,
+                    services: room.services.map((service) => ({
+                        ...service.service, // Flatten the service details
+                        quantity: service.quantity, // Keep quantity
+                    })),
+                    images: room.images.map((image) => image.imageUrl), // Map only image URLs
+                })),
+            })),
+        };
     }
 
     static async create(data: HouseCreate) {

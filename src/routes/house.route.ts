@@ -9,7 +9,8 @@ const houseRouter = express.Router();
 
 houseRouter.post("/create", authentication, houseValidator.createHouse, handleErrors, HouseController.createHouse);
 houseRouter.get("/list", authentication, HouseController.getHouseList);
-houseRouter.get("/:houseId/details", authentication, authorize(Module.HOUSE, Action.READ), houseValidator.houseIdValidator, handleErrors, HouseController.getHouseDetails);
+houseRouter.get("/:houseId/details", houseValidator.houseIdValidator, handleErrors, HouseController.getHouseDetails);
+houseRouter.get("/:houseId/rooms", houseValidator.houseIdValidator, handleErrors, HouseController.getHouseWithRooms);
 houseRouter.put("/:houseId/update", authentication, authorize(Module.HOUSE, Action.UPDATE), houseValidator.updateHouseDetails, handleErrors, HouseController.updateHouseDetails);
 houseRouter.patch("/:houseId/update-status", authentication, authorize(Module.HOUSE, Action.UPDATE), houseValidator.updateHouseStatus, handleErrors, HouseController.updateHouseStatus);
 houseRouter.delete("/:houseId/delete", authentication, authorize(Module.HOUSE, Action.DELETE), HouseController.deleteHouse);

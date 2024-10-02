@@ -32,7 +32,38 @@ class HouseController {
     static async getHouseDetails(req, res) {
         const { houseId } = req.params;
         try {
+            const redis = await redisConfig;
+            const cache = await redis.sIsMember(`house:${houseId}:details`, houseId);
+            if (cache) {
+                const result = await redis.sMembers(`house:${houseId}:details`);
+                return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, JSON.parse(result[0])));
+            }
+
             const details = await HouseService.getHouseById(houseId);
+            redis.sAdd(`house:${houseId}:details`, JSON.stringify(details));
+            redis.expire(`house:${houseId}:details`, 300);
+
+            return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, details));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async getHouseWithRooms(req, res) {
+        const { houseId } = req.params;
+        try {
+            // cache
+            const redis = await redisConfig;
+            const cache = await redis.sIsMember(`house:${houseId}:rooms`, houseId);
+            if (cache) {
+                const result = await redis.sMembers(`house:${houseId}:rooms`);
+                return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, JSON.parse(result[0])));
+            }
+
+            const details = await HouseService.getHouseWithRooms(houseId);
+            redis.sAdd(`house:${houseId}:rooms`, JSON.stringify(details));
+            redis.expire(`house:${houseId}:rooms`, 300);
+
             return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, details));
         } catch (err) {
             Exception.handle(err, req, res);

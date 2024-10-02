@@ -404,6 +404,15 @@ components:
                                     description:
                                         type: string
                                         example: "This is a beautiful house"
+                                    collectionCycle:
+                                        type: integer
+                                        example: 1
+                                    minRenters:
+                                        type: integer
+                                        example: 1
+                                    maxRenters:
+                                        type: integer
+                                        example: 6
                                     minPrice:
                                         type: number
                                         example: 3000000
@@ -413,6 +422,15 @@ components:
                                     numOfRooms:
                                         type: integer
                                         example: 3
+                                    minRoomArea:
+                                        type: number
+                                        example: 25
+                                    maxRoomArea:
+                                        type: number
+                                        example: 30
+                                    thumbnail:
+                                        type: string
+                                        example: "https://via.placeholder.com/150"
                         total:
                             type: integer
                             example: 24
@@ -474,6 +492,107 @@ components:
                     type: integer
                     minimum: 1
                     example: 5
+
+        HouseWithRooms:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    example: 40ca663f-8dbe-4424-b52b-b949ace687ff
+                name:
+                    type: string
+                    example: "House 5"
+                address:
+                    type: object
+                    $ref: "#/components/schemas/Address"
+                description:
+                    type: string
+                    example: "This is a beautiful house"
+                collectionCycle:
+                    type: integer
+                    example: 1
+                floors:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            id:
+                                type: string
+                                format: uuid
+                                example: 6e21fac3-6460-44cc-a93f-a16a62c59417
+                            name:
+                                type: string
+                                example: "Tầng 2"
+                            rooms:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        id:
+                                            type: string
+                                            format: uuid
+                                            example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
+                                        name:
+                                            type: string
+                                            example: "Phòng 3"
+                                        maxRenters:
+                                            type: integer
+                                            example: 6
+                                        roomArea:
+                                            type: number
+                                            example: 25
+                                        price:
+                                            type: number
+                                            example: 3500000
+                                        description:
+                                            type: string
+                                            nullable: true
+                                        status:
+                                            type: string
+                                            enum:
+                                                - AVAILABLE
+                                                - PENDING
+                                                - RENTED
+                                                - EXPIRED
+                                                - MAINTENANCE
+                                            example: "AVAILABLE"
+                                        services:
+                                            type: array
+                                            items:
+                                                type: object
+                                                properties:
+                                                    id:
+                                                        type: string
+                                                        format: uuid
+                                                        example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
+                                                    name:
+                                                        type: string
+                                                        example: "Electricity"
+                                                    unitPrice:
+                                                        type: number
+                                                        example: 4000
+                                                    description:
+                                                        type: string
+                                                        nullable: true
+                                                        example: "Electricity service"
+                                                    quantity:
+                                                        type: number
+                                                        example: 1
+
+        HouseWithRoomsSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    default: GET_HOUSE_DETAILS_SUCCESS
+                message:
+                    default: Get house details successful
+                data:
+                    $ref: "#/components/schemas/HouseWithRooms"
+
         HouseDetailsSuccess:
             type: object
             properties:
@@ -758,8 +877,6 @@ paths:
             tags:
                 - House
             summary: Get house details
-            security:
-                - BearerAuth: []
             parameters:
                 - in: path
                   name: houseId
@@ -776,21 +893,41 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/HouseDetailsSuccess"
 
-                "401":
-                    description: Unauthorized
-                    content:
-                        application/json:
-                            schema:
-                                oneOf:
-                                    - $ref: "#/components/schemas/TokenInvalid"
-                                    - $ref: "#/components/schemas/TokenExpired"
-
                 "404":
                     description: House not found
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/NoHouseFound"
+
+    /houses/{houseId}/rooms:
+        get:
+            tags:
+                - House
+            summary: Get rooms of a house
+            description: Get all rooms of a house with the house ID. It is used for renter to view the rooms of a house
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  description: The ID of the house
+                  schema:
+                      type: string
+                      format: uuid
+                      example: 40ca663f-8dbe-4424-b52b-b949ace687ff
+            responses:
+                "200":
+                    description: Get rooms of a house successful
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/HouseWithRoomsSuccess"
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
 
     /houses/{houseId}/update:
         put:
