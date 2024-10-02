@@ -22,7 +22,8 @@ const jwtToken = {
             const data = jwt.verify(token, JWT_SECRET);
             return data;
         } catch (e) {
-            if (e.name === "TokenExpiredError") throw new ApiException(messageResponse.TOKEN_EXPIRED, 401);
+            if (e.name === "TokenExpiredError")
+                throw new ApiException(messageResponse.TOKEN_EXPIRED, 401);
             throw new ApiException(messageResponse.TOKEN_INVALID, 401);
         }
     },

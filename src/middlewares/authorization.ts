@@ -63,7 +63,7 @@ const renterAuthorize = (action: Action) => {
 // Main authorization middleware handler
 const authorizationMiddleware = (module: Module, action: string) => {
     return async (req, res, next) => {
-        const { houseId, roleId, roomId } = req.params;
+        const { houseId, roleId, roomId, renterId } = req.params;
         const user = req.user;
 
         try {
@@ -78,7 +78,7 @@ const authorizationMiddleware = (module: Module, action: string) => {
             }
 
             // Specific check for roles (when roleId is provided)
-            if (roleId && module === Module.ROLE) {
+            if (roleId) {
                 const isAccessRole = await RoleService.isAccessible(user.id, roleId, action);
                 if (!isAccessRole) {
                     throw new ApiException(messageResponse.UNAUTHORIZED, 403);
@@ -86,9 +86,17 @@ const authorizationMiddleware = (module: Module, action: string) => {
             }
 
             // Specific check for rooms (when roomId is provided)
-            if (roomId && module === Module.ROOM) {
+            if (roomId) {
                 const isAccessRoom = await RoomService.isRoomAccessible(user.id, roomId, action);
                 if (!isAccessRoom) {
+                    throw new ApiException(messageResponse.UNAUTHORIZED, 403);
+                }
+            }
+
+            // Specific check for renters (when renterId is provided)
+            if (renterId) {
+                const isAccessRenter = await RenterService.isRenterAccessible(user.id, renterId, action);
+                if (!isAccessRenter) {
                     throw new ApiException(messageResponse.UNAUTHORIZED, 403);
                 }
             }

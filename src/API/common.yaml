@@ -161,3 +161,14 @@ components:
                     minLength: 1
                     maxLength: 50
                     example: "1234 Main St"
+
+        Unauthorized:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    default: UNAUTHORIZED
+                message:
+                    default: You are not authorized to access this resource

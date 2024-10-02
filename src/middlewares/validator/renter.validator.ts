@@ -2,6 +2,8 @@ import { check } from "express-validator";
 
 const login = [check("email").optional().isEmail().withMessage("Email must be a valid email"), check("phoneNumber").optional().isString().withMessage("Phone number must be a string")];
 
+const verify = [check("email").optional().isEmail().withMessage("Email must be a valid email"), check("phoneNumber").optional().isString().withMessage("Phone number must be a string"), check("code").isString().withMessage("Code must be a string")];
+
 const renterInfo = [
     check("name").isString().withMessage("Name must be a string"),
     check("citizenId").isString().withMessage("Citizen ID must be a string"),
@@ -18,6 +20,7 @@ const renterId = [check("renterId").isUUID().withMessage("Renter ID must be a UU
 
 const renterValidator = {
     login,
+    verify,
     renterInfo,
     renterId,
 };

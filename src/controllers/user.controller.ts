@@ -81,7 +81,7 @@ class UserController {
             const user = await UserService.createUser(newUser);
 
             if (user) {
-                let verifyCode = String(Math.floor(1000 + Math.random() * 9000));
+                const verifyCode = String(Math.floor(1000 + Math.random() * 9000));
 
                 const redis = await redisClient;
                 await redis.set(`verify-account:${user.email}`, verifyCode);

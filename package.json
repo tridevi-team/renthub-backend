@@ -45,6 +45,7 @@
         "uuid": "^10.0.0"
     },
     "devDependencies": {
+        "@eslint/js": "^9.11.1",
         "@faker-js/faker": "^9.0.3",
         "@types/cookie-parser": "^1.4.7",
         "@types/cors": "^2.8.17",
@@ -53,6 +54,9 @@
         "@types/multer": "^1.4.12",
         "@types/node": "^20.14.1",
         "@types/swagger-jsdoc": "^6.0.4",
-        "@types/swagger-ui-express": "^4.1.6"
+        "@types/swagger-ui-express": "^4.1.6",
+        "eslint": "^9.11.1",
+        "globals": "^15.10.0",
+        "typescript-eslint": "^8.8.0"
     }
 }

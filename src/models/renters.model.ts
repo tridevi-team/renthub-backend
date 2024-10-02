@@ -1,6 +1,7 @@
 import { Model, ModelOptions, QueryContext } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { currentDateTime } from "../utils/currentTime";
+import Rooms from "./rooms.model";
 
 class Renters extends Model {
     id: string;
@@ -22,6 +23,7 @@ class Renters extends Model {
     updated_at: string;
     phoneNumber: string;
     roomId: string;
+    createdBy: string;
 
     static get tableName() {
         return "renters";
@@ -61,6 +63,19 @@ class Renters extends Model {
                 created_at: { type: "string", format: "date-time" },
                 updated_by: { type: "string", format: "uuid" },
                 updated_at: { type: "string", format: "date-time" },
+            },
+        };
+    }
+
+    static get relationMappings() {
+        return {
+            room: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Rooms,
+                join: {
+                    from: "renters.room_id",
+                    to: "rooms.id",
+                },
             },
         };
     }

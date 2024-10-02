@@ -1,0 +1,997 @@
+openapi: "3.0.3"
+tags:
+    - name: Renter
+      description: Renter API
+
+components:
+    schemas:
+        RenterInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    description: Renter ID
+                    example: 1fa091e7-c977-44be-ae41-efa38958851f
+                roomId:
+                    type: string
+                    format: uuid
+                    description: Room ID
+                    example: 02ebde3d-ac50-4c2a-afa9-4da1adc52f5b
+                name:
+                    type: string
+                    description: Renter name
+                    example: Juana Lockman
+                citizenId:
+                    type: string
+                    description: Renter citizen ID
+                    example: 026203002093
+                birthday:
+                    type: string
+                    format: date
+                    description: Renter birthday
+                    example: 1990-01-01
+                gender:
+                    type: string
+                    description: Gender of renter
+                    enum:
+                        - male
+                        - female
+                        - other
+                    example: male
+                email:
+                    type: string
+                    format: email
+                    description: Renter email
+                    example: example@gmail.com
+                phoneNumber:
+                    type: string
+                    description: Renter phone number
+                    example: 0397847806
+                address:
+                    type: string
+                    description: Renter address
+                    example: Ha Noi
+                tempReg:
+                    type: boolean
+                    description: Temporary registration
+                    example: true
+                moveInDate:
+                    type: string
+                    format: date-time
+                    description: Move in date
+                    example: 2023-12-31T17:00:00.000Z
+                represent:
+                    type: boolean
+                    description: Set as representative of room
+                    example: true
+                note:
+                    type: string
+                    description: Note
+                    example: Note
+                createdBy:
+                    type: string
+                    format: uuid
+                    description: Created by
+                    example: 00aa0612-e5ca-4e06-a6e4-a761dff7e3bb
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: Created at
+                    example: 2024-10-01T09:50:53.000Z
+                updatedBy:
+                    type: string
+                    format: uuid
+                    description: Updated by
+                    example: 00aa0612-e5ca-4e06-a6e4-a761dff7e3bb
+                updatedAt:
+                    type: string
+                    format: date-time
+                    description: Updated at
+                    example: 2024-10-01T09:50:53.000Z
+            required:
+                - id
+                - roomId
+                - name
+                - citizenId
+                - email
+
+        RenterInfoResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: GET_RENTER_DETAILS_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Renter details retrieved successfully
+                data:
+                    $ref: "#/components/schemas/RenterInfo"
+            required:
+                - success
+                - code
+                - message
+                - data
+
+        RentersListByRoomResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: GET_RENTERS_BY_ROOM_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Renters by room retrieved successfully
+                data:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RenterInfo"
+            required:
+                - success
+                - code
+                - message
+                - data
+
+        RenterInfoListByHouseResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: GET_RENTER_LIST_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Renter list retrieved successfully
+                data:
+                    type: object
+                    properties:
+                        results:
+                            type: array
+                            items:
+                                type: object
+                                properties:
+                                    floorId:
+                                        type: string
+                                        format: uuid
+                                        description: Floor ID
+                                        example: 36f9a639-5cc7-437d-a228-1305521a4b06
+                                    floorName:
+                                        type: string
+                                        description: Floor name
+                                        example: Tầng 2
+                                    roomId:
+                                        type: string
+                                        format: uuid
+                                        description: Room ID
+                                        example: 02ebde3d-ac50-4c2a-afa9-4da1adc52f5b
+                                    roomName:
+                                        type: string
+                                        description: Room name
+                                        example: Phòng 205
+                                    renterId:
+                                        type: string
+                                        format: uuid
+                                        description: Renter ID
+                                        example: 1fa091e7-c977-44be-ae41-efa38958851f
+                                    renterName:
+                                        type: string
+                                        description: Renter name
+                                        example: Juana Lockman
+                                    citizenId:
+                                        type: string
+                                        description: Renter citizen ID
+                                        example: 026203002093
+                                    birthday:
+                                        type: string
+                                        format: date
+                                        description: Renter birthday
+                                        example: 1990-01-01
+                                    gender:
+                                        type: string
+                                        enum:
+                                            - male
+                                            - female
+                                            - other
+                                        example: male
+                                    email:
+                                        type: string
+                                        format: email
+                                        description: Renter email
+                                        example: example@gmail.com
+                                    phoneNumber:
+                                        type: string
+                                        description: Renter phone number
+                                        example: 0397847806
+                                    address:
+                                        type: string
+                                        description: Renter address
+                                        example: Ha Noi
+                                    tempReg:
+                                        type: boolean
+                                        description: Temporary registration
+                                        example: true
+                                    moveInDate:
+                                        type: string
+                                        format: date-time
+                                        description: Move in date
+                                        example: 2023-12-31T17:00:00.000Z
+                                    represent:
+                                        type: boolean
+                                        description: Set as representative of room
+                                        example: true
+                                    note:
+                                        type: string
+                                        description: Note
+                                        example: Note
+                                required:
+                                    - floorId
+                                    - floorName
+                                    - roomId
+                                    - roomName
+                                    - renterId
+                                    - renterName
+                                    - citizenId
+                                    - email
+                                    - phoneNumber
+                                    - address
+                                    - tempReg
+                                    - moveInDate
+                                    - represent
+                                    - note
+                        total:
+                            type: integer
+                            example: 2
+
+        RenterDetailsResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: GET_RENTER_DETAILS_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Renter details retrieved successfully
+                data:
+                    $ref: "#/components/schemas/RenterInfo"
+            required:
+                - success
+                - code
+                - message
+                - data
+
+        RenterUpdateRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: Renter name
+                    example: Juana Lockman
+                citizenId:
+                    type: string
+                    description: Renter citizen ID
+                    example: 026203002093
+                birthday:
+                    type: string
+                    format: date
+                    description: Renter birthday
+                    example: 1990-01-01
+                email:
+                    type: string
+                    format: email
+                    description: Renter email
+                    example: example@gmail.com
+                phoneNumber:
+                    type: string
+                    description: Renter phone number
+                    example: 0397847806
+                address:
+                    type: string
+                    description: Renter address
+                    example: Ha Noi
+                tempReg:
+                    type: boolean
+                    description: Temporary registration
+                    example: false
+                moveInDate:
+                    type: string
+                    format: date-time
+                    description: Move in date
+                    example: 2023-12-31T17:00:00.000Z
+                represent:
+                    type: boolean
+                    description: Set as representative of room
+                    example: true
+                note:
+                    type: string
+                    description: Note
+                    example: Note
+            required:
+                - name
+                - citizenId
+
+        RenterUpdateResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: UPDATE_RENTER_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Renter updated successfully
+                data:
+                    $ref: "#/components/schemas/RenterInfo"
+            required:
+                - success
+                - code
+                - message
+                - data
+
+        RenterDeleteResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: DELETE_RENTER_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Renter deleted successfully
+            required:
+                - success
+                - code
+                - message
+
+        RenterUpdateRepresentativeResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: CHANGE_REPRESENT_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Renter representative updated successfully
+                data:
+                    $ref: "#/components/schemas/RenterInfo"
+            required:
+                - success
+                - code
+                - message
+                - data
+
+        SendCodeSuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: SEND_CODE_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Send code successfully
+            required:
+                - success
+                - code
+                - message
+
+        RenterNotFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: false
+                code:
+                    type: string
+                    description: Response code
+                    example: RENTER_NOT_FOUND
+                message:
+                    type: string
+                    description: Response message
+                    example: Renter not found
+            required:
+                - success
+                - code
+                - message
+
+        NoRentersFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: false
+                code:
+                    type: string
+                    description: Response code
+                    example: NO_RENTERS_FOUND
+                message:
+                    type: string
+                    description: Response message
+                    example: No renters found
+            required:
+                - success
+                - code
+                - message
+
+        RenterCreateRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: Renter name
+                    example: Juana Lockman
+                citizenId:
+                    type: string
+                    description: Renter citizen ID
+                    example: 026203002093
+                tempReg:
+                    type: boolean
+                    description: Temporary registration
+                    example: false
+                email:
+                    type: string
+                    format: email
+                    description: Renter email
+                    example: example@gmail.com
+                phoneNumber:
+                    type: string
+                    description: Renter phone number
+                    example: 0397847806
+                address:
+                    type: string
+                    description: Renter address
+                    example: Ha Noi
+                birthday:
+                    type: string
+                    format: date
+                    description: Renter birthday
+                    example: 1990-01-01
+                gender:
+                    type: string
+                    description: Gender of renter
+                    enum:
+                        - male
+                        - female
+                        - other
+                represent:
+                    type: boolean
+                    description: Set as representative of room
+                    example: true
+                note:
+                    type: string
+                    description: Note
+                    example: Note
+            required:
+                - name
+                - citizenId
+                - phoneNumber
+
+        RenterCreateResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: CREATE_RENTER_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Renter created successfully
+                data:
+                    $ref: "#/components/schemas/RenterInfo"
+            required:
+                - success
+                - code
+                - message
+                - data
+
+        RentersByRoomResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    default: true
+                code:
+                    type: string
+                    description: Response code
+                    default: GET_RENTERS_BY_ROOM_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    default: Renters by room retrieved successfully
+                data:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RenterInfo"
+            required:
+                - success
+                - code
+                - message
+                - data
+
+        RentersByHouse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    default: true
+                code:
+                    type: string
+                    description: Response code
+                    default: GET_RENTERS_BY_HOUSE_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    default: Renters by house retrieved successfully
+                data:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RenterInfo"
+            required:
+                - success
+                - code
+                - message
+                - data
+
+paths:
+    /renters/login:
+        post:
+            tags:
+                - Renter
+            summary: Login for renter
+            description: Login for renter. They can login with email or phone number. The system will verify and send a code to the renter's email or phone number.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                    description: Renter email
+                                    example: renter.mail@gmail.com
+                                phoneNumber:
+                                    type: string
+                                    description: Renter phone number
+                                    example: 0397847806
+            responses:
+                "200":
+                    description: Login successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SendCodeSuccessResponse"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "404":
+                    description: Renter not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterNotFound"
+
+    /renters/verify:
+        post:
+            tags:
+                - Renter
+            summary: Verify renter
+            description: Verify renter with code sent to email or phone number
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                    description: Renter email
+                                    example: renter.mail@gmail.com
+                                phoneNumber:
+                                    type: string
+                                    description: Renter phone number
+                                    example: 0397847806
+                                code:
+                                    type: string
+                                    description: Verification code
+                                    example: 123456
+                            required:
+                                - code
+            responses:
+                "200":
+                    description: Verification successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/LoginSuccess"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Invalid verification code
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/InvalidVerificationCode"
+
+    /renters/{roomId}/add:
+        post:
+            tags:
+                - Renter
+            summary: Add renter
+            description: Add a new renter to a room
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: roomId
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: Room ID
+                  example: 02ebde3d-ac50-4c2a-afa9-4da1adc52f5b
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/RenterCreateRequest"
+            responses:
+                "200":
+                    description: Renter added successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterCreateResponse"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Invalid token
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: You are not authorized to access this resource
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
+    /renters/rooms/{roomId}/list:
+        get:
+            tags:
+                - Renter
+            summary: Get renters by room
+            description: Get renters by room
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: roomId
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: Room ID
+                  example: 02ebde3d-ac50-4c2a-afa9-4da1adc52f5b
+            responses:
+                "200":
+                    description: Renters by room retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RentersByRoomResponse"
+                "401":
+                    description: Invalid token
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: You are not authorized to access this resource
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
+    /renters/houses/{houseId}/list:
+        get:
+            tags:
+                - Renter
+            summary: Get renters by house
+            description: Get renters by house
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: House ID
+                  example: 02ebde3d-ac50-4c2a-afa9-4da1adc52f5b
+            responses:
+                "200":
+                    description: Renters by house retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RentersByHouse"
+                "401":
+                    description: Invalid token
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: You are not authorized to access this resource
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
+    /renters/{renterId}/details:
+        get:
+            tags:
+                - Renter
+            summary: Get renter details
+            description: Get renter details by renter ID
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: renterId
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: Renter ID
+                  example: 1fa091e7-c977-44be-ae41-efa38958851f
+            responses:
+                "200":
+                    description: Renter details retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterDetailsResponse"
+                "401":
+                    description: Invalid token
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: You are not authorized to access this resource
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Renter not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterNotFound"
+
+    /renters/{renterId}/update:
+        put:
+            tags:
+                - Renter
+            summary: Update renter
+            description: Update renter by renter ID
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: renterId
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: Renter ID
+                  example: 1fa091e7-c977-44be-ae41-efa38958851f
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/RenterUpdateRequest"
+            responses:
+                "200":
+                    description: Renter updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterUpdateResponse"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Invalid token
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: You are not authorized to access this resource
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Renter not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterNotFound"
+
+    /renters/{renterId}/change-represent:
+        patch:
+            tags:
+                - Renter
+            summary: Change representative
+            description: Change representative of room by renter ID
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: renterId
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: Renter ID
+                  example: 1fa091e7-c977-44be-ae41-efa38958851f
+            responses:
+                "200":
+                    description: Renter representative updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterUpdateRepresentativeResponse"
+                "401":
+                    description: Invalid token
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: You are not authorized to access this resource
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Renter not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterNotFound"
+
+    /renters/{renterId}/delete:
+        delete:
+            tags:
+                - Renter
+            summary: Delete renter
+            description: Delete renter by renter ID
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: renterId
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: Renter ID
+                  example: 1fa091e7-c977-44be-ae41-efa38958851f
+            responses:
+                "200":
+                    description: Renter deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterDeleteResponse"
+                "401":
+                    description: Invalid token
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: You are not authorized to access this resource
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Renter not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterNotFound"

@@ -1,7 +1,7 @@
 import { Model, ModelOptions, QueryContext } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { currentDateTime } from "../utils/currentTime";
-import { HouseFloors, RoomImages, RoomServices } from "./";
+import { HouseFloors, Renters, RoomImages, RoomServices } from "./";
 
 class Rooms extends Model {
     id: string;
@@ -76,6 +76,14 @@ class Rooms extends Model {
                 join: {
                     from: "rooms.floor_id",
                     to: "house_floors.id",
+                },
+            },
+            renters: {
+                relation: Model.HasManyRelation,
+                modelClass: Renters,
+                join: {
+                    from: "rooms.id",
+                    to: "renters.room_id",
                 },
             },
             services: {

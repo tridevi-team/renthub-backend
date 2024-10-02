@@ -37,7 +37,7 @@ class Exception {
         error.httpCode = error.httpCode || 500;
         error.data = error.data || error.stack || {};
 
-        let exceptionHandler = new ExceptionHandler();
+        const exceptionHandler = new ExceptionHandler();
         exceptionHandler.handle(error, { request, response });
     }
 }
