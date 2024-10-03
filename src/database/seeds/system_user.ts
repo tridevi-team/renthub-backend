@@ -1,5 +1,4 @@
-import { verify } from "crypto";
-import { Knex } from "knex";
+import type { Knex } from "knex";
 
 export async function seed(knex: Knex): Promise<void> {
     // Deletes ALL existing entries
@@ -7,6 +6,15 @@ export async function seed(knex: Knex): Promise<void> {
 
     // Inserts seed entries
     await knex("users").insert([
-        { email: "system@tmquang.com", password: "123456", full_name: "System", phone_number: "0399999999", gender: "male", address: "Ha Noi", birthday: "2003/05/01", verify: true },
+        {
+            email: "system@tmquang.com",
+            password: "123456",
+            full_name: "System",
+            phone_number: "0399999999",
+            gender: "male",
+            address: "Ha Noi",
+            birthday: "2003/05/01",
+            verify: true,
+        },
     ]);
 }

@@ -1,4 +1,5 @@
-import { Model, QueryContext } from "objection";
+import type { QueryContext } from "objection";
+import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 
 class Logs extends Model {
@@ -12,7 +13,7 @@ class Logs extends Model {
         return "id";
     }
 
-    $beforeInsert(queryContext: QueryContext): Promise<any> | void {
+    $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
     }
 
@@ -25,7 +26,10 @@ class Logs extends Model {
                 request_timestamp: { type: "string", format: "date-time" },
                 client_ip: { type: "string", maxLength: 45 },
                 endpoint: { type: "string", maxLength: 255 },
-                request_method: { type: "string", enum: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"] },
+                request_method: {
+                    type: "string",
+                    enum: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"],
+                },
                 status_code: { type: "integer" },
                 user_agent: { type: "string" },
                 response_time_ms: { type: "integer" },

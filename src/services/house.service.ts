@@ -1,7 +1,7 @@
 import { raw } from "objection";
 import { Action, RoomStatus } from "../enums";
 import messageResponse from "../enums/message.enum";
-import { HouseCreate, HouseFilter, HouseServiceInfo, HouseUpdate } from "../interfaces";
+import type { HouseCreate, HouseFilter, HouseServiceInfo, HouseUpdate } from "../interfaces";
 import { HouseFloors, Houses, Rooms, Services } from "../models";
 import { ApiException } from "../utils";
 import camelToSnake from "../utils/camelToSnake";
@@ -61,7 +61,9 @@ class HouseService {
         }
 
         if (data.numOfBeds) {
-            query.where("floors:rooms.description", "like", `%${data.numOfBeds} ngu%`).orWhere("floors:rooms.description", "like", `%${data.numOfBeds}n%`);
+            query
+                .where("floors:rooms.description", "like", `%${data.numOfBeds} ngu%`)
+                .orWhere("floors:rooms.description", "like", `%${data.numOfBeds}n%`);
         }
 
         if (data.numOfRenters) {
@@ -98,7 +100,9 @@ class HouseService {
                 raw("COUNT(`floors:rooms`.`id`) as num_of_rooms"),
                 raw("MIN(`floors:rooms`.`room_area`) as min_room_area"),
                 raw("MAX(`floors:rooms`.`room_area`) as max_room_area"),
-                raw("(SELECT room_images.image_url FROM room_images WHERE room_images.room_id = `floors:rooms`.id ORDER BY RAND() LIMIT 1) as thumbnail")
+                raw(
+                    "(SELECT room_images.image_url FROM room_images WHERE room_images.room_id = `floors:rooms`.id ORDER BY RAND() LIMIT 1) as thumbnail"
+                )
             )
             .groupBy("houses.id", "houses.name", "houses.address", "houses.description");
 
@@ -292,6 +296,8 @@ class HouseService {
 
     static async updateService(serviceId: string, data: HouseServiceInfo) {
         const serviceDetails = await Services.query().findById(serviceId);
+        if (!serviceDetails) throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
+
         const serviceNameExists = await Services.query().findOne(
             camelToSnake({
                 name: data.name,
@@ -300,8 +306,6 @@ class HouseService {
         );
 
         if (serviceNameExists && serviceDetails.id !== serviceId) throw new ApiException(messageResponse.SERVICE_ALREADY_EXISTS, 409);
-
-        if (!serviceDetails) throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
 
         const updatedService = await serviceDetails.$query().patchAndFetch(camelToSnake(data));
 

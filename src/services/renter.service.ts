@@ -1,6 +1,6 @@
 import { ConstraintViolationError } from "objection";
 import messageResponse from "../enums/message.enum";
-import { Pagination, Renter } from "../interfaces";
+import type { Pagination, Renter } from "../interfaces";
 import { Houses, Renters, Roles } from "../models";
 import { ApiException, jwtToken } from "../utils";
 import camelToSnake from "../utils/camelToSnake";
@@ -10,15 +10,12 @@ class RenterService {
         try {
             // check if renter exists
             const renter = await Renters.query()
-                .where("email", "=", data.email)
-                .orWhere("email", "=", data.email)
-                .orWhere("phone_number", "=", data.phoneNumber)
+                .where("email", "=", data.email || "")
+                .orWhere("email", "=", data.email || "")
+                .orWhere("phone_number", "=", data.phoneNumber || "")
                 .first();
             if (renter) {
-                throw new ApiException(
-                    messageResponse.RENTER_ALREADY_EXISTS,
-                    409
-                );
+                throw new ApiException(messageResponse.RENTER_ALREADY_EXISTS, 409);
             }
 
             // create renter
@@ -81,20 +78,14 @@ class RenterService {
 
     static async update(id: string, data: Renter) {
         const renter = await this.get(id);
-        const updatedRenter = await Renters.query().patchAndFetchById(
-            id,
-            camelToSnake(data)
-        );
+        const updatedRenter = await renter.$query().patchAndFetch(camelToSnake(data));
         return updatedRenter;
     }
 
     static async delete(id: string) {
         const renter = await this.get(id);
         if (renter.represent) {
-            throw new ApiException(
-                messageResponse.CHANGE_REPRESENT_BEFORE_DELETE,
-                409
-            );
+            throw new ApiException(messageResponse.CHANGE_REPRESENT_BEFORE_DELETE, 409);
         }
         const deletedRenter = await Renters.query().deleteById(id);
         return deletedRenter;
@@ -102,8 +93,14 @@ class RenterService {
 
     static async checkExists(data: { email?: string; phoneNumber?: string }) {
         const renter = await Renters.query()
-            .where("email", data.email)
-            .orWhere("phone_number", data.phoneNumber)
+            .where(builder => {
+                if (data.email) {
+                    builder.where("email", data.email);
+                }
+                if (data.phoneNumber) {
+                    builder.orWhere("phone_number", data.phoneNumber);
+                }
+            })
             .first();
         if (!renter) {
             throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
@@ -113,8 +110,14 @@ class RenterService {
 
     static async login(data: { email?: string; phoneNumber?: string }) {
         const renter = await Renters.query()
-            .where("email", data.email)
-            .orWhere("phone_number", data.phoneNumber)
+            .where(builder => {
+                if (data.email) {
+                    builder.where("email", data.email);
+                }
+                if (data.phoneNumber) {
+                    builder.orWhere("phone_number", data.phoneNumber);
+                }
+            })
             .first();
         if (!renter) {
             throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
@@ -149,19 +152,17 @@ class RenterService {
                 represent: false,
             });
         }
-        const updatedRenter = await Renters.query().patchAndFetchById(
-            renterId,
-            { represent: true }
-        );
+        const updatedRenter = await renter.$query().patchAndFetch({ represent: true });
         return updatedRenter;
     }
 
     static async isOwner(renterId: string, roomId: string) {
         // Check if renter is owner of room
         const renter = await Renters.query().findById(renterId);
-        if (renter.roomId === roomId) {
+        if (renter && renter.roomId === roomId) {
             return true;
         }
+        return false;
     }
 
     static async accessHouse(renterId: string, houseId: string) {
@@ -179,11 +180,7 @@ class RenterService {
         return false;
     }
 
-    static async isRenterAccessible(
-        userId: string,
-        renterId: string,
-        action: string
-    ) {
+    static async isRenterAccessible(userId: string, renterId: string, action: string) {
         const renter = await Renters.query().findById(renterId);
         if (!renter) {
             throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
@@ -196,13 +193,13 @@ class RenterService {
             .where("renters.id", renterId)
             .select("houses.created_by", "houses.id")
             .first();
-        if (houseDetails.createdBy === userId) return true;
+        if (houseDetails && houseDetails.createdBy === userId) return true;
 
         const housePermissions = await Roles.query()
             .leftJoin("user_roles", "roles.id", "user_roles.role_id")
             .findOne(
                 camelToSnake({
-                    "roles.house_id": houseDetails.id,
+                    "roles.house_id": houseDetails?.id,
                     "user_roles.user_id": userId,
                 })
             );

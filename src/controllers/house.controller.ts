@@ -118,7 +118,8 @@ class HouseController {
     }
 
     static async searchHouse(req, res) {
-        const { keyword, limit, page, sortBy, orderBy, numOfBeds, street, ward, district, city, numOfRenters, roomArea, priceFrom, priceTo } = req.query;
+        const { keyword, limit, page, sortBy, orderBy, numOfBeds, street, ward, district, city, numOfRenters, roomArea, priceFrom, priceTo } =
+            req.query;
         try {
             const data = {
                 keyword,

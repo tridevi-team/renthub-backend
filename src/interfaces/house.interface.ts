@@ -1,5 +1,5 @@
-import { Address } from ".";
-import { ServiceTypes } from "../enums";
+import type { Address } from ".";
+import type { ServiceTypes } from "../enums";
 
 export interface HouseCreate {
     name: string;

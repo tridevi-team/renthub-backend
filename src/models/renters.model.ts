@@ -1,4 +1,5 @@
-import { Model, ModelOptions, QueryContext } from "objection";
+import type { ModelOptions, QueryContext } from "objection";
+import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { currentDateTime } from "../utils/currentTime";
 import Rooms from "./rooms.model";
@@ -33,11 +34,11 @@ class Renters extends Model {
         return "id";
     }
 
-    $beforeInsert(queryContext: QueryContext): Promise<any> | void {
+    $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
     }
 
-    $beforeUpdate(opt: ModelOptions, queryContext: QueryContext): Promise<any> | void {
+    $beforeUpdate(_opt: ModelOptions, _queryContext: QueryContext): Promise<any> | void {
         this.updated_at = currentDateTime();
     }
 

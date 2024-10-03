@@ -1,8 +1,23 @@
+// export default [
+//     { files: ["**/*.{js,mjs,cjs,ts}"] },
+//     { languageOptions: { globals: globals.node } },
+//     ...tseslint.configs.recommended,
+// ];
+
+import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default [
-    { files: ["**/*.{js,mjs,cjs,ts}"] },
-    { languageOptions: { globals: globals.browser } },
+    // js.configs.recommended,
     ...tseslint.configs.recommended,
+    {
+        files: ["**/*.{js,mjs,cjs,ts}"],
+        languageOptions: { globals: globals.node },
+        rules: {
+            "@typescript-eslint/no-unused-vars": "off",
+            "@typescript-eslint/no-explicit-any": "off",
+            "no-undef": "off",
+        },
+    },
 ];

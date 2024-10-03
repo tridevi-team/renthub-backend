@@ -19,6 +19,10 @@ const updateEquipment = [
     check("equipmentId").notEmpty().withMessage("Equipment ID is required"),
 ];
 
-const equipmentValidator = { addEquipment, addEquipmentToRoom, updateEquipment };
+const equipmentValidator = {
+    addEquipment,
+    addEquipmentToRoom,
+    updateEquipment,
+};
 
 export default equipmentValidator;

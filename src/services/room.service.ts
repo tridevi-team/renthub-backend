@@ -1,6 +1,6 @@
 import { ForeignKeyViolationError } from "objection";
 import messageResponse from "../enums/message.enum";
-import { Pagination, Room, RoomServiceInfo } from "../interfaces";
+import type { Pagination, Room, RoomServiceInfo } from "../interfaces";
 import { Roles, RoomImages, Rooms, RoomServices, Services } from "../models";
 import { ApiException } from "../utils";
 import camelToSnake from "../utils/camelToSnake";
@@ -9,29 +9,23 @@ class RoomService {
     static async create(houseId: string, data: Room) {
         try {
             // check if room exists
-            const room = await Rooms.query()
-                .join("house_floors", "rooms.floor_id", "house_floors.id")
-                .findOne({
-                    "rooms.name": data.name,
-                    "house_floors.house_id": houseId,
-                });
+            const room = await Rooms.query().join("house_floors", "rooms.floor_id", "house_floors.id").findOne({
+                "rooms.name": data.name,
+                "house_floors.house_id": houseId,
+            });
 
             if (room) {
-                throw new ApiException(
-                    messageResponse.ROOM_ALREADY_EXISTS,
-                    409
-                );
+                throw new ApiException(messageResponse.ROOM_ALREADY_EXISTS, 409);
             }
 
             // create room
-            const newRoom = await Rooms.query().insertAndFetch(
-                camelToSnake(data)
-            );
+            const newRoom = await Rooms.query().insertAndFetch(camelToSnake(data));
             return newRoom;
         } catch (err) {
             if (err instanceof ForeignKeyViolationError) {
                 throw new ApiException(messageResponse.FLOOR_NOT_FOUND, 404);
             }
+            throw err;
         }
     }
 
@@ -81,7 +75,7 @@ class RoomService {
         };
     }
 
-    static async listByHouse(houseId: string, pagination: Pagination = null) {
+    static async listByHouse(houseId: string, pagination: Pagination = { page: 1, limit: 10 }) {
         // Get list of rooms by house
         const rooms = await Rooms.query()
             .withGraphFetched("floor.house")
@@ -139,14 +133,13 @@ class RoomService {
             if (!room) {
                 throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
             }
-            const updatedRoom = await room
-                .$query()
-                .patchAndFetch(camelToSnake(data));
+            const updatedRoom = await room.$query().patchAndFetch(camelToSnake(data));
             return updatedRoom;
         } catch (err) {
             if (err instanceof ForeignKeyViolationError) {
                 throw new ApiException(messageResponse.FLOOR_NOT_FOUND, 404);
             }
+            throw err;
         }
     }
 
@@ -160,11 +153,7 @@ class RoomService {
         return deletedRoom;
     }
 
-    static async addServiceToRoom(
-        roomId: string,
-        services: RoomServiceInfo[],
-        userId: string
-    ) {
+    static async addServiceToRoom(roomId: string, services: RoomServiceInfo[], userId: string) {
         const room = await this.getRoomById(roomId);
 
         // check if services exist
@@ -197,11 +186,7 @@ class RoomService {
         return room;
     }
 
-    static async removeServicesFromRoom(
-        roomId: string,
-        services: RoomServiceInfo[],
-        userId: string
-    ) {
+    static async removeServicesFromRoom(roomId: string, services: RoomServiceInfo[], userId: string) {
         const room = await this.getRoomById(roomId);
 
         // check if services exist
@@ -219,20 +204,13 @@ class RoomService {
                 .patch(camelToSnake({ updatedBy: userId }))
                 .where("room_id", roomId)
                 .andWhere("service_id", service.serviceId);
-            await RoomServices.query()
-                .delete()
-                .where("room_id", roomId)
-                .andWhere("service_id", service.serviceId);
+            await RoomServices.query().delete().where("room_id", roomId).andWhere("service_id", service.serviceId);
         }
 
         return room;
     }
 
-    static async addImagesToRoom(
-        roomId: string,
-        images: string[],
-        userId: string
-    ) {
+    static async addImagesToRoom(roomId: string, images: string[], userId: string) {
         const room = await this.getRoomById(roomId);
 
         // remove existing images
@@ -262,11 +240,7 @@ class RoomService {
         return room;
     }
 
-    static async isRoomAccessible(
-        userId: string,
-        roomId: string,
-        action: string
-    ) {
+    static async isRoomAccessible(userId: string, roomId: string, action: string) {
         const room = await Rooms.query().findById(roomId);
 
         if (!room) throw new ApiException(messageResponse.ROLE_NOT_FOUND, 404);
@@ -277,6 +251,8 @@ class RoomService {
             .where("rooms.id", roomId)
             .select("houses.created_by", "houses.id")
             .first();
+        if (!houseDetails) throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
+
         if (houseDetails.createdBy === userId) return true;
 
         // get house permissions

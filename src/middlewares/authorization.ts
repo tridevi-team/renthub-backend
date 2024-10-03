@@ -27,7 +27,7 @@ export const authorize = (module: Module, action: Action) => {
 const renterAuthorize = (action: Action) => {
     return async (req, res, next) => {
         const user = req.user;
-        const { roomId, houseId, renterId } = req.params;
+        const { roomId, houseId } = req.params;
         try {
             if (user.type === "renter") {
                 switch (action) {
@@ -40,7 +40,7 @@ const renterAuthorize = (action: Action) => {
                             else throw new ApiException(messageResponse.UNAUTHORIZED, 403);
                         } else throw new ApiException(messageResponse.UNAUTHORIZED, 403);
                         break;
-                    case Action.READ:
+                    case Action.READ: {
                         const hasAccessRoom = await RenterService.isOwner(user.id, roomId);
                         const hasAccessHouse = await RenterService.accessHouse(user.id, houseId);
                         if (!hasAccessRoom && !hasAccessHouse) {
@@ -48,6 +48,7 @@ const renterAuthorize = (action: Action) => {
                         }
                         next();
                         break;
+                    }
                     default:
                         throw new ApiException(messageResponse.UNKNOWN_ERROR, 500);
                 }
@@ -61,7 +62,7 @@ const renterAuthorize = (action: Action) => {
 };
 
 // Main authorization middleware handler
-const authorizationMiddleware = (module: Module, action: string) => {
+const authorizationMiddleware = (_module: Module, action: string) => {
     return async (req, res, next) => {
         const { houseId, roleId, roomId, renterId } = req.params;
         const user = req.user;

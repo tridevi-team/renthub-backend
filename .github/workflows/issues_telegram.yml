@@ -1,58 +1,58 @@
 name: Send Telegram Message on Issue/PR
 
 on:
-  issues:
-    types: [opened, closed, assigned, labeled]  # Bổ sung sự kiện labeled
-  pull_request:
-    types: [opened, closed, assigned]
+    issues:
+        types: [opened, closed, assigned, labeled] # Bổ sung sự kiện labeled
+    pull_request:
+        types: [opened, closed, assigned]
 
 jobs:
-  notify-telegram:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Send message to Telegram
-      env:
-        TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_TO }}
-        ACTION: ${{ github.event.action }}  # Trạng thái (opened, closed, assigned, labeled)
-        ISSUE_TITLE: ${{ github.event.issue.title || github.event.pull_request.title }}
-        ISSUE_URL: ${{ github.event.issue.html_url || github.event.pull_request.html_url }}
-        ISSUE_CREATOR: ${{ github.event.issue.user.login || github.event.pull_request.user.login }}  # Người tạo
-        ASSIGNEE: ${{ github.event.issue.assignee.login || github.event.pull_request.assignee.login || 'None' }}  # Người được assign
-        ISSUE_DESCRIPTION: ${{ github.event.issue.body || github.event.pull_request.body || 'No description provided.' }}  # Mô tả của issue/PR
-        ISSUE_LABEL: ${{ github.event.label.name || 'No label' }}  # Nhãn được gán
-      run: |
-        # Xác định icon và trạng thái dựa trên action
-        if [[ "${ACTION}" == "opened" ]]; then
-          STATUS_ICON="🟢"
-          STATUS="Opened"
-          MESSAGE_TITLE="New Issue Created"
-        elif [[ "${ACTION}" == "closed" ]]; then
-          STATUS_ICON="🔴"
-          STATUS="Closed"
-          MESSAGE_TITLE="Issue Closed"
-        elif [[ "${ACTION}" == "assigned" ]]; then
-          STATUS_ICON="👤"
-          STATUS="Assigned"
-          MESSAGE_TITLE="Issue Assigned"
-        elif [[ "${ACTION}" == "labeled" ]]; then
-          STATUS_ICON="🏷️"
-          STATUS="Labeled"
-          MESSAGE_TITLE="Label Added to Issue"
-        fi
+    notify-telegram:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Send message to Telegram
+              env:
+                  TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+                  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_TO }}
+                  ACTION: ${{ github.event.action }} # Trạng thái (opened, closed, assigned, labeled)
+                  ISSUE_TITLE: ${{ github.event.issue.title || github.event.pull_request.title }}
+                  ISSUE_URL: ${{ github.event.issue.html_url || github.event.pull_request.html_url }}
+                  ISSUE_CREATOR: ${{ github.event.issue.user.login || github.event.pull_request.user.login }} # Người tạo
+                  ASSIGNEE: ${{ github.event.issue.assignee.login || github.event.pull_request.assignee.login || 'None' }} # Người được assign
+                  ISSUE_DESCRIPTION: ${{ github.event.issue.body || github.event.pull_request.body || 'No description provided.' }} # Mô tả của issue/PR
+                  ISSUE_LABEL: ${{ github.event.label.name || 'No label' }} # Nhãn được gán
+              run: |
+                  # Xác định icon và trạng thái dựa trên action
+                  if [[ "${ACTION}" == "opened" ]]; then
+                    STATUS_ICON="🟢"
+                    STATUS="Opened"
+                    MESSAGE_TITLE="New Issue Created"
+                  elif [[ "${ACTION}" == "closed" ]]; then
+                    STATUS_ICON="🔴"
+                    STATUS="Closed"
+                    MESSAGE_TITLE="Issue Closed"
+                  elif [[ "${ACTION}" == "assigned" ]]; then
+                    STATUS_ICON="👤"
+                    STATUS="Assigned"
+                    MESSAGE_TITLE="Issue Assigned"
+                  elif [[ "${ACTION}" == "labeled" ]]; then
+                    STATUS_ICON="🏷️"
+                    STATUS="Labeled"
+                    MESSAGE_TITLE="Label Added to Issue"
+                  fi
 
-        # Tạo nội dung tin nhắn với markdown và icon, bao gồm cả description và label nếu có
-        MESSAGE="*${MESSAGE_TITLE}*%0A%0A\
-        *${STATUS_ICON} Issue/PR Status: ${STATUS}*%0A%0A\
-        📋 *Title*: ${ISSUE_TITLE}%0A%0A\
-        🔗 *Link*: [View here](${ISSUE_URL})%0A%0A\
-        👤 *Created by*: ${ISSUE_CREATOR}%0A%0A\
-        👥 *Assigned to*: ${ASSIGNEE}%0A%0A\
-        🏷️ *Label*: ${ISSUE_LABEL}%0A%0A\
-        📝 *Description*: ${ISSUE_DESCRIPTION}"
+                  # Tạo nội dung tin nhắn với markdown và icon, bao gồm cả description và label nếu có
+                  MESSAGE="*${MESSAGE_TITLE}*%0A%0A\
+                  *${STATUS_ICON} Issue/PR Status: ${STATUS}*%0A%0A\
+                  📋 *Title*: ${ISSUE_TITLE}%0A%0A\
+                  🔗 *Link*: [View here](${ISSUE_URL})%0A%0A\
+                  👤 *Created by*: ${ISSUE_CREATOR}%0A%0A\
+                  👥 *Assigned to*: ${ASSIGNEE}%0A%0A\
+                  🏷️ *Label*: ${ISSUE_LABEL}%0A%0A\
+                  📝 *Description*: ${ISSUE_DESCRIPTION}"
 
-        # Gửi tin nhắn tới Telegram
-        curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
-        -d chat_id="${TELEGRAM_CHAT_ID}" \
-        -d text="${MESSAGE}" \
-        -d parse_mode="Markdown"
+                  # Gửi tin nhắn tới Telegram
+                  curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
+                  -d chat_id="${TELEGRAM_CHAT_ID}" \
+                  -d text="${MESSAGE}" \
+                  -d parse_mode="Markdown"

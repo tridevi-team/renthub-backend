@@ -1,6 +1,101 @@
 import { faker } from "@faker-js/faker";
-import { Knex } from "knex";
+import type { Knex } from "knex";
 import { RoomStatus } from "../../enums";
+
+interface User {
+    id: string;
+    email: string;
+    password: string;
+    full_name: string;
+    gender: string;
+    phone_number: string;
+    address: string;
+    birthday: Date;
+    role: string;
+    type: string;
+    status: number;
+    verify: number;
+    first_login: number;
+}
+interface City {
+    name: string;
+    code: number;
+    division_type: string;
+    phone_code: number;
+    districts: Array<District>;
+}
+
+interface District {
+    name: string;
+    code: number;
+    codename: string;
+    division_type: string;
+    short_codename: string;
+    wards: Array<Ward>;
+}
+
+interface Ward {
+    name: string;
+    code: number;
+    codename: string;
+    division_type: string;
+    short_codename: string;
+}
+interface House {
+    id: string;
+    name: string;
+    contract_default: null | string;
+    description: string;
+    collection_cycle: number;
+    invoice_date: number;
+    num_collect_days: number;
+    status: number;
+    created_by: string;
+    updated_by: string;
+    address: {
+        city: string;
+        district: string;
+        ward: string;
+        street: string;
+    };
+}
+
+interface Floor {
+    id: string;
+    house_id: string;
+    name: string;
+    description: string;
+    created_by: string;
+    updated_by: string;
+}
+interface Room {
+    id: string;
+    floor_id: string;
+    name: string;
+    max_renters: number;
+    room_area: number;
+    price: number;
+    description: string;
+    status: RoomStatus;
+    created_by: string;
+    updated_by: string;
+}
+interface RoomService {
+    id: string;
+    room_id: string;
+    service_id: string;
+    quantity: number;
+    start_index: number | null;
+    description: string;
+    created_by: string;
+    updated_by: string;
+}
+interface RoomImage {
+    room_id: string;
+    image_url: string;
+    description: string;
+    created_by: string;
+}
 
 export async function seed(knex: Knex): Promise<void> {
     await knex("room_images").del();
@@ -13,15 +108,26 @@ export async function seed(knex: Knex): Promise<void> {
 
     // insert system user
     await knex("users").insert([
-        { email: "system@tmquang.com", password: "123456", full_name: "System", phone_number: "0399999999", gender: "male", address: "Ha Noi", birthday: "2003/05/01", verify: true },
+        {
+            email: "system@tmquang.com",
+            password: "123456",
+            full_name: "System",
+            phone_number: "0399999999",
+            gender: "male",
+            address: "Ha Noi",
+            birthday: "2003/05/01",
+            verify: true,
+        },
     ]);
 
     const startPhone = ["032", "033", "034", "035", "036", "037", "038", "039"];
     const genders = ["male", "female", "other"];
-    const users = [];
+
+    const users: User[] = [];
 
     for (let i = 0; i < 100; i++) {
-        const randomPhoneNumber = startPhone[Math.floor(Math.random() * startPhone.length)] + Math.floor(1000000 + Math.random() * 9000000);
+        const randomPhoneNumber =
+            startPhone[Math.floor(Math.random() * startPhone.length)] + Math.floor(1000000 + Math.random() * 9000000);
         const randomGender = genders[Math.floor(Math.random() * 3)];
         users.push({
             id: faker.string.uuid(),
@@ -48,9 +154,11 @@ export async function seed(knex: Knex): Promise<void> {
         return data;
     };
 
-    const address = await fetchAddress().then((data: Array<any>) => data.filter((city: any) => city.name === "Thành phố Hà Nội"));
+    const address = await fetchAddress().then((data) =>
+        (data as Array<City>).filter((city: City) => city.name === "Thành phố Hà Nội")
+    );
 
-    const houses = [];
+    const houses: House[] = [];
 
     for (let i = 0; i < 50; i++) {
         for (let j = 0; j < 10; j++) {
@@ -90,7 +198,7 @@ export async function seed(knex: Knex): Promise<void> {
     await knex("houses").insert(houses);
 
     for (let i = 0; i < houses.length; i++) {
-        const floors = [];
+        const floors: Floor[] = [];
         const numFloors = faker.number.int({
             min: 3,
             max: 7,
@@ -171,7 +279,7 @@ export async function seed(knex: Knex): Promise<void> {
 
         await knex("services").insert(services);
 
-        const rooms = [];
+        const rooms: Room[] = [];
         const usedRoomIds = new Set();
         for (let j = 0; j < floors.length; j++) {
             const numRooms = faker.number.int({
@@ -187,7 +295,8 @@ export async function seed(knex: Knex): Promise<void> {
 
                 usedRoomIds.add(randomRoomId);
 
-                const roomNumber = k < 10 ? floors[j].name.split(" ")[1] + "0" + (k + 1) : floors[j].name.split(" ")[1] + (k + 1);
+                const roomNumber =
+                    k < 10 ? floors[j].name.split(" ")[1] + "0" + (k + 1) : floors[j].name.split(" ")[1] + (k + 1);
                 const roomName = `Phòng ${roomNumber}`;
                 const randomRoom = {
                     id: randomRoomId,
@@ -218,7 +327,7 @@ export async function seed(knex: Knex): Promise<void> {
         await knex("rooms").insert(rooms);
 
         for (let k = 0; k < rooms.length; k++) {
-            const roomServices = [];
+            const roomServices: RoomService[] = [];
             for (let l = 0; l < services.length; l++) {
                 const startIndex = services[l].has_index ? faker.number.int({ min: 1, max: 100 }) : null;
                 const randomRoomService = {
@@ -240,7 +349,7 @@ export async function seed(knex: Knex): Promise<void> {
 
             await knex("room_services").insert(roomServices);
 
-            const roomImages = [];
+            const roomImages: RoomImage[] = [];
             for (let l = 0; l < 2; l++) {
                 const randomRoomImage = {
                     room_id: rooms[k].id,

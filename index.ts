@@ -13,7 +13,18 @@ import { swaggerSpec } from "./src/API/swagger";
 import "./src/config/database.config";
 import messageResponse from "./src/enums/message.enum";
 import { authentication, requestLogger } from "./src/middlewares";
-import { AuthRoute, EquipmentRoute, FloorRoute, HouseRoute, PaymentMethodRoute, RenterRoute, RoleRoute, RoomRoute, ServiceRoute, UserRoute } from "./src/routes";
+import {
+    AuthRoute,
+    EquipmentRoute,
+    FloorRoute,
+    HouseRoute,
+    PaymentMethodRoute,
+    RenterRoute,
+    RoleRoute,
+    RoomRoute,
+    ServiceRoute,
+    UserRoute,
+} from "./src/routes";
 import { aesEncrypt, apiResponse } from "./src/utils";
 
 const PORT = process.env.PORT || 3000;
@@ -49,10 +60,10 @@ app.post(
     "/upload",
     multer({
         storage: multer.diskStorage({
-            destination: (req, file, cb) => {
+            destination: (_req, _file, cb) => {
                 cb(null, UPLOADS_DIR);
             },
-            filename: (req, file, cb) => {
+            filename: (_req, file, cb) => {
                 const currentTimestamp = new Date().getTime();
                 file.originalname = `${currentTimestamp}-${file.originalname}`;
                 cb(null, file.originalname);

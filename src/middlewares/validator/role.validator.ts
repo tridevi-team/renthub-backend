@@ -56,7 +56,10 @@ const updateRoleValidator = [
     check("status").isBoolean().withMessage("status must be a boolean"),
 ];
 
-const updateStatusValidator = [check("roleId").isUUID().withMessage("roleId is not in the correct format"), check("status").isBoolean().withMessage("status must be a boolean")];
+const updateStatusValidator = [
+    check("roleId").isUUID().withMessage("roleId is not in the correct format"),
+    check("status").isBoolean().withMessage("status must be a boolean"),
+];
 
 const roleIdValidator = [check("roleId").isUUID().withMessage("roleId is not in the correct format")];
 

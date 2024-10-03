@@ -1,6 +1,6 @@
 import Objection from "objection";
 import messageResponse from "../enums/message.enum";
-import { Role } from "../interfaces";
+import type { Role } from "../interfaces";
 import { Roles, UserRoles } from "../models";
 import { ApiException } from "../utils";
 import camelToSnake from "../utils/camelToSnake";
@@ -47,7 +47,8 @@ class RoleService {
             })
         );
 
-        if (isNameExists && isNameExists.id !== roleId) throw new ApiException(messageResponse.ROLE_NAME_ALREADY_EXISTS, 409);
+        if (isNameExists && isNameExists.id !== roleId)
+            throw new ApiException(messageResponse.ROLE_NAME_ALREADY_EXISTS, 409);
 
         const updatedRow = await roleDetails.$query().patch(camelToSnake(data));
 
@@ -65,7 +66,8 @@ class RoleService {
             const isDeleted = deletedRow > 0;
             if (!isDeleted) throw new ApiException(messageResponse.DELETE_ROLE_ERROR, 500);
         } catch (error) {
-            if (error instanceof Objection.ForeignKeyViolationError) throw new ApiException(messageResponse.CANNOT_DELETE_ROLE_ASSIGNED_TO_USER, 409);
+            if (error instanceof Objection.ForeignKeyViolationError)
+                throw new ApiException(messageResponse.CANNOT_DELETE_ROLE_ASSIGNED_TO_USER, 409);
         }
     }
 
@@ -112,15 +114,30 @@ class RoleService {
 
         if (!role) throw new ApiException(messageResponse.ROLE_NOT_FOUND, 404);
         // get houseId
-        const houseDetails = await Roles.query().join("houses", "roles.house_id", "houses.id").where("roles.id", roleId).select("houses.created_by").first();
+        const houseDetails = await Roles.query()
+            .join("houses", "roles.house_id", "houses.id")
+            .where("roles.id", roleId)
+            .select("houses.created_by")
+            .first();
+        if (!houseDetails) throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
+
         if (houseDetails.createdBy === userId) return true;
 
         // get house permissions
-        const housePermissions = await Roles.query().leftJoin("user_roles", "roles.id", "user_roles.role_id").where("roles.id", roleId).andWhere("user_id", userId).select("roles.permissions").first();
+        const housePermissions = await Roles.query()
+            .leftJoin("user_roles", "roles.id", "user_roles.role_id")
+            .where("roles.id", roleId)
+            .andWhere("user_id", userId)
+            .select("roles.permissions")
+            .first();
 
         if (!housePermissions?.permissions) return false;
         else if (action === "read") {
-            return housePermissions.permissions.role.read || housePermissions.permissions.role.update || housePermissions.permissions.role.delete;
+            return (
+                housePermissions.permissions.role.read ||
+                housePermissions.permissions.role.update ||
+                housePermissions.permissions.role.delete
+            );
         }
 
         return true;

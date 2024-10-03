@@ -64,6 +64,7 @@ enum messageResponse {
     ROOM_NOT_FOUND = "Room not found",
     NO_ROOMS_FOUND = "No rooms found",
     CREATE_ROOM_SUCCESS = "Room created successfully",
+    CREATE_ROOM_FAIL = "Failed to create room",
     UPDATE_ROOM_SUCCESS = "Room updated successfully",
     DELETE_ROOM_SUCCESS = "Room deleted successfully",
     RENTER_ALREADY_EXISTS = "Renter already exists in this room",
@@ -99,6 +100,16 @@ enum messageResponse {
     GET_SERVICE_DETAILS_SUCCESS = "Service details retrieved successfully",
     GET_SERVICES_BY_HOUSE_SUCCESS = "Services by house retrieved successfully",
     GET_SERVICES_BY_ROOM_SUCCESS = "Services by room retrieved successfully",
+    EQUIPMENT_NOT_FOUND = "Equipment not found",
+    NO_EQUIPMENT_FOUND = "No equipment found",
+    GET_EQUIPMENT_LIST_SUCCESS = "Equipment list retrieved successfully",
+    EQUIPMENT_ALREADY_EXISTS = "Equipment already exists",
+    CREATE_EQUIPMENT_SUCCESS = "Equipment created successfully",
+    UPDATE_EQUIPMENT_SUCCESS = "Equipment updated successfully",
+    DELETE_EQUIPMENT_SUCCESS = "Equipment deleted successfully",
+    GET_EQUIPMENT_DETAILS_SUCCESS = "Equipment details retrieved successfully",
+    GET_EQUIPMENT_BY_ROOM_SUCCESS = "Equipment by room retrieved successfully",
+    GET_EQUIPMENT_BY_HOUSE_SUCCESS = "Equipment by house retrieved successfully",
 }
 
 export default messageResponse;

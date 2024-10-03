@@ -6,7 +6,10 @@ const createFloor = [
     check("description").optional().isString().withMessage("Description must be a string"),
 ];
 
-const updateFloor = [check("name").optional().isString().withMessage("Name must be a string"), check("description").optional().isString().withMessage("Description must be a string")];
+const updateFloor = [
+    check("name").optional().isString().withMessage("Name must be a string"),
+    check("description").optional().isString().withMessage("Description must be a string"),
+];
 
 const floorIdValidator = [check("floorId").isUUID().withMessage("Floor Id must be a UUID")];
 

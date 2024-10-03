@@ -1,5 +1,5 @@
 import messageResponse from "../enums/message.enum";
-import { Role } from "../interfaces";
+import type { Role } from "../interfaces";
 import { HouseService, UserService } from "../services";
 import RoleService from "../services/role.service";
 import { ApiException, apiResponse, Exception } from "../utils";
@@ -10,7 +10,14 @@ class RoleController {
         const { name, permissions, description, status }: Role = req.body;
         const user = req.user;
         try {
-            const data = { houseId, name, permissions, description, status, createdBy: user.id };
+            const data = {
+                houseId,
+                name,
+                permissions,
+                description,
+                status,
+                createdBy: user.id,
+            };
             const create = await RoleService.create(houseId, data);
 
             return res.json(apiResponse(messageResponse.CREATE_ROLE_SUCCESS, true, create));

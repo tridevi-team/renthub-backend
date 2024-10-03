@@ -92,7 +92,6 @@ export const loginCodeTemplate = (name: string, code: string) => `<!DOCTYPE html
 </body>
 </html>`;
 
-
 export const resetPasswordTemplate = (code: string) => `<!DOCTYPE html>
 <html lang="en">
 <head>

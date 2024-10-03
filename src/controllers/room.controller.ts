@@ -3,14 +3,17 @@
 import { RoomStatus } from "../enums";
 import messageResponse from "../enums/message.enum";
 import { RoomService } from "../services";
-import { apiResponse, Exception } from "../utils";
+import { ApiException, apiResponse, Exception } from "../utils";
 
 class RoomController {
     static async getRoomsByHouse(req, res) {
         const { houseId } = req.params;
         const { page, limit } = req.query;
         try {
-            const rooms = await RoomService.listByHouse(houseId, { page: parseInt(page), limit: parseInt(limit) });
+            const rooms = await RoomService.listByHouse(houseId, {
+                page: parseInt(page),
+                limit: parseInt(limit),
+            });
             return res.json(apiResponse(messageResponse.GET_ROOMS_BY_HOUSE_SUCCESS, true, rooms));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -33,13 +36,14 @@ class RoomController {
                 updatedBy: userId,
             });
 
-            await RoomService.addServiceToRoom(newRoom.id, services, userId);
+            if (newRoom) {
+                await RoomService.addServiceToRoom(newRoom.id, services, userId);
+                await RoomService.addImagesToRoom(newRoom.id, images, userId);
 
-            await RoomService.addImagesToRoom(newRoom.id, images, userId);
-
-            const room = await RoomService.getRoomById(newRoom.id);
-
-            return res.json(apiResponse(messageResponse.CREATE_ROOM_SUCCESS, true, room));
+                const room = await RoomService.getRoomById(newRoom.id);
+                return res.json(apiResponse(messageResponse.CREATE_ROOM_SUCCESS, true, room));
+            }
+            throw new ApiException(messageResponse.CREATE_ROOM_FAIL, 400);
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -81,7 +85,7 @@ class RoomController {
         const { roomId } = req.params;
         const userId = req.user.id;
         try {
-            const deletedRoom = await RoomService.deleteRoom(roomId, userId);
+            await RoomService.deleteRoom(roomId, userId);
             return res.json(apiResponse(messageResponse.DELETE_ROOM_SUCCESS, true));
         } catch (err) {
             Exception.handle(err, req, res);

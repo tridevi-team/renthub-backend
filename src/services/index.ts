@@ -1,4 +1,6 @@
 "use strict";
+
+export { default as EquipmentService } from "./equipment.service";
 export { default as FloorService } from "./floor.service";
 export { default as HouseService } from "./house.service";
 export { default as RenterService } from "./renter.service";

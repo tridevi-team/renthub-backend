@@ -38,7 +38,9 @@ class UserController {
             // const decryptPassword = aesDecrypt(password);
             // const user = await UserService.login(username, decryptPassword);
             const userData = await UserService.login(username, password);
-            res.cookie("accessToken", userData.token.refreshToken, { httpOnly: true });
+            res.cookie("accessToken", userData.token.refreshToken, {
+                httpOnly: true,
+            });
             const userInfo = {
                 id: userData.user.id,
                 email: userData.user.email,
@@ -85,11 +87,11 @@ class UserController {
 
                 const redis = await redisClient;
                 await redis.set(`verify-account:${user.email}`, verifyCode);
-                await redis.expire(`verify-account:${user.email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
+                await redis.expire(`verify-account:${user.email}`, parseInt(process.env.REDIS_EXPIRE_TIME || "300"));
 
                 const mail = await MailService.sendVerificationMail(user.email, verifyCode);
                 if (mail) {
-                    return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_VERIFY_ACCOUNT, true, null));
+                    return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_VERIFY_ACCOUNT, true, {}));
                 } else {
                     throw new ApiException(messageResponse.FAILED_EMAIL_VERIFICATION, 200);
                 }
@@ -104,8 +106,11 @@ class UserController {
     static async verifyAccount(req, res) {
         try {
             const { verifyCode, email } = req.body;
-            const result = await UserService.verifyAccount({ email, verifyCode });
-            return res.status(200).json(apiResponse(messageResponse.ACCOUNT_VERIFIED_SUCCESSFULLY, true, null));
+            await UserService.verifyAccount({
+                email,
+                verifyCode,
+            });
+            return res.status(200).json(apiResponse(messageResponse.ACCOUNT_VERIFIED_SUCCESSFULLY, true, {}));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -116,7 +121,7 @@ class UserController {
         try {
             const verifyCode = String(Math.floor(1000 + Math.random() * 9000));
             await MailService.sendVerificationMail(email, verifyCode);
-            return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_VERIFY_ACCOUNT, true, null));
+            return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_VERIFY_ACCOUNT, true, {}));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -125,16 +130,16 @@ class UserController {
     static async forgotPassword(req, res) {
         try {
             const { email } = req.body;
-            const userDetails = await UserService.getUserByEmail(email);
+            await UserService.getUserByEmail(email);
 
             const verifyCode = String(Math.floor(1000 + Math.random() * 9000));
-            const mail = await MailService.sendResetPasswordMail(email, verifyCode);
+            await MailService.sendResetPasswordMail(email, verifyCode);
 
             const redis = await redisClient;
             await redis.set(`reset-password:${email}`, verifyCode);
-            await redis.expire(`reset-password:${email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
+            await redis.expire(`reset-password:${email}`, parseInt(process.env.REDIS_EXPIRE_TIME || "300"));
 
-            return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_RESET_PASSWORD, true, null));
+            return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_RESET_PASSWORD, true, {}));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -144,11 +149,15 @@ class UserController {
         try {
             const { code, email, password } = req.body;
             await UserService.getUserByEmail(email);
-            const isReset = await UserService.resetPassword({ code, email, password });
+            const isReset = await UserService.resetPassword({
+                code,
+                email,
+                password,
+            });
             if (!isReset) {
                 throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 401);
             }
-            return res.status(200).json(apiResponse(messageResponse.PASSWORD_RESET_SUCCESS, true, null));
+            return res.status(200).json(apiResponse(messageResponse.PASSWORD_RESET_SUCCESS, true, {}));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -159,12 +168,12 @@ class UserController {
         const { email } = userInfo;
         const { oldPassword, newPassword } = req.body;
         try {
-            const verifyOldPassword = UserService.verifyPassword(email, oldPassword);
+            await UserService.verifyPassword(email, oldPassword);
 
             // change password
-            const changePassword = UserService.changePassword(email, newPassword);
+            await UserService.changePassword(email, newPassword);
 
-            return res.status(200).json(apiResponse(messageResponse.PASSWORD_UPDATE_SUCCESS, true, null));
+            return res.status(200).json(apiResponse(messageResponse.PASSWORD_UPDATE_SUCCESS, true, {}));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -174,7 +183,11 @@ class UserController {
         const { fullName, phoneNumber, birthday } = req.body;
         const user = req.user;
         try {
-            const updateInfo = await UserService.updateProfile(user.id, { fullName, phoneNumber, birthday });
+            const updateInfo = await UserService.updateProfile(user.id, {
+                fullName,
+                phoneNumber,
+                birthday,
+            });
             return res.status(200).json(apiResponse(messageResponse.PROFILE_UPDATE_SUCCESS, true, updateInfo));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -184,8 +197,8 @@ class UserController {
     static async firstLogin(req, res) {
         const { user } = req;
         try {
-            const userUpdate = await UserService.updateFirstLoginStatus(user.id);
-            return res.status(200).json(apiResponse(messageResponse.FIRST_LOGIN_STATUS_UPDATE_SUCCESS, true, null));
+            await UserService.updateFirstLoginStatus(user.id);
+            return res.status(200).json(apiResponse(messageResponse.FIRST_LOGIN_STATUS_UPDATE_SUCCESS, true, {}));
         } catch (err) {
             Exception.handle(err, req, res);
         }

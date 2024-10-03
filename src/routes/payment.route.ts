@@ -1,7 +1,4 @@
 import express from "express";
-import { access, handleErrors } from "../middlewares";
-import { paymentMethodValidator } from "../middlewares/validator";
-import paymentMethodController from "../controllers/payment.controller";
 
 const paymentMethodRouter = express.Router();
 

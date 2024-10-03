@@ -1,7 +1,7 @@
 import "dotenv/config";
 import redisConfig from "../config/redis.config";
 import messageResponse from "../enums/message.enum";
-import { UserCreate, UserUpdate } from "../interfaces";
+import type { AccessTokenPayload, UserCreate, UserUpdate } from "../interfaces";
 import { Users } from "../models";
 import { ApiException, bcrypt, jwtToken } from "../utils";
 import camelToSnake from "../utils/camelToSnake";
@@ -16,12 +16,12 @@ class UserService {
         return user;
     }
 
-    static async checkUserExist(filter: any = {}) {
+    static async checkUserExist(filter: object = {}) {
         const user = await Users.query().findOne(filter);
         return user ? true : false;
     }
 
-    static async getUsers(filter: any = {}) {
+    static async getUsers(filter: object = {}) {
         const users = await Users.query().where(filter);
         if (users.length === 0) {
             throw new ApiException(messageResponse.NO_USERS_FOUND, 404);
@@ -78,7 +78,7 @@ class UserService {
         return true;
     }
 
-    static async generateToken(user: { id: string; email: string; password: string; phoneNumber: string; role: string; status: boolean }) {
+    static async generateToken(user: AccessTokenPayload) {
         const accessToken = jwtToken.signAccessToken(user);
         const refreshToken = jwtToken.signRefreshToken({
             id: user.id,

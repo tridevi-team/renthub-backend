@@ -1,5 +1,5 @@
 import messageResponse from "../enums/message.enum";
-import { Floor } from "../interfaces";
+import type { Floor } from "../interfaces";
 import { HouseFloors } from "../models";
 import { ApiException } from "../utils";
 import camelToSnake from "../utils/camelToSnake";

@@ -11,7 +11,7 @@ const authentication = async (req, res, next) => {
         const data = await jwtToken.verifyAccessToken(authorization);
 
         // check type user or renter
-        let user = null;
+        let user: any = null;
         if (data.type === "renter") {
             user = await RenterService.get(data.id);
         } else {

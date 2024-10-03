@@ -9,9 +9,16 @@ const serviceRouter = express.Router();
 serviceRouter.get("/:houseId/list", authentication, houseValidator.houseIdValidator, handleErrors, ServiceController.getServicesByHouse);
 serviceRouter.get("/:serviceId/details", authentication, serviceValidator.serviceIdValidator, handleErrors, ServiceController.getServiceDetails);
 serviceRouter.post("/:houseId/create", authentication, serviceValidator.createService, handleErrors, ServiceController.createServiceForHouse);
-serviceRouter.put("/:serviceId/update", authentication, serviceValidator.serviceIdValidator, serviceValidator.updateService, handleErrors, ServiceController.updateService);
+serviceRouter.put(
+    "/:serviceId/update",
+    authentication,
+    serviceValidator.serviceIdValidator,
+    serviceValidator.updateService,
+    handleErrors,
+    ServiceController.updateService
+);
 serviceRouter.delete("/:serviceId/delete", authentication, serviceValidator.serviceIdValidator, handleErrors, ServiceController.deleteService);
 serviceRouter.post("/:roomId/add", authentication, roomsValidator.roomId, handleErrors, ServiceController.addServiceToRoom);
-serviceRouter.delete("/:roomId/deleteRoomService", authentication,  roomsValidator.roomId, handleErrors, ServiceController.removeServiceFromRoom);
+serviceRouter.delete("/:roomId/deleteRoomService", authentication, roomsValidator.roomId, handleErrors, ServiceController.removeServiceFromRoom);
 
 export default serviceRouter;

@@ -8,7 +8,7 @@ const createHouse = [
         .custom((value) => {
             const keys = ["city", "district", "street", "ward"];
             for (const key of keys) {
-                if (!value.hasOwnProperty(key)) {
+                if (!Object.prototype.hasOwnProperty.call(value, key)) {
                     throw new Error(`address must have a ${key} property`);
                 }
             }
@@ -32,7 +32,7 @@ const updateHouseDetails = [
         .custom((value) => {
             const keys = ["city", "district", "street", "ward"];
             for (const key of keys) {
-                if (!value.hasOwnProperty(key)) {
+                if (!Object.prototype.hasOwnProperty.call(value, key)) {
                     throw new Error(`address must have a ${key} property`);
                 }
             }

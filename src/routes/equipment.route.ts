@@ -1,7 +1,4 @@
 import express from "express";
-import { access, handleErrors } from "../middlewares";
-import equipmentController from "../controllers/equipment.controller";
-import { equipmentValidator } from "../middlewares/validator";
 
 const equipmentRouter = express.Router();
 
