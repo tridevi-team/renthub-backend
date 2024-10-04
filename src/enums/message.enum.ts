@@ -121,6 +121,13 @@ enum messageResponse {
     GET_PAYMENT_METHOD_DETAILS_SUCCESS = "Payment method details retrieved successfully",
     GET_PAYMENT_METHOD_BY_HOUSE_SUCCESS = "Payment method by house retrieved successfully",
     PAYMENT_METHOD_DEFAULT_STATUS = "Default payment method status cannot be changed",
+    ISSUE_NOT_FOUND = "Issue not found",
+    NO_ISSUES_FOUND = "No issues found",
+    GET_ISSUE_LIST_SUCCESS = "Issue list retrieved successfully",
+    CREATE_ISSUE_SUCCESS = "Issue created successfully",
+    UPDATE_ISSUE_SUCCESS = "Issue updated successfully",
+    DELETE_ISSUE_SUCCESS = "Issue deleted successfully",
+    GET_ISSUE_DETAILS_SUCCESS = "Issue details retrieved successfully",
 }
 
 export default messageResponse;

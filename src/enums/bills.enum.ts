@@ -1,4 +1,4 @@
-enum BillStatus {
+export enum BillStatus {
     CREATED,
     UNPAID,
     CONFIRMED,
@@ -6,5 +6,3 @@ enum BillStatus {
     CANCELLED,
     DELAY,
 }
-
-export default BillStatus;

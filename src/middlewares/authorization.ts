@@ -18,9 +18,12 @@ export const authorize = (module: Module, action: Action) => {
         case Module.SERVICE:
         case Module.EQUIPMENT:
         case Module.PAYMENT:
+        case Module.ISSUE:
             return authorizationMiddleware(module, action);
         default:
-            throw new ApiException(messageResponse.UNKNOWN_ERROR, 500);
+            return (_req, _res, next) => {
+                next();
+            };
     }
 };
 

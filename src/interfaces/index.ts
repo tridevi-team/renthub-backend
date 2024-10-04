@@ -2,6 +2,7 @@ export * from "./address.interface";
 export * from "./equipment.interface";
 export * from "./floor.interface";
 export * from "./house.interface";
+export * from "./issue.interface";
 export * from "./jwt.interface";
 export * from "./pagination.interface";
 export * from "./payment.interface";

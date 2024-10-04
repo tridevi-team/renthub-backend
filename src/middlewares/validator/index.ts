@@ -1,20 +1,11 @@
 "use strict";
-import equipmentValidator from "./equipment.validator";
-import houseValidator from "./houses.validator";
-import paymentMethodValidator from "./paymentMethod.validator";
-import renterValidator from "./renter.validator";
-import roleValidator from "./role.validator";
-import roomsValidator from "./rooms.validator";
-import serviceValidator from "./services.validator";
-import userValidator from "./users.validator";
 
-export {
-    equipmentValidator,
-    houseValidator,
-    paymentMethodValidator,
-    renterValidator,
-    roleValidator,
-    roomsValidator,
-    serviceValidator,
-    userValidator,
-};
+export { default as equipmentValidator } from "./equipment.validator";
+export { default as houseValidator } from "./houses.validator";
+export { default as issueValidator } from "./issues.validator";
+export { default as paymentMethodValidator } from "./paymentMethod.validator";
+export { default as renterValidator } from "./renter.validator";
+export { default as roleValidator } from "./role.validator";
+export { default as roomsValidator } from "./rooms.validator";
+export { default as serviceValidator } from "./services.validator";
+export { default as userValidator } from "./users.validator";

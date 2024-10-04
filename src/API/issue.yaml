@@ -1,0 +1,705 @@
+openapi: "3.0.3"
+
+tags:
+    - name: Issue
+      description: It allows renter can create and follow up the issue
+
+components:
+    schemas:
+        IssueInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the issue
+                    example: 236787f4-4639-444a-99cd-548ce74f1be9
+                houseId:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the house
+                    example: 13251603-a1b5-488a-8a06-44c9bbed67e0
+                floorId:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the floor
+                    example: 9507caea-f99d-4e49-bde8-764286639506
+                floorName:
+                    type: string
+                    description: The name of the floor
+                    example: 1st floor
+                roomId:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the room
+                    example: 0005a2e7-ff4a-41bb-a849-31883c22c61d
+                roomName:
+                    type: string
+                    description: The name of the room
+                    example: Room 101
+                title:
+                    type: string
+                    description: The title of the issue
+                    example: TV is not working
+                content:
+                    type: string
+                    description: The content of the issue
+                    example: The TV in the living room is not working
+                status:
+                    type: string
+                    description: The status of the issue
+                    enum:
+                        - open
+                        - pending
+                        - in_progress
+                        - done
+                        - cancelled
+                        - confirmed
+                    example: open
+                description:
+                    type: string
+                    description: The description of the issue. Manager can note the issue here
+                    example: The TV in the living room is not working
+                files:
+                    type: object
+                    description: The files of the issue
+                    properties:
+                        image:
+                            type: array
+                            example: ["image1.jpg", "image2.jpg"]
+                        video:
+                            type: array
+                            example: ["video1.mp4", "video2.mp4"]
+                        file:
+                            type: array
+                            example: ["file1.pdf", "file2.pdf"]
+                assignTo:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the user who is assigned to solve the issue
+                    example: 1fa091e7-c977-44be-ae41-efa38958851f
+                createdBy:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the user who created the issue
+                    example: 1fa091e7-c977-44be-ae41-efa38958851f
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: The date and time when the issue was created
+                    example: 2024-10-04T17:25:33.000Z
+                updatedBy:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the user who updated the issue
+                    example: 1fa091e7-c977-44be-ae41-efa38958851f
+                updatedAt:
+                    type: string
+                    format: date-time
+                    description: The date and time when the issue was updated
+                    example: 2024-10-04T17:25:33.000Z
+            required:
+                - houseId
+                - title
+                - content
+                - status
+
+        IssueRequest:
+            type: object
+            properties:
+                floorId:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the floor
+                    example: 9507caea-f99d-4e49-bde8-764286639506
+                roomId:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the room
+                    example: 0005a2e7-ff4a-41bb-a849-31883c22c61d
+                title:
+                    type: string
+                    description: The title of the issue
+                    example: TV is not working
+                content:
+                    type: string
+                    description: The content of the issue
+                    example: The TV in the living room is not working
+                files:
+                    type: object
+                    description: The files of the issue
+                    properties:
+                        image:
+                            type: array
+                            example: ["image1.jpg", "image2.jpg"]
+                        video:
+                            type: array
+                            example: ["video1.mp4", "video2.mp4"]
+                        file:
+                            type: array
+                            example: ["file1.pdf", "file2.pdf"]
+            required:
+                - floorId
+                - roomId
+                - title
+                - content
+
+        NoIssuesFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    example: NO_ISSUES_FOUND
+                message:
+                    type: string
+                    example: No issues found
+
+        IssueNotFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    example: ISSUE_NOT_FOUND
+                message:
+                    type: string
+                    example: Issue not found
+
+        GetIssueListSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: GET_ISSUE_LIST_SUCCESS
+                message:
+                    type: string
+                    example: Get issue list successfully
+                data:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/IssueInfo"
+
+        CreateIssueSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: CREATE_ISSUE_SUCCESS
+                message:
+                    type: string
+                    example: Create issue successfully
+                data:
+                    $ref: "#/components/schemas/IssueInfo"
+
+        UpdateIssueSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: UPDATE_ISSUE_SUCCESS
+                message:
+                    type: string
+                    example: Update issue successfully
+                data:
+                    $ref: "#/components/schemas/IssueInfo"
+
+        DeleteIssueSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: DELETE_ISSUE_SUCCESS
+                message:
+                    type: string
+                    example: Delete issue successfully
+
+        GetIssueSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: GET_ISSUE_DETAILS_SUCCESS
+                message:
+                    type: string
+                    example: Issue details retrieved successfully
+                data:
+                    $ref: "#/components/schemas/IssueInfo"
+
+paths:
+    /issues/{houseId}/create:
+        post:
+            tags:
+                - Issue
+            summary: Create an issue
+            description: Create an issue for a house
+            operationId: createIssue
+            parameters:
+                - name: houseId
+                  in: path
+                  description: The unique identifier of the house
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 13251603-a1b5-488a-8a06-44c9bbed67e0
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/IssueRequest"
+            responses:
+                "200":
+                    description: Created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CreateIssueSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: House not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoHouseFound"
+
+    /issues/{houseId}/list:
+        get:
+            tags:
+                - Issue
+            summary: Get issue list
+            description: Get list of issues for a house
+            operationId: getIssueList
+            parameters:
+                - name: houseId
+                  in: path
+                  description: The unique identifier of the house
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 13251603-a1b5-488a-8a06-44c9bbed67e0
+                - name: floorId
+                  in: query
+                  description: The unique identifier of the floor
+                  required: false
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 9507caea-f99d-4e49-bde8-764286639506
+                - name: roomId
+                  in: query
+                  description: The unique identifier of the room
+                  required: false
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 0005a2e7-ff4a-41bb-a849-31883c22c61d
+                - name: equipmentId
+                  in: query
+                  description: The unique identifier of the equipment
+                  required: false
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 0005a2e7-ff4a-41bb-a849-31883c22c61d
+                - name: title
+                  in: query
+                  description: The title of the issue
+                  required: false
+                  schema:
+                      type: string
+                  example: TV is not working
+                - name: status
+                  in: query
+                  description: The status of the issue
+                  required: false
+                  schema:
+                      type: string
+                      enum:
+                          - open
+                          - pending
+                          - in_progress
+                          - done
+                          - cancelled
+                          - confirmed
+                  example: open
+                - name: assignee
+                  in: query
+                  description: The unique identifier of the user who is assigned to solve the issue
+                  required: false
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 1fa091e7-c977-44be-ae41-efa38958851f
+                - name: page
+                  in: query
+                  description: The page number
+                  required: false
+                  schema:
+                      type: integer
+                      example: 1
+                - name: limit
+                  in: query
+                  description: The number of items per page
+                  required: false
+                  schema:
+                      type: integer
+                      example: 10
+            responses:
+                "200":
+                    description: Success
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetIssueListSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: House not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoHouseFound"
+
+    /issues/{issueId}/details:
+        get:
+            tags:
+                - Issue
+            summary: Get issue details
+            description: Get details of an issue
+            operationId: getIssueDetails
+            parameters:
+                - name: issueId
+                  in: path
+                  description: The unique identifier of the issue
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 236787f4-4639-444a-99cd-548ce74f1be9
+            responses:
+                "200":
+                    description: Success
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetIssueSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Issue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/IssueNotFound"
+
+    /issues/{issueId}/update:
+        put:
+            tags:
+                - Issue
+            summary: Update an issue
+            description: Update an issue
+            operationId: updateIssue
+            parameters:
+                - name: issueId
+                  in: path
+                  description: The unique identifier of the issue
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 236787f4-4639-444a-99cd-548ce74f1be9
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/IssueRequest"
+            responses:
+                "200":
+                    description: Updated
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UpdateIssueSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Issue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/IssueNotFound"
+    /issues/{issueId}/update-status:
+        patch:
+            tags:
+                - Issue
+            summary: Update an issue status
+            description: Update an issue status
+            operationId: updateIssueStatus
+            parameters:
+                - name: issueId
+                  in: path
+                  description: The unique identifier of the issue
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 236787f4-4639-444a-99cd-548ce74f1be9
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                status:
+                                    type: string
+                                    description: The status of the issue
+                                    enum:
+                                        - open
+                                        - pending
+                                        - in_progress
+                                        - done
+                                        - cancelled
+                                        - confirmed
+                                    example: open
+            responses:
+                "200":
+                    description: Updated
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UpdateIssueSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Issue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/IssueNotFound"
+
+    /issues/{issueId}/assign:
+        patch:
+            tags:
+                - Issue
+            summary: Assign an issue
+            description: Assign an issue to a user
+            operationId: assignIssue
+            parameters:
+                - name: issueId
+                  in: path
+                  description: The unique identifier of the issue
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 236787f4-4639-444a-99cd-548ce74f1be9
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                assignTo:
+                                    type: string
+                                    format: uuid
+                                    description: The unique identifier of the user who is assigned to solve the issue
+                                    example: 1fa091e7-c977-44be-ae41-efa38958851f
+            responses:
+                "200":
+                    description: Updated
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UpdateIssueSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Issue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/IssueNotFound"
+
+    /issues/{issueId}/delete:
+        delete:
+            tags:
+                - Issue
+            summary: Delete an issue
+            description: Delete an issue
+            operationId: deleteIssue
+            parameters:
+                - name: issueId
+                  in: path
+                  description: The unique identifier of the issue
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 236787f4-4639-444a-99cd-548ce74f1be9
+            responses:
+                "200":
+                    description: Deleted
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/DeleteIssueSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Issue not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/IssueNotFound"

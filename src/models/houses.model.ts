@@ -3,7 +3,7 @@ import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import type { Address, Permissions } from "../interfaces";
 import { currentDateTime } from "../utils/currentTime";
-import { Equipment, HouseFloors } from "./";
+import { Equipment, HouseFloors, Issues } from "./";
 
 class Houses extends Model {
     id: string;
@@ -77,6 +77,14 @@ class Houses extends Model {
                 join: {
                     from: "houses.id",
                     to: "equipment.house_id",
+                },
+            },
+            issues: {
+                relation: Model.HasManyRelation,
+                modelClass: Issues,
+                join: {
+                    from: "houses.id",
+                    to: "issues.house_id",
                 },
             },
         };

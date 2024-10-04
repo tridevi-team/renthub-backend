@@ -10,7 +10,8 @@ class RenterController {
     static async addNewRenter(req, res) {
         const { roomId } = req.params;
         const user = req.user;
-        const { name, citizenId, birthday, gender, email, phoneNumber, address, tempReg, moveInDate, represent, note } = req.body;
+        const { name, citizenId, birthday, gender, email, phoneNumber, address, tempReg, moveInDate, represent, note } =
+            req.body;
         try {
             // check max renter
             const data = {
@@ -72,7 +73,8 @@ class RenterController {
     static async updateRenterDetails(req, res) {
         const { renterId } = req.params;
         const user = req.user;
-        const { name, citizenId, birthday, gender, email, phoneNumber, address, tempReg, moveInDate, represent, note } = req.body;
+        const { name, citizenId, birthday, gender, email, phoneNumber, address, tempReg, moveInDate, represent, note } =
+            req.body;
         try {
             const data = {
                 name,
@@ -121,6 +123,9 @@ class RenterController {
     static async login(req, res) {
         const { email, phoneNumber } = req.body;
         try {
+            if (!email && !phoneNumber) {
+                throw new ApiException(messageResponse.VALIDATION_ERROR, 400);
+            }
             const renterDetails = await RenterService.checkExists({
                 email,
                 phoneNumber,
@@ -134,6 +139,8 @@ class RenterController {
                 // send code to phone number
             }
             await redis.set(`verify-renter:${username}`, String(code));
+            await redis.expire(`verify-renter:${username}`, 300);
+            
             return res.json(apiResponse(messageResponse.SEND_CODE_SUCCESS, true));
         } catch (err) {
             Exception.handle(err, req, res);

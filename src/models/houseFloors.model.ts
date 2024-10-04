@@ -1,7 +1,7 @@
 import type { QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
-import { Equipment, Houses, Rooms } from "./";
+import { Equipment, Houses, Issues, Rooms } from "./";
 
 class HouseFloors extends Model {
     id: string;
@@ -68,6 +68,14 @@ class HouseFloors extends Model {
                 join: {
                     from: "house_floors.id",
                     to: "equipment.floor_id",
+                },
+            },
+            issue: {
+                relation: Model.HasManyRelation,
+                modelClass: Issues,
+                join: {
+                    from: "house_floors.id",
+                    to: "issues.floor_id",
                 },
             },
         };
