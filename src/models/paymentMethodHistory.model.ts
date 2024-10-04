@@ -29,6 +29,7 @@ class PaymentMethodHistory extends Model {
                 account_number: { type: "string", maxLength: 255 },
                 status: { type: "boolean" },
                 description: { type: "string", maxLength: 255 },
+                is_default: { type: "boolean" },
                 payos_client_id: { type: "string", maxLength: 255 },
                 payos_api_key: { type: "string", maxLength: 255 },
                 payos_checksum: { type: "string", maxLength: 255 },

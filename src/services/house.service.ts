@@ -23,6 +23,7 @@ class HouseService {
             service: { create: true, read: true, update: true, delete: true },
             bill: { create: true, read: true, update: true, delete: true },
             equipment: { create: true, read: true, update: true, delete: true },
+            payment: { create: true, read: true, update: true, delete: true },
         };
 
         const enhancedList = list.map((house) => {
@@ -35,7 +36,10 @@ class HouseService {
     }
 
     static async search(data: HouseFilter) {
-        const query = Houses.query().joinRelated("floors.rooms").where("houses.status", true).andWhere("floors:rooms.status", RoomStatus.AVAILABLE);
+        const query = Houses.query()
+            .joinRelated("floors.rooms")
+            .where("houses.status", true)
+            .andWhere("floors:rooms.status", RoomStatus.AVAILABLE);
 
         if (data.keyword) {
             query.where("houses.name", "like", `%${data.keyword}%`);
@@ -261,7 +265,11 @@ class HouseService {
             .first();
         if (!housePermissions?.permissions) return false;
         else if (action === Action.READ) {
-            return housePermissions.permissions.house.read || housePermissions.permissions.house.update || housePermissions.permissions.house.delete;
+            return (
+                housePermissions.permissions.house.read ||
+                housePermissions.permissions.house.update ||
+                housePermissions.permissions.house.delete
+            );
         }
         return housePermissions.permissions.house[action];
     }
@@ -305,7 +313,8 @@ class HouseService {
             })
         );
 
-        if (serviceNameExists && serviceDetails.id !== serviceId) throw new ApiException(messageResponse.SERVICE_ALREADY_EXISTS, 409);
+        if (serviceNameExists && serviceDetails.id !== serviceId)
+            throw new ApiException(messageResponse.SERVICE_ALREADY_EXISTS, 409);
 
         const updatedService = await serviceDetails.$query().patchAndFetch(camelToSnake(data));
 

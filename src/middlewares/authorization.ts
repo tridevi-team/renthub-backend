@@ -1,6 +1,6 @@
 import { Action, Module } from "../enums";
 import messageResponse from "../enums/message.enum";
-import { EquipmentService, HouseService, RenterService, RoomService } from "../services";
+import { EquipmentService, HouseService, PaymentService, RenterService, RoomService } from "../services";
 import RoleService from "../services/role.service";
 import { ApiException, Exception } from "../utils";
 
@@ -17,7 +17,7 @@ export const authorize = (module: Module, action: Action) => {
         case Module.BILL:
         case Module.SERVICE:
         case Module.EQUIPMENT:
-        case Module.PAYMENT_METHOD:
+        case Module.PAYMENT:
             return authorizationMiddleware(module, action);
         default:
             throw new ApiException(messageResponse.UNKNOWN_ERROR, 500);
@@ -64,7 +64,7 @@ const renterAuthorize = (action: Action) => {
 // Main authorization middleware handler
 const authorizationMiddleware = (_module: Module, action: string) => {
     return async (req, res, next) => {
-        const { houseId, roleId, roomId, renterId, equipmentId } = req.params;
+        const { houseId, roleId, roomId, renterId, equipmentId, paymentMethodId } = req.params;
         const user = req.user;
 
         try {
@@ -106,6 +106,14 @@ const authorizationMiddleware = (_module: Module, action: string) => {
             if (equipmentId) {
                 const isAccessEquipment = await EquipmentService.isAccessible(user.id, equipmentId, action);
                 if (!isAccessEquipment) {
+                    throw new ApiException(messageResponse.UNAUTHORIZED, 403);
+                }
+            }
+
+            // Specific check for payment methods (when paymentMethodId is provided)
+            if (paymentMethodId) {
+                const isAccessPaymentMethod = await PaymentService.isAccessible(user.id, paymentMethodId, action);
+                if (!isAccessPaymentMethod) {
                     throw new ApiException(messageResponse.UNAUTHORIZED, 403);
                 }
             }

@@ -89,7 +89,7 @@ app.use("/renters", RenterRoute);
 app.use("/services", ServiceRoute);
 app.use("/rooms", RoomRoute);
 app.use("/equipment", EquipmentRoute);
-app.use("/paymentMethods", PaymentMethodRoute);
+app.use("/payment", PaymentMethodRoute);
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);

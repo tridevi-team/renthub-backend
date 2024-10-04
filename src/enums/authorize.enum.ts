@@ -6,7 +6,7 @@ export enum Module {
     BILL = "bill",
     SERVICE = "service",
     EQUIPMENT = "equipment",
-    PAYMENT_METHOD = "paymentMethod",
+    PAYMENT = "payment",
 }
 
 export enum Action {

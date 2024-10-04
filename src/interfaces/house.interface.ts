@@ -44,6 +44,7 @@ export interface Permissions {
     service: CRUDPermissions;
     bill: CRUDPermissions;
     equipment: CRUDPermissions;
+    payment: CRUDPermissions;
 }
 
 export interface Role {

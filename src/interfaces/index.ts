@@ -4,6 +4,7 @@ export * from "./floor.interface";
 export * from "./house.interface";
 export * from "./jwt.interface";
 export * from "./pagination.interface";
+export * from "./payment.interface";
 export * from "./renter.interface";
 export * from "./room.interface";
 export * from "./service.interface";

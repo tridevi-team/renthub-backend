@@ -1,0 +1,634 @@
+openapi: "3.0.3"
+tags:
+    - name: Payment
+      description: Payment API. It helps manage payment methods and transactions.
+
+components:
+    schemas:
+        PaymentInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the payment method.
+                    example: 5b4335ba-3170-4df0-9f33-e777ed07bd82
+                houseId:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the house.
+                    example: 189591c6-0d4c-49dc-a4f9-86b8d41db73a
+                name:
+                    type: string
+                    description: The name of the payment method.
+                    example: Tran Minh Quang
+                accountNumber:
+                    type: string
+                    description: The account number of the payment method.
+                    example: 0999999999
+                bankName:
+                    type: string
+                    description: The bank name of the payment method.
+                    example: Vietinbank
+                status:
+                    type: integer
+                    description: The status of the payment method.
+                    example: 1
+                description:
+                    type: string
+                    description: The description of the payment method.
+                    example: Bank account of Tran Minh Quang
+                isDefault:
+                    type: integer
+                    description: The default status of the payment method.
+                    example: 1
+                payosClientId:
+                    type: string
+                    description: The client ID of the payment method.
+                    example: 1234
+                payosApiKey:
+                    type: string
+                    description: The API key of the payment method.
+                    example: abcd
+                payosChecksum:
+                    type: string
+                    description: The checksum of the payment method.
+                    example: 123444444
+                createdBy:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the user who created the payment method.
+                    example: 00aa0612-e5ca-4e06-a6e4-a761dff7e3bb
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: The date and time when the payment method was created.
+                    example: 2024-10-04T06:36:15.000Z
+                updatedBy:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the user who updated the payment method.
+                    example: 00aa0612-e5ca-4e06-a6e4-a761dff7e3bb
+                updatedAt:
+                    type: string
+                    format: date-time
+                    description: The date and time when the payment method was updated.
+                    example: 2024-10-04T06:47:40.000Z
+
+        PaymentRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: The name of the payment method.
+                    example: Tran Minh Quang
+                accountNumber:
+                    type: string
+                    description: The account number of the payment method.
+                    example: 0397847805
+                bankName:
+                    type: string
+                    description: The bank name of the payment method.
+                    example: TpBank
+                status:
+                    type: boolean
+                    description: The status of the payment method.
+                    example: true
+                description:
+                    type: string
+                    description: The description of the payment method.
+                    example: test
+                isDefault:
+                    type: boolean
+                    description: The default status of the payment method.
+                    example: true
+                payosClientId:
+                    type: string
+                    description: The client ID of the payment method.
+                    example: 1234
+                payosApiKey:
+                    type: string
+                    description: The API key of the payment method.
+                    example: abcd
+                payosChecksum:
+                    type: string
+                    description: The checksum of the payment method.
+                    example: 123444444
+            required:
+                - name
+                - accountNumber
+                - bankName
+
+        PaymentCreateSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: The status of the payment method creation.
+                    example: true
+                code:
+                    type: string
+                    description: The code of the payment method creation.
+                    default: CREATE_PAYMENT_METHOD_SUCCESS
+                message:
+                    type: string
+                    description: The message of the payment method creation.
+                    example: Payment method created successfully.
+                data:
+                    $ref: "#/components/schemas/PaymentInfo"
+
+        PaymentUpdateSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: The status of the payment method update.
+                    example: true
+                code:
+                    type: string
+                    description: The code of the payment method update.
+                    default: UPDATE_PAYMENT_METHOD_SUCCESS
+                message:
+                    type: string
+                    description: The message of the payment method update.
+                    example: Payment method updated successfully.
+                data:
+                    $ref: "#/components/schemas/PaymentInfo"
+
+        PaymentDeleteSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: The status of the payment method deletion.
+                    example: true
+                code:
+                    type: string
+                    description: The code of the payment method deletion.
+                    default: DELETE_PAYMENT_METHOD_SUCCESS
+                message:
+                    type: string
+                    description: The message of the payment method deletion.
+                    example: Payment method deleted successfully.
+
+        PaymentListSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: The status of the payment method list.
+                    example: true
+                code:
+                    type: string
+                    description: The code of the payment method list.
+                    default: GET_PAYMENT_METHOD_LIST_SUCCESS
+                message:
+                    type: string
+                    description: The message of the payment method list.
+                    example: Payment method list retrieved successfully
+                data:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/PaymentInfo"
+
+        PaymentDetailsSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: The status of the payment method details.
+                    example: true
+                code:
+                    type: string
+                    description: The code of the payment method details.
+                    default: GET_PAYMENT_METHOD_DETAILS_SUCCESS
+                message:
+                    type: string
+                    description: The message of the payment method details.
+                    example: Payment method details retrieved successfully
+                data:
+                    $ref: "#/components/schemas/PaymentInfo"
+
+        PaymentNotFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: The status of the payment method not found.
+                    example: false
+                code:
+                    type: string
+                    description: The code of the payment method not found.
+                    default: PAYMENT_METHOD_NOT_FOUND
+                message:
+                    type: string
+                    description: The message of the payment method not found.
+                    example: Payment method not found.
+
+        PaymentAlreadyExists:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: The status of the payment method already exists.
+                    example: false
+                code:
+                    type: string
+                    description: The code of the payment method already exists.
+                    default: PAYMENT_METHOD_ALREADY_EXISTS
+                message:
+                    type: string
+                    description: The message of the payment method already exists.
+                    example: Payment method already exists.
+
+        PaymentDefaultStatus:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: The status of the payment method default status.
+                    example: false
+                code:
+                    type: string
+                    description: The code of the payment method default status.
+                    default: PAYMENT_METHOD_DEFAULT_STATUS
+                message:
+                    type: string
+                    description: The message of the payment method default status.
+                    example: Default payment method status cannot be changed.
+
+paths:
+    /payment/{houseId}/create:
+        post:
+            tags:
+                - Payment
+            summary: Create a new payment method.
+            description: Create a new payment method for a house.
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: houseId
+                  in: path
+                  description: The unique identifier of the house.
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 189591c6-0d4c-49dc-a4f9-86b8d41db73a
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/PaymentRequest"
+            responses:
+                "200":
+                    description: Payment method created successfully.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentCreateSuccess"
+                "400":
+                    description: Validation Error.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token invalid.
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorize.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: House not found.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoHouseFound"
+                "409":
+                    description: Payment method already exists.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentAlreadyExists"
+    /payment/{paymentId}/details:
+        get:
+            tags:
+                - Payment
+            summary: Get a payment method details.
+            description: Get a payment method details.
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: paymentId
+                  in: path
+                  description: The unique identifier of the payment method.
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 5b4335ba-3170-4df0-9f33-e777ed07bd82
+            responses:
+                "200":
+                    description: Payment method details retrieved successfully.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentDetailsSuccess"
+                "401":
+                    description: Token invalid.
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorize.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Payment method not found.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentNotFound"
+
+    /payment/{houseId}/list:
+        get:
+            tags:
+                - Payment
+            summary: Get a list of payment methods.
+            description: Get a list of payment methods for a house.
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: houseId
+                  in: path
+                  description: The unique identifier of the house.
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 189591c6-0d4c-49dc-a4f9-86b8d41db73a
+            responses:
+                "200":
+                    description: Payment method list retrieved successfully.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentListSuccess"
+                "401":
+                    description: Token invalid.
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorize.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: House not found.
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/NoHouseFound"
+                                    - $ref: "#/components/schemas/PaymentNotFound"
+
+    /payment/{paymentId}/update:
+        put:
+            tags:
+                - Payment
+            summary: Update a payment method.
+            description: Update a payment method.
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: paymentId
+                  in: path
+                  description: The unique identifier of the payment method.
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 5b4335ba-3170-4df0-9f33-e777ed07bd82
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/PaymentRequest"
+            responses:
+                "200":
+                    description: Payment method updated successfully.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentUpdateSuccess"
+                "400":
+                    description: Validation Error.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token invalid.
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorize.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Payment method not found.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentNotFound"
+
+    /payment/{paymentId}/update-status:
+        patch:
+            tags:
+                - Payment
+            summary: Update the default status of a payment method.
+            description: Update the default status of a payment method.
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: paymentId
+                  in: path
+                  description: The unique identifier of the payment method.
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 5b4335ba-3170-4df0-9f33-e777ed07bd82
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                isDefault:
+                                    type: boolean
+                                    description: The default status of the payment method.
+                                    example: true
+            responses:
+                "200":
+                    description: Payment method default status updated successfully.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentUpdateSuccess"
+                "400":
+                    description: Validation Error.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token invalid.
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorize.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Payment method not found.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentNotFound"
+                "409":
+                    description: Default payment method status cannot be changed.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentDefaultStatus"
+
+    /payment/{paymentId}/change-default:
+        patch:
+            tags:
+                - Payment
+            summary: Change the default status of a payment method.
+            description: Change the default status of a payment method.
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: paymentId
+                  in: path
+                  description: The unique identifier of the payment method.
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 5b4335ba-3170-4df0-9f33-e777ed07bd82
+            responses:
+                "200":
+                    description: Payment method default status changed successfully.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentUpdateSuccess"
+                "401":
+                    description: Token invalid.
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorize.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Payment method not found.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentNotFound"
+
+    /payment/{paymentId}/delete:
+        delete:
+            tags:
+                - Payment
+            summary: Delete a payment method.
+            description: Delete a payment method.
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: paymentId
+                  in: path
+                  description: The unique identifier of the payment method.
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 5b4335ba-3170-4df0-9f33-e777ed07bd82
+            responses:
+                "200":
+                    description: Payment method deleted successfully.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentDeleteSuccess"
+                "401":
+                    description: Token invalid.
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorize.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Payment method not found.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentNotFound"
+                "409":
+                    description: Payment method cannot be deleted.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PaymentDefaultStatus"

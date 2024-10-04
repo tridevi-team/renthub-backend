@@ -3,6 +3,7 @@ import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import type { Permissions } from "../interfaces";
 import { currentDateTime } from "../utils/currentTime";
+import { Houses, UserRoles } from "./";
 
 class Roles extends Model {
     id: string;
@@ -49,6 +50,27 @@ class Roles extends Model {
                 created_at: { type: "string", format: "date-time" },
                 updated_by: { type: "string", format: "uuid" },
                 updated_at: { type: "string", format: "date-time" },
+            },
+        };
+    }
+
+    static get relationMappings() {
+        return {
+            house: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Houses,
+                join: {
+                    from: "roles.house_id",
+                    to: "houses.id",
+                },
+            },
+            user: {
+                relation: Model.HasManyRelation,
+                modelClass: UserRoles,
+                join: {
+                    from: "roles.id",
+                    to: "user_roles.role_id",
+                },
             },
         };
     }

@@ -111,6 +111,16 @@ enum messageResponse {
     GET_EQUIPMENT_DETAILS_SUCCESS = "Equipment details retrieved successfully",
     GET_EQUIPMENT_BY_ROOM_SUCCESS = "Equipment by room retrieved successfully",
     GET_EQUIPMENT_BY_HOUSE_SUCCESS = "Equipment by house retrieved successfully",
+    PAYMENT_METHOD_NOT_FOUND = "Payment method not found",
+    NO_PAYMENT_METHODS_FOUND = "No payment methods found",
+    GET_PAYMENT_METHOD_LIST_SUCCESS = "Payment method list retrieved successfully",
+    PAYMENT_METHOD_ALREADY_EXISTS = "Payment method already exists",
+    CREATE_PAYMENT_METHOD_SUCCESS = "Payment method created successfully",
+    UPDATE_PAYMENT_METHOD_SUCCESS = "Payment method updated successfully",
+    DELETE_PAYMENT_METHOD_SUCCESS = "Payment method deleted successfully",
+    GET_PAYMENT_METHOD_DETAILS_SUCCESS = "Payment method details retrieved successfully",
+    GET_PAYMENT_METHOD_BY_HOUSE_SUCCESS = "Payment method by house retrieved successfully",
+    PAYMENT_METHOD_DEFAULT_STATUS = "Default payment method status cannot be changed",
 }
 
 export default messageResponse;
