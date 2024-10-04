@@ -1,0 +1,646 @@
+openapi: "3.0.3"
+
+tags:
+    - name: Equipment
+      description: Equipment management
+
+components:
+    schemas:
+        EquipmentDetails:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the equipment
+                    example: dc6f90bc-43aa-4dd8-975e-3a75117c38a5
+                houseId:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the house
+                    example: 189591c6-0d4c-49dc-a4f9-86b8d41db73a
+                floorId:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the floor
+                    example: 7bd27eab-fc1b-4895-ace0-d770aefc4072
+                roomId:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the room
+                    example: 7bd27eab-fc1b-4895-ace0-d770aefc4072
+                code:
+                    type: string
+                    description: The code of the equipment
+                    example: MG.01
+                name:
+                    type: string
+                    description: The name of the equipment
+                    example: Máy giặt
+                status:
+                    type: string
+                    enum:
+                        - NORMAL
+                        - BROKEN
+                        - REPAIRING
+                        - DISPOSED
+                    description: The status of the equipment
+                    example: NORMAL
+                sharedType:
+                    type: string
+                    enum:
+                        - HOUSE
+                        - ROOM
+                    description: The shared type of the equipment
+                    example: HOUSE
+                description:
+                    type: string
+                    description: The description of the equipment
+                    example: Dùng chung tại tầng 1
+                createdBy:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the user who created the equipment
+                    example: 00aa0612-e5ca-4e06-a6e4-a761dff7e3bb
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: The date and time when the equipment was created
+                    example: 2024-10-04T01:45:52.000Z
+                updatedBy:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the user who updated the equipment
+                    example: 00aa0612-e5ca-4e06-a6e4-a761dff7e3bb
+                updatedAt:
+                    type: string
+                    format: date-time
+                    description: The date and time when the equipment was updated
+                    example: 2024-10-04T01:45:52.000Z
+                floorName:
+                    type: string
+                    description: The name of the floor
+                    example: Tầng 1
+                roomName:
+                    type: string
+                    description: The name of the room
+                    example: Phòng khách
+            required:
+                - id
+                - houseId
+                - floorId
+                - code
+                - name
+                - status
+                - sharedType
+
+        EquipmentRequest:
+            type: object
+            properties:
+                floorId:
+                    type: string
+                    format: uuid
+                    description: The location of equipment
+                    example: 7bd27eab-fc1b-4895-ace0-d770aefc4072
+                roomId:
+                    type: string
+                    format: uuid
+                    description: The location of equipment
+                    example: 7bd27eab-fc1b-4895-ace0-d770aefc4072
+                code:
+                    type: string
+                    description: The code of the equipment
+                    example: MG.01
+                name:
+                    type: string
+                    description: The name of the equipment
+                    example: Máy giặt
+                status:
+                    type: string
+                    enum:
+                        - NORMAL
+                        - BROKEN
+                        - REPAIRING
+                        - DISPOSED
+                    description: The status of the equipment
+                    example: NORMAL
+                sharedType:
+                    type: string
+                    enum:
+                        - HOUSE
+                        - ROOM
+                    description: The shared type of the equipment
+                    example: HOUSE
+                description:
+                    type: string
+                    description: The description of the equipment
+                    example: Dùng chung tại tầng 1
+            required:
+                - code
+                - name
+                - status
+                - sharedType
+        NoEquipmentFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    example: NO_EQUIPMENT_FOUND
+                message:
+                    type: string
+                    example: No equipment found
+
+        CreateEquipmentSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: CREATE_EQUIPMENT_SUCCESS
+                message:
+                    type: string
+                    example: Equipment created successfully
+                data:
+                    $ref: "#/components/schemas/EquipmentDetails"
+
+        EquipmentDetailsSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: GET_EQUIPMENT_DETAILS_SUCCESS
+                message:
+                    type: string
+                    example: Get equipment details successfully
+                data:
+                    $ref: "#/components/schemas/EquipmentDetails"
+
+        EquipmentUpdateSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: UPDATE_EQUIPMENT_SUCCESS
+                message:
+                    type: string
+                    example: Equipment updated successfully
+                data:
+                    $ref: "#/components/schemas/EquipmentDetails"
+
+        EquipmentUpdateStatusRequest:
+            type: object
+            properties:
+                status:
+                    type: string
+                    enum:
+                        - NORMAL
+                        - BROKEN
+                        - REPAIRING
+                        - DISPOSED
+                    description: The status of the equipment
+                    example: NORMAL
+                sharedType:
+                    type: string
+                    enum:
+                        - HOUSE
+                        - ROOM
+                    description: The shared type of the equipment
+                    example: HOUSE
+
+        EquipmentUpdateStatusSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: UPDATE_EQUIPMENT_STATUS_SUCCESS
+                message:
+                    type: string
+                    example: Equipment status updated successfully
+                data:
+                    $ref: "#/components/schemas/EquipmentDetails"
+
+        EquipmentDeleteSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: DELETE_EQUIPMENT_SUCCESS
+                message:
+                    type: string
+                    example: Equipment deleted successfully
+
+        EquipmentSearchSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    example: GET_EQUIPMENT_LIST_SUCCESS
+                message:
+                    type: string
+                    example: Get equipment list successfully
+                data:
+                    type: object
+                    properties:
+                        results:
+                            type: array
+                            items:
+                                $ref: "#/components/schemas/EquipmentDetails"
+                        total:
+                            type: integer
+                            example: 1
+
+        # EquipmentSearchRequest:
+        #   type: object
+        #   properties:
+        #     houseId:
+        #       type: string
+        #       format: uuid
+        #       description: The unique identifier of the house
+        #       example: 189591c6-0d4c-49dc-a4f9-86b8d41db73a
+        #     floorId:
+        #       type: string
+        #       format: uuid
+        #       description: The unique identifier of the floor
+        #       example: 7bd27eab-fc1b-4895-ace0-d770aefc4072
+        #     roomId:
+        #       type: string
+        #       format: uuid
+        #       description: The unique identifier of the room
+        #       example: 7bd27eab-fc1b-4895-ace0-d770aefc4072
+        #     code:
+        #       type: string
+        #       description: The code of the equipment
+        #       example: MG.01
+        #     name:
+        #       type: string
+        #       description: The name of the equipment
+        #       example: Máy giặt
+        #     status:
+        #       type: string
+        #       enum:
+        #         - NORMAL
+        #         - BROKEN
+        #         - REPAIRING
+        #         - DISPOSED
+        #       description: The status of the equipment
+        #       example: NORMAL
+        #     sharedType:
+        #       type: string
+        #       enum:
+        #         - HOUSE
+        #         - ROOM
+        #       description: The shared type of the equipment
+        #       example: HOUSE
+paths:
+    /equipment/search:
+        get:
+            tags:
+                - Equipment
+            summary: Search equipment. User need to login to use this endpoint. It only get base on userId
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: query
+                  name: houseId
+                  schema:
+                      type: string
+                      format: uuid
+                  description: The unique identifier of the house
+                - in: query
+                  name: floorId
+                  schema:
+                      type: string
+                      format: uuid
+                  description: The unique identifier of the floor
+                - in: query
+                  name: roomId
+                  schema:
+                      type: string
+                      format: uuid
+                  description: The unique identifier of the room
+                - in: query
+                  name: code
+                  schema:
+                      type: string
+                  description: The code of the equipment
+                - in: query
+                  name: name
+                  schema:
+                      type: string
+                  description: The name of the equipment
+                - in: query
+                  name: status
+                  schema:
+                      type: string
+                      enum:
+                          - NORMAL
+                          - BROKEN
+                          - REPAIRING
+                          - DISPOSED
+                  description: The status of the equipment
+                - in: query
+                  name: sharedType
+                  schema:
+                      type: string
+                      enum:
+                          - HOUSE
+                          - ROOM
+                  description: The shared type of the equipment
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      minimum: 1
+                  description: The page number
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      minimum: 1
+                  description: The number of items in a page
+            responses:
+                "200":
+                    description: Get equipment list successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/EquipmentSearchSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "403":
+                    description: User is not authorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
+    /equipment/{equipmentId}/details:
+        get:
+            tags:
+                - Equipment
+            summary: Get equipment details. User need to login to use this endpoint. It only get base on userId
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: equipmentId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The unique identifier of the equipment
+            responses:
+                "200":
+                    description: Get equipment details successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/EquipmentDetailsSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "403":
+                    description: User is not authorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: No equipment found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoEquipmentFound"
+
+    /equipment/{houseId}/add:
+        post:
+            tags:
+                - Equipment
+            summary: Create equipment. User need to login to use this endpoint. In order to create equipment, user must have permission to the house. HouseId is required in the path. You can't set floorId and roomId at the same time
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: houseId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The unique identifier of the house
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/EquipmentRequest"
+            responses:
+                "201":
+                    description: Equipment created successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CreateEquipmentSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "403":
+                    description: User is not authorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
+    /equipment/{equipmentId}/update:
+        put:
+            tags:
+                - Equipment
+            summary: Update equipment. User need to login to use this endpoint. In order to update equipment, user must have permission to the house. HouseId is required in the path. You can't set floorId and roomId at the same time
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: equipmentId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The unique identifier of the equipment
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/EquipmentRequest"
+            responses:
+                "200":
+                    description: Equipment updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/EquipmentUpdateSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "403":
+                    description: User is not authorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
+    /equipment/{equipmentId}/update-status:
+        patch:
+            tags:
+                - Equipment
+            summary: Update equipment status. User need to login to use this endpoint. In order to update equipment status, user must have permission to the house. HouseId is required in the path
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: equipmentId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The unique identifier of the equipment
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/EquipmentUpdateStatusRequest"
+            responses:
+                "200":
+                    description: Equipment status updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/EquipmentUpdateStatusSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "403":
+                    description: User is not authorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
+    /equipment/{equipmentId}/delete:
+        delete:
+            tags:
+                - Equipment
+            summary: Delete equipment. User need to login to use this endpoint. In order to delete equipment, user must have permission to the house. HouseId is required in the path
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: equipmentId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The unique identifier of the equipment
+            responses:
+                "200":
+                    description: Equipment deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/EquipmentDeleteSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "403":
+                    description: User is not authorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"

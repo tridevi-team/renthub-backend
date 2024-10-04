@@ -1,13 +1,13 @@
 "use strict";
+import "dotenv/config";
+import * as jwt from "jsonwebtoken";
+import messageResponse from "../enums/message.enum";
 import {
     AccessTokenPayload,
     AccessTokenRenterPayload,
     RefreshTokenPayload,
     RefreshTokenRenterPayload,
-} from "@/interfaces";
-import "dotenv/config";
-import * as jwt from "jsonwebtoken";
-import messageResponse from "../enums/message.enum";
+} from "../interfaces";
 import ApiException from "./Exceptions/ApiException";
 
 const JWT_SECRET = process.env.JWT_SECRET || "";

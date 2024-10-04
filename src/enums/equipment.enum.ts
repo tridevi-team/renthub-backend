@@ -1,6 +1,8 @@
 enum EquipmentStatus {
     NORMAL = "NORMAL",
     BROKEN = "BROKEN",
+    REPAIRING = "REPAIRING",
+    DISPOSED = "DISPOSED",
 }
 
 enum EquipmentType {

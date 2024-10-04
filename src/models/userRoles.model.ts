@@ -1,6 +1,7 @@
 import type { QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
+import { Houses, Roles, Users } from "./";
 
 class UserRoles extends Model {
     id: string;
@@ -31,6 +32,35 @@ class UserRoles extends Model {
                 created_at: { type: "string", format: "date-time" },
                 updated_by: { type: "string", format: "uuid" },
                 updated_at: { type: "string", format: "date-time" },
+            },
+        };
+    }
+
+    static get relationMappings() {
+        return {
+            user: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Users,
+                join: {
+                    from: "user_roles.user_id",
+                    to: "users.id",
+                },
+            },
+            house: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Houses,
+                join: {
+                    from: "user_roles.house_id",
+                    to: "houses.id",
+                },
+            },
+            role: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Roles,
+                join: {
+                    from: "user_roles.role_id",
+                    to: "roles.id",
+                },
             },
         };
     }

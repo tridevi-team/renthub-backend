@@ -1,4 +1,5 @@
 export * from "./address.interface";
+export * from "./equipment.interface";
 export * from "./floor.interface";
 export * from "./house.interface";
 export * from "./jwt.interface";

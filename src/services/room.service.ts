@@ -260,8 +260,8 @@ class RoomService {
             .leftJoin("user_roles", "roles.id", "user_roles.role_id")
             .findOne(
                 camelToSnake({
-                    "roles.house_id": houseDetails.id,
-                    "user_roles.user_id": userId,
+                    "roles.houseId": houseDetails.id,
+                    "userRoles.userId": userId,
                 })
             );
 
