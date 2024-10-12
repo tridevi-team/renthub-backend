@@ -39,7 +39,9 @@ const createRoom = [
     check("status").optional().isString().withMessage("Status must be a string"),
 ];
 
-const roomId = [check("roomId").notEmpty().withMessage("Room ID is required").isUUID().withMessage("Room ID must be a UUID")];
+const roomId = [
+    check("roomId").notEmpty().withMessage("Room ID is required").isUUID().withMessage("Room ID must be a UUID"),
+];
 
 const updateRoom = [
     check("name").not().isEmpty().withMessage("Name is required"),

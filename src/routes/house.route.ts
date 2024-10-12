@@ -27,7 +27,12 @@ houseRouter.patch(
     handleErrors,
     HouseController.updateHouseStatus
 );
-houseRouter.delete("/:houseId/delete", authentication, authorize(Module.HOUSE, Action.DELETE), HouseController.deleteHouse);
+houseRouter.delete(
+    "/:houseId/delete",
+    authentication,
+    authorize(Module.HOUSE, Action.DELETE),
+    HouseController.deleteHouse
+);
 
 // api for renter
 houseRouter.get("/search", HouseController.searchHouse);

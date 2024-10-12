@@ -1,8 +1,8 @@
-import express from "express"
+import express from "express";
 import { Bills } from "../models";
 import { aesEncrypt } from "../utils";
 
-const staticRouter = express.Router()
+const staticRouter = express.Router();
 
 staticRouter.get("/lookup", (_req, res) => {
     res.render("lookup", {
@@ -46,4 +46,4 @@ staticRouter.use("/encrypt", (req, res) => {
     });
 });
 
-export default staticRouter
+export default staticRouter;

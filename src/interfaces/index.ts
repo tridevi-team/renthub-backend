@@ -11,4 +11,4 @@ export * from "./renter.interface";
 export * from "./room.interface";
 export * from "./service.interface";
 export * from "./user.interface";
-export * from "./filter.interface"
+export * from "./filter.interface";

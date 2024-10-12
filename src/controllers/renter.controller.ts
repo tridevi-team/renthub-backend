@@ -140,7 +140,7 @@ class RenterController {
             }
             await redis.set(`verify-renter:${username}`, String(code));
             await redis.expire(`verify-renter:${username}`, 300);
-            
+
             return res.json(apiResponse(messageResponse.SEND_CODE_SUCCESS, true));
         } catch (err) {
             Exception.handle(err, req, res);

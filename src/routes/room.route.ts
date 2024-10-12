@@ -16,7 +16,13 @@ roomRouter.post(
     handleErrors,
     RoomController.createRoom
 );
-roomRouter.get("/:houseId/list", authentication, houseValidator.houseIdValidator, handleErrors, RoomController.getRoomsByHouse);
+roomRouter.get(
+    "/:houseId/list",
+    authentication,
+    houseValidator.houseIdValidator,
+    handleErrors,
+    RoomController.getRoomsByHouse
+);
 roomRouter.get("/:roomId/details", authentication, roomsValidator.roomId, handleErrors, RoomController.getRoomDetails);
 roomRouter.put(
     "/:roomId/update",

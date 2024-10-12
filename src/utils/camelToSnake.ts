@@ -1,4 +1,3 @@
-
 function camelToSnake(obj: object): object {
     if (obj === null || obj === undefined || typeof obj !== "object") {
         return obj;

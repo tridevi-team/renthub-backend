@@ -93,7 +93,7 @@ class RenterService {
 
     static async checkExists(data: { email?: string; phoneNumber?: string }) {
         const renter = await Renters.query()
-            .where(builder => {
+            .where((builder) => {
                 if (data.email) {
                     builder.where("email", data.email);
                 }
@@ -110,7 +110,7 @@ class RenterService {
 
     static async login(data: { email?: string; phoneNumber?: string }) {
         const renter = await Renters.query()
-            .where(builder => {
+            .where((builder) => {
                 if (data.email) {
                     builder.where("email", data.email);
                 }

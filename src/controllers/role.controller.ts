@@ -81,7 +81,8 @@ class RoleController {
             await UserService.getUserById(userId);
 
             if (user.id === userId) throw new ApiException(messageResponse.CANNOT_ASSIGN_ROLE_TO_SELF, 403);
-            if (userId === houseDetails.createdBy) throw new ApiException(messageResponse.CANNOT_ASSIGN_ROLE_TO_HOUSE_OWNER, 403);
+            if (userId === houseDetails.createdBy)
+                throw new ApiException(messageResponse.CANNOT_ASSIGN_ROLE_TO_HOUSE_OWNER, 403);
 
             const data = await RoleService.assign(houseId, userId, roleId, user.id);
 

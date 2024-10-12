@@ -58,7 +58,6 @@ equipmentRouter.patch(
     equipmentValidator.equipmentStatus,
     handleErrors,
     EquipmentController.updateEquipmentStatus
-
 );
 
 equipmentRouter.delete(

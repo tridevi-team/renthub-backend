@@ -14,7 +14,13 @@ floorRouter.post(
     handleErrors,
     FloorController.createFloor
 );
-floorRouter.get("/:houseId/list", authentication, houseValidator.houseIdValidator, handleErrors, FloorController.getFloorsByHouse);
+floorRouter.get(
+    "/:houseId/list",
+    authentication,
+    houseValidator.houseIdValidator,
+    handleErrors,
+    FloorController.getFloorsByHouse
+);
 floorRouter.get(
     "/:floorId/details",
     authentication,

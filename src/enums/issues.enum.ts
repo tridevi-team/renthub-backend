@@ -5,5 +5,4 @@ export enum IssueStatus {
     DONE = "DONE",
     CANCELLED = "CANCELLED",
     CONFIRMED = "CONFIRMED",
-
 }
