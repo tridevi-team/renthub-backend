@@ -1,5 +1,6 @@
 enum messageResponse {
     UNKNOWN_ERROR = "An unknown error occurred",
+    INVALID_SORT_VALUE = "Invalid sort value",
     UNAUTHORIZED = "You are not authorized to access this resource",
     FILE_UPLOAD_SUCCESS = "File uploaded successfully",
     FILE_UPLOAD_FAILED = "File upload failed",
@@ -128,6 +129,17 @@ enum messageResponse {
     UPDATE_ISSUE_SUCCESS = "Issue updated successfully",
     DELETE_ISSUE_SUCCESS = "Issue deleted successfully",
     GET_ISSUE_DETAILS_SUCCESS = "Issue details retrieved successfully",
+    GET_BILL_LIST_SUCCESS = "Bill list retrieved successfully",
+    NO_BILLS_FOUND = "No bills found",
+    BILL_NOT_FOUND = "Bill not found",
+    CREATE_BILL_SUCCESS = "Bill created successfully",
+    UPDATE_BILL_SUCCESS = "Bill updated successfully",
+    DELETE_BILL_SUCCESS = "Bill deleted successfully",
+    GET_BILL_DETAILS_SUCCESS = "Bill details retrieved successfully",
+    BILL_EXISTS = "Bill already exists",
+    UPDATE_BILL_STATUS_SUCCESS = "Bill status updated successfully",
+    BILL_STATUS_PAID_OR_CANCELLED = "Bill status cannot be updated because it is already paid or cancelled",
+    DELETE_SERVICE_IN_BILL_SUCCESS = "Service in bill deleted successfully",
 }
 
 export default messageResponse;

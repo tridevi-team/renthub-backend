@@ -1,8 +1,6 @@
 export enum BillStatus {
-    CREATED,
-    UNPAID,
-    CONFIRMED,
-    PAID,
-    CANCELLED,
-    DELAY,
+    UNPAID = "UNPAID",
+    PAID = "PAID",
+    CANCELLED = "CANCELLED",
+    IN_DEBT = "IN_DEBT",
 }

@@ -1,3 +1,4 @@
+import PayOS from "@payos/node";
 import { Action } from "../enums";
 import messageResponse from "../enums/message.enum";
 import { PaymentRequest } from "../interfaces";
@@ -84,6 +85,20 @@ class PaymentService {
         await paymentMethod.$query().patch(camelToSnake({ updatedBy: actionBy }));
         await paymentMethod.$query().deleteById(id);
         return paymentMethod;
+    }
+
+    static async createPaymentLink(paymentId: string, request) {
+        const details = await this.getById(paymentId);
+        if (details.payosApiKey === null || details.payosClientId === null || details.payosChecksum === null)
+            return null;
+
+        const clientId = details.payosClientId;
+        const apiKey = details.payosApiKey;
+        const checksum = details.payosChecksum;
+
+        const payOs = new PayOS(clientId, apiKey, checksum);
+        const paymentLink = await payOs.createPaymentLink(request);
+        return paymentLink.checkoutUrl;
     }
 
     static async isAccessible(userId: string, paymentMethodId: string, action: string) {

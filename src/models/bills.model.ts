@@ -1,9 +1,33 @@
 import type { QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
+import { BillDetails, PaymentMethods, Rooms } from "./";
 
 class Bills extends Model {
     id: string;
+    room_id: string;
+    payment_method_id: string;
+    title: string;
+    amount: number;
+    payment_date: string;
+    date: {
+        from: string;
+        to: string;
+    };
+    payos_request: any;
+    payos_response: any;
+    status: string;
+    description: string;
+    created_by: string;
+    created_at: string;
+    updated_by: string;
+    updated_at: string;
+    room: Rooms;
+    services: any;
+    roomId: string;
+    paymentMethodId: string;
+    payosRequest: any;
+    payosResponse: any;
 
     static get tableName() {
         return "bills";
@@ -20,7 +44,7 @@ class Bills extends Model {
     static get jsonSchema() {
         return {
             type: "object",
-            required: ["room_id", "payment_method_id", "title", "amount", "payment_date", "status", "description", "created_by"],
+            required: ["room_id", "title", "created_by"],
             properties: {
                 id: { type: "string", format: "uuid" },
                 room_id: { type: "string", format: "uuid" },
@@ -28,12 +52,52 @@ class Bills extends Model {
                 title: { type: "string", maxLength: 255 },
                 amount: { type: "integer" },
                 payment_date: { type: "string", format: "date-time" },
+                date: { type: "object" },
+                payos_request: { type: "object" },
+                payos_response: { type: "object" },
                 status: { type: "string", maxLength: 10 },
                 description: { type: "string" },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
                 updated_by: { type: "string", format: "uuid" },
                 updated_at: { type: "string", format: "date-time" },
+            },
+        };
+    }
+
+    static get relationMappings() {
+        return {
+            room: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Rooms,
+                join: {
+                    from: "bills.room_id",
+                    to: "rooms.id",
+                },
+            },
+            details: {
+                relation: Model.HasManyRelation,
+                modelClass: BillDetails,
+                join: {
+                    from: "bills.id",
+                    to: "bill_details.bill_id",
+                },
+            },
+            payment: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: PaymentMethods,
+                join: {
+                    from: "bills.payment_method_id",
+                    to: "payment_methods.id",
+                },
+            },
+        };
+    }
+
+    static get modifiers() {
+        return {
+            billInfo(builder) {
+                builder.select("id", "room_id", "title", "amount", "date", "paymentDate", "status", "description");
             },
         };
     }

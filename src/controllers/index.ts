@@ -1,4 +1,5 @@
 "use strict";
+export { default as BillController } from "./bill.controller";
 export { default as EquipmentController } from "./equipment.controller";
 export { default as FloorController } from "./floor.controller";
 export { default as HouseController } from "./house.controller";

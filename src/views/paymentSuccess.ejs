@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS for animations -->
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f9fa;
+        }
+
+        .success-container {
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .checkmark {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #28a745;
+            position: relative;
+            display: inline-block;
+            animation: scaleUp 0.5s ease-in-out;
+        }
+
+        .checkmark svg {
+            width: 60px;
+            height: 60px;
+            fill: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleUp {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        h2 {
+            margin-top: 20px;
+            font-size: 32px;
+            color: #28a745;
+            animation: slideIn 1s ease-in-out;
+        }
+
+        p {
+            font-size: 18px;
+            color: #6c757d;
+            animation: slideIn 1.2s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            0% {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .button-container {
+            margin-top: 20px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        .button-container a {
+            font-size: 18px;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="success-container">
+        <div class="checkmark">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <path
+                    d="M26 0C11.663 0 0 11.663 0 26s11.663 26 26 26 26-11.663 26-26S40.337 0 26 0zm13.704 18.292l-14.85 15.27a1.712 1.712 0 0 1-2.455 0l-7.13-7.177a1.737 1.737 0 0 1 0-2.47 1.712 1.712 0 0 1 2.455 0l5.906 5.948L37.249 15.82a1.712 1.712 0 0 1 2.455 0 1.737 1.737 0 0 1 0 2.471z" />
+            </svg>
+        </div>
+        <h2>Payment Successful!</h2>
+        <p>Your payment has been processed successfully.</p>
+
+        <div class="button-container">
+            <a href="/" class="btn btn-success btn-lg">Back to Home</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

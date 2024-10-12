@@ -1,4 +1,5 @@
 export * from "./address.interface";
+export * from "./bill.interface";
 export * from "./equipment.interface";
 export * from "./floor.interface";
 export * from "./house.interface";
@@ -10,3 +11,4 @@ export * from "./renter.interface";
 export * from "./room.interface";
 export * from "./service.interface";
 export * from "./user.interface";
+export * from "./filter.interface"

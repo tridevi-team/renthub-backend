@@ -15,6 +15,7 @@ import messageResponse from "./src/enums/message.enum";
 import { authentication, requestLogger } from "./src/middlewares";
 import {
     AuthRoute,
+    BillRoute,
     EquipmentRoute,
     FloorRoute,
     HouseRoute,
@@ -24,9 +25,10 @@ import {
     RoleRoute,
     RoomRoute,
     ServiceRoute,
+    StaticRoute,
     UserRoute,
 } from "./src/routes";
-import { aesEncrypt, apiResponse } from "./src/utils";
+import { apiResponse } from "./src/utils";
 
 const PORT = process.env.PORT || 3000;
 
@@ -45,14 +47,14 @@ app.use(limiter);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use("/public", express.static("src/public"));
+app.use(express.urlencoded({ extended: true }));
 
-app.use("/encrypt", (req, res) => {
-    return res.json({
-        raw: req.query.raw,
-        encrypted: aesEncrypt(req.query.raw),
-    });
-});
+// Cấu hình view engine là EJS
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "src/views"));
+
+// Cấu hình đường dẫn cho file static
+app.use(express.static(path.join(__dirname, "src/public")));
 
 const UPLOADS_DIR = path.join("./src/public/uploads");
 mkdirSync(UPLOADS_DIR, { recursive: true });
@@ -81,6 +83,16 @@ app.post(
     }
 );
 
+app.use((req, _res, next) => {
+    let { filter = {}, sort = [] } = req.query;
+    filter = typeof filter === "string" ? JSON.parse(filter) : filter;
+    sort = typeof sort === "string" ? [sort] : sort;
+
+    req.query = { ...req.query, filter, sort };
+    next();
+});
+
+app.use(StaticRoute);
 app.use("/auth", AuthRoute);
 app.use("/users", authentication, UserRoute);
 app.use("/houses", HouseRoute);
@@ -92,6 +104,7 @@ app.use("/rooms", RoomRoute);
 app.use("/equipment", EquipmentRoute);
 app.use("/payment", PaymentMethodRoute);
 app.use("/issues", IssueRoute);
+app.use("/bills", BillRoute);
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);

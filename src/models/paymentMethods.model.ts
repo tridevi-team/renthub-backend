@@ -2,6 +2,7 @@ import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { currentDateTime } from "../utils/currentTime";
+import { Bills, Houses } from "./";
 
 class PaymentMethods extends Model {
     id: string;
@@ -71,6 +72,36 @@ class PaymentMethods extends Model {
                 created_at: { type: "string", format: "date-time" },
                 updated_by: { type: "string", format: "uuid" },
                 updated_at: { type: "string", format: "date-time" },
+            },
+        };
+    }
+
+    static get relationMappings() {
+        return {
+            house: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Houses,
+                join: {
+                    from: "payment_methods.house_id",
+                    to: "houses.id",
+                },
+            },
+
+            bills: {
+                relation: Model.HasManyRelation,
+                modelClass: Bills,
+                join: {
+                    from: "payment_methods.id",
+                    to: "bills.payment_method_id",
+                },
+            },
+        };
+    }
+
+    static get modifiers() {
+        return {
+            accountNumber(builder) {
+                builder.select("name", "account_number", "bank_name");
             },
         };
     }

@@ -19,9 +19,17 @@ class Houses extends Model {
     created_at: string;
     updated_by: string;
     updated_at: string;
-    createdBy: string;
     permissions: Permissions;
-    floors: any;
+    floors: HouseFloors[];
+    equipment: Equipment[];
+    issues: Issues[];
+    collectionCycle: number;
+    invoiceDate: number;
+    numCollectDays: number;
+    createdBy: string;
+    createdAt: string;
+    updatedBy: string;
+    updatedAt: string;
 
     static get tableName() {
         return "houses";
