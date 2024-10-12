@@ -1,7 +1,7 @@
 import { ForeignKeyViolationError } from "objection";
 import messageResponse from "../enums/message.enum";
 import type { Pagination, Room, RoomServiceInfo } from "../interfaces";
-import { Roles, RoomImages, Rooms, RoomServices, Services } from "../models";
+import { Renters, Roles, RoomImages, Rooms, RoomServices, Services } from "../models";
 import { ApiException } from "../utils";
 import camelToSnake from "../utils/camelToSnake";
 
@@ -73,6 +73,37 @@ class RoomService {
             updatedBy: room.updatedBy,
             updatedAt: room.updatedAt,
         };
+    }
+
+    static async getRoomServices(roomId: string) {
+        const services = await RoomServices.query()
+            .joinRelated("service")
+            .where("room_id", roomId)
+            .select("service_id as id", "name", "unit_price", "type", "quantity");
+        if (services.length === 0) {
+            throw new ApiException(messageResponse.NO_SERVICES_FOUND, 404);
+        }
+        return services;
+    }
+
+    static async countRenterInRoom(roomId: string) {
+        const renters = await Renters.query().where("room_id", roomId).count("id", {
+            as: "count",
+        });
+        return renters[0].count;
+    }
+
+    static async getRoomServiceDetails(roomId: string, serviceId: string) {
+        const service = await RoomServices.query()
+            .joinRelated("service")
+            .where("room_id", roomId)
+            .andWhere("service_id", serviceId)
+            .select("services.id as id", "name", "unit_price", "type", "quantity")
+            .first();
+        if (!service) {
+            throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
+        }
+        return service;
     }
 
     static async listByHouse(houseId: string, pagination: Pagination = { page: 1, limit: 10 }) {

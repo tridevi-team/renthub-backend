@@ -17,6 +17,9 @@ class RoomServices extends Model {
     updated_at: string;
     serviceId: string;
     service: Services;
+    unitPrice: number;
+    type: string;
+    name: never;
 
     static get tableName() {
         return "room_services";

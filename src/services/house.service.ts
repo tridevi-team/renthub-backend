@@ -35,6 +35,11 @@ class HouseService {
         return enhancedList;
     }
 
+    static async isRoomInHouse(houseId: string, roomId: string) {
+        const room = await Rooms.query().joinRelated("floor.house").findOne({ "rooms.id": roomId, house_id: houseId });
+        return !!room;
+    }
+
     static async search(data: HouseFilter) {
         const query = Houses.query()
             .joinRelated("floors.rooms")

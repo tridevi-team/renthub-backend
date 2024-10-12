@@ -25,6 +25,7 @@ class Renters extends Model {
     phoneNumber: string;
     roomId: string;
     createdBy: string;
+    count: number;
 
     static get tableName() {
         return "renters";
@@ -77,6 +78,14 @@ class Renters extends Model {
                     from: "renters.room_id",
                     to: "rooms.id",
                 },
+            },
+        };
+    }
+
+    static get modifiers() {
+        return {
+            represent(builder) {
+                builder.where("represent", true);
             },
         };
     }
