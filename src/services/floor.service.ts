@@ -1,8 +1,7 @@
-import messageResponse from "../enums/message.enum";
+import { messageResponse } from "../enums";
 import type { Floor } from "../interfaces";
 import { HouseFloors } from "../models";
-import { ApiException } from "../utils";
-import camelToSnake from "../utils/camelToSnake";
+import { ApiException, camelToSnake } from "../utils";
 
 class FloorService {
     static async createFloor(data: Floor) {

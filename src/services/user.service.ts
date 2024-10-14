@@ -1,11 +1,10 @@
 import "dotenv/config";
 import redisConfig from "../config/redis.config";
-import messageResponse from "../enums/message.enum";
+import { messageResponse } from "../enums";
 import type { AccessTokenPayload, UserCreate, UserUpdate } from "../interfaces";
 import { Users } from "../models";
-import { ApiException, bcrypt, jwtToken } from "../utils";
-import camelToSnake from "../utils/camelToSnake";
-import HouseService from "./house.service";
+import { ApiException, bcrypt, camelToSnake, jwtToken } from "../utils";
+import { HouseService } from "./";
 
 class UserService {
     static async getUserById(id: string) {

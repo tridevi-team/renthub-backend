@@ -1,7 +1,6 @@
 "use strict";
 
-import { RoomStatus } from "../enums";
-import messageResponse from "../enums/message.enum";
+import { messageResponse, RoomStatus } from "../enums";
 import { RoomService } from "../services";
 import { ApiException, apiResponse, Exception } from "../utils";
 

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Cancelled</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS for animations -->
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f9fa;
+        }
+
+        .cancel-container {
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .crossmark {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #dc3545;
+            position: relative;
+            display: inline-block;
+            animation: scaleUp 0.5s ease-in-out;
+        }
+
+        .crossmark svg {
+            width: 60px;
+            height: 60px;
+            fill: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleUp {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        h2 {
+            margin-top: 20px;
+            font-size: 32px;
+            color: #dc3545;
+            animation: slideIn 1s ease-in-out;
+        }
+
+        p {
+            font-size: 18px;
+            color: #6c757d;
+            animation: slideIn 1.2s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            0% {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .button-container {
+            margin-top: 20px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        .button-container a {
+            font-size: 18px;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="cancel-container">
+        <div class="crossmark">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <path
+                    d="M26 0C11.663 0 0 11.663 0 26s11.663 26 26 26 26-11.663 26-26S40.337 0 26 0zm10.364 14.121L26 24.485 15.636 14.121a1.5 1.5 0 1 0-2.121 2.121L23.879 26.5 13.515 36.864a1.5 1.5 0 1 0 2.121 2.121L26 28.515l10.364 10.364a1.5 1.5 0 0 0 2.121-2.121L28.121 26.5l10.364-10.364a1.5 1.5 0 0 0-2.121-2.121z" />
+            </svg>
+        </div>
+        <h2>Payment Cancelled!</h2>
+        <p>Your payment has been cancelled. Please try again or contact support if you need assistance.</p>
+
+        <div class="button-container">
+            <a href="/" class="btn btn-danger btn-lg">Back to Home</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

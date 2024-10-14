@@ -1,4 +1,4 @@
-import messageResponse from "../enums/message.enum";
+import { messageResponse } from "../enums";
 import { loginCodeTemplate, resetPasswordTemplate, verifyCodeTemplate } from "../resources";
 import { ApiException, sendMail } from "../utils";
 

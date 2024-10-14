@@ -1,7 +1,7 @@
 "use strict";
 
 import redisConfig from "../config/redis.config";
-import messageResponse from "../enums/message.enum";
+import { messageResponse } from "../enums";
 import { RenterService } from "../services";
 import MailService from "../services/mail.service";
 import { ApiException, apiResponse, Exception } from "../utils";

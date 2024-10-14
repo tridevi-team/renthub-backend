@@ -1,11 +1,10 @@
 import PayOS from "@payos/node";
-import { Action } from "../enums";
-import messageResponse from "../enums/message.enum";
+import { raw } from "objection";
+import { Action, messageResponse } from "../enums";
 import { PaymentRequest } from "../interfaces";
 import { PaymentMethods, Roles } from "../models";
-import { ApiException } from "../utils";
-import camelToSnake from "../utils/camelToSnake";
-import HouseService from "./house.service";
+import { ApiException, camelToSnake } from "../utils";
+import { HouseService } from "./";
 
 class PaymentService {
     static async getById(id: string) {
@@ -99,6 +98,19 @@ class PaymentService {
         const payOs = new PayOS(clientId, apiKey, checksum);
         const paymentLink = await payOs.createPaymentLink(request);
         return paymentLink.checkoutUrl;
+    }
+
+    static async getPayOSKey(orderCode: string) {
+        const info = await PaymentMethods.query()
+            .joinRelated("bills")
+            .findOne(raw("JSON_UNQUOTE(JSON_EXTRACT(payos_request, '$.order_code')) = ?", orderCode));
+        if (!info) throw new ApiException(messageResponse.PAYMENT_METHOD_NOT_FOUND, 404);
+
+        return {
+            clientId: info.payosClientId,
+            apiKey: info.payosApiKey,
+            checksum: info.payosChecksum,
+        };
     }
 
     static async isAccessible(userId: string, paymentMethodId: string, action: string) {

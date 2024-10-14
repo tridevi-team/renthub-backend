@@ -1,9 +1,8 @@
 import Objection from "objection";
-import messageResponse from "../enums/message.enum";
+import { messageResponse } from "../enums";
 import type { Role } from "../interfaces";
 import { Roles, UserRoles } from "../models";
-import { ApiException } from "../utils";
-import camelToSnake from "../utils/camelToSnake";
+import { ApiException, camelToSnake } from "../utils";
 
 class RoleService {
     static async create(houseId: string, data: Role) {

@@ -1,8 +1,7 @@
 "use strict";
 
 import redisClient from "../config/redis.config";
-import { AccountRoles } from "../enums";
-import messageResponse from "../enums/message.enum";
+import { AccountRoles, messageResponse } from "../enums";
 import { UserService } from "../services";
 import MailService from "../services/mail.service";
 import { ApiException, apiResponse, bcrypt, Exception } from "../utils";

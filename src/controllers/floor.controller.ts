@@ -1,4 +1,4 @@
-import messageResponse from "../enums/message.enum";
+import { messageResponse } from "../enums";
 import { FloorService } from "../services";
 import { apiResponse, Exception } from "../utils";
 

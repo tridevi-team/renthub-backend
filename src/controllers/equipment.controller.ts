@@ -1,6 +1,6 @@
 "use strict";
 
-import messageResponse from "../enums/message.enum";
+import { messageResponse } from "../enums";
 import { EquipmentService } from "../services";
 import { apiResponse, Exception } from "../utils";
 

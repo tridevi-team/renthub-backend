@@ -2,10 +2,8 @@ import "dotenv/config";
 import { BillStatus, messageResponse, ServiceTypes } from "../enums";
 import { BillInfo } from "../interfaces";
 import { Bills } from "../models";
-import { HouseService, PaymentService, RoomService } from "../services";
-import BillService from "../services/bill.service";
-import { ApiException, apiResponse, Exception } from "../utils";
-import camelToSnake from "../utils/camelToSnake";
+import { BillService, HouseService, PaymentService, RoomService } from "../services";
+import { ApiException, apiResponse, camelToSnake, Exception } from "../utils";
 
 const { RETURN_URL, CANCEL_URL } = process.env;
 

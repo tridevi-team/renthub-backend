@@ -28,6 +28,7 @@ class Bills extends Model {
     paymentMethodId: string;
     payosRequest: any;
     payosResponse: any;
+    payment: PaymentMethods;
 
     static get tableName() {
         return "bills";

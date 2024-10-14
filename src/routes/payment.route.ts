@@ -77,4 +77,6 @@ paymentMethodRouter.delete(
     PaymentController.deletePaymentMethod
 );
 
+paymentMethodRouter.post("/hook", PaymentController.payOSWebhook);
+
 export default paymentMethodRouter;

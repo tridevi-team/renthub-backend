@@ -44,6 +44,13 @@
         <p><strong>Tổng tiền:</strong>
             <%= new Intl.NumberFormat('vi-VN', { style: 'currency' , currency: 'VND' , }).format(invoice.amount) %>
         </p>
+        <p>
+            <% if (paymentUrl && paymentUrl.includes("https")) { %>
+                <a href="<%= paymentUrl %>">Thanh toán ngay</a>
+                <% } else { %>
+                    <a href="https://pay.payos.vn/web/<%= paymentUrl %>">Thanh toán ngay</a>
+                    <% } %>
+        </p>
         <table class="table table-striped table-hover">
             <thead>
                 <th>STT</th>

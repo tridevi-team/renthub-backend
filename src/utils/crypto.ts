@@ -2,7 +2,7 @@
 import * as CryptoJS from "crypto-js";
 import "dotenv/config";
 
-const aesEncrypt = (data) => {
+export const aesEncrypt = (data) => {
     const key = CryptoJS.enc.Utf8.parse(process.env.CRYPTO_KEY);
     const iv = CryptoJS.enc.Utf8.parse(process.env.CRYPTO_IV);
 
@@ -15,7 +15,7 @@ const aesEncrypt = (data) => {
     return encrypted.toString();
 };
 
-const aesDecrypt = (encrypted) => {
+export const aesDecrypt = (encrypted) => {
     const key = CryptoJS.enc.Utf8.parse(process.env.CRYPTO_KEY);
     const iv = CryptoJS.enc.Utf8.parse(process.env.CRYPTO_IV);
 
@@ -33,13 +33,3 @@ const aesDecrypt = (encrypted) => {
 
     return decrypted.toString(CryptoJS.enc.Utf8);
 };
-
-// Example usage
-// const encryptedString = "AA+WdcgTaGRNC59C9sJEvg==";
-// const encryptedString = aesEncrypt("Hello World");
-// console.log(encryptedString);
-
-// const decryptedString = aesDecrypt(encryptedString);
-// console.log(decryptedString);
-
-export { aesEncrypt, aesDecrypt };

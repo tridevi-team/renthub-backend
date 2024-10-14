@@ -1,9 +1,8 @@
 import { messageResponse } from "../enums";
 import { IssueFilter, IssueRequest, Pagination } from "../interfaces";
 import { Issues } from "../models";
-import { ApiException } from "../utils";
-import camelToSnake from "../utils/camelToSnake";
-import UserService from "./user.service";
+import { ApiException, camelToSnake } from "../utils";
+import { UserService } from "./";
 
 class IssueService {
     static async getById(id: string) {
