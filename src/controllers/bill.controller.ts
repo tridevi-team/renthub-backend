@@ -202,8 +202,8 @@ class BillController {
                         cancelUrl: CANCEL_URL,
                         expiredAt: expiredDate,
                     };
-                    const url = await PaymentService.createPaymentLink(data.paymentMethodId, payosRequest);
-                    console.log("🚀 ~ BillController ~ createBill ~ url:", url);
+                    await PaymentService.createPaymentLink(data.paymentMethodId, payosRequest);
+
                     await newBill.$query(trx).patch(camelToSnake({ amount: total, payosRequest }));
                 }
 
