@@ -37,9 +37,9 @@ const jwtToken = {
         const data = jwt.verify(token, JWT_SECRET_REFRESH);
         const currentTime = Date.now() / 1000;
 
-        if (data.exp < currentTime) {
+        if ((data as jwt.JwtPayload).exp! < currentTime) {
             throw new ApiException(messageResponse.TOKEN_EXPIRED, 401);
-        } else if (data.iat > currentTime) {
+        } else if ((data as jwt.JwtPayload).iat! > currentTime) {
             throw new ApiException(messageResponse.TOKEN_INVALID, 401);
         }
     },

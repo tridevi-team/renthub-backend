@@ -44,7 +44,7 @@ class EquipmentService {
             status?: string;
             sharedType?: string;
         },
-        pagination: Pagination = { page: -1, limit: -1 },
+        pagination: Pagination = { page: -1, pageSize: -1 },
         sort: { orderBy?: string; sortBy?: "DESC" | "ASC" } = { orderBy: "created_at", sortBy: "DESC" }
     ) {
         const { houseId, floorId, roomId } = filter;
@@ -70,7 +70,7 @@ class EquipmentService {
             query = query.orderBy(sort.orderBy, sort.sortBy);
         }
 
-        if (pagination.page === -1 && pagination.limit === -1) {
+        if (pagination.page === -1 && pagination.pageSize === -1) {
             const data = await query;
             return [
                 {
@@ -88,7 +88,7 @@ class EquipmentService {
             throw new ApiException(messageResponse.EQUIPMENT_NOT_FOUND, 404);
         }
 
-        const data = await query.page(pagination.page - 1, pagination.limit);
+        const data = await query.page(pagination.page - 1, pagination.pageSize);
         return data;
     }
 

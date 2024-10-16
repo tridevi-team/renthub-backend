@@ -6,6 +6,12 @@ import { houseValidator, renterValidator, roomsValidator } from "../middlewares/
 
 const renterRouter = express.Router();
 
+renterRouter.post("/auth", (req, res) => {
+    const { token } = req.headers;
+    console.log("🚀 ~ renterRouter.post ~ token:", token)
+    return res.json({ message: "Renter auth" });
+});
+
 renterRouter.post("/login", renterValidator.login, handleErrors, RenterController.login);
 renterRouter.post("/verify", renterValidator.verify, handleErrors, RenterController.verifyLogin);
 renterRouter.post("/resend", renterValidator.login, handleErrors, RenterController.resendCode);

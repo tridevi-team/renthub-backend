@@ -1,5 +1,6 @@
-// Numeric Operators Enum
-export enum NumericOperator {
+// Combined Operators Enum
+export enum Operator {
+    // Numeric Operators
     Equals = "eq", // Equal to
     NotEquals = "ne", // Not equal to
     GreaterThan = "gt", // Greater than
@@ -8,18 +9,12 @@ export enum NumericOperator {
     LessThanOrEqual = "lte", // Less than or equal to
     In = "in", // In array
     NotIn = "nin", // Not in array
-}
 
-// String Operators Enum
-export enum StringOperator {
-    Equals = "eq", // Equal to
-    NotEquals = "ne", // Not equal to
+    // String Operators
     Contains = "cont", // Contains
     DoesNotContain = "ncont", // Does not contain
     StartsWith = "sw", // Starts with
     EndsWith = "ew", // Ends with
     Matches = "match", // Matches regex
     DoesNotMatch = "nmatch", // Does not match regex
-    In = "in", // In array
-    NotIn = "nin", // Not in array
 }

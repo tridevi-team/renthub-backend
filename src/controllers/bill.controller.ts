@@ -34,7 +34,7 @@ class BillController {
                 }
             }
 
-            const bills = await BillService.search(houseId, filter, sort, { page: page || -1, limit: limit || -1 });
+            const bills = await BillService.search(houseId, filter, sort, { page: page || -1, pageSize: limit || -1 });
             return res.json(apiResponse(messageResponse.GET_BILL_LIST_SUCCESS, true, bills));
         } catch (err) {
             Exception.handle(err, req, res);

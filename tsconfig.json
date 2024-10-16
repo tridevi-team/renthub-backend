@@ -14,6 +14,7 @@
         "baseUrl": "./", // Sets a base directory to resolve non-absolute module names
         "esModuleInterop": true, // fixes some issues TS originally had with the ES6 spec where TypeScript treats CommonJS/AMD/UMD modules similar to ES6 module
         "moduleResolution": "node", // Pretty much always node for modern JS. Other option is "classic"
+        "resolveJsonModule": true, // Include modules imported with .json extension
         "paths": {
             "@application/*": ["src/application/*"],
             "@domain/*": ["src/domain/*"],

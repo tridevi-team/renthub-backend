@@ -1,36 +1,65 @@
 import { raw } from "objection";
-import { Action, messageResponse, RoomStatus } from "../enums";
-import type { HouseCreate, HouseFilter, HouseServiceInfo, HouseUpdate } from "../interfaces";
+import { Action, EPagination, messageResponse } from "../enums";
+import type { Filter, HouseCreate, HouseServiceInfo, HouseUpdate } from "../interfaces";
 import { HouseFloors, Houses, Rooms, Services } from "../models";
-import { ApiException, camelToSnake } from "../utils";
+import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 
 class HouseService {
-    static async getHouseByUser(userId: string) {
-        const list = await Houses.query()
+    static async getHouseByUser(userId: string, data?: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
+        } = data || {};
+
+        let list = Houses.query()
             .leftJoin("user_roles", "houses.id", "user_roles.house_id")
             .leftJoin("roles", "user_roles.role_id", "roles.id")
-            .where("houses.created_by", userId)
-            .orWhere("user_roles.user_id", userId)
+            .where((builder) => {
+                builder.where("houses.created_by", userId).orWhere("user_roles.user_id", userId);
+            })
             .select("houses.*", "roles.permissions");
 
-        const fullPermissions = {
-            house: { create: false, read: true, update: true, delete: true },
-            role: { create: true, read: true, update: true, delete: true },
-            room: { create: true, read: true, update: true, delete: true },
-            renter: { create: true, read: true, update: true, delete: true },
-            service: { create: true, read: true, update: true, delete: true },
-            bill: { create: true, read: true, update: true, delete: true },
-            equipment: { create: true, read: true, update: true, delete: true },
-            payment: { create: true, read: true, update: true, delete: true },
-        };
+        if (!data) {
+            const fetchData = await list;
+            const fullPermissions = {
+                house: { create: false, read: true, update: true, delete: true },
+                role: { create: true, read: true, update: true, delete: true },
+                room: { create: true, read: true, update: true, delete: true },
+                renter: { create: true, read: true, update: true, delete: true },
+                service: { create: true, read: true, update: true, delete: true },
+                bill: { create: true, read: true, update: true, delete: true },
+                equipment: { create: true, read: true, update: true, delete: true },
+                payment: { create: true, read: true, update: true, delete: true },
+            };
 
-        const enhancedList = list.map((house) => {
-            if (house.createdBy === userId) {
-                house.permissions = fullPermissions;
-            }
-            return house;
-        });
-        return enhancedList;
+            const enhancedList = fetchData.map((house) => {
+                if (house.createdBy === userId) {
+                    house.permissions = fullPermissions;
+                }
+                return house;
+            });
+            return enhancedList;
+        }
+
+        // Filter
+        list = filterHandler(list, filter);
+
+        // Sort
+        list = sortingHandler(list, sort);
+
+        const clone = list.clone();
+        const total = await clone.resultSize();
+        const totalPages = Math.ceil(total / pageSize);
+
+        // Pagination
+        if (page !== -1 && pageSize !== -1)
+            await list.page(page - 1, pageSize);
+        else await list.page(0, total);
+
+        const fetchData = await list;
+
+        return { ...fetchData, page: page, pageCount: totalPages, pageSize: pageSize, total };
     }
 
     static async isRoomInHouse(houseId: string, roomId: string) {
@@ -38,60 +67,22 @@ class HouseService {
         return !!room;
     }
 
-    static async search(data: HouseFilter) {
-        const query = Houses.query()
-            .joinRelated("floors.rooms")
-            .where("houses.status", true)
-            .andWhere("floors:rooms.status", RoomStatus.AVAILABLE);
+    static async search(data: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
+        } = data || {};
 
-        if (data.keyword) {
-            query.where("houses.name", "like", `%${data.keyword}%`);
-        }
+        let query = Houses.query()
+            .join("house_floors as floors", "floors.house_id", "houses.id")
+            .join("rooms", "floors.id", "rooms.floor_id");
 
-        if (data.address) {
-            query.modifiers({
-                address(query) {
-                    if (data.address.city) {
-                        query.where("city", "like", `%${data.address.city}%`);
-                    }
-                    if (data.address.district) {
-                        query.where("district", "like", `%${data.address.district}%`);
-                    }
-                    if (data.address.ward) {
-                        query.where("ward", "like", `%${data.address.ward}%`);
-                    }
-                    if (data.address.street) {
-                        query.where("street", "like", `%${data.address.street}%`);
-                    }
-                },
-            });
-        }
+        // Filter
+        query = filterHandler(query, filter);
 
-        if (data.numOfBeds) {
-            query
-                .where("floors:rooms.description", "like", `%${data.numOfBeds} ngu%`)
-                .orWhere("floors:rooms.description", "like", `%${data.numOfBeds}n%`);
-        }
-
-        if (data.numOfRenters) {
-            query.where("floors:rooms.max_renters", ">=", data.numOfRenters);
-        }
-
-        if (data.price?.from) {
-            query.where("floors:rooms.price", ">=", data.price.from);
-        }
-
-        if (data.price?.to) {
-            query.where("floors:rooms.price", "<=", data.price.to);
-        }
-
-        if (data.roomArea) {
-            query.where("floors:rooms.room_area", ">=", data.roomArea);
-        }
-
-        if (data.sortBy && data.orderBy) {
-            query.orderBy(`houses.${data.sortBy}`, data.orderBy);
-        }
+        // Sort
+        query = sortingHandler(query, sort);
 
         query
             .select(
@@ -104,26 +95,29 @@ class HouseService {
                 raw("MAX(max_renters) as max_renters"),
                 raw("MIN(price) as min_price"),
                 raw("MAX(price) as max_price"),
-                raw("COUNT(`floors:rooms`.`id`) as num_of_rooms"),
-                raw("MIN(`floors:rooms`.`room_area`) as min_room_area"),
-                raw("MAX(`floors:rooms`.`room_area`) as max_room_area"),
+                raw("COUNT(`rooms`.`id`) as num_of_rooms"),
+                raw("MIN(`rooms`.`room_area`) as min_room_area"),
+                raw("MAX(`rooms`.`room_area`) as max_room_area"),
                 raw(
-                    "(SELECT room_images.image_url FROM room_images WHERE room_images.room_id = `floors:rooms`.id ORDER BY RAND() LIMIT 1) as thumbnail"
+                    "(SELECT room_images.image_url FROM room_images WHERE room_images.room_id = `rooms`.id ORDER BY RAND() LIMIT 1) as thumbnail"
                 )
             )
             .groupBy("houses.id", "houses.name", "houses.address", "houses.description");
 
         const totalQuery = query.clone();
-        const count = await totalQuery.resultSize();
-        query.offset((data.page - 1) * data.limit).limit(data.limit);
+        const total = await totalQuery.resultSize();
+        const totalPages = Math.ceil(total / pageSize);
+
+        query.page(page - 1, pageSize); // Pagination
 
         const fetchData = await query;
 
         return {
-            results: fetchData,
-            total: count,
-            page: data.page,
-            limit: data.limit,
+            ...fetchData,
+            total,
+            page,
+            pageCount: totalPages,
+            pageSize,
         };
     }
 

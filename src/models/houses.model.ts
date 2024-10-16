@@ -3,7 +3,7 @@ import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import type { Address, Permissions } from "../interfaces";
 import { currentDateTime } from "../utils/currentTime";
-import { Equipment, HouseFloors, Issues } from "./";
+import { Equipment, HouseFloors, Issues, Users } from "./";
 
 class Houses extends Model {
     id: string;
@@ -93,6 +93,22 @@ class Houses extends Model {
                 join: {
                     from: "houses.id",
                     to: "issues.house_id",
+                },
+            },
+            createdBy: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Users,
+                join: {
+                    from: "houses.created_by",
+                    to: "users.id",
+                },
+            },
+            updatedBy: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Users,
+                join: {
+                    from: "houses.updated_by",
+                    to: "users.id",
                 },
             },
         };

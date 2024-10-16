@@ -105,14 +105,14 @@ class RoomService {
         return service;
     }
 
-    static async listByHouse(houseId: string, pagination: Pagination = { page: 1, limit: 10 }) {
+    static async listByHouse(houseId: string, pagination: Pagination = { page: 1, pageSize: 10 }) {
         // Get list of rooms by house
         const rooms = await Rooms.query()
             .withGraphFetched("floor.house")
             .where("floor.house_id", houseId)
             .withGraphJoined("services.service")
             .withGraphJoined("images")
-            .page(pagination.page - 1, pagination.limit);
+            .page(pagination.page - 1, pagination.pageSize);
         if (rooms.results.length === 0) {
             throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
         }

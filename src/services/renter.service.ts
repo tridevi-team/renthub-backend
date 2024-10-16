@@ -61,7 +61,7 @@ class RenterService {
                 "renters.move_in_date",
                 "renters.note"
             )
-            .page(pagination.page - 1, pagination.limit);
+            .page(pagination.page - 1, pagination.pageSize);
 
         return renters;
     }

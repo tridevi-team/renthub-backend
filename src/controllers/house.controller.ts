@@ -1,6 +1,6 @@
 "use strict";
 import redisConfig from "../config/redis.config";
-import { messageResponse } from "../enums";
+import { EPagination, messageResponse } from "../enums";
 import { HouseService } from "../services";
 import { ApiException, apiResponse, Exception } from "../utils";
 
@@ -20,9 +20,19 @@ class HouseController {
 
     static async getHouseList(req, res) {
         const user = req.user;
+        const {
+            filter = [],
+            sort = [],
+            pagination = { page: EPagination.DEFAULT_PAGE, pageSize: EPagination.DEFAULT_LIMIT },
+        } = req.query;
+
         try {
-            const list = await HouseService.getHouseByUser(user.id);
-            if (list.length === 0) throw new ApiException(messageResponse.NO_HOUSES_FOUND, 404);
+            const list = await HouseService.getHouseByUser(user.id, {
+                filter,
+                sort,
+                pagination,
+            });
+            if (!list) throw new ApiException(messageResponse.NO_HOUSES_FOUND, 404);
             return res.json(apiResponse(messageResponse.GET_HOUSE_LIST_SUCCESS, true, list));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -119,66 +129,39 @@ class HouseController {
 
     static async searchHouse(req, res) {
         const {
-            keyword,
-            limit,
-            page,
-            sortBy,
-            orderBy,
-            numOfBeds,
-            street,
-            ward,
-            district,
-            city,
-            numOfRenters,
-            roomArea,
-            priceFrom,
-            priceTo,
+            filter = [],
+            sort = [],
+            pagination = { page: EPagination.DEFAULT_PAGE, pageSize: EPagination.DEFAULT_LIMIT },
         } = req.query;
         try {
-            const data = {
-                keyword,
-                limit: limit ? parseInt(limit) : 10,
-                page: page ? parseInt(page) : 1,
-                sortBy: sortBy,
-                orderBy: orderBy,
-                numOfBeds: numOfBeds ? parseInt(numOfBeds) : 0,
-                address: {
-                    street: street,
-                    ward: ward,
-                    district: district,
-                    city: city,
-                },
-                numOfRenters: numOfRenters,
-                roomArea: roomArea,
-                price: {
-                    from: priceFrom,
-                    to: priceTo,
-                },
-            };
             // check cache
-            const redis = await redisConfig;
-            const cache = await redis.sIsMember(
-                `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`,
-                JSON.stringify(data)
-            );
-            if (cache) {
-                const result = await redis.sMembers(
-                    `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`
-                );
-                return res.json(apiResponse(messageResponse.SEARCH_HOUSE_SUCCESS, true, JSON.parse(result[0])));
-            }
+            // const redis = await redisConfig;
+            // const cache = await redis.sIsMember(
+            //     `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`,
+            //     JSON.stringify(data)
+            // );
+            // if (cache) {
+            //     const result = await redis.sMembers(
+            //         `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`
+            //     );
+            //     return res.json(apiResponse(messageResponse.SEARCH_HOUSE_SUCCESS, true, JSON.parse(result[0])));
+            // }
 
-            const result = await HouseService.search(data);
+            const result = await HouseService.search({
+                filter,
+                sort,
+                pagination,
+            });
 
             // save to cache
-            redis.sAdd(
-                `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`,
-                JSON.stringify(result)
-            );
-            redis.expire(
-                `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`,
-                300
-            );
+            // redis.sAdd(
+            //     `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`,
+            //     JSON.stringify(result)
+            // );
+            // redis.expire(
+            //     `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`,
+            //     300
+            // );
 
             return res.json(apiResponse(messageResponse.SEARCH_HOUSE_SUCCESS, true, result));
         } catch (err) {

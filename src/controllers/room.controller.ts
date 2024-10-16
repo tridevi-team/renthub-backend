@@ -11,7 +11,7 @@ class RoomController {
         try {
             const rooms = await RoomService.listByHouse(houseId, {
                 page: parseInt(page),
-                limit: parseInt(limit),
+                pageSize: parseInt(limit),
             });
             return res.json(apiResponse(messageResponse.GET_ROOMS_BY_HOUSE_SUCCESS, true, rooms));
         } catch (err) {

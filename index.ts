@@ -12,7 +12,7 @@ import { serve, setup } from "swagger-ui-express";
 import { swaggerSpec } from "./src/API/swagger";
 import "./src/config/database.config";
 import messageResponse from "./src/enums/message.enum";
-import { authentication, requestLogger } from "./src/middlewares";
+import { authentication, queryParser, requestLogger } from "./src/middlewares";
 import {
     AuthRoute,
     BillRoute,
@@ -49,12 +49,15 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-// Cấu hình view engine là EJS
+// config view engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "src/views"));
 
-// Cấu hình đường dẫn cho file static
+// config static folder
 app.use(express.static(path.join(__dirname, "src/public")));
+
+// config query parser
+app.use(queryParser);
 
 const UPLOADS_DIR = path.join("./src/public/uploads");
 mkdirSync(UPLOADS_DIR, { recursive: true });
@@ -82,15 +85,6 @@ app.post(
         );
     }
 );
-
-app.use((req, _res, next) => {
-    let { filter = {}, sort = [] } = req.query;
-    filter = typeof filter === "string" ? JSON.parse(filter) : filter;
-    sort = typeof sort === "string" ? [sort] : sort;
-
-    req.query = { ...req.query, filter, sort };
-    next();
-});
 
 app.use(StaticRoute);
 app.use("/auth", AuthRoute);

@@ -43,7 +43,7 @@ class IssueController {
                     description,
                     assignTo: assignee,
                 },
-                { page: page || -1, limit: limit || -1 }
+                { page: page || -1, pageSize: limit || -1 }
             );
             return res.json(apiResponse(messageResponse.GET_ISSUE_LIST_SUCCESS, true, issues));
         } catch (err) {

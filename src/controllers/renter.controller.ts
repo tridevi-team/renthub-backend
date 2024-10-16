@@ -52,7 +52,7 @@ class RenterController {
         try {
             const renters = await RenterService.listByHouse(houseId, {
                 page: parseInt(page),
-                limit: parseInt(limit),
+                pageSize: parseInt(limit),
             });
             return res.json(apiResponse(messageResponse.GET_RENTERS_BY_HOUSE_SUCCESS, true, renters));
         } catch (err) {

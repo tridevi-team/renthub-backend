@@ -27,7 +27,7 @@ class IssueService {
         });
 
         if (pagination.page !== -1) {
-            const result = await issues.page(pagination.page, pagination.limit);
+            const result = await issues.page(pagination.page, pagination.pageSize);
             if (!result.results.length) throw new ApiException(messageResponse.NO_ISSUES_FOUND, 404);
             return result;
         }

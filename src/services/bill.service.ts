@@ -1,5 +1,5 @@
 import { raw, TransactionOrKnex } from "objection";
-import { BillStatus, messageResponse, StringOperator } from "../enums";
+import { BillStatus, messageResponse } from "../enums";
 import { BillDetailRequest, BillFilter, BillInfo, BillUpdate, Pagination } from "../interfaces";
 import { BillDetails, Bills, Houses } from "../models";
 import { ApiException, camelToSnake } from "../utils";
@@ -74,8 +74,9 @@ class BillService {
         houseId: string,
         filter: BillFilter,
         sort: Array<string>,
-        pagination: Pagination = { page: -1, limit: -1 }
+        pagination: Pagination = { page: -1, pageSize: -1 }
     ) {
+        console.log("🚀 ~ BillService ~ pagination:", pagination)
         const query = Houses.query()
             .joinRelated("floors.rooms.bills")
             .where("houses.id", houseId)
@@ -84,51 +85,51 @@ class BillService {
                 if (filter.roomName) {
                     builder.where("name", "bill");
                 }
-                for (const key in filter.title) {
-                    switch (key) {
-                        case StringOperator.In:
-                            const inValues = filter.title[key]?.split(",");
-                            for (const value of inValues || []) {
-                                builder.orWhereLike("title", "%" + value + "%");
-                            }
-                            break;
-                        case StringOperator.Equals:
-                            if (filter.title[key]) builder.where("title", filter.title[key]);
-                            break;
-                        case StringOperator.NotEquals:
-                            if (filter.title[key]) builder.where("title", "<>", filter.title[key]);
-                            break;
-                        case StringOperator.Contains:
-                            if (filter.title[key]) builder.where("title", "like", `%${filter.title[key]}%`);
-                            break;
-                        case StringOperator.DoesNotContain:
-                            if (filter.title[key]) builder.where("title", "not like", `%${filter.title[key]}%`);
-                            break;
-                        case StringOperator.StartsWith:
-                            if (filter.title[key]) builder.where("title", "like", `${filter.title[key]}%`);
-                            break;
-                        case StringOperator.EndsWith:
-                            if (filter.title[key]) builder.where("title", "like", `%${filter.title[key]}`);
-                            break;
-                        case StringOperator.Matches:
-                            if (filter.title[key]) builder.where("title", "regexp", filter.title[key]);
-                            break;
-                        case StringOperator.DoesNotMatch:
-                            if (filter.title[key]) builder.where("title", "not regexp", filter.title[key]);
-                            break;
-                        default:
-                            break;
-                    }
-                }
+                // for (const key in filter.title) {
+                //     switch (key) {
+                //         case StringOperator.In:
+                //             const inValues = filter.title[key]?.split(",");
+                //             for (const value of inValues || []) {
+                //                 builder.orWhereLike("title", "%" + value + "%");
+                //             }
+                //             break;
+                //         case StringOperator.Equals:
+                //             if (filter.title[key]) builder.where("title", filter.title[key]);
+                //             break;
+                //         case StringOperator.NotEquals:
+                //             if (filter.title[key]) builder.where("title", "<>", filter.title[key]);
+                //             break;
+                //         case StringOperator.Contains:
+                //             if (filter.title[key]) builder.where("title", "like", `%${filter.title[key]}%`);
+                //             break;
+                //         case StringOperator.DoesNotContain:
+                //             if (filter.title[key]) builder.where("title", "not like", `%${filter.title[key]}%`);
+                //             break;
+                //         case StringOperator.StartsWith:
+                //             if (filter.title[key]) builder.where("title", "like", `${filter.title[key]}%`);
+                //             break;
+                //         case StringOperator.EndsWith:
+                //             if (filter.title[key]) builder.where("title", "like", `%${filter.title[key]}`);
+                //             break;
+                //         case StringOperator.Matches:
+                //             if (filter.title[key]) builder.where("title", "regexp", filter.title[key]);
+                //             break;
+                //         case StringOperator.DoesNotMatch:
+                //             if (filter.title[key]) builder.where("title", "not regexp", filter.title[key]);
+                //             break;
+                //         default:
+                //             break;
+                //     }
+                // }
             });
 
-        let page = 0;
-        let limit = await query.resultSize();
+        const page = 0;
+        const limit = await query.resultSize();
 
-        if (pagination.page !== -1) {
-            page = pagination.page - 1;
-            limit = pagination.limit;
-        }
+        // if (pagination.page !== -1) {
+        //     page = pagination.page - 1;
+        //     limit = pagination.limit;
+        // }
 
         // sort
         sort.forEach((item) => {

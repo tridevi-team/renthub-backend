@@ -12,9 +12,9 @@ const authentication = async (req, res, next) => {
 
         // check type user or renter
         let user: any = null;
-        if (data.type === "renter") {
+        if (typeof data !== 'string' && data.type === "renter") {
             user = await RenterService.get(data.id);
-        } else {
+        } else if (typeof data !== 'string') {
             user = await UserService.getUserById(data.id);
         }
         req.user = user;

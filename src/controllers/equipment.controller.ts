@@ -45,7 +45,7 @@ class EquipmentController {
         try {
             const data = await EquipmentService.listEquipment(
                 { houseId, floorId, roomId, code, name, status, sharedType },
-                { page: Number(page), limit: Number(limit) },
+                { page: Number(page), pageSize: Number(limit) },
                 { orderBy: orderBy, sortBy: sortBy }
             );
             return res.json(apiResponse(messageResponse.GET_EQUIPMENT_LIST_SUCCESS, true, data));
