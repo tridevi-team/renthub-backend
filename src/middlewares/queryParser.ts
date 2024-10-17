@@ -1,7 +1,7 @@
 import { Model } from "objection";
 
 export const queryParser = async (req, res, next) => {
-    const { filter = [], sorting = [], pagination = {} } = req.query;
+    const { filter = [], sorting = [] } = req.query;
 
     // Ensure filter is an array and parse items as JSON if necessary
     const parsedFilter = Array.isArray(filter)
@@ -12,9 +12,6 @@ export const queryParser = async (req, res, next) => {
     const parsedSorting = Array.isArray(sorting)
         ? sorting.map((item) => (typeof item === "string" ? JSON.parse(item) : item))
         : sorting;
-
-    // Ensure pagination is an object and parse items as JSON if necessary
-    const parsedPagination = typeof pagination === "string" ? JSON.parse(pagination) : pagination;
 
     if (Array.isArray(filter) && filter.length > 0) {
         for (const filterItem of filter) {
@@ -38,6 +35,6 @@ export const queryParser = async (req, res, next) => {
             }
         }
     }
-    req.query = { filter: parsedFilter, sorting: parsedSorting, pagination: parsedPagination };
+    req.query = { filter: parsedFilter, sorting: parsedSorting };
     next();
 };

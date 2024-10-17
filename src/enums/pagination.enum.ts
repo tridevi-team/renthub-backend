@@ -1,5 +1,4 @@
 export enum EPagination {
-    DEFAULT_LIMIT = 10,
-    DEFAULT_PAGE = 1,
-    MAX_LIMIT = 100,
+    DEFAULT_LIMIT = 25,
+    DEFAULT_PAGE = 1
 }

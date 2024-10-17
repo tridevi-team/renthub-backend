@@ -53,8 +53,7 @@ class HouseService {
         const totalPages = Math.ceil(total / pageSize);
 
         // Pagination
-        if (page !== -1 && pageSize !== -1)
-            await list.page(page - 1, pageSize);
+        if (page !== -1 && pageSize !== -1) await list.page(page - 1, pageSize);
         else await list.page(0, total);
 
         const fetchData = await list;

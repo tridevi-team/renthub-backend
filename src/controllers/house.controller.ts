@@ -23,8 +23,11 @@ class HouseController {
         const {
             filter = [],
             sort = [],
-            pagination = { page: EPagination.DEFAULT_PAGE, pageSize: EPagination.DEFAULT_LIMIT },
+            page = EPagination.DEFAULT_PAGE,
+            pageSize = EPagination.DEFAULT_LIMIT,
         } = req.query;
+
+        const pagination = { page, pageSize };
 
         try {
             const list = await HouseService.getHouseByUser(user.id, {
@@ -32,7 +35,9 @@ class HouseController {
                 sort,
                 pagination,
             });
+
             if (!list) throw new ApiException(messageResponse.NO_HOUSES_FOUND, 404);
+
             return res.json(apiResponse(messageResponse.GET_HOUSE_LIST_SUCCESS, true, list));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -131,8 +136,12 @@ class HouseController {
         const {
             filter = [],
             sort = [],
-            pagination = { page: EPagination.DEFAULT_PAGE, pageSize: EPagination.DEFAULT_LIMIT },
+            page = EPagination.DEFAULT_PAGE,
+            pageSize = EPagination.DEFAULT_LIMIT,
         } = req.query;
+
+        const pagination = { page, pageSize };
+
         try {
             // check cache
             // const redis = await redisConfig;
