@@ -1,6 +1,6 @@
 "use strict";
 import redisConfig from "../config/redis.config";
-import { EPagination, messageResponse } from "../enums";
+import { messageResponse } from "../enums";
 import { HouseService } from "../services";
 import { ApiException, apiResponse, Exception } from "../utils";
 
@@ -20,14 +20,7 @@ class HouseController {
 
     static async getHouseList(req, res) {
         const user = req.user;
-        const {
-            filter = [],
-            sort = [],
-            page = EPagination.DEFAULT_PAGE,
-            pageSize = EPagination.DEFAULT_LIMIT,
-        } = req.query;
-
-        const pagination = { page, pageSize };
+        const { filter = [], sort = [], pagination = {} } = req.query;
 
         try {
             const list = await HouseService.getHouseByUser(user.id, {
@@ -133,14 +126,7 @@ class HouseController {
     }
 
     static async searchHouse(req, res) {
-        const {
-            filter = [],
-            sort = [],
-            page = EPagination.DEFAULT_PAGE,
-            pageSize = EPagination.DEFAULT_LIMIT,
-        } = req.query;
-
-        const pagination = { page, pageSize };
+        const { filter = [], sort = [], pagination = {} } = req.query;
 
         try {
             // check cache

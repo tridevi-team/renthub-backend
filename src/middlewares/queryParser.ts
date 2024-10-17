@@ -1,7 +1,14 @@
 import { Model } from "objection";
+import { EPagination } from "../enums";
+import { Pagination } from "../interfaces";
 
 export const queryParser = async (req, res, next) => {
-    const { filter = [], sorting = [] } = req.query;
+    const { filter = [], sorting = [], page, pageSize } = req.query;
+
+    const pagination: Pagination = {
+        page: page ? parseInt(page) : EPagination.DEFAULT_PAGE,
+        pageSize: pageSize ? parseInt(pageSize) : EPagination.DEFAULT_LIMIT,
+    };
 
     // Ensure filter is an array and parse items as JSON if necessary
     const parsedFilter = Array.isArray(filter)
@@ -35,6 +42,6 @@ export const queryParser = async (req, res, next) => {
             }
         }
     }
-    req.query = { filter: parsedFilter, sorting: parsedSorting };
+    req.query = { filter: parsedFilter, sorting: parsedSorting, pagination };
     next();
 };
