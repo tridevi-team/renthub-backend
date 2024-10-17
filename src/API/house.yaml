@@ -832,20 +832,6 @@ paths:
                   description: Number of items per page
                   required: false
 
-                #   description: Pagination criteria with page and limit. If you want to get all results, set page and pageSize to -1
-                #   required: false
-                #   style: deepObject
-                #   schema:
-                #       type: object
-                #       properties:
-                #           page:
-                #               type: integer
-                #               example: 1
-                #               description: The page number
-                #           pageSize:
-                #               type: integer
-                #               example: 10
-                #               description: The number of items per page
             responses:
                 "200":
                     description: List of houses
@@ -936,21 +922,19 @@ paths:
                                   example: "asc"
                                   description: "The order to sort by (asc or desc)"
                 - in: query
-                  name: pagination
-                  description: Pagination criteria with page and limit. If you want to get all results, set page and pageSize to -1
-                  required: false
-                  style: deepObject
+                  name: page
                   schema:
-                      type: object
-                      properties:
-                          page:
-                              type: integer
-                              example: 1
-                              description: The page number
-                          pageSize:
-                              type: integer
-                              example: 10
-                              description: The number of items per page
+                      type: integer
+                      example: 1
+                  description: Current page number
+                  required: false
+                - in: query
+                  name: pageSize
+                  schema:
+                      type: integer
+                      example: 10
+                  description: Number of items per page
+                  required: false
             responses:
                 "200":
                     description: List of houses
