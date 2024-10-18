@@ -1,8 +1,7 @@
 "use strict";
-import redisConfig from "../config/redis.config";
 import { messageResponse } from "../enums";
 import { HouseService } from "../services";
-import { ApiException, apiResponse, Exception } from "../utils";
+import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
 
 class HouseController {
     static async createHouse(req, res) {
@@ -12,6 +11,11 @@ class HouseController {
                 ...req.body,
                 createdBy: user.id,
             });
+
+            // delete cache
+            const detailsCache = `houses:*`;
+            await RedisUtils.deletePattern(detailsCache);
+
             return res.json(apiResponse(messageResponse.CREATE_HOUSE_SUCCESS, true, house));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -40,16 +44,15 @@ class HouseController {
     static async getHouseDetails(req, res) {
         const { houseId } = req.params;
         try {
-            const redis = await redisConfig;
-            const cache = await redis.sIsMember(`house:${houseId}:details`, houseId);
-            if (cache) {
-                const result = await redis.sMembers(`house:${houseId}:details`);
+            const detailsCache = `houses:${houseId}:details`;
+            const isRedisExists = await RedisUtils.isExists(detailsCache);
+            if (isRedisExists) {
+                const result = await RedisUtils.getSetMembers(detailsCache);
                 return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, JSON.parse(result[0])));
             }
 
             const details = await HouseService.getHouseById(houseId);
-            redis.sAdd(`house:${houseId}:details`, JSON.stringify(details));
-            redis.expire(`house:${houseId}:details`, 300);
+            RedisUtils.setAddMember(detailsCache, JSON.stringify(details));
 
             return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, details));
         } catch (err) {
@@ -61,16 +64,15 @@ class HouseController {
         const { houseId } = req.params;
         try {
             // cache
-            const redis = await redisConfig;
-            const cache = await redis.sIsMember(`house:${houseId}:rooms`, houseId);
-            if (cache) {
-                const result = await redis.sMembers(`house:${houseId}:rooms`);
+            const roomCache = `houses:${houseId}:rooms`;
+            const isRedisExists = await RedisUtils.isExists(roomCache);
+            if (isRedisExists) {
+                const result = await RedisUtils.getSetMembers(roomCache);
                 return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, JSON.parse(result[0])));
             }
 
             const details = await HouseService.getHouseWithRooms(houseId);
-            redis.sAdd(`house:${houseId}:rooms`, JSON.stringify(details));
-            redis.expire(`house:${houseId}:rooms`, 300);
+            await RedisUtils.setAddMember(roomCache, JSON.stringify(details));
 
             return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, details));
         } catch (err) {
@@ -95,6 +97,10 @@ class HouseController {
             const update = await HouseService.update(houseId, data);
             if (!update) throw new ApiException(messageResponse.UPDATE_HOUSE_FAIL, 500);
 
+            // delete cache
+            const detailsCache = `houses:*`;
+            await RedisUtils.deletePattern(detailsCache);
+
             return res.json(apiResponse(messageResponse.UPDATE_HOUSE_SUCCESS, true, update));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -106,6 +112,10 @@ class HouseController {
         try {
             const isUpdate = await HouseService.updateStatus(houseId, req.body.status);
             if (!isUpdate) throw new ApiException(messageResponse.UPDATE_HOUSE_STATUS_FAIL, 500);
+
+            // delete cache
+            const detailsCache = `houses:*`;
+            await RedisUtils.deletePattern(detailsCache);
 
             return res.json(apiResponse(messageResponse.UPDATE_HOUSE_STATUS_SUCCESS, true, isUpdate));
         } catch (err) {
@@ -119,6 +129,10 @@ class HouseController {
             const isDelete = await HouseService.delete(houseId);
             if (!isDelete) throw new ApiException(messageResponse.DELETE_HOUSE_FAIL, 500);
 
+            // delete cache
+            const detailsCache = `houses:*`;
+            await RedisUtils.deletePattern(detailsCache);
+
             return res.json(apiResponse(messageResponse.DELETE_HOUSE_SUCCESS, true));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -130,17 +144,13 @@ class HouseController {
 
         try {
             // check cache
-            // const redis = await redisConfig;
-            // const cache = await redis.sIsMember(
-            //     `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`,
-            //     JSON.stringify(data)
-            // );
-            // if (cache) {
-            //     const result = await redis.sMembers(
-            //         `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`
-            //     );
-            //     return res.json(apiResponse(messageResponse.SEARCH_HOUSE_SUCCESS, true, JSON.parse(result[0])));
-            // }
+            const searchHousesCache = `houses:search:${JSON.stringify(filter)}`;
+            const isSearchCache = await RedisUtils.isExists(searchHousesCache);
+
+            if (isSearchCache) {
+                const result = await RedisUtils.getSetMembers(searchHousesCache);
+                return res.json(apiResponse(messageResponse.SEARCH_HOUSE_SUCCESS, true, JSON.parse(result[0])));
+            }
 
             const result = await HouseService.search({
                 filter,
@@ -149,14 +159,7 @@ class HouseController {
             });
 
             // save to cache
-            // redis.sAdd(
-            //     `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`,
-            //     JSON.stringify(result)
-            // );
-            // redis.expire(
-            //     `search:house:keyword_${keyword}:limit_${limit}:page_${page}:sortBy_${sortBy}:orderBy_${orderBy}:numOfBeds_${numOfBeds}:street_${street}:ward_${ward}:district_${district}:city_${city}:numOfRenters_${numOfRenters}:roomArea_${roomArea}:priceFrom_${priceFrom}:priceTo_${priceTo}`,
-            //     300
-            // );
+            await RedisUtils.setAddMember(searchHousesCache, JSON.stringify(result));
 
             return res.json(apiResponse(messageResponse.SEARCH_HOUSE_SUCCESS, true, result));
         } catch (err) {
