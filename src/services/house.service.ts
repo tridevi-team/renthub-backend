@@ -129,41 +129,15 @@ class HouseService {
 
     static async getHouseWithRooms(houseId: string) {
         const details = await Houses.query()
-            .withGraphJoined("floors.rooms.[services.service, images]")
+            .withGraphJoined("floors(idAndName).rooms(basic).[services(basic), images(imageUrl)]")
             .findById(houseId)
-            .select("houses.id", "houses.name", "houses.address", "houses.description", "houses.collection_cycle")
-            .modifyGraph("floors", (builder) => {
-                builder.select("id", "name");
-            })
-            .modifyGraph("floors.rooms", (builder) => {
-                builder.select("id", "name", "max_renters", "room_area", "price", "description", "status");
-            })
-            .modifyGraph("floors.rooms.services.service", (builder) => {
-                builder.select("id", "name", "unit_price", "description");
-            })
-            .modifyGraph("floors.rooms.images", (builder) => {
-                builder.select("id", "imageUrl");
-            });
+            .select("houses.id", "houses.name", "houses.address", "houses.description", "houses.collection_cycle");
 
         if (!details) {
             throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
         }
 
-        // Flatten the data structure and return a simplified object
-        return {
-            ...details,
-            floors: details.floors.map((floor) => ({
-                ...floor,
-                rooms: floor.rooms.map((room) => ({
-                    ...room,
-                    services: room.services.map((service) => ({
-                        ...service.service, // Flatten the service details
-                        quantity: service.quantity, // Keep quantity
-                    })),
-                    images: room.images.map((image) => image.imageUrl), // Map only image URLs
-                })),
-            })),
-        };
+        return details;
     }
 
     static async create(data: HouseCreate) {

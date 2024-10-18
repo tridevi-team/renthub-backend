@@ -51,6 +51,14 @@ class RoomImages extends Model {
             },
         };
     }
+
+    static get modifiers() {
+        return {
+            imageUrl(builder) {
+                builder.select("id", "image_url", "description");
+            },
+        };
+    }
 }
 
 export default RoomImages;

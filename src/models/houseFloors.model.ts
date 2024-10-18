@@ -80,6 +80,14 @@ class HouseFloors extends Model {
             },
         };
     }
+
+    static get modifiers() {
+        return {
+            idAndName(builder) {
+                return builder.select("id", "name");
+            }
+        }
+    }
 }
 
 export default HouseFloors;
