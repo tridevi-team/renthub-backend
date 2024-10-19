@@ -78,8 +78,8 @@ class UserService {
     }
 
     static async generateToken(user: AccessTokenPayload) {
-        const accessToken = this.generateAccessToken(user);
-        const refreshToken = this.generateRefreshToken(user);
+        const accessToken = await this.generateAccessToken(user);
+        const refreshToken = await this.generateRefreshToken(user);
         return { accessToken, refreshToken };
     }
 
