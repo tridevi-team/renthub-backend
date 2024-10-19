@@ -1,0 +1,95 @@
+services:
+    backend:
+        build: .
+        container_name: renthub-backend
+        networks:
+            - renthub-network
+        image: tmquang0209/renthub-backend:latest
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./backend:/app
+        depends_on:
+            - redis
+            - mariadb
+        working_dir: /renthub-backend
+        command: yarn start
+        environment:
+            - NODE_ENV
+            - MYSQL_HOST_DEV
+            - MYSQL_PORT_DEV
+            - MYSQL_USERNAME_DEV
+            - MYSQL_PASSWORD_DEV
+            - MYSQL_DATABASE_DEV
+            - REDIS_DEV_URL
+            - REDIS_DEV_DB
+            - MYSQL_HOST_PROD
+            - MYSQL_PORT_PROD
+            - MYSQL_USERNAME_PROD
+            - MYSQL_PASSWORD_PROD
+            - MYSQL_DATABASE_PROD
+            - REDIS_PROD_URL
+            - REDIS_PROD_DB
+            - MYSQL_HOST_LOCAL
+            - MYSQL_PORT_LOCAL
+            - MYSQL_USERNAME_LOCAL
+            - MYSQL_PASSWORD_LOCAL
+            - MYSQL_DATABASE_LOCAL
+            - REDIS_LOCAL_URL
+            - REDIS_LOCAL_DB
+            - JWT_SECRET
+            - JWT_SECRET_REFRESH
+            - CRYPTO_KEY
+            - CRYPTO_IV
+            - ACCESS_TOKEN_EXPIRE
+            - REFRESH_TOKEN_EXPIRE
+            - REDIS_EXPIRE_TIME
+            - HOST_EMAIL
+
+    redis:
+        image: redis:6.0.16-alpine
+        container_name: renthub-redis
+        command: redis-server --appendonly yes --bind 0.0.0.0
+        ports:
+            - "6379:6379"
+        networks:
+            - renthub-network
+        volumes:
+            - redis-data:/data
+
+    redis-cli:
+        image: redis:6.0.16-alpine
+        container_name: renthub-redis-cli
+        command: redis-cli -h redis
+        depends_on:
+            - redis
+        stdin_open: true
+        tty: true
+        networks:
+            - renthub-network
+
+    mariadb:
+        image: mariadb:11.5.2
+        container_name: renthub-mariadb
+        networks:
+            - renthub-network
+        ports:
+            - "3307:3306"
+        command: --init-file /data/application/init.sql
+        volumes:
+            - mariadb-data:/var/lib/mysql
+            - ./init.sql:/data/application/init.sql
+        environment:
+            MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: renthub_dev
+            MYSQL_USER: renthub
+            MYSQL_PASSWORD: renthub
+
+volumes:
+    redis-data:
+    mariadb-data:
+
+networks:
+    renthub-network:
+        driver: bridge

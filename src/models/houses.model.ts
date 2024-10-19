@@ -1,11 +1,14 @@
-import { Model, QueryContext } from "objection";
+import type { ModelOptions, QueryContext } from "objection";
+import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
-import HouseFloors from "./houseFloors.model";
+import type { Address, Permissions } from "../interfaces";
+import { currentDateTime } from "../utils/currentTime";
+import { Equipment, HouseFloors, Issues, Users } from "./";
 
 class Houses extends Model {
     id: string;
     name: string;
-    address: string;
+    address: Address;
     contract_default: string;
     description?: string;
     collection_cycle: number;
@@ -16,8 +19,17 @@ class Houses extends Model {
     created_at: string;
     updated_by: string;
     updated_at: string;
+    permissions: Permissions;
+    floors: HouseFloors[];
+    equipment: Equipment[];
+    issues: Issues[];
+    collectionCycle: number;
+    invoiceDate: number;
+    numCollectDays: number;
     createdBy: string;
-    permissions: object;
+    createdAt: string;
+    updatedBy: string;
+    updatedAt: string;
 
     static get tableName() {
         return "houses";
@@ -27,8 +39,12 @@ class Houses extends Model {
         return "id";
     }
 
-    $beforeInsert(queryContext: QueryContext): Promise<any> | void {
+    $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
+    }
+
+    $beforeUpdate(_opt: ModelOptions, _queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
     }
 
     static get jsonSchema() {
@@ -38,7 +54,7 @@ class Houses extends Model {
             properties: {
                 id: { type: "string", format: "uuid" },
                 name: { type: "string", maxLength: 50 },
-                address: { type: "string", maxLength: 255 },
+                address: { type: "object" },
                 contract_default: { type: "string" },
                 description: { type: "string" },
                 collection_cycle: { type: "integer" },
@@ -61,6 +77,38 @@ class Houses extends Model {
                 join: {
                     from: "houses.id",
                     to: "house_floors.house_id",
+                },
+            },
+            equipment: {
+                relation: Model.HasManyRelation,
+                modelClass: Equipment,
+                join: {
+                    from: "houses.id",
+                    to: "equipment.house_id",
+                },
+            },
+            issues: {
+                relation: Model.HasManyRelation,
+                modelClass: Issues,
+                join: {
+                    from: "houses.id",
+                    to: "issues.house_id",
+                },
+            },
+            createdBy: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Users,
+                join: {
+                    from: "houses.created_by",
+                    to: "users.id",
+                },
+            },
+            updatedBy: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Users,
+                join: {
+                    from: "houses.updated_by",
+                    to: "users.id",
                 },
             },
         };

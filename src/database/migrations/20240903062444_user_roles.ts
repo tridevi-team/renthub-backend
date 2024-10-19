@@ -8,7 +8,7 @@ export async function up(knex: Knex): Promise<void> {
         table.uuid("role_id").references("id").inTable("roles").notNullable();
         table.uuid("created_by").references("id").inTable("users").notNullable();
         table.datetime("created_at").defaultTo(knex.fn.now());
-        table.uuid("updated_by").references("id").inTable("users").notNullable();
+        table.uuid("updated_by").references("id").inTable("users").nullable();
         table.datetime("updated_at").defaultTo(knex.fn.now());
     });
 }

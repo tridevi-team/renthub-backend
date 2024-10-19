@@ -5,12 +5,12 @@ import ExceptionHandler from "./ExceptionHandler";
 class Exception {
     code: string;
     message: string;
-    data: any;
+    data: unknown;
     httpCode: number;
-    static request: any;
-    static response: any;
+    static request: Request;
+    static response: Response;
 
-    constructor(message: string, data: any, httpCode: number) {
+    constructor(message: string, data: unknown, httpCode: number) {
         this.code = Exception.getKeyByValue(message) || "UNKNOWN_ERROR";
         this.message = message;
         this.data = data;
@@ -18,15 +18,17 @@ class Exception {
     }
 
     static getKeyByValue(value: string): string | undefined {
-        return Object.keys(messageResponse).find((key) => messageResponse[key as keyof typeof messageResponse] === value);
+        return Object.keys(messageResponse).find(
+            (key) => messageResponse[key as keyof typeof messageResponse] === value
+        );
     }
 
-    static handle(error: any, request: any, response: any) {
+    static handle(error: any, request: Request, response: Response) {
         this.request = request;
         this.response = response;
         if (typeof error === "string") {
             error = {
-                code: 500,
+                code: this.getKeyByValue(error) || "UNKNOWN_ERROR",
                 message: error,
             };
         }
@@ -37,7 +39,7 @@ class Exception {
         error.httpCode = error.httpCode || 500;
         error.data = error.data || error.stack || {};
 
-        let exceptionHandler = new ExceptionHandler();
+        const exceptionHandler = new ExceptionHandler();
         exceptionHandler.handle(error, { request, response });
     }
 }

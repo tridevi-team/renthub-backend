@@ -1,22 +1,21 @@
 name: Send Telegram Message on Commit
 on: [push]
 jobs:
+    build:
+        name: Build
+        runs-on: ubuntu-latest
+        steps:
+            - name: send telegram message on push
+              uses: appleboy/telegram-action@master
+              with:
+                  to: ${{ secrets.TELEGRAM_TO }}
+                  token: ${{ secrets.TELEGRAM_TOKEN }}
+                  message: |
+                      🚀 New Commit by: *${{ github.actor }}*
 
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: send telegram message on push
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            🚀 New Commit by: *${{ github.actor }}*
+                      📝 Commit Message: _ ${{ github.event.commits[0].message }} _
 
-            📝 Commit Message: _ ${{ github.event.commits[0].message }} _
+                      📂 Repository: [${{ github.repository }}](https://github.com/${{ github.repository }})
 
-            📂 Repository: [${{ github.repository }}](https://github.com/${{ github.repository }})
-
-            🔗 View Changes: [Click here](https://github.com/${{ github.repository }}/commit/${{ github.sha}})
-          format: markdown
+                      🔗 View Changes: [Click here](https://github.com/${{ github.repository }}/commit/${{ github.sha}})
+                  format: markdown

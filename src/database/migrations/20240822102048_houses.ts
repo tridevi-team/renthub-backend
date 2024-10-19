@@ -5,7 +5,7 @@ export async function up(knex: Knex): Promise<void> {
         table.uuid("id").primary().defaultTo(knex.raw("(uuid())"));
         table.string("name", 50).notNullable();
         table.string("address", 255).notNullable();
-        table.integer("contract_default").nullable();
+        table.string("contract_default").nullable();
         table.specificType("description", "text").nullable();
         table.integer("collection_cycle").defaultTo(1);
         table.integer("invoice_date").defaultTo(1);

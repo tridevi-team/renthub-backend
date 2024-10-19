@@ -1,9 +1,7 @@
-enum RoomStatus {
+export enum RoomStatus {
     AVAILABLE = "AVAILABLE",
     RENTED = "RENTED",
     PENDING = "PENDING",
-    EXPiRED = "EXPIRED",
+    EXPIRED = "EXPIRED",
     MAINTENANCE = "MAINTENANCE",
 }
-
-export default RoomStatus;

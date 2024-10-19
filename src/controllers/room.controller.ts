@@ -1,130 +1,116 @@
 "use strict";
-import { RoomImages, Rooms, RoomServices, Services } from "../models";
-import { ApiException, apiResponse, Exception } from "../utils";
 
-const roomController = {
-    // async getRoomList(req, res) {
+import { messageResponse, RoomStatus } from "../enums";
+import { RoomService } from "../services";
+import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
+
+const prefix = "rooms";
+class RoomController {
+    // static async getRoomsByHouse(req, res) {
+    //     const { houseId } = req.params;
+    //     const { filter = [], sorting = [], page, pageSize } = req.query;
     //     try {
-    //         const { houseId } = req.params;
-
-    //         const roomList = await Rooms.query().where({ house_id: houseId });
-    //         if (!roomList || roomList.length === 0) {
-    //             return res.json(formatJson.success(1001, "There are no rooms in this house", []));
-    //         }
-
-    //         res.json(formatJson.success(1002, "Get room list successfully", roomList));
+    //         const rooms = await RoomService.listByHouse(houseId, {
+    //             page: parseInt(page),
+    //             pageSize: parseInt(limit),
+    //         });
+    //         return res.json(apiResponse(messageResponse.GET_ROOMS_BY_HOUSE_SUCCESS, true, rooms));
     //     } catch (err) {
     //         Exception.handle(err, req, res);
     //     }
-    // },
+    // }
 
-    // async createRoom(req, res) {
-    //     try {
-    //         let { houseId } = req.params;
-    //         houseId = parseInt(houseId);
+    static async createRoom(req, res) {
+        const { houseId } = req.params;
+        const { name, floor, maxRenters, price, services, images, description, status } = req.body;
+        const userId = req.user.id;
+        try {
+            const newRoom = await RoomService.create(houseId, {
+                name,
+                floorId: floor,
+                maxRenters,
+                price,
+                description,
+                status: status || RoomStatus.AVAILABLE,
+                createdBy: userId,
+                updatedBy: userId,
+            });
 
-    //         const userInfo = req.user;
+            if (newRoom) {
+                await RoomService.addServiceToRoom(newRoom.id, services, userId);
+                await RoomService.addImagesToRoom(newRoom.id, images, userId);
 
-    //         const { name, price, floor, maxRenters, services, images } = req.body;
-    //         const newRoom = await Rooms.query().insert({ name, floor, max_renters: maxRenters, price, house_id: houseId, created_by: userInfo.id });
+                const room = await RoomService.getRoomById(newRoom.id);
 
-    //         if (!newRoom) {
-    //             throw new ApiException(1003, "Error creating room");
-    //         }
+                // delete cache
+                await RedisUtils.deletePattern(`${prefix}:*`);
 
-    //         await RoomServices.query().delete().whereNotIn("service_id", services).andWhere({ room_id: newRoom.id });
-    //         if (services && services.length > 0) {
-    //             services.forEach(async (service) => {
-    //                 const checkService = await Services.query().findOne({ id: service, house_id: houseId });
-    //                 if (!checkService) {
-    //                     throw new ApiException(1010, "Service not found");
-    //                 }
-    //                 await RoomServices.query().insert({ room_id: newRoom.id, service_id: service });
-    //             });
-    //         }
+                return res.json(apiResponse(messageResponse.CREATE_ROOM_SUCCESS, true, room));
+            }
+            throw new ApiException(messageResponse.CREATE_ROOM_FAIL, 400);
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         await RoomImages.query().delete().whereNotIn("image_url", images).andWhere({ room_id: newRoom.id });
-    //         if (images && images.length > 0) {
-    //             images.forEach(async (image) => {
-    //                 await RoomImages.query().insert({ room_id: newRoom.id, image_url: image, created_by: userInfo.id });
-    //             });
-    //         }
+    static async getRoomDetails(req, res) {
+        const { roomId } = req.params;
+        try {
+            const redisKey = `${prefix}:${roomId}`;
+            const cache = await RedisUtils.isExists(redisKey);
+            if (cache) {
+                const room = await RedisUtils.getSetMembers(redisKey);
+                return res.json(apiResponse(messageResponse.GET_ROOM_DETAILS_SUCCESS, true, JSON.parse(room[0])));
+            }
+            const room = await RoomService.getRoomById(roomId);
 
-    //         res.json(formatJson.success(1007, "Room created successfully", newRoom));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+            // set cache
+            await RedisUtils.setAddMember(redisKey, JSON.stringify(room));
 
-    // async updateRoom(req, res) {
-    //     try {
-    //         const { houseId, roomId } = req.params;
-    //         const userInfo = req.user;
+            return res.json(apiResponse(messageResponse.GET_ROOM_DETAILS_SUCCESS, true, room));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         const { name, floor, maxRenters, price, services, images } = req.body;
-    //         const updatedRoom = await Rooms.query().patchAndFetchById(roomId, { name, floor, max_renters: maxRenters, price });
+    static async updateRoom(req, res) {
+        const { roomId } = req.params;
+        const { name, floor, maxRenters, price, services, images } = req.body;
+        const userId = req.user.id;
+        try {
+            const updatedRoom = await RoomService.updateRoom(roomId, {
+                name,
+                floorId: floor,
+                maxRenters,
+                price,
+                services,
+                images,
+                updatedBy: userId,
+            });
 
-    //         if (!updatedRoom) {
-    //             throw new ApiException(1004, "Error updating room");
-    //         }
+            // delete cache
+            await RedisUtils.deletePattern(`${prefix}`);
 
-    //         await RoomServices.query().delete().whereNotIn("service_id", services).andWhere({ room_id: roomId });
-    //         if (services && services.length > 0) {
-    //             services.forEach(async (service) => {
-    //                 const checkService = await Services.query().findOne({ id: service });
-    //                 if (!checkService) {
-    //                     throw new ApiException(1010, "Service not found");
-    //                 }
-    //                 await RoomServices.query().insert({ room_id: roomId, service_id: service });
-    //             });
-    //         }
+            return res.json(apiResponse(messageResponse.UPDATE_ROOM_SUCCESS, true, updatedRoom));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         await RoomImages.query().delete().whereNotIn("image_url", images).andWhere({ room_id: roomId });
-    //         if (images && images.length > 0) {
-    //             images.forEach(async (image) => {
-    //                 await RoomImages.query().insert({ room_id: roomId, image_url: image, created_by: userInfo.id });
-    //             });
-    //         }
+    static async deleteRoom(req, res) {
+        const { roomId } = req.params;
+        const userId = req.user.id;
+        try {
+            await RoomService.deleteRoom(roomId, userId);
 
-    //         res.json(formatJson.success(1008, "Room updated successfully", updatedRoom));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+            // delete cache
+            await RedisUtils.deletePattern(`${prefix}:*`);
 
-    // async deleteRoom(req, res) {
-    //     try {
-    //         const { houseId, roomId } = req.params;
+            return res.json(apiResponse(messageResponse.DELETE_ROOM_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+}
 
-    //         const deletedRoom = await Rooms.query().deleteById(roomId);
-
-    //         if (!deletedRoom) {
-    //             throw new ApiException(1006, "Error deleting room");
-    //         }
-
-    //         res.json(formatJson.success(1009, "Room deleted successfully", deletedRoom));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-
-    // async getRoomDetails(req, res) {
-    //     try {
-    //         const { houseId, roomId } = req.params;
-
-    //         const roomDetails = await Rooms.query().findOne({ id: roomId, house_id: houseId });
-    //         if (!roomDetails) {
-    //             throw new ApiException(1001, "Room not found", []);
-    //         }
-
-    //         const roomServices = await RoomServices.query().where({ room_id: roomId });
-    //         const roomImages = await RoomImages.query().where({ room_id: roomId });
-
-    //         res.json(formatJson.success(1002, "Get room details successfully", { roomDetails, roomServices, roomImages }));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-};
-
-export default roomController;
+export default RoomController;

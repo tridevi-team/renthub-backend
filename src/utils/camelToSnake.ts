@@ -1,10 +1,4 @@
-type CamelToSnake<T> = {
-    [K in keyof T as K extends string ? CamelToSnakeKey<K> : K]: T[K] extends object ? CamelToSnake<T[K]> : T[K];
-};
-
-type CamelToSnakeKey<K extends string> = K extends `${infer P}${infer R}` ? `${Lowercase<P>}${R extends Capitalize<R> ? `_${Lowercase<R>}` : R}` : K;
-
-function camelToSnake(obj: any): any {
+function camelToSnake(obj: object): object {
     if (obj === null || obj === undefined || typeof obj !== "object") {
         return obj;
     }
@@ -17,7 +11,7 @@ function camelToSnake(obj: any): any {
         const snakeKey = camelToSnakeKey(key);
         acc[snakeKey] = camelToSnake(obj[key]);
         return acc;
-    }, {} as any);
+    }, {} as object);
 }
 
 function camelToSnakeKey(key: string): string {

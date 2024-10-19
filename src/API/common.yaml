@@ -10,6 +10,9 @@ components:
         TokenInvalid:
             type: object
             properties:
+                success:
+                    type: boolean
+                    example: false
                 code:
                     default: TOKEN_INVALID
                 message:
@@ -17,6 +20,9 @@ components:
         TokenExpired:
             type: object
             properties:
+                success:
+                    type: boolean
+                    example: false
                 code:
                     default: TOKEN_EXPIRED
                 message:
@@ -25,6 +31,9 @@ components:
         ValidationError:
             type: object
             properties:
+                success:
+                    type: boolean
+                    example: false
                 code:
                     example: VALIDATION_ERROR
                 message:
@@ -110,6 +119,9 @@ components:
         GetUserNotFound:
             type: object
             properties:
+                success:
+                    type: boolean
+                    example: false
                 code:
                     default: GET_USER_NOT_FOUND
                 message:
@@ -118,7 +130,45 @@ components:
         CheckMailResetPassword:
             type: object
             properties:
+                success:
+                    type: boolean
+                    example: false
                 code:
                     default: CHECK_MAIL_RESET_PASSWORD
                 message:
                     default: Check your mail to reset password
+
+        Address:
+            type: object
+            properties:
+                city:
+                    type: string
+                    minLength: 1
+                    maxLength: 50
+                    example: "Ha Noi"
+                district:
+                    type: string
+                    minLength: 1
+                    maxLength: 50
+                    example: "Cau Giay"
+                ward:
+                    type: string
+                    minLength: 1
+                    maxLength: 50
+                    example: "Xuan Thuy"
+                street:
+                    type: string
+                    minLength: 1
+                    maxLength: 50
+                    example: "1234 Main St"
+
+        Unauthorized:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    default: UNAUTHORIZED
+                message:
+                    default: You are not authorized to access this resource

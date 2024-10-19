@@ -1,5 +1,7 @@
-import { Model, QueryContext } from "objection";
+import type { ModelOptions, QueryContext } from "objection";
+import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
+import { currentDateTime } from "../utils/currentTime";
 
 class Users extends Model {
     id!: string;
@@ -15,8 +17,12 @@ class Users extends Model {
     status!: boolean;
     verify!: boolean;
     first_login!: boolean;
-    code!: string;
     created_at!: string;
+    updated_by!: string;
+    updated_at!: string;
+    phoneNumber: string;
+    firstLogin: boolean;
+    fullName: string;
 
     static get tableName() {
         return "users";
@@ -26,8 +32,12 @@ class Users extends Model {
         return "id";
     }
 
-    $beforeInsert(queryContext: QueryContext): Promise<any> | void {
+    $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
+    }
+
+    $beforeUpdate(_opt: ModelOptions, _queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
     }
 
     static get jsonSchema() {

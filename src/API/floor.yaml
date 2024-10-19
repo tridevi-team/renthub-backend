@@ -1,0 +1,468 @@
+openapi: "3.0.3"
+
+info:
+    title: Floor API
+    version: 1.0.0
+
+tags:
+    - name: Floor
+      description: Manage floors of a house
+
+components:
+    schemas:
+        FloorInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    example: a586fbd5-6f97-49dc-bd60-a79a709fee4c
+                name:
+                    type: string
+                    example: "First Floor"
+                description:
+                    type: string
+                    example: "This is the first floor of the house"
+                houseId:
+                    type: string
+                    format: uuid
+                    example: 0e00efd5-4009-486c-8d43-13fd198ceff5
+                createdBy:
+                    type: string
+                    format: uuid
+                    example: 108640a5-2929-44af-9ee7-7515089580dc
+                createdAt:
+                    type: string
+                    format: date-time
+                    example: "2024-09-26T09:44:22.000Z"
+                updatedBy:
+                    type: string
+                    format: uuid
+                    example: 108640a5-2929-44af-9ee7-7515089580dc
+                updatedAt:
+                    type: string
+                    format: date-time
+                    example: "2024-09-26T09:44:22.000Z"
+            required:
+                - id
+                - name
+                - houseId
+                - createdBy
+
+        FloorDetailsSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    default: GET_FLOOR_DETAILS_SUCCESS
+                message:
+                    type: string
+                    example: Floor details retrieved successfully
+                data:
+                    $ref: "#/components/schemas/FloorInfo"
+            required:
+                - success
+                - code
+                - message
+                - data
+
+        FloorCreate:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: "First Floor"
+                description:
+                    type: string
+                    example: "This is the first floor of the house"
+                houseId:
+                    type: string
+                    format: uuid
+                    example: 0e00efd5-4009-486c-8d43-13fd198ceff5
+            required:
+                - name
+                - houseId
+
+        FloorCreateSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    default: CREATE_FLOOR_SUCCESS
+                message:
+                    type: string
+                    example: "Floor created successfully"
+                data:
+                    $ref: "#/components/schemas/FloorInfo"
+            required:
+                - id
+
+        FloorAlreadyExists:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    default: FLOOR_ALREADY_EXISTS
+                message:
+                    type: string
+                    example: "Floor already exists"
+            required:
+                - code
+                - message
+
+        FloorNotFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    default: FLOOR_NOT_FOUND
+                message:
+                    type: string
+                    example: "Floor not found"
+            required:
+                - code
+                - message
+
+        NoFloorsFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    type: string
+                    default: NO_FLOORS_FOUND
+                message:
+                    type: string
+                    example: "No floors found"
+            required:
+                - code
+                - message
+
+        FloorUpdate:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: "First Floor"
+                description:
+                    type: string
+                    example: "This is the first floor of the house"
+            required:
+                - name
+
+        FloorUpdateSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    default: UPDATE_FLOOR_SUCCESS
+                message:
+                    type: string
+                    example: "Floor updated successfully"
+                data:
+                    $ref: "#/components/schemas/FloorInfo"
+
+        FloorDeleteSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    default: DELETE_FLOOR_SUCCESS
+                message:
+                    type: string
+                    example: "Floor deleted successfully"
+
+paths:
+    /floors/{houseId}/create:
+        post:
+            tags:
+                - Floor
+            summary: Create a new floor
+            description: Create a new floor in the house
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: houseId
+                  in: path
+                  description: ID of the house
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/FloorCreate"
+            responses:
+                "201":
+                    description: Floor created successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FloorCreateSuccess"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "409":
+                    description: Floor already exists
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FloorAlreadyExists"
+
+    /floors/{houseId}/list:
+        get:
+            tags:
+                - Floor
+            summary: List all floors
+            description: List all floors in the house
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: houseId
+                  in: path
+                  description: ID of the house
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                - in: query
+                  name: filter[]
+                  description: Filter criteria array with field, operator, and value
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the filter on, e.g. houses.name"
+                              operator:
+                                  type: string
+                                  example: "ew"
+                                  description: "The operator to apply (e.g., 'ew' for endsWith, 'eq' for equals, etc.)"
+                              value:
+                                  type: string
+                                  example: "qui"
+                                  description: "The value to filter by, e.g. 'qui'"
+                - in: query
+                  name: sort[]
+                  description: Sort criteria array with field and order
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the sort on, e.g. houses.name"
+                              direction:
+                                  type: string
+                                  enum:
+                                      - "asc"
+                                      - "desc"
+                                  example: "asc"
+                                  description: "The order to sort by (asc or desc)"
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      example: 1
+                  description: Current page number
+                  required: false
+                - in: query
+                  name: pageSize
+                  schema:
+                      type: integer
+                      example: 10
+                  description: Number of items per page
+                  required: false
+            responses:
+                "200":
+                    description: List of floors
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/FloorInfo"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "404":
+                    description: No floors found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoFloorsFound"
+
+    /floors/{floorId}/details:
+        get:
+            tags:
+                - Floor
+            summary: Get floor details
+            description: Get details of a floor in the house
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: floorId
+                  in: path
+                  description: ID of the floor
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+            responses:
+                "200":
+                    description: Floor details retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FloorDetailsSuccess"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/scomponents/schemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "404":
+                    description: Floor not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FloorNotFound"
+
+    /floors/{floorId}/update:
+        put:
+            tags:
+                - Floor
+            summary: Update a floor
+            description: Update a floor in the house
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: floorId
+                  in: path
+                  description: ID of the floor
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/FloorUpdate"
+            responses:
+                "200":
+                    description: Floor updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FloorUpdateSuccess"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/sschemas/chemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "404":
+                    description: Floor not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FloorNotFound"
+
+    /floors/{floorId}/delete:
+        delete:
+            tags:
+                - Floor
+            summary: Delete a floor
+            description: Delete a floor in the house
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: floorId
+                  in: path
+                  description: ID of the floor
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+            responses:
+                "200":
+                    description: Floor deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FloorDeleteSuccess"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "404":
+                    description: Floor not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FloorNotFound"

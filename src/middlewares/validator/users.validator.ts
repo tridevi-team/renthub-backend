@@ -3,10 +3,16 @@ import "dotenv/config";
 import { check } from "express-validator";
 import { comparePassword, validatePassword } from "./password.validator";
 
-// email, fullName, password: min 8 characters, least one number, one lowercase, confirmPassword
+const refreshTokenValidator = [
+    check("refreshToken", "Refresh token is required.").notEmpty().isJWT().withMessage("Invalid refresh token."),
+];
+
 const registerValidator = [
     check("email", "Please provide a valid email address.").isEmail(),
-    check("fullName", "Please provide your full name.").isLength({ min: 1, max: 50 }),
+    check("fullName", "Please provide your full name.").isLength({
+        min: 1,
+        max: 50,
+    }),
     check("password", "Password must be at least 8 characters long and contain at least one letter and one number.")
         .isLength({ min: 8 })
         .custom((value) => {
@@ -18,13 +24,23 @@ const registerValidator = [
         comparePassword(req.body.password, value);
         return true;
     }),
-    check("gender", "Please provide gender.").notEmpty().withMessage("Gender must be required.").isIn(["male", "female", "other"]).withMessage("Please select only a gender from the list."),
+    check("gender", "Please provide gender.")
+        .notEmpty()
+        .withMessage("Gender must be required.")
+        .isIn(["male", "female", "other"])
+        .withMessage("Please select only a gender from the list."),
 ];
 
 // username is email/ phone number, password
-const loginValidator = [check("username", "Please provide a valid email address or phone number.").notEmpty(), check("password", "Password is required.").notEmpty()];
+const loginValidator = [
+    check("username", "Please provide a valid email address or phone number.").notEmpty(),
+    check("password", "Password is required.").notEmpty(),
+];
 
-const verifyAccountValidator = [check("email", "Please provide a valid email address.").isEmail(), check("verifyCode", "Please provide the verification code.").isNumeric()];
+const verifyAccountValidator = [
+    check("email", "Please provide a valid email address.").isEmail(),
+    check("verifyCode", "Please provide the verification code.").isNumeric(),
+];
 
 const emailValidator = [check("email", "Please provide a valid email address.").isEmail()];
 
@@ -62,12 +78,16 @@ const updatePasswordValidator = [
 ];
 
 const updateProfileValidator = [
-    check("fullName", "Please provide your full name.").isLength({ min: 1, max: 50 }),
+    check("fullName", "Please provide your full name.").isLength({
+        min: 1,
+        max: 50,
+    }),
     check("phoneNumber", "Please provide a valid phone number.").isMobilePhone("vi-VN"),
     check("birthday", "Please provide a valid date of birth.").isDate(),
 ];
 
 const userValidator = {
+    refreshToken: refreshTokenValidator,
     register: registerValidator,
     login: loginValidator,
     verifyAccount: verifyAccountValidator,

@@ -1,4 +1,4 @@
-import { Knex } from "knex";
+import type { Knex } from "knex";
 
 export async function seed(knex: Knex): Promise<void> {
     // Deletes ALL existing entries
@@ -11,8 +11,14 @@ export async function seed(knex: Knex): Promise<void> {
         { key: "{{CONTRACT_MONTHS}}", label: "Số tháng hợp đồng" },
         { key: "{{RENT_COST}}", label: "Tiền thuê" },
         { key: "{{DEPOSIT_AMOUNT}}", label: "Tiền cọc" },
-        { key: "{{RENTAL_AMOUNT_IN_WORDS}}", label: "Số tiền thuê ghi bằng chữ" },
-        { key: "{{DEPOSIT_AMOUNT_IN_WORDS}}", label: "Số tiền cọc ghi bằng chữ" },
+        {
+            key: "{{RENTAL_AMOUNT_IN_WORDS}}",
+            label: "Số tiền thuê ghi bằng chữ",
+        },
+        {
+            key: "{{DEPOSIT_AMOUNT_IN_WORDS}}",
+            label: "Số tiền cọc ghi bằng chữ",
+        },
         { key: "{{FEE_COLLECTION_DAY}}", label: "Ngày thu tiền" },
         { key: "{{COLLECTION_CYCLE}}", label: "Chu kỳ thu tiền" },
         { key: "{{USE_SERVICES}}", label: "Dịch vụ sử dụng" },
@@ -23,7 +29,10 @@ export async function seed(knex: Knex): Promise<void> {
         { key: "{{RENTER_ADDRESS}}", label: "Địa chỉ khách thuê" },
         { key: "{{RENTER_BIRTHDAY}}", label: "Ngày sinh khách thuê" },
         { key: "{{RENTER_IDENTITY_NUMBER}}", label: "Số CCCD/CMND khách thuê" },
-        { key: "{{RENTER_DATE_OF_ISSUANCE}}", label: "Ngày cấp CCCD khách thuê" },
+        {
+            key: "{{RENTER_DATE_OF_ISSUANCE}}",
+            label: "Ngày cấp CCCD khách thuê",
+        },
         { key: "{{RENTER_PLACE_OF_ISSUE}}", label: "Nơi cấp CCCD khách thuê" },
         { key: "{{RENTER_PHONE_NUMBER}}", label: "SĐT khách thuê" },
         { key: "{{ROOM_VEHICLE_LIST}}", label: "Danh sách phương tiện" },

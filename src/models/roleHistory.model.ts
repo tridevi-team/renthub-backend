@@ -1,4 +1,5 @@
-import { Model, QueryContext } from "objection";
+import type { QueryContext } from "objection";
+import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 
 class RoleHistory extends Model {
@@ -12,7 +13,7 @@ class RoleHistory extends Model {
         return "id";
     }
 
-    $beforeInsert(queryContext: QueryContext): Promise<any> | void {
+    $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
     }
 
@@ -31,6 +32,9 @@ class RoleHistory extends Model {
                 action: { type: "string", maxLength: 10 },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
+                updated_by: { type: "string", format: "uuid" },
+                updated_at: { type: "string", format: "date-time" },
+                action_at: { type: "string", format: "date-time" },
             },
         };
     }

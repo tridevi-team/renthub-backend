@@ -1,6 +1,9 @@
+import type { Address } from ".";
+import type { ServiceTypes } from "../enums";
+
 export interface HouseCreate {
     name: string;
-    address: string;
+    address: Address;
     numOfFloors: number;
     numOfRoomsPerFloor: number;
     maxRenters: number;
@@ -23,19 +26,30 @@ export interface HouseUpdate {
     invoiceDate: number;
     numCollectDays: number;
     contractDefault?: string;
-    status: boolean;
+    status?: boolean;
+    updatedBy?: string;
 }
 
-export interface Permissions {
+export interface CRUDPermissions {
     create: boolean;
     read: boolean;
     update: boolean;
     delete: boolean;
 }
 
+export interface Permissions {
+    house: CRUDPermissions;
+    role: CRUDPermissions;
+    room: CRUDPermissions;
+    service: CRUDPermissions;
+    bill: CRUDPermissions;
+    equipment: CRUDPermissions;
+    payment: CRUDPermissions;
+}
+
 export interface Role {
     id?: string;
-    houseId?: string,
+    houseId?: string;
     name: string;
     permissions: {
         house: Permissions;
@@ -48,4 +62,14 @@ export interface Role {
     description?: string;
     status: boolean;
     createdBy?: string;
+}
+
+export interface HouseServiceInfo {
+    name: string;
+    unitPrice: number;
+    type: ServiceTypes;
+    hasIndex?: boolean;
+    description?: string;
+    createdBy?: string;
+    updatedBy?: string;
 }

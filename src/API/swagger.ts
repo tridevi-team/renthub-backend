@@ -8,7 +8,8 @@ const swaggerDefinition = {
     info: {
         title: "RenHub API Documentation",
         version: "1.0.0",
-        description: "Renthub is a graduation topic of the tridevi team. It helps home managers easily manage their homes effectively.",
+        description:
+            "Renthub is a graduation topic of the tridevi team. It helps home managers easily manage their homes effectively.",
     },
     servers: [
         {
@@ -29,7 +30,7 @@ const swaggerDefinition = {
 
 const swaggerOptions = {
     swaggerDefinition,
-    apis: [path.join(__dirname, "./src/API/*.yaml")],
+    apis: [path.join(__dirname, "/*.yaml")],
 };
 
 // Continue with the rest of your code

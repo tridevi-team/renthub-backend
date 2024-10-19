@@ -1,4 +1,5 @@
-import { Model, QueryContext } from "objection";
+import type { QueryContext } from "objection";
+import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 
 class PaymentMethodHistory extends Model {
@@ -12,7 +13,7 @@ class PaymentMethodHistory extends Model {
         return "id";
     }
 
-    $beforeInsert(queryContext: QueryContext): Promise<any> | void {
+    $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
     }
 
@@ -28,6 +29,7 @@ class PaymentMethodHistory extends Model {
                 account_number: { type: "string", maxLength: 255 },
                 status: { type: "boolean" },
                 description: { type: "string", maxLength: 255 },
+                is_default: { type: "boolean" },
                 payos_client_id: { type: "string", maxLength: 255 },
                 payos_api_key: { type: "string", maxLength: 255 },
                 payos_checksum: { type: "string", maxLength: 255 },

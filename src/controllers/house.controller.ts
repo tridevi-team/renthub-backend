@@ -1,7 +1,9 @@
 "use strict";
-import messageResponse from "../enums/message.enum";
+import { messageResponse } from "../enums";
 import { HouseService } from "../services";
-import { ApiException, apiResponse, Exception } from "../utils";
+import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
+
+const prefix = "houses";
 
 class HouseController {
     static async createHouse(req, res) {
@@ -11,6 +13,11 @@ class HouseController {
                 ...req.body,
                 createdBy: user.id,
             });
+
+            // delete cache
+            const detailsCache = `${prefix}:*`;
+            await RedisUtils.deletePattern(detailsCache);
+
             return res.json(apiResponse(messageResponse.CREATE_HOUSE_SUCCESS, true, house));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -19,8 +26,27 @@ class HouseController {
 
     static async getHouseList(req, res) {
         const user = req.user;
+        const { filter = [], sort = [], pagination = {} } = req.query;
+
+        const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + ":list", { filter, sort, pagination });
+
         try {
-            const list = await HouseService.getHouseByUser(user.id);
+            const isCacheExists = await RedisUtils.isExists(cacheKey);
+            if (isCacheExists) {
+                const result = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(apiResponse(messageResponse.GET_HOUSE_LIST_SUCCESS, true, JSON.parse(result[0])));
+            }
+
+            const list = await HouseService.getHouseByUser(user.id, {
+                filter,
+                sort,
+                pagination,
+            });
+
+            if (!list) throw new ApiException(messageResponse.NO_HOUSES_FOUND, 404);
+
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(list));
+
             return res.json(apiResponse(messageResponse.GET_HOUSE_LIST_SUCCESS, true, list));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -28,9 +54,38 @@ class HouseController {
     }
 
     static async getHouseDetails(req, res) {
-        const { id } = req.params;
+        const { houseId } = req.params;
         try {
-            const details = await HouseService.getHouseById(id);
+            const cacheKey = RedisUtils.generateCacheKeyWithId(prefix, houseId, "details");
+            const isRedisExists = await RedisUtils.isExists(cacheKey);
+            if (isRedisExists) {
+                const result = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, JSON.parse(result[0])));
+            }
+
+            const details = await HouseService.getHouseById(houseId);
+            RedisUtils.setAddMember(cacheKey, JSON.stringify(details));
+
+            return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, details));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async getHouseWithRooms(req, res) {
+        const { houseId } = req.params;
+        try {
+            // cache
+            const roomCache = `${prefix}:${houseId}:rooms`;
+            const isRedisExists = await RedisUtils.isExists(roomCache);
+            if (isRedisExists) {
+                const result = await RedisUtils.getSetMembers(roomCache);
+                return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, JSON.parse(result[0])));
+            }
+
+            const details = await HouseService.getHouseWithRooms(houseId);
+            await RedisUtils.setAddMember(roomCache, JSON.stringify(details));
+
             return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, details));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -38,10 +93,25 @@ class HouseController {
     }
 
     static async updateHouseDetails(req, res) {
-        const { id } = req.params;
+        const { houseId } = req.params;
+        const { user } = req;
+        const { name, address, description, collectionCycle, invoiceDate, numCollectDays } = req.body;
         try {
-            const update = await HouseService.update(id, req.body);
+            const data = {
+                name,
+                address,
+                description: description,
+                collectionCycle,
+                invoiceDate,
+                numCollectDays,
+                updatedBy: user.id,
+            };
+            const update = await HouseService.update(houseId, data);
             if (!update) throw new ApiException(messageResponse.UPDATE_HOUSE_FAIL, 500);
+
+            // delete cache
+            const detailsCache = `${prefix}:*`;
+            await RedisUtils.deletePattern(detailsCache);
 
             return res.json(apiResponse(messageResponse.UPDATE_HOUSE_SUCCESS, true, update));
         } catch (err) {
@@ -50,24 +120,60 @@ class HouseController {
     }
 
     static async updateHouseStatus(req, res) {
-        const { id } = req.params;
+        const { houseId } = req.params;
         try {
-            const isUpdate = await HouseService.updateStatus(id, req.body.status);
+            const isUpdate = await HouseService.updateStatus(houseId, req.body.status);
             if (!isUpdate) throw new ApiException(messageResponse.UPDATE_HOUSE_STATUS_FAIL, 500);
 
-            return res.json(apiResponse(messageResponse.UPDATE_HOUSE_STATUS_SUCCESS, true));
+            // delete cache
+            const detailsCache = `${prefix}:*`;
+            await RedisUtils.deletePattern(detailsCache);
+
+            return res.json(apiResponse(messageResponse.UPDATE_HOUSE_STATUS_SUCCESS, true, isUpdate));
         } catch (err) {
             Exception.handle(err, req, res);
         }
     }
 
     static async deleteHouse(req, res) {
-        const { id } = req.params;
+        const { houseId } = req.params;
         try {
-            const isDelete = await HouseService.delete(id);
+            const isDelete = await HouseService.delete(houseId);
             if (!isDelete) throw new ApiException(messageResponse.DELETE_HOUSE_FAIL, 500);
 
+            // delete cache
+            const detailsCache = `${prefix}:*`;
+            await RedisUtils.deletePattern(detailsCache);
+
             return res.json(apiResponse(messageResponse.DELETE_HOUSE_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async searchHouse(req, res) {
+        const { filter = [], sort = [], pagination = {} } = req.query;
+
+        try {
+            // check cache
+            const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + ":search", { filter, sort, pagination });
+            const isSearchCache = await RedisUtils.isExists(cacheKey);
+
+            if (isSearchCache) {
+                const result = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(apiResponse(messageResponse.SEARCH_HOUSE_SUCCESS, true, JSON.parse(result[0])));
+            }
+
+            const result = await HouseService.search({
+                filter,
+                sort,
+                pagination,
+            });
+
+            // save to cache
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(result));
+
+            return res.json(apiResponse(messageResponse.SEARCH_HOUSE_SUCCESS, true, result));
         } catch (err) {
             Exception.handle(err, req, res);
         }

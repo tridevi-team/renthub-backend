@@ -1,100 +1,61 @@
 // bill model
-import BillDetails from "./billDetails.model";
-import BillHistory from "./billHistory.model";
-import Bills from "./bills.model";
+export { default as BillDetails } from "./billDetails.model";
+export { default as BillHistory } from "./billHistory.model";
+export { default as Bills } from "./bills.model";
 
 // contract model
-import ContractKeyReplace from "./contractKeyReplace.model";
-import ContractTemplate from "./contractTemplate.model";
-import ContractTemplateHistory from "./contractTemplateHistory.model";
+export { default as ContractKeyReplace } from "./contractKeyReplace.model";
+export { default as ContractTemplate } from "./contractTemplate.model";
+export { default as ContractTemplateHistory } from "./contractTemplateHistory.model";
 
 // equipment model
-import Equipment from "./equipment.model";
-import EquipmentHistory from "./equipmentHistory.model";
+export { default as Equipment } from "./equipment.model";
+export { default as EquipmentHistory } from "./equipmentHistory.model";
 
 // house model
-import HouseFloorHistory from "./houseFloorHistory.model";
-import HouseFloors from "./houseFloors.model";
-import HouseHistory from "./houseHistory.model";
-import Houses from "./houses.model";
+export { default as HouseFloorHistory } from "./houseFloorHistory.model";
+export { default as HouseFloors } from "./houseFloors.model";
+export { default as HouseHistory } from "./houseHistory.model";
+export { default as Houses } from "./houses.model";
 
 // issue model
-import IssueHistory from "./issueHistory.model";
-import Issues from "./issues.model";
+export { default as IssueHistory } from "./issueHistory.model";
+export { default as Issues } from "./issues.model";
 
 // logs model
-import Logs from "./logs.model";
+export { default as Logs } from "./logs.model";
 
 // notification model
-import NotificationRecipients from "./notificationRecipients.model";
-import Notifications from "./notifications.model";
+export { default as NotificationRecipients } from "./notificationRecipients.model";
+export { default as Notifications } from "./notifications.model";
 
 // payment method model
-import PaymentMethodHistory from "./paymentMethodHistory.model";
-import PaymentMethods from "./paymentMethods.model";
+export { default as PaymentMethodHistory } from "./paymentMethodHistory.model";
+export { default as PaymentMethods } from "./paymentMethods.model";
 
 // renter model
-import RenterHistory from "./renterHistory.model";
-import Renters from "./renters.model";
+export { default as RenterHistory } from "./renterHistory.model";
+export { default as Renters } from "./renters.model";
 
 // role model
-import RoleHistory from "./roleHistory.model";
-import Roles from "./roles.model";
+export { default as RoleHistory } from "./roleHistory.model";
+export { default as Roles } from "./roles.model";
 
 // room model
-import RoomContractHistory from "./roomContractHistory.model";
-import RoomContracts from "./roomContracts.model";
-import RoomHistory from "./roomHistory.model";
-import RoomImages from "./roomImages.model";
-import Rooms from "./rooms.model";
-import RoomServiceHistory from "./roomServiceHistory.model";
-import RoomServices from "./roomServices.model";
+export { default as RoomContractHistory } from "./roomContractHistory.model";
+export { default as RoomContracts } from "./roomContracts.model";
+export { default as RoomHistory } from "./roomHistory.model";
+export { default as RoomImages } from "./roomImages.model";
+export { default as Rooms } from "./rooms.model";
+export { default as RoomServiceHistory } from "./roomServiceHistory.model";
+export { default as RoomServices } from "./roomServices.model";
 
 // service model
-import ServiceHistory from "./serviceHistory.model";
-import Services from "./services.model";
+export { default as ServiceHistory } from "./serviceHistory.model";
+export { default as Services } from "./services.model";
 
 // user model
-import UserHistory from "./userHistory.model";
-import UserRoleHistory from "./userRoleHistory.model";
-import UserRoles from "./userRoles.model";
-import Users from "./users.models";
-
-export {
-    BillDetails,
-    BillHistory,
-    Bills,
-    ContractKeyReplace,
-    ContractTemplate,
-    ContractTemplateHistory,
-    Equipment,
-    EquipmentHistory,
-    HouseFloorHistory,
-    HouseFloors,
-    HouseHistory,
-    Houses,
-    IssueHistory,
-    Issues,
-    Logs,
-    NotificationRecipients,
-    Notifications,
-    PaymentMethodHistory,
-    PaymentMethods,
-    RenterHistory,
-    Renters,
-    RoleHistory,
-    Roles,
-    RoomContractHistory,
-    RoomContracts,
-    RoomHistory,
-    RoomImages,
-    Rooms,
-    RoomServiceHistory,
-    RoomServices,
-    ServiceHistory,
-    Services,
-    UserHistory,
-    UserRoleHistory,
-    UserRoles,
-    Users,
-};
+export { default as UserHistory } from "./userHistory.model";
+export { default as UserRoleHistory } from "./userRoleHistory.model";
+export { default as UserRoles } from "./userRoles.model";
+export { default as Users } from "./users.models";

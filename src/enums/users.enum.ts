@@ -1,15 +1,13 @@
 enum AccountRoles {
-    ADMIN,
-    USER,
-    GUEST,
-    HOST,
+    ADMIN = "admin",
+    USER = "user",
 }
 
 enum AccountTypes {
-    FREE,
-    STANDARD,
-    PREMIUM,
-    ENTERPRISE,
+    FREE = "free",
+    STANDARD = "standard",
+    PREMIUM = "premium",
+    ENTERPRISE = "enterprise",
 }
 
 export { AccountRoles, AccountTypes };

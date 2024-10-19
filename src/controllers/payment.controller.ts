@@ -1,114 +1,245 @@
 "use strict";
 
-import { PaymentMethods } from "../models";
-import { ApiException, Exception, formatJson } from "../utils";
+import PayOS from "@payos/node";
+import "dotenv/config";
+import { BillStatus, messageResponse } from "../enums";
+import { Bills } from "../models";
+import { BillService, HouseService, PaymentService } from "../services";
+import { apiResponse, Exception, isValidData, RedisUtils } from "../utils";
 
-const paymentMethodController = {
-    // async createNewPaymentMethod(req, res) {
-    //     try {
-    //         const { houseId, fullName, accountNumber, status, description, apiKey, clientId, checksum } = req.body;
-    //         const user = req.user;
+const HOOK_URL = process.env.WEBHOOK_URL || "";
+const prefix = "paymentMethods";
+class PaymentController {
+    static async createNewPaymentMethod(req, res) {
+        const { houseId } = req.params;
+        const {
+            name,
+            accountNumber,
+            bankName,
+            status,
+            description,
+            isDefault,
+            payosClientId,
+            payosApiKey,
+            payosChecksum,
+        } = req.body;
+        const user = req.user;
+        try {
+            await HouseService.getHouseById(houseId);
+            const paymentMethod = await PaymentService.createPaymentMethod({
+                houseId,
+                name,
+                accountNumber,
+                bankName,
+                status: status,
+                description: description,
+                isDefault: isDefault,
+                payosClientId: payosClientId,
+                payosApiKey: payosApiKey,
+                payosChecksum: payosChecksum,
+                createdBy: user.id,
+                updatedBy: user.id,
+            });
 
-    //         // check account number
-    //         const accountNumberExist = await PaymentMethods.query().findOne({ account_number: accountNumber, house_id: houseId });
-    //         if (accountNumberExist) {
-    //             return res.json(formatJson.success(1001, "Account number already exist", null));
-    //         }
+            if (payosApiKey && payosClientId && payosChecksum) {
+                const payos = new PayOS(payosClientId, payosApiKey, payosChecksum);
+                await payos.confirmWebhook(HOOK_URL);
+            }
 
-    //         // create new payment method
-    //         const newPaymentMethod = await PaymentMethods.query().insert({
-    //             house_id: houseId,
-    //             name: fullName,
-    //             account_number: accountNumber,
-    //             status,
-    //             description,
-    //             api_key: apiKey,
-    //             client_id: clientId,
-    //             checksum,
-    //             created_by: user.id,
-    //         });
+            // delete cache
+            const cacheKey = `${prefix}:*`;
+            await RedisUtils.deletePattern(cacheKey);
 
-    //         if (!newPaymentMethod) {
-    //             throw new ApiException(1002, "Failed to create new payment method");
-    //         }
+            return res.json(apiResponse(messageResponse.CREATE_PAYMENT_METHOD_SUCCESS, true, paymentMethod));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         return res.json(formatJson.success(1003, "Create new payment method successful.", newPaymentMethod));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+    static async getPaymentMethods(req, res) {
+        const { houseId } = req.params;
+        const { filter = [], sort = [], pagination } = req.query;
+        const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + ":search", {
+            filter,
+            sort,
+            pagination,
+        });
+        try {
+            const isExistsCache = await RedisUtils.isExists(cacheKey);
+            if (isExistsCache) {
+                const data = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(
+                    apiResponse(messageResponse.GET_PAYMENT_METHOD_LIST_SUCCESS, true, JSON.parse(data[0]))
+                );
+            }
 
-    // async getPaymentMethods(req, res) {
-    //     try {
-    //         const { houseId } = req.params;
-    //         const paymentMethods = await PaymentMethods.query().where({ house_id: houseId });
-    //         return res.json(formatJson.success(1004, "Get payment methods successful.", paymentMethods));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+            await HouseService.getHouseById(houseId);
+            const paymentMethods = await PaymentService.getByHouse(houseId, {
+                filter,
+                sort,
+                pagination,
+            });
 
-    // async getPaymentMethodDetail(req, res) {
-    //     try {
-    //         const { paymentMethodId } = req.params;
-    //         const paymentMethod = await PaymentMethods.query().findById(paymentMethodId);
-    //         if (!paymentMethod) {
-    //             return res.json(formatJson.success(1005, "Payment method not found.", null));
-    //         }
+            // set cache
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(paymentMethods));
 
-    //         return res.json(formatJson.success(1006, "Get payment method detail successful.", paymentMethod));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+            return res.json(apiResponse(messageResponse.GET_PAYMENT_METHOD_LIST_SUCCESS, true, paymentMethods));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    // async updatePaymentMethod(req, res) {
-    //     try {
-    //         const { paymentMethodId } = req.params;
-    //         const { houseId, fullName, accountNumber, status, description, apiKey, clientId, checksum } = req.body;
-    //         const user = req.user;
+    static async getPaymentMethodDetails(req, res) {
+        const { paymentMethodId } = req.params;
+        const cacheKey = RedisUtils.generateCacheKeyWithId(prefix, paymentMethodId, "details");
+        try {
+            const isExistsCache = await RedisUtils.isExists(cacheKey);
+            if (isExistsCache) {
+                const data = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(
+                    apiResponse(messageResponse.GET_PAYMENT_METHOD_DETAILS_SUCCESS, true, JSON.parse(data[0]))
+                );
+            }
 
-    //         // check account number
-    //         const accountNumberExist = await PaymentMethods.query().findOne({ account_number: accountNumber, house_id: houseId });
-    //         if (accountNumberExist && accountNumberExist.id !== parseInt(paymentMethodId)) {
-    //             return res.json(formatJson.success(1001, "Account number already exist", null));
-    //         }
+            const paymentMethod = await PaymentService.getById(paymentMethodId);
 
-    //         // update payment method
-    //         const updatedPaymentMethod = await PaymentMethods.query().patchAndFetchById(paymentMethodId, {
-    //             house_id: houseId,
-    //             name: fullName,
-    //             account_number: accountNumber,
-    //             status,
-    //             description,
-    //             api_key: apiKey,
-    //             client_id: clientId,
-    //             checksum,
-    //         });
+            // set cache
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(paymentMethod));
 
-    //         if (!updatedPaymentMethod) {
-    //             throw new ApiException(1007, "Failed to update payment method");
-    //         }
+            return res.json(apiResponse(messageResponse.GET_PAYMENT_METHOD_DETAILS_SUCCESS, true, paymentMethod));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         return res.json(formatJson.success(1008, "Update payment method successful.", updatedPaymentMethod));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+    static async updatePaymentMethod(req, res) {
+        const { paymentMethodId } = req.params;
+        const {
+            houseId,
+            name,
+            accountNumber,
+            bankName,
+            status,
+            description,
+            isDefault,
+            payosClientId,
+            payosApiKey,
+            payosChecksum,
+        } = req.body;
+        try {
+            const paymentMethod = await PaymentService.updatePaymentMethod(paymentMethodId, {
+                houseId,
+                name,
+                accountNumber,
+                bankName,
+                status: status,
+                description: description,
+                isDefault: isDefault,
+                payosClientId: payosClientId,
+                payosApiKey: payosApiKey,
+                payosChecksum: payosChecksum,
+                updatedBy: req.user.id,
+            });
 
-    // async deletePaymentMethod(req, res) {
-    //     try {
-    //         const { paymentMethodId } = req.params;
-    //         const deletedPaymentMethod = await PaymentMethods.query().deleteById(paymentMethodId);
-    //         if (!deletedPaymentMethod) {
-    //             return res.json(formatJson.success(1009, "Failed to delete payment method", null));
-    //         }
+            if (payosApiKey && payosClientId && payosChecksum) {
+                const payos = new PayOS(payosClientId, payosApiKey, payosChecksum);
 
-    //         return res.json(formatJson.success(1010, "Delete payment method successful.", null));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-};
+                await payos.confirmWebhook(HOOK_URL);
+            }
 
-export default paymentMethodController;
+            // delete cache
+            const cacheKey = `${prefix}:*`;
+            await RedisUtils.deletePattern(cacheKey);
+
+            return res.json(apiResponse(messageResponse.UPDATE_PAYMENT_METHOD_SUCCESS, true, paymentMethod));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async deletePaymentMethod(req, res) {
+        const { paymentMethodId } = req.params;
+        const user = req.user;
+        const cacheKey = `${prefix}:*`;
+        try {
+            await PaymentService.deletePaymentMethod(user.id, paymentMethodId);
+
+            // delete cache
+            await RedisUtils.deletePattern(cacheKey);
+
+            return res.json(apiResponse(messageResponse.DELETE_PAYMENT_METHOD_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async updateStatus(req, res) {
+        const { paymentMethodId } = req.params;
+        const { status } = req.body;
+        const user = req.user;
+        const cacheKey = `${prefix}:*`;
+
+        try {
+            const paymentMethod = await PaymentService.updateStatus(user.id, paymentMethodId, status);
+
+            // delete cache
+            await RedisUtils.deletePattern(cacheKey);
+
+            return res.json(apiResponse(messageResponse.UPDATE_PAYMENT_METHOD_SUCCESS, true, paymentMethod));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async updateDefault(req, res) {
+        const { paymentMethodId } = req.params;
+        const { isDefault } = req.body;
+        const user = req.user;
+        const cacheKey = `${prefix}:*`;
+
+        try {
+            const paymentMethod = await PaymentService.updateDefault(user.id, paymentMethodId, isDefault);
+
+            // delete cache
+            await RedisUtils.deletePattern(cacheKey);
+
+            return res.json(apiResponse(messageResponse.UPDATE_PAYMENT_METHOD_SUCCESS, true, paymentMethod));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async payOSWebhook(req, res) {
+        const webhookData = req.body;
+
+        const { orderCode, description, accountNumber, code, desc } = req.body.data;
+
+        if (orderCode === 123 && description === "VQRIO123" && accountNumber === "12345678") {
+            return res.json({ message: "success" });
+        }
+
+        const trx = await Bills.startTransaction();
+
+        try {
+            const payosKeys = await PaymentService.getPayOSKey(webhookData.data.orderCode);
+
+            const checksumKey = payosKeys?.checksum || "";
+
+            const isValid = isValidData(webhookData.data, webhookData.signature, checksumKey);
+            if (!isValid) {
+                await BillService.updatePayOS(webhookData.data.orderCode, BillStatus.UNPAID, webhookData, trx);
+            } else if (code === "00" && desc === "success") {
+                await BillService.updatePayOS(webhookData.data.orderCode, BillStatus.PAID, webhookData, trx);
+            } else {
+                await BillService.updatePayOS(webhookData.data.orderCode, BillStatus.UNPAID, webhookData, trx);
+            }
+            await trx.commit();
+            return res.json({ message: "success" });
+        } catch (err) {
+            await trx.rollback();
+            Exception.handle(err, req, res);
+        }
+    }
+}
+
+export default PaymentController;

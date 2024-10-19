@@ -3,7 +3,12 @@ import type { Knex } from "knex";
 export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable("room_contract_history", (table) => {
         table.uuid("id").primary().defaultTo(knex.raw("(uuid())"));
-        table.uuid("room_contract_id").references("id").inTable("room_contracts").onDelete("CASCADE").onUpdate("CASCADE");
+        table
+            .uuid("room_contract_id")
+            .references("id")
+            .inTable("room_contracts")
+            .onDelete("CASCADE")
+            .onUpdate("CASCADE");
         table.uuid("room_id").references("id").inTable("rooms").onDelete("CASCADE").onUpdate("CASCADE");
         table.uuid("contract_id").references("id").inTable("contract_template").onDelete("CASCADE").onUpdate("CASCADE");
         table.integer("deposit_amount").unsigned().nullable();

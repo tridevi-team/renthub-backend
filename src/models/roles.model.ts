@@ -1,17 +1,23 @@
-import { Model, QueryContext } from "objection";
+import type { ModelOptions, QueryContext } from "objection";
+import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
+import type { Permissions } from "../interfaces";
+import { currentDateTime } from "../utils/currentTime";
+import { Houses, UserRoles } from "./";
 
 class Roles extends Model {
     id: string;
+    houseId: string;
     house_id: string;
     name: string;
-    permissions: object;
+    permissions: Permissions;
     description?: string;
     status: boolean;
     created_by: string;
     created_at: string;
     updated_by: string;
     updated_at: string;
+    createdBy: string;
 
     static get tableName() {
         return "roles";
@@ -21,8 +27,12 @@ class Roles extends Model {
         return "id";
     }
 
-    $beforeInsert(queryContext: QueryContext): Promise<any> | void {
+    $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
+    }
+
+    $beforeUpdate(_opt: ModelOptions, _queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
     }
 
     static get jsonSchema() {
@@ -40,6 +50,27 @@ class Roles extends Model {
                 created_at: { type: "string", format: "date-time" },
                 updated_by: { type: "string", format: "uuid" },
                 updated_at: { type: "string", format: "date-time" },
+            },
+        };
+    }
+
+    static get relationMappings() {
+        return {
+            house: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Houses,
+                join: {
+                    from: "roles.house_id",
+                    to: "houses.id",
+                },
+            },
+            user: {
+                relation: Model.HasManyRelation,
+                modelClass: UserRoles,
+                join: {
+                    from: "roles.id",
+                    to: "user_roles.role_id",
+                },
             },
         };
     }

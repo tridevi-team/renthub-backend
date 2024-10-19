@@ -1,8 +1,31 @@
-import { Model, QueryContext } from "objection";
+import type { ModelOptions, QueryContext } from "objection";
+import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
+import { currentDateTime } from "../utils/currentTime";
+import Rooms from "./rooms.model";
 
 class Renters extends Model {
     id: string;
+    room_id: string;
+    name: string;
+    citizen_id: string;
+    birthday: string;
+    gender: "male" | "female" | "other";
+    email: string;
+    phone_number: string;
+    address: string;
+    temp_reg: boolean;
+    move_in_date: string;
+    represent: boolean;
+    note: string;
+    created_by: string;
+    created_at: string;
+    updated_by: string;
+    updated_at: string;
+    phoneNumber: string;
+    roomId: string;
+    createdBy: string;
+    count: number;
 
     static get tableName() {
         return "renters";
@@ -12,8 +35,12 @@ class Renters extends Model {
         return "id";
     }
 
-    $beforeInsert(queryContext: QueryContext): Promise<any> | void {
+    $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
+    }
+
+    $beforeUpdate(_opt: ModelOptions, _queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
     }
 
     static get jsonSchema() {
@@ -22,6 +49,7 @@ class Renters extends Model {
             required: ["name"],
             properties: {
                 id: { type: "string", format: "uuid" },
+                room_id: { type: "string", format: "uuid" },
                 name: { type: "string", maxLength: 255 },
                 citizen_id: { type: "string", maxLength: 255 },
                 birthday: { type: "string", format: "date" },
@@ -37,6 +65,27 @@ class Renters extends Model {
                 created_at: { type: "string", format: "date-time" },
                 updated_by: { type: "string", format: "uuid" },
                 updated_at: { type: "string", format: "date-time" },
+            },
+        };
+    }
+
+    static get relationMappings() {
+        return {
+            room: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Rooms,
+                join: {
+                    from: "renters.room_id",
+                    to: "rooms.id",
+                },
+            },
+        };
+    }
+
+    static get modifiers() {
+        return {
+            represent(builder) {
+                builder.where("represent", true);
             },
         };
     }

@@ -1,0 +1,1176 @@
+openapi: "3.0.3"
+tags:
+    - name: House
+      description: House API
+
+components:
+    schemas:
+        HouseInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: 40ca663f-8dbe-4424-b52b-b949ace687ff
+                name:
+                    type: string
+                    example: "House 5"
+                address:
+                    type: object
+                    $ref: "#/components/schemas/Address"
+                contractDefault:
+                    type: string
+                    nullable: true
+                description:
+                    type: string
+                    example: "This is a beautiful house"
+                collectionCycle:
+                    type: integer
+                    example: 1
+                invoiceDate:
+                    type: integer
+                    example: 1
+                numCollectDays:
+                    type: integer
+                    example: 5
+                status:
+                    type: integer
+                    example: 1
+                createdBy:
+                    type: string
+                    example: "231c665c-dc53-42c6-88cc-e36490cb52a8"
+                createdAt:
+                    type: string
+                    format: date-time
+                    example: "2024-09-23T03:48:07.000Z"
+                updatedBy:
+                    type: string
+                    example: "231c665c-dc53-42c6-88cc-e36490cb52a8"
+                    nullable: true
+                updatedAt:
+                    type: string
+                    format: date-time
+                    example: "2024-09-23T03:48:07.000Z"
+        HouseCreateRequest:
+            type: object
+            properties:
+                name:
+                    description: The name of the house
+                    type: string
+                    maxLength: 50
+                    minLength: 1
+                    example: "House 1"
+                address:
+                    description: The address of the house. Use API https://provinces.tmquang.com/api/?depth=3 to get the address
+                    type: object
+                    $ref: "#/components/schemas/Address"
+                numOfFloors:
+                    description: The number of floors in the house
+                    type: integer
+                    minimum: 1
+                    example: 2
+                numOfRoomsPerFloor:
+                    description: The number of rooms per floor in the house
+                    type: integer
+                    minimum: 1
+                    example: 3
+                maxRenters:
+                    description: The maximum number of renters in each room
+                    type: integer
+                    minimum: 1
+                    example: 6
+                roomArea:
+                    description: The average area of each room in the house
+                    type: number
+                    minimum: 1
+                    example: 25
+                roomPrice:
+                    description: The average price of each room in the house
+                    type: number
+                    minimum: 1
+                    example: 3500000
+                description:
+                    description: The description of the house, it is optional
+                    type: string
+                    minLength: 1
+                    example: "This is a beautiful house"
+                collectionCycle:
+                    # optional
+                    description: The collection cycle of the house. It is the number of months between each invoice. If not provided, the default value is 1
+                    type: integer
+                    minimum: 1
+                    example: 1
+                invoiceDate:
+                    description: The date of creating the invoice. It is the day of the month that the invoice is created. If not provided, the default value is 1
+                    type: integer
+                    minimum: 1
+                    maximum: 25
+                    example: 1
+                numCollectDays:
+                    description: The number of days that renters have to pay the invoice. If not provided, the default value is 5
+                    type: integer
+                    minimum: 1
+                    example: 5
+        HouseCreateSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    default: CREATE_HOUSE_SUCCESS
+                message:
+                    default: House created successfully
+                data:
+                    type: object
+                    properties:
+                        id:
+                            type: string
+                            example: 40ca663f-8dbe-4424-b52b-b949ace687ff
+                        name:
+                            type: string
+                            example: "House 5"
+                        address:
+                            type: object
+                            $ref: "#/components/schemas/Address"
+                        contractDefault:
+                            type: string
+                            nullable: true
+                        description:
+                            type: string
+                            example: "This is a beautiful house"
+                        collectionCycle:
+                            type: integer
+                            example: 1
+                        invoiceDate:
+                            type: integer
+                            example: 1
+                        numCollectDays:
+                            type: integer
+                            example: 5
+                        status:
+                            type: integer
+                            example: 1
+                        createdBy:
+                            type: string
+                            example: "231c665c-dc53-42c6-88cc-e36490cb52a8"
+                        createdAt:
+                            type: string
+                            format: date-time
+                            example: "2024-09-23T03:48:07.000Z"
+                        updatedBy:
+                            type: string
+                            example: "231c665c-dc53-42c6-88cc-e36490cb52a8"
+                            nullable: true
+                        updatedAt:
+                            type: string
+                            format: date-time
+                            example: "2024-09-23T03:48:07.000Z"
+                        floors:
+                            type: array
+                            items:
+                                type: object
+                                properties:
+                                    id:
+                                        type: string
+                                        example: 6e21fac3-6460-44cc-a93f-a16a62c59417
+                                    houseId:
+                                        type: string
+                                        example: 40ca663f-8dbe-4424-b52b-b949ace687ff
+                                    name:
+                                        type: string
+                                        example: "Tầng 2"
+                                    description:
+                                        type: string
+                                        nullable: true
+                                    createdBy:
+                                        type: string
+                                        example: "231c665c-dc53-42c6-88cc-e36490cb52a8"
+                                    createdAt:
+                                        type: string
+                                        format: date-time
+                                        example: "2024-09-23T03:48:07.000Z"
+                                    updatedBy:
+                                        type: string
+                                        example: "231c665c-dc53-42c6-88cc-e36490cb52a8"
+                                        nullable: true
+                                    updatedAt:
+                                        type: string
+                                        format: date-time
+                                        example: "2024-09-23T03:48:07.000Z"
+                                    rooms:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                id:
+                                                    type: string
+                                                    example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
+                                                floorId:
+                                                    type: string
+                                                    example: 6e21fac3-6460-44cc-a93f-a16a62c59417
+                                                name:
+                                                    type: string
+                                                    example: "Phòng 3"
+                                                maxRenters:
+                                                    type: integer
+                                                    example: 6
+                                                roomArea:
+                                                    type: number
+                                                    example: 25
+                                                price:
+                                                    type: number
+                                                    example: 3500000
+                                                description:
+                                                    type: string
+                                                    nullable: true
+                                                status:
+                                                    type: string
+                                                    enum:
+                                                        - AVAILABLE
+                                                        - PENDING
+                                                        - RENTED
+                                                        - EXPIRED
+                                                        - MAINTENANCE
+                                                    example: "AVAILABLE"
+                                                createdBy:
+                                                    type: string
+                                                    example: "231c665c-dc53-42c6-88cc-e36490cb52a8"
+                                                createdAt:
+                                                    type: string
+                                                    format: date-time
+                                                    example: "2024-09-23T03:48:08.000Z"
+                                                updatedBy:
+                                                    type: string
+                                                    nullable: true
+                                                    example: "231c665c-dc53-42c6-88cc-e36490cb52a8"
+                                                updatedAt:
+                                                    type: string
+                                                    format: date-time
+                                                    example: "2024-09-23T03:48:08.000Z"
+
+        HousesListSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    default: GET_HOUSE_LIST_SUCCESS
+                message:
+                    default: House list retrieved successfully
+                data:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            id:
+                                type: string
+                                example: 225cb910-7894-433e-97d8-0be99cdb7953
+                            name:
+                                type: string
+                                example: "House 1"
+                            address:
+                                type: object
+                                $ref: "#/components/schemas/Address"
+                            contractDefault:
+                                type: string
+                                nullable: true
+                            description:
+                                type: string
+                                example: "This is a beautiful house"
+                            collectionCycle:
+                                type: integer
+                                example: 1
+                            invoiceDate:
+                                type: integer
+                                example: 1
+                            numCollectDays:
+                                type: integer
+                                example: 5
+                            status:
+                                type: integer
+                                example: 1
+                            createdBy:
+                                type: string
+                                example: "231c665c-dc53-42c6-88cc-e36490cb52a8"
+                            createdAt:
+                                type: string
+                                format: date-time
+                                example: "2024-09-23T03:45:20.000Z"
+                            updatedBy:
+                                type: string
+                                nullable: true
+                                example: "231c665c-dc53-42c6-88cc-e36490cb52a8"
+                            updatedAt:
+                                type: string
+                                format: date-time
+                                example: "2024-09-23T03:45:20.000Z"
+                            permissions:
+                                type: object
+                                properties:
+                                    house:
+                                        type: object
+                                        properties:
+                                            create:
+                                                type: boolean
+                                            read:
+                                                type: boolean
+                                            update:
+                                                type: boolean
+                                            delete:
+                                                type: boolean
+                                    role:
+                                        type: object
+                                        properties:
+                                            create:
+                                                type: boolean
+                                            read:
+                                                type: boolean
+                                            update:
+                                                type: boolean
+                                            delete:
+                                                type: boolean
+                                    room:
+                                        type: object
+                                        properties:
+                                            create:
+                                                type: boolean
+                                            read:
+                                                type: boolean
+                                            update:
+                                                type: boolean
+                                            delete:
+                                                type: boolean
+                                    service:
+                                        type: object
+                                        properties:
+                                            create:
+                                                type: boolean
+                                            read:
+                                                type: boolean
+                                            update:
+                                                type: boolean
+                                            delete:
+                                                type: boolean
+                                    bill:
+                                        type: object
+                                        properties:
+                                            create:
+                                                type: boolean
+                                            read:
+                                                type: boolean
+                                            update:
+                                                type: boolean
+                                            delete:
+                                                type: boolean
+                                    equipment:
+                                        type: object
+                                        properties:
+                                            create:
+                                                type: boolean
+                                            read:
+                                                type: boolean
+                                            update:
+                                                type: boolean
+                                            delete:
+                                                type: boolean
+
+        HousesListSearchSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    default: GET_HOUSE_LIST_SUCCESS
+                message:
+                    default: House list retrieved successfully
+                data:
+                    type: object
+                    properties:
+                        results:
+                            type: array
+                            items:
+                                type: object
+                                properties:
+                                    id:
+                                        type: string
+                                        example: 225cb910-7894-433e-97d8-0be99cdb7953
+                                    name:
+                                        type: string
+                                        example: "House 1"
+                                    address:
+                                        type: object
+                                        $ref: "#/components/schemas/Address"
+                                    contractDefault:
+                                        type: string
+                                        nullable: true
+                                    description:
+                                        type: string
+                                        example: "This is a beautiful house"
+                                    collectionCycle:
+                                        type: integer
+                                        example: 1
+                                    invoiceDate:
+                                        type: integer
+                                        example: 1
+                                    numCollectDays:
+                                        type: integer
+                                        example: 5
+                                    status:
+                                        type: integer
+                                        example: 1
+                                    createdBy:
+                                        type: string
+                                        example: "231c665c-dc53-42c6-88cc-e36490cb52a8"
+                                    createdAt:
+                                        type: string
+                                        format: date-time
+                                        example: "2024-09-23T03:45:20.000Z"
+                                    updatedBy:
+                                        type: string
+                                        nullable: true
+                                        example: "231c665c-dc53-42c6-88cc-e36490cb52a8"
+                                    updatedAt:
+                                        type: string
+                                        format: date-time
+                                        example: "2024-09-23T03:45:20.000Z"
+                                    permissions:
+                                        type: object
+                                        default: {}
+
+        HousesSearchSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    default: SEARCH_HOUSE_SUCCESS
+                message:
+                    default: House search successful
+                data:
+                    type: object
+                    properties:
+                        results:
+                            type: array
+                            items:
+                                type: object
+                                properties:
+                                    id:
+                                        type: string
+                                        example: 225cb910-7894-433e-97d8-0be99cdb7953
+                                    name:
+                                        type: string
+                                        example: "House 1"
+                                    address:
+                                        type: object
+                                        $ref: "#/components/schemas/Address"
+                                    description:
+                                        type: string
+                                        example: "This is a beautiful house"
+                                    collectionCycle:
+                                        type: integer
+                                        example: 1
+                                    minRenters:
+                                        type: integer
+                                        example: 1
+                                    maxRenters:
+                                        type: integer
+                                        example: 6
+                                    minPrice:
+                                        type: number
+                                        example: 3000000
+                                    maxPrice:
+                                        type: number
+                                        example: 5000000
+                                    numOfRooms:
+                                        type: integer
+                                        example: 3
+                                    minRoomArea:
+                                        type: number
+                                        example: 25
+                                    maxRoomArea:
+                                        type: number
+                                        example: 30
+                                    thumbnail:
+                                        type: string
+                                        example: "https://via.placeholder.com/150"
+                        total:
+                            type: integer
+                            example: 24
+                        page:
+                            type: integer
+                            example: 1
+                        pageCount:
+                            type: integer
+                            example: 3
+                        pageSize:
+                            type: integer
+                            example: 10
+
+        NoHousesFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    default: NO_HOUSES_FOUND
+                message:
+                    default: No houses found
+
+        NoHouseFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                code:
+                    default: HOUSE_NOT_FOUND
+                message:
+                    default: House not found
+
+        HouseUpdateRequest:
+            type: object
+            properties:
+                name:
+                    description: The name of the house
+                    type: string
+                    maxLength: 50
+                    minLength: 1
+                    example: "House 1"
+                address:
+                    description: The address of the house
+                    type: object
+                    $ref: "#/components/schemas/Address"
+                description:
+                    description: The description of the house, it is optional
+                    type: string
+                    minLength: 1
+                    example: "This is a beautiful house"
+                collectionCycle:
+                    # optional
+                    description: The collection cycle of the house. It is the number of months between each invoice. If not provided, the default value is 1
+                    type: integer
+                    minimum: 1
+                    example: 1
+                invoiceDate:
+                    description: The date of creating the invoice. It is the day of the month that the invoice is created. If not provided, the default value is 1
+                    type: integer
+                    minimum: 1
+                    maximum: 25
+                    example: 1
+                numCollectDays:
+                    description: The number of days that renters have to pay the invoice. If not provided, the default value is 5
+                    type: integer
+                    minimum: 1
+                    example: 5
+
+        HouseWithRooms:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    example: 40ca663f-8dbe-4424-b52b-b949ace687ff
+                name:
+                    type: string
+                    example: "House 5"
+                address:
+                    type: object
+                    $ref: "#/components/schemas/Address"
+                description:
+                    type: string
+                    example: "This is a beautiful house"
+                collectionCycle:
+                    type: integer
+                    example: 1
+                floors:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            id:
+                                type: string
+                                format: uuid
+                                example: 6e21fac3-6460-44cc-a93f-a16a62c59417
+                            name:
+                                type: string
+                                example: "Tầng 2"
+                            rooms:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        id:
+                                            type: string
+                                            format: uuid
+                                            example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
+                                        name:
+                                            type: string
+                                            example: "Phòng 3"
+                                        maxRenters:
+                                            type: integer
+                                            example: 6
+                                        roomArea:
+                                            type: number
+                                            example: 25
+                                        price:
+                                            type: number
+                                            example: 3500000
+                                        description:
+                                            type: string
+                                            nullable: true
+                                        status:
+                                            type: string
+                                            enum:
+                                                - AVAILABLE
+                                                - PENDING
+                                                - RENTED
+                                                - EXPIRED
+                                                - MAINTENANCE
+                                            example: "AVAILABLE"
+                                        services:
+                                            type: array
+                                            items:
+                                                type: object
+                                                properties:
+                                                    id:
+                                                        type: string
+                                                        format: uuid
+                                                        example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
+                                                    name:
+                                                        type: string
+                                                        example: "Electricity"
+                                                    unitPrice:
+                                                        type: number
+                                                        example: 4000
+                                                    description:
+                                                        type: string
+                                                        nullable: true
+                                                        example: "Electricity service"
+                                                    quantity:
+                                                        type: number
+                                                        example: 1
+
+        HouseWithRoomsSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    default: GET_HOUSE_DETAILS_SUCCESS
+                message:
+                    default: Get house details successful
+                data:
+                    $ref: "#/components/schemas/HouseWithRooms"
+
+        HouseDetailsSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    default: GET_HOUSE_DETAILS_SUCCESS
+                message:
+                    default: Get house details successful
+                data:
+                    $ref: "#/components/schemas/HouseInfo"
+
+        HouseUpdateSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    default: UPDATE_HOUSE_SUCCESS
+                message:
+                    default: Update house successful
+                data:
+                    $ref: "#/components/schemas/HouseInfo"
+        HouseUpdateStatusSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    default: UPDATE_HOUSE_STATUS_SUCCESS
+                message:
+                    default: Update house status successful
+                data:
+                    type: object
+                    properties:
+                        houseId:
+                            type: string
+                            example: 40ca663f-8dbe-4424-b52b-b949ace687ff
+                        status:
+                            type: boolean
+                            example: true
+paths:
+    /houses/create:
+        post:
+            tags:
+                - House
+            summary: Create a house
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/HouseCreateRequest"
+            responses:
+                "200":
+                    description: House created successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/HouseCreateSuccess"
+
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+
+                "409":
+                    description: House already exists
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    code:
+                                        default: HOUSE_ALREADY_EXISTS
+                                    message:
+                                        default: House already exists
+
+    /houses/list:
+        get:
+            tags:
+                - House
+            summary: List all houses by the current user
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: query
+                  name: filter[]
+                  description: Filter criteria array with field, operator, and value
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the filter on, e.g. houses.name"
+                              operator:
+                                  type: string
+                                  example: "ew"
+                                  description: "The operator to apply (e.g., 'ew' for endsWith, 'eq' for equals, etc.)"
+                              value:
+                                  type: string
+                                  example: "qui"
+                                  description: "The value to filter by, e.g. 'qui'"
+                - in: query
+                  name: sort[]
+                  description: Sort criteria array with field and order
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the sort on, e.g. houses.name"
+                              direction:
+                                  type: string
+                                  enum:
+                                      - "asc"
+                                      - "desc"
+                                  example: "asc"
+                                  description: "The order to sort by (asc or desc)"
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      example: 1
+                  description: Current page number
+                  required: false
+                - in: query
+                  name: pageSize
+                  schema:
+                      type: integer
+                      example: 10
+                  description: Number of items per page
+                  required: false
+            responses:
+                "200":
+                    description: List of houses
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    code:
+                                        default: LIST_HOUSE_SUCCESS
+                                    message:
+                                        default: List of houses
+                                    data:
+                                        type: array
+                                        items:
+                                            oneOf:
+                                                - $ref: "#/components/schemas/HousesListSuccess"
+                                                - $ref: "#/components/schemas/HousesListSearchSuccess"
+
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+
+                "404":
+                    description: No houses found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoHousesFound"
+
+    /houses/search:
+        get:
+            tags:
+                - House
+            summary: Search houses for renter to find a suitable house
+            parameters:
+                - in: query
+                  name: filter[]
+                  description: Filter criteria array with field, operator, and value
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the filter on, e.g. houses.name"
+                              operator:
+                                  type: string
+                                  example: "ew"
+                                  description: "The operator to apply (e.g., 'ew' for endsWith, 'eq' for equals, etc.)"
+                              value:
+                                  type: string
+                                  example: "qui"
+                                  description: "The value to filter by, e.g. 'qui'"
+                - in: query
+                  name: sort[]
+                  description: Sort criteria array with field and order
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the sort on, e.g. houses.name"
+                              direction:
+                                  type: string
+                                  enum:
+                                      - "asc"
+                                      - "desc"
+                                  example: "asc"
+                                  description: "The order to sort by (asc or desc)"
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      example: 1
+                  description: Current page number
+                  required: false
+                - in: query
+                  name: pageSize
+                  schema:
+                      type: integer
+                      example: 10
+                  description: Number of items per page
+                  required: false
+            responses:
+                "200":
+                    description: List of houses
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/HousesSearchSuccess"
+
+                "404":
+                    description: No houses found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoHousesFound"
+
+    /houses/{houseId}/details:
+        get:
+            tags:
+                - House
+            summary: Get house details
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  description: The ID of the house
+                  schema:
+                      type: string
+                      format: uuid
+            responses:
+                "200":
+                    description: House details
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/HouseDetailsSuccess"
+
+                "404":
+                    description: House not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoHouseFound"
+
+    /houses/{houseId}/rooms:
+        get:
+            tags:
+                - House
+            summary: Get rooms of a house
+            description: Get all rooms of a house with the house ID. It is used for renter to view the rooms of a house
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  description: The ID of the house
+                  schema:
+                      type: string
+                      format: uuid
+                      example: 40ca663f-8dbe-4424-b52b-b949ace687ff
+            responses:
+                "200":
+                    description: Get rooms of a house successful
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/HouseWithRoomsSuccess"
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+
+    /houses/{houseId}/update:
+        put:
+            tags:
+                - House
+            summary: Update house information
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  description: The ID of the house
+                  schema:
+                      type: string
+                      format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/HouseUpdateRequest"
+            responses:
+                "200":
+                    description: House updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/HouseUpdateSuccess"
+
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+
+                "404":
+                    description: House not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoHouseFound"
+
+    /houses/{houseId}/update-status:
+        patch:
+            tags:
+                - House
+            summary: Update house status
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  description: The ID of the house
+                  schema:
+                      type: string
+                      format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                status:
+                                    type: boolean
+                                    example: true
+            responses:
+                "200":
+                    description: House status updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/HouseUpdateStatusSuccess"
+
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+
+                "404":
+                    description: House not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoHouseFound"
+
+    /houses/{houseId}/delete:
+        delete:
+            tags:
+                - House
+            summary: Delete a house
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  description: The ID of the house
+                  schema:
+                      type: string
+                      format: uuid
+            responses:
+                "200":
+                    description: House deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    code:
+                                        default: DELETE_HOUSE_SUCCESS
+                                    message:
+                                        default: House deleted successfully
+
+                "401":
+                    description: Unauthorized
+                    content:
+                        applicationjson:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+
+                "404":
+                    description: House not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoHouseFound"
+                "500":
+                    description: Delete house failed
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    code:
+                                        default: DELETE_HOUSE_FAIL
+                                    message:
+                                        default: Delete house failed

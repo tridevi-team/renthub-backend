@@ -6,15 +6,17 @@ type ApiResponse = {
     success: boolean;
     code: string;
     message: string;
-    data: object | any[];
+    data: object | unknown[];
 };
 
-const apiResponse = (message: string, success: boolean, data: object | any[] = {}): ApiResponse => {
-    const code = Object.keys(messageResponse).find((key) => messageResponse[key as keyof typeof messageResponse] === message);
+const apiResponse = (message: string, success: boolean, data: object | unknown[] = {}): ApiResponse => {
+    const code = Object.keys(messageResponse).find(
+        (key) => messageResponse[key as keyof typeof messageResponse] === message
+    );
 
     return {
         success,
-        code,
+        code: code || "UNKNOWN_ERROR",
         message,
         data,
     };

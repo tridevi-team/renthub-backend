@@ -1,10 +1,10 @@
 import "dotenv/config";
 import redisConfig from "../config/redis.config";
-import messageResponse from "../enums/message.enum";
-import { UserCreate, UserUpdate } from "../interfaces/user.interface";
-import { Houses, Users } from "../models";
-import { ApiException, bcrypt, jwtToken, sendMail } from "../utils";
-import camelToSnake from "../utils/camelToSnake";
+import { messageResponse } from "../enums";
+import type { AccessTokenPayload, RefreshTokenPayload, UserCreate, UserUpdate } from "../interfaces";
+import { Users } from "../models";
+import { ApiException, bcrypt, camelToSnake, jwtToken } from "../utils";
+import { HouseService } from "./";
 
 class UserService {
     static async getUserById(id: string) {
@@ -15,12 +15,12 @@ class UserService {
         return user;
     }
 
-    static async checkUserExist(filter: any = {}) {
+    static async checkUserExist(filter: object = {}) {
         const user = await Users.query().findOne(filter);
         return user ? true : false;
     }
 
-    static async getUsers(filter: any = {}) {
+    static async getUsers(filter: object = {}) {
         const users = await Users.query().where(filter);
         if (users.length === 0) {
             throw new ApiException(messageResponse.NO_USERS_FOUND, 404);
@@ -44,17 +44,11 @@ class UserService {
             }
         }
 
-        const housePermissions = await Houses.query()
-            .leftJoin("user_roles", "houses.id", "user_roles.house_id")
-            .leftJoin("roles", "user_roles.role_id", "roles.id")
-            .where("user_roles.user_id", user.id)
-            .orWhere("houses.created_by", user.id)
-            .select("houses.id", "houses.name", "houses.address", "houses.status", "roles.permissions");
-
+        const housePermissions = await HouseService.getHouseByUser(user.id);
         const { accessToken, refreshToken } = await this.generateToken({
             id: user.id,
             email: user.email,
-            password: user.password,
+            fullName: user.full_name,
             phoneNumber: user.phone_number,
             role: user.role,
             status: user.status,
@@ -83,22 +77,27 @@ class UserService {
         return true;
     }
 
-    static async generateToken(user: { id: string; email: string; password: string; phoneNumber: string; role: string; status: boolean }) {
-        const accessToken = jwtToken.signAccessToken(user);
-        const refreshToken = jwtToken.signRefreshToken({
-            id: user.id,
-            email: user.email,
-            role: user.role,
-            status: user.status,
-        });
+    static async generateToken(user: AccessTokenPayload) {
+        const accessToken = this.generateAccessToken(user);
+        const refreshToken = this.generateRefreshToken(user);
         return { accessToken, refreshToken };
+    }
+
+    static async generateAccessToken(user: AccessTokenPayload) {
+        return jwtToken.signAccessToken(user);
+    }
+
+    static async generateRefreshToken(user: RefreshTokenPayload) {
+        return jwtToken.signRefreshToken(user);
     }
 
     static async createUser(data: UserCreate) {
         const isExists = await this.checkUserExist({ email: data.email });
-        if (isExists) throw new ApiException(messageResponse.USER_ALREADY_EXISTS, 200);
+        if (isExists) throw new ApiException(messageResponse.USER_ALREADY_EXISTS, 409);
 
-        const user = await Users.query().insertAndFetch(camelToSnake(data)).select("id", "email", "full_name", "phone_number", "birthday");
+        const user = await Users.query()
+            .insertAndFetch(camelToSnake(data))
+            .select("id", "email", "full_name", "phone_number", "birthday");
 
         return user;
     }
@@ -121,49 +120,22 @@ class UserService {
         return user;
     }
 
-    static async resendCode(email: string) {
+    static async getUserByEmail(email: string) {
         const user = await Users.query().findOne({ email });
         if (!user) {
             throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 404);
-        } else if (user.verify) {
-            throw new ApiException(messageResponse.ACCOUNT_PREVIOUSLY_VERIFIED, 409);
         }
-
-        const newCode = Math.floor(1000 + Math.random() * 9000);
-        const mail = await sendMail(email, "Verify your account", `Your verification code is: ${newCode}`);
-        if (!mail) {
-            throw new ApiException(messageResponse.FAILED_EMAIL_VERIFICATION, 500);
-        }
-        const redis = await redisConfig;
-        await redis.set(`verify-account:${email}`, newCode);
-        await redis.expire(`verify-account:${email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
-    }
-
-    static async forgotPassword(email: string) {
-        const user = await Users.query().findOne({ email });
-        if (!user) {
-            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 200);
-        }
-        const verifyCode = Math.floor(1000 + Math.random() * 9000);
-        const mail = await sendMail(email, "Reset your password", `Your verification code is: ${verifyCode}`);
-        if (!mail) {
-            throw new ApiException(messageResponse.FAILED_EMAIL_VERIFICATION, 500);
-        }
-        const redis = await redisConfig;
-        await redis.set(`reset-password:${email}`, verifyCode);
-        await redis.expire(`reset-password:${email}`, parseInt(process.env.REDIS_EXPIRE_TIME));
+        return user;
     }
 
     static async resetPassword(data: { code: string; email: string; password: string }) {
-        const user = await Users.query().findOne({ email: data.email });
-        if (!user) {
-            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 200);
-        } else if (user.code !== data.code) {
-            throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 200);
+        const redis = await redisConfig;
+        const code = await redis.get(`reset-password:${data.email}`);
+        if (String(code) !== data.code) {
+            throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 401);
         }
-        await user.$query().patch({ code: "" });
         this.changePassword(data.email, data.password);
-        return user;
+        return true;
     }
 
     static async changePassword(email: string, newPassword: string) {

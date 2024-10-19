@@ -1,10 +1,19 @@
-import { Model, QueryContext } from "objection";
+import type { QueryContext } from "objection";
+import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
-import Houses from "./houses.model";
-import Rooms from "./rooms.model";
+import { Equipment, Houses, Issues, Rooms } from "./";
 
 class HouseFloors extends Model {
     id: string;
+    house_id: string;
+    name: string;
+    description: string;
+    created_by: string;
+    created_at: string;
+    updated_by: string;
+    updated_at: string;
+    house: Houses;
+    rooms: Rooms[];
 
     static get tableName() {
         return "house_floors";
@@ -14,7 +23,7 @@ class HouseFloors extends Model {
         return "id";
     }
 
-    $beforeInsert(queryContext: QueryContext): Promise<any> | void {
+    $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
     }
 
@@ -52,6 +61,30 @@ class HouseFloors extends Model {
                     from: "house_floors.id",
                     to: "rooms.floor_id",
                 },
+            },
+            equipment: {
+                relation: Model.HasManyRelation,
+                modelClass: Equipment,
+                join: {
+                    from: "house_floors.id",
+                    to: "equipment.floor_id",
+                },
+            },
+            issue: {
+                relation: Model.HasManyRelation,
+                modelClass: Issues,
+                join: {
+                    from: "house_floors.id",
+                    to: "issues.floor_id",
+                },
+            },
+        };
+    }
+
+    static get modifiers() {
+        return {
+            idAndName(builder) {
+                return builder.select("id", "name");
             },
         };
     }

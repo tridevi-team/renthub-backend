@@ -4,7 +4,12 @@ export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable("bills", (table) => {
         table.uuid("id").primary().defaultTo(knex.raw("(uuid())"));
         table.uuid("room_id").references("id").inTable("rooms").onDelete("CASCADE").onUpdate("CASCADE");
-        table.uuid("payment_method_id").references("id").inTable("payment_methods").onDelete("CASCADE").onUpdate("CASCADE");
+        table
+            .uuid("payment_method_id")
+            .references("id")
+            .inTable("payment_methods")
+            .onDelete("CASCADE")
+            .onUpdate("CASCADE");
         table.string("title").notNullable();
         table.integer("amount").notNullable();
         table.datetime("payment_date").notNullable();

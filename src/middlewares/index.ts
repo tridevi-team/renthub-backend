@@ -1,6 +1,5 @@
-import authentication from "./authentication";
-import access from "./access";
-import handleErrors from "./handleErrors";
-import requestLogger from "./logger";
-
-export { authentication, requestLogger, access, handleErrors };
+export { default as authentication } from "./authentication";
+export * from "./authorization";
+export { default as handleErrors } from "./handleErrors";
+export { default as requestLogger } from "./logger";
+export * from "./queryParser";

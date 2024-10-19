@@ -1,179 +1,108 @@
 "use strict";
-import { EquipmentType } from "../enums";
-import { Equipment, RoomEquipment, Rooms } from "../models";
-import { ApiException, Exception, formatJson } from "../utils";
 
-const equipmentController = {
-    async addEquipment(req, res) {
+import { messageResponse } from "../enums";
+import { EquipmentService } from "../services";
+import { apiResponse, Exception } from "../utils";
+
+class EquipmentController {
+    static async addEquipment(req, res) {
+        const { houseId } = req.params;
+        const { floorId, roomId, code, name, status, sharedType, description } = req.body;
+        const userInfo = req.user;
         try {
-            const { houseId } = req.params;
-            const userInfo = req.user;
-
-            const { name, quantity, status, expDate, sharedType, description } = req.body;
-
-            const checkEquipment = await Equipment.query().findOne({
-                name: name || "",
-                house_id: houseId,
-            });
-
-            if (checkEquipment) {
-                throw new ApiException(1005, "Equipment already exists", checkEquipment);
-            }
-
-            const insertEquipment = await Equipment.query().insert({
+            const data = {
+                houseId: houseId,
+                floorId: floorId,
+                roomId: roomId,
+                code,
                 name,
-                quantity: quantity || 1,
                 status,
-                shared_type: sharedType,
+                sharedType,
                 description,
-                exp_date: expDate,
-                house_id: Number(houseId),
-                created_by: userInfo.id,
+                createdBy: userInfo.id,
+                updatedBy: userInfo.id,
+            };
+            const equipment = await EquipmentService.create(data);
+            return res.json(apiResponse(messageResponse.CREATE_EQUIPMENT_SUCCESS, true, equipment));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async getEquipmentDetails(req, res) {
+        const { equipmentId } = req.params;
+        try {
+            const equipment = await EquipmentService.getById(equipmentId);
+            return res.json(apiResponse(messageResponse.GET_EQUIPMENT_DETAILS_SUCCESS, true, equipment));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async searchEquipment(req, res) {
+        const { houseId } = req.params;
+        const { filter = [], sort = [], pagination } = req.query;
+        try {
+            const data = await EquipmentService.listEquipment(houseId, {
+                filter,
+                sort,
+                pagination,
             });
-
-            if (!insertEquipment) {
-                throw new ApiException(1003, "Error creating equipment");
-            }
-
-            res.json(formatJson.success(1002, "Add equipment successfully", insertEquipment));
+            return res.json(apiResponse(messageResponse.GET_EQUIPMENT_LIST_SUCCESS, true, data));
         } catch (err) {
             Exception.handle(err, req, res);
         }
-    },
+    }
 
-    async addEquipmentToRoom(req, res) {
+    static async updateEquipment(req, res) {
+        const { equipmentId } = req.params;
+        const userInfo = req.user;
+        const { floorId, roomId, code, name, status, sharedType, description } = req.body;
         try {
-            const userInfo = req.user;
-            const { roomId } = req.params;
-            const { equipment } = req.body;
-
-            // check house and room exists
-            const checkRoom = await Rooms.query().findOne({
-                id: Number(roomId),
-            });
-            if (!checkRoom) {
-                throw new ApiException(1004, "Room not found", []);
-            }
-
-            for (let equipmentId of equipment) {
-                const checkEquipment = await Equipment.query().findOne({ id: equipmentId });
-                if (!checkEquipment) {
-                    throw new ApiException(1001, "Equipment not found", []);
-                } else if (checkEquipment.shared_type === EquipmentType.HOUSE) {
-                    throw new ApiException(1006, "This equipment is shared in house", []);
-                }
-
-                const checkEquipmentInRoom = await RoomEquipment.query().findOne({
-                    room_id: Number(roomId),
-                    equipment_id: equipmentId,
-                });
-
-                if (checkEquipmentInRoom) {
-                    throw new ApiException(1005, "Equipment already exists in this room", checkEquipmentInRoom);
-                }
-
-                const insertEquipment = await RoomEquipment.query().insert({
-                    room_id: Number(roomId),
-                    equipment_id: equipmentId,
-                    created_by: userInfo.id,
-                });
-
-                if (!insertEquipment) {
-                    throw new ApiException(1003, "Error adding equipment to room");
-                }
-
-                res.json(formatJson.success(1002, "Add equipment to room successfully", insertEquipment));
-            }
-        } catch (err) {
-            Exception.handle(err, req, res);
-        }
-    },
-
-    async getEquipmentListInHouse(req, res) {
-        try {
-            const { houseId } = req.params;
-
-            const lists = await Equipment.query().where("house_id", houseId);
-
-            res.json(formatJson.success(1004, "Get equipment list successfully", lists));
-        } catch (err) {
-            Exception.handle(err, req, res);
-        }
-    },
-
-    async getEquipmentListInRoom(req, res) {
-        try {
-            const { roomId } = req.params;
-
-            const checkRoom = await Rooms.query().findOne({
-                id: roomId,
-            });
-
-            if (!checkRoom) {
-                throw new ApiException(1004, "Room not found", []);
-            }
-
-            const equipments = await RoomEquipment.query().join("equipment", "room_equipment.equipment_id", "equipment.id").where("room_id", roomId).select("equipment.*");
-
-            res.json(formatJson.success(1004, "Get equipment list successfully", equipments));
-        } catch (err) {
-            Exception.handle(err, req, res);
-        }
-    },
-
-    async updateEquipment(req, res) {
-        try {
-            const userInfo = req.user;
-            const { equipmentId } = req.params;
-            const { name, quantity, status, expDate, sharedType, description } = req.body;
-
-            const checkEquipment = await Equipment.query().findOne({ id: equipmentId });
-
-            if (!checkEquipment) {
-                throw new ApiException(1001, "Equipment not found", []);
-            }
-
-            const updateEquipment = await Equipment.query().patchAndFetchById(equipmentId, {
+            const data = {
+                floorId: floorId,
+                roomId: roomId,
+                code,
                 name,
-                quantity: quantity || 1,
                 status,
-                shared_type: sharedType,
+                sharedType,
                 description,
-                exp_date: expDate,
-                created_by: userInfo.id,
-            });
-
-            if (!updateEquipment) {
-                throw new ApiException(1003, "Error updating equipment");
-            }
-
-            res.json(formatJson.success(1002, "Update equipment successfully", updateEquipment));
+                updatedBy: userInfo.id,
+            };
+            const equipment = await EquipmentService.update(userInfo.id, equipmentId, data);
+            return res.json(apiResponse(messageResponse.UPDATE_EQUIPMENT_SUCCESS, true, equipment));
         } catch (err) {
             Exception.handle(err, req, res);
         }
-    },
+    }
 
-    async deleteEquipment(req, res) {
+    static async updateEquipmentStatus(req, res) {
+        const { equipmentId } = req.params;
+        const { status, sharedType } = req.body;
+        const userInfo = req.user;
         try {
-            const { equipmentId } = req.params;
-
-            const checkEquipment = await Equipment.query().findOne({ id: equipmentId });
-
-            if (!checkEquipment) {
-                throw new ApiException(1001, "Equipment not found", []);
-            }
-
-            const deleteEquipment = await Equipment.query().deleteById(equipmentId);
-
-            if (!deleteEquipment) {
-                throw new ApiException(1003, "Error deleting equipment");
-            }
-
-            res.json(formatJson.success(1002, "Delete equipment successfully", null));
+            const data = {
+                status,
+                sharedType,
+                updatedBy: userInfo.id,
+            };
+            const equipment = await EquipmentService.updateStatus(userInfo.id, equipmentId, data);
+            return res.json(apiResponse(messageResponse.UPDATE_EQUIPMENT_STATUS_SUCCESS, true, equipment));
         } catch (err) {
             Exception.handle(err, req, res);
         }
-    },
-};
+    }
 
-export default equipmentController;
+    static async deleteEquipment(req, res) {
+        const { equipmentId } = req.params;
+        const user = req.user;
+        try {
+            await EquipmentService.delete(user.id, equipmentId);
+            return res.json(apiResponse(messageResponse.DELETE_EQUIPMENT_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+}
+
+export default EquipmentController;

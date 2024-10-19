@@ -1,144 +1,261 @@
 "use strict";
 
-import { Renters } from "../models";
-import { ApiException, Exception, formatJson } from "../utils";
+import redisConfig from "../config/redis.config";
+import { messageResponse } from "../enums";
+import { RenterService } from "../services";
+import MailService from "../services/mail.service";
+import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
 
-const RenterController = {
-    // async addNewRenter(req, res) {
-    //     try {
-    //         const {
-    //             roomId,
-    //         }: {
-    //             roomId: Number;
-    //         } = req.params;
-    //         const user = req.user;
+const prefix = "renters";
+const cachePattern = `${prefix}:*`;
+class RenterController {
+    static async addNewRenter(req, res) {
+        const { roomId } = req.params;
+        const user = req.user;
+        const { name, citizenId, birthday, gender, email, phoneNumber, address, tempReg, moveInDate, represent, note } =
+            req.body;
 
-    //         const { name, citizenId, phoneNumber, email, licensePlates, temporaryRegistration, moveInDate, represent } = req.body;
-    //         console.log({
-    //             name: name,
-    //             citizen_id: citizenId,
-    //             phone_number: phoneNumber,
-    //             email: email || null,
-    //             license_plates: licensePlates,
-    //             temporary_registration: temporaryRegistration,
-    //             move_in_date: moveInDate,
-    //             represent: represent || false,
-    //             room_id: Number(roomId),
-    //             created_by: user.id,
-    //         });
+        try {
+            // check max renter
+            const data = {
+                roomId,
+                name,
+                citizenId,
+                birthday: birthday,
+                gender: gender || "other",
+                email: email || null,
+                phoneNumber: phoneNumber || null,
+                address: address || null,
+                tempReg: tempReg || false,
+                moveInDate: moveInDate || null,
+                represent: represent || false,
+                note: note,
+                createdBy: user.id,
+            };
+            const createRenter = await RenterService.create(data);
 
-    //         const renter = await Renters.query().insert({
-    //             name: name,
-    //             citizen_id: citizenId,
-    //             phone_number: phoneNumber,
-    //             email: email || null,
-    //             license_plates: licensePlates,
-    //             temporary_registration: temporaryRegistration,
-    //             move_in_date: moveInDate,
-    //             represent: represent || false,
-    //             room_id: Number(roomId),
-    //             created_by: user.id,
-    //         });
+            // delete cache
+            await RedisUtils.deletePattern(cachePattern);
 
-    //         if (!renter) {
-    //             throw new ApiException(1001, "Failed to add renter");
-    //         }
+            return res.json(apiResponse(messageResponse.CREATE_RENTER_SUCCESS, true, createRenter));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         return res.json(formatJson.success(1002, "Renter added successfully", renter));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+    static async getRentersByRoom(req, res) {
+        const { roomId } = req.params;
+        const { filter = [], sort = [], pagination = {} } = req.query;
+        const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + `:getRentersByRoom_${roomId}`, {
+            filter,
+            sort,
+            pagination,
+        });
+        try {
+            const isExistsCache = await RedisUtils.isExists(cacheKey);
+            if (isExistsCache) {
+                const renters = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(apiResponse(messageResponse.GET_RENTERS_BY_ROOM_SUCCESS, true, JSON.parse(renters[0])));
+            }
 
-    // async getRenterList(req, res) {
-    //     try {
-    //         const { roomId } = req.params;
+            const renters = await RenterService.listByRoom(roomId, {
+                filter,
+                sort,
+                pagination,
+            });
 
-    //         const renters = await Renters.query().where("room_id", roomId);
+            // set cache
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(renters));
 
-    //         return res.json(formatJson.success(1003, "Renter list retrieved successfully", renters));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+            return res.json(apiResponse(messageResponse.GET_RENTERS_BY_ROOM_SUCCESS, true, renters));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    // async getRenterListByHouse(req, res) {
-    //     try {
-    //         const { houseId } = req.params;
+    static async getRentersByHouse(req, res) {
+        const { houseId } = req.params;
+        const { filter = [], sort = [], pagination = {} } = req.query;
+        const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + `:getRentersByHouse_${houseId}`, {
+            filter,
+            sort,
+            pagination,
+        });
+        try {
+            const isExistsCache = await RedisUtils.isExists(cacheKey);
+            if (isExistsCache) {
+                const renters = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(
+                    apiResponse(messageResponse.GET_RENTERS_BY_HOUSE_SUCCESS, true, JSON.parse(renters[0]))
+                );
+            }
 
-    //         const renters = await Renters.query().whereExists(function () {
-    //             this.select("*").from("rooms").whereRaw("rooms.id = renters.room_id").where("house_id", houseId);
-    //         });
+            const renters = await RenterService.listByHouse(houseId, {
+                filter,
+                sort,
+                pagination,
+            });
 
-    //         return res.json(formatJson.success(1003, "Renter list retrieved successfully", renters));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+            // set cache
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(renters));
 
-    // async getRenterDetails(req, res) {
-    //     try {
-    //         const { renterId } = req.params;
+            return res.json(apiResponse(messageResponse.GET_RENTERS_BY_HOUSE_SUCCESS, true, renters));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         const renter = await Renters.query().findById(renterId);
+    static async getRenterDetails(req, res) {
+        const { renterId } = req.params;
 
-    //         if (!renter) {
-    //             throw new ApiException(1004, "Renter not found");
-    //         }
+        const cacheKey = RedisUtils.generateCacheKeyWithId(prefix, renterId, "details");
+        try {
+            const isExistsCache = await RedisUtils.isExists(cacheKey);
+            if (isExistsCache) {
+                const renter = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(apiResponse(messageResponse.GET_RENTER_DETAILS_SUCCESS, true, renter));
+            }
 
-    //         return res.json(formatJson.success(1005, "Renter details retrieved successfully", renter));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+            const renter = await RenterService.get(renterId);
 
-    // async updateRenterDetails(req, res) {
-    //     try {
-    //         const { renterId } = req.params;
-    //         const user = req.user;
+            // set cache
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(renter));
 
-    //         const { name, citizenId, phoneNumber, email, licensePlates, temporaryRegistration, moveInDate, represent } = req.body;
+            return res.json(apiResponse(messageResponse.GET_RENTER_DETAILS_SUCCESS, true, renter));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         const renter = await Renters.query().findById(renterId);
+    static async updateRenterDetails(req, res) {
+        const { renterId } = req.params;
+        const user = req.user;
+        const { name, citizenId, birthday, gender, email, phoneNumber, address, tempReg, moveInDate, represent, note } =
+            req.body;
+        try {
+            const data = {
+                name,
+                citizenId,
+                birthday,
+                gender,
+                email,
+                phoneNumber,
+                address,
+                tempReg,
+                moveInDate,
+                represent,
+                note,
+                updatedBy: user.id,
+            };
 
-    //         if (!renter) {
-    //             throw new ApiException(1004, "Renter not found");
-    //         }
+            const updateRenter = await RenterService.update(renterId, data);
 
-    //         const updatedRenter = await renter.$query().patchAndFetch({
-    //             name,
-    //             citizen_id: citizenId,
-    //             phone_number: phoneNumber,
-    //             email: email || null,
-    //             license_plates: licensePlates,
-    //             temporary_registration: temporaryRegistration,
-    //             move_in_date: moveInDate,
-    //             represent: represent || false,
-    //         });
+            // delete cache
+            await RedisUtils.deletePattern(cachePattern);
 
-    //         return res.json(formatJson.success(1006, "Renter details updated successfully", updatedRenter));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
+            return res.json(apiResponse(messageResponse.UPDATE_RENTER_SUCCESS, true, updateRenter));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    // async deleteRenter(req, res) {
-    //     try {
-    //         const { renterId } = req.params;
+    static async deleteRenter(req, res) {
+        const { renterId } = req.params;
+        try {
+            await RenterService.delete(renterId);
 
-    //         const renter = await Renters.query().findById(renterId);
+            // delete cache
+            await RedisUtils.deletePattern(cachePattern);
 
-    //         if (!renter) {
-    //             throw new ApiException(1004, "Renter not found");
-    //         }
+            return res.json(apiResponse(messageResponse.DELETE_RENTER_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 
-    //         const deletedRenter = await renter.$query().delete();
+    static async changeRepresent(req, res) {
+        const { renterId } = req.params;
+        const user = req.user;
+        try {
+            const changeRepresent = await RenterService.changeRepresent(renterId, user.id);
 
-    //         return res.json(formatJson.success(1007, "Renter deleted successfully", deletedRenter));
-    //     } catch (err) {
-    //         Exception.handle(err, req, res);
-    //     }
-    // },
-};
+            // delete cache
+            await RedisUtils.deletePattern(cachePattern);
+
+            return res.json(apiResponse(messageResponse.CHANGE_REPRESENT_SUCCESS, true, changeRepresent));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async login(req, res) {
+        const { email, phoneNumber } = req.body;
+        try {
+            if (!email && !phoneNumber) {
+                throw new ApiException(messageResponse.VALIDATION_ERROR, 400);
+            }
+            const renterDetails = await RenterService.checkExists({
+                email,
+                phoneNumber,
+            });
+            const redis = await redisConfig;
+            const code = Math.floor(1000 + Math.random() * 9000);
+            const username = email || phoneNumber;
+            if (email) {
+                await MailService.sendLoginMail(email, renterDetails.name, String(code));
+            } else if (phoneNumber) {
+                // send code to phone number
+            }
+            await redis.set(`verify-renter:${username}`, String(code));
+            await redis.expire(`verify-renter:${username}`, 300);
+
+            return res.json(apiResponse(messageResponse.SEND_CODE_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async resendCode(req, res) {
+        const { email, phoneNumber } = req.body;
+        try {
+            const redis = await redisConfig;
+            const code = Math.floor(1000 + Math.random() * 9000);
+            const username = email || phoneNumber;
+            const renterDetails = await RenterService.checkExists({
+                email,
+                phoneNumber,
+            });
+            if (email) {
+                await MailService.sendLoginMail(email, renterDetails.name, String(code));
+            } else if (phoneNumber) {
+                // send code to phone
+            }
+            await redis.set(`verify-renter:${username}`, String(code));
+            return res.json(apiResponse(messageResponse.SEND_CODE_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async verifyLogin(req, res) {
+        const { email, phoneNumber, code } = req.body;
+        try {
+            const redis = await redisConfig;
+            const username = email || phoneNumber;
+            const verifyCode = await redis.get(`verify-renter:${username}`);
+            if (verifyCode !== code) {
+                throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 401);
+            }
+            await redis.del(`verify-renter:${username}`);
+            const renter = await RenterService.login({
+                email,
+                phoneNumber,
+            });
+            return res.json(apiResponse(messageResponse.LOGIN_SUCCESS, true, renter));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+}
 
 export default RenterController;

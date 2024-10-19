@@ -1,14 +1,82 @@
 import express from "express";
-import { access, handleErrors } from "../middlewares";
-import { paymentMethodValidator } from "../middlewares/validator";
-import paymentMethodController from "../controllers/payment.controller";
+import { PaymentController } from "../controllers";
+import { Action, Module } from "../enums";
+import { authentication, authorize, handleErrors } from "../middlewares";
+import { houseValidator, paymentMethodValidator } from "../middlewares/validator";
 
 const paymentMethodRouter = express.Router();
 
-// paymentMethodRouter.post("/create", access, paymentMethodValidator.createPaymentMethod, handleErrors, paymentMethodController.createNewPaymentMethod);
-// paymentMethodRouter.get("/list/:houseId", access, paymentMethodController.getPaymentMethods);
-// paymentMethodRouter.get("/details/:houseId/:paymentMethodId", access, paymentMethodController.getPaymentMethodDetail);
-// paymentMethodRouter.put("/update/:paymentMethodId", access, paymentMethodValidator.updatePaymentMethod, handleErrors, paymentMethodController.updatePaymentMethod);
-// paymentMethodRouter.delete("/delete/:paymentMethodId", access, paymentMethodController.deletePaymentMethod);
+paymentMethodRouter.post(
+    "/:houseId/create",
+    authentication,
+    authorize(Module.PAYMENT, Action.CREATE),
+    houseValidator.houseIdValidator,
+    handleErrors,
+    paymentMethodValidator.paymentRequest,
+    handleErrors,
+    PaymentController.createNewPaymentMethod
+);
+
+paymentMethodRouter.get(
+    "/:houseId/search",
+    authentication,
+    authorize(Module.PAYMENT, Action.READ),
+    houseValidator.houseIdValidator,
+    handleErrors,
+    PaymentController.getPaymentMethods
+);
+
+paymentMethodRouter.get(
+    "/:paymentMethodId/details",
+    authentication,
+    authorize(Module.PAYMENT, Action.READ),
+    paymentMethodValidator.paymentId,
+    handleErrors,
+    PaymentController.getPaymentMethodDetails
+);
+
+paymentMethodRouter.put(
+    "/:paymentMethodId/update",
+    authentication,
+    authorize(Module.PAYMENT, Action.UPDATE),
+    paymentMethodValidator.paymentId,
+    handleErrors,
+    paymentMethodValidator.paymentRequest,
+    handleErrors,
+    PaymentController.updatePaymentMethod
+);
+
+paymentMethodRouter.patch(
+    "/:paymentMethodId/update-status",
+    authentication,
+    authorize(Module.PAYMENT, Action.UPDATE),
+    paymentMethodValidator.paymentId,
+    handleErrors,
+    paymentMethodValidator.updateStatus,
+    handleErrors,
+    PaymentController.updateStatus
+);
+
+paymentMethodRouter.patch(
+    "/:paymentMethodId/change-default",
+    authentication,
+    authorize(Module.PAYMENT, Action.UPDATE),
+    paymentMethodValidator.paymentId,
+    handleErrors,
+    paymentMethodValidator.updateDefault,
+    handleErrors,
+    PaymentController.updateDefault
+);
+
+paymentMethodRouter.delete(
+    "/:paymentMethodId/delete",
+    authentication,
+    authorize(Module.PAYMENT, Action.DELETE),
+    paymentMethodValidator.paymentId,
+    handleErrors,
+    PaymentController.deletePaymentMethod
+);
+
+paymentMethodRouter.post("/hook", PaymentController.payOSWebhook);
 
 export default paymentMethodRouter;

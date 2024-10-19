@@ -1,17 +1,40 @@
 "use strict";
 import express from "express";
 import { HouseController } from "../controllers";
-import { access, handleErrors } from "../middlewares";
+import { Action, Module } from "../enums";
+import { authentication, authorize, handleErrors } from "../middlewares";
 import { houseValidator } from "../middlewares/validator";
 
 const houseRouter = express.Router();
 
-houseRouter.post("/create", access, houseValidator.createHouse, handleErrors, HouseController.createHouse);
+houseRouter.post("/create", authentication, houseValidator.createHouse, handleErrors, HouseController.createHouse);
+houseRouter.get("/list", authentication, HouseController.getHouseList);
+houseRouter.get("/:houseId/details", houseValidator.houseIdValidator, handleErrors, HouseController.getHouseDetails);
+houseRouter.get("/:houseId/rooms", houseValidator.houseIdValidator, handleErrors, HouseController.getHouseWithRooms);
+houseRouter.put(
+    "/:houseId/update",
+    authentication,
+    authorize(Module.HOUSE, Action.UPDATE),
+    houseValidator.updateHouseDetails,
+    handleErrors,
+    HouseController.updateHouseDetails
+);
+houseRouter.patch(
+    "/:houseId/update-status",
+    authentication,
+    authorize(Module.HOUSE, Action.UPDATE),
+    houseValidator.updateHouseStatus,
+    handleErrors,
+    HouseController.updateHouseStatus
+);
+houseRouter.delete(
+    "/:houseId/delete",
+    authentication,
+    authorize(Module.HOUSE, Action.DELETE),
+    HouseController.deleteHouse
+);
 
-houseRouter.get("/list", access, HouseController.getHouseList);
-houseRouter.get("/details/:id", access, houseValidator.houseIdValidator, handleErrors, HouseController.getHouseDetails);
-houseRouter.put("/update/:id", access, houseValidator.updateHouseDetails, handleErrors, HouseController.updateHouseDetails);
-houseRouter.put("/updateStatus/:id", access, houseValidator.updateHouseStatus, handleErrors, HouseController.updateHouseStatus);
-houseRouter.delete("/delete/:id", access, houseValidator.deleteHouse, handleErrors, HouseController.deleteHouse);
+// api for renter
+houseRouter.get("/search", HouseController.searchHouse);
 
 export default houseRouter;

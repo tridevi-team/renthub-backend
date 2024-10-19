@@ -1,4 +1,5 @@
-import { Model, QueryContext } from "objection";
+import type { QueryContext } from "objection";
+import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 
 class HouseHistory extends Model {
@@ -12,7 +13,7 @@ class HouseHistory extends Model {
         return "id";
     }
 
-    $beforeInsert(queryContext: QueryContext): Promise<any> | void {
+    $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
     }
 
@@ -24,7 +25,7 @@ class HouseHistory extends Model {
                 id: { type: "string", format: "uuid" },
                 house_id: { type: "string", format: "uuid" },
                 name: { type: "string", maxLength: 50 },
-                address: { type: "string", maxLength: 255 },
+                address: { type: "object" },
                 contract_default: { type: "integer" },
                 description: { type: "string" },
                 collection_cycle: { type: "integer" },

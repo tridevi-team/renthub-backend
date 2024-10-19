@@ -1,0 +1,938 @@
+openapi: "3.0.3"
+tags:
+    - name: Bill
+      description: Bill API
+
+components:
+    schemas:
+        BillDetailsInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    description: Bill ID
+                    example: 2c28c8ae-230a-49dc-9c8c-fc182a4193d4
+                roomId:
+                    type: string
+                    format: uuid
+                    description: Room ID
+                    example: 02ebde3d-ac50-4c2a-afa9-4da1adc52f5b
+                roomName:
+                    type: string
+                    description: Room name
+                    example: Phòng 205
+                title:
+                    type: string
+                    description: Bill title
+                    example: Hóa đơn tiền nhà tháng 1
+                amount:
+                    type: number
+                    description: Bill amount
+                    example: 3675000
+                date:
+                    type: object
+                    properties:
+                        from:
+                            type: string
+                            format: date
+                            description: From date
+                            example: 2019-03-01
+                        to:
+                            type: string
+                            format: date
+                            description: To date
+                            example: 2019-04-01
+                paymentDate:
+                    type: string
+                    format: date
+                    description: Payment date
+                    example: null
+                status:
+                    type: string
+                    enum:
+                        - PAID
+                        - UNPAID
+                        - OVERDUE
+                        - CANCELLED
+                        - IN_DEBT
+                    description: Bill status
+                    example: PAID
+                description:
+                    type: string
+                    description: Bill description
+                    example: null
+                accountName:
+                    type: string
+                    description: Account name
+                    example: Nguyen Van A
+                accountNumber:
+                    type: string
+                    description: Account number
+                    example: 123456789
+                bankName:
+                    type: string
+                    description: Bank name
+                    example: Vietcombank
+                services:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            serviceId:
+                                type: string
+                                format: uuid
+                                description: Service ID
+                                example: d24c0978-7d56-44f7-9ffd-14012e8ccc78
+                            name:
+                                type: string
+                                description: Service name
+                                example: Điện
+                            oldValue:
+                                type: string
+                                description: Old value
+                                example: 100
+                            newValue:
+                                type: string
+                                description: New value
+                                example: 150
+                            amount:
+                                type: number
+                                description: Amount
+                                example: 50
+                            unitPrice:
+                                type: number
+                                description: Unit price
+                                example: 3500
+                            totalPrice:
+                                type: number
+                                description: Total price
+                                example: 175000
+                            description:
+                                type: string
+                                description: Service description
+                                example: null
+                        required:
+                            - id
+                            - name
+                            - amount
+                            - unitPrice
+                            - totalPrice
+
+        BillDetailsResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: GET_BILL_DETAILS_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: ill details retrieved successfully
+                data:
+                    $ref: "#/components/schemas/BillDetailsInfo"
+
+        BillListResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: GET_BILL_LIST_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Bill list retrieved successfully
+                data:
+                    type: object
+                    properties:
+                        results:
+                            type: array
+                            items:
+                                $ref: "#/components/schemas/BillDetailsInfo"
+                        total:
+                            type: integer
+                            description: Total number of bills
+                            example: 1
+                        pageSize:
+                            type: integer
+                            description: Number of bills per page
+                            example: 10
+                        page:
+                            type: integer
+                            description: Current page number
+                            example: 1
+
+        BillUpdateData:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    description: Bill ID
+                    example: 2c28c8ae-230a-49dc-9c8c-fc182a4193d4
+                roomId:
+                    type: string
+                    format: uuid
+                    description: Room ID
+                    example: 02ebde3d-ac50-4c2a-afa9-4da1adc52f5b
+                title:
+                    type: string
+                    description: Bill title
+                    example: Hóa đơn tiền nhà tháng 1
+                paymentMethodId:
+                    type: string
+                    format: uuid
+                    description: Payment method ID
+                    example: 2c28c8ae-230a-49dc-9c8c-fc182a4193d4
+                paymentDate:
+                    type: string
+                    format: date
+                    description: Payment date
+                    example: null
+                startDate:
+                    type: string
+                    format: date
+                    description: Start date
+                    example: 2019-03-01
+                endDate:
+                    type: string
+                    format: date
+                    description: End date
+                    example: 2019-04-01
+                status:
+                    type: string
+                    enum:
+                        - PAID
+                        - UNPAID
+                        - OVERDUE
+                        - CANCELLED
+                        - IN_DEBT
+                    description: Bill status
+                    example: PAID
+                description:
+                    type: string
+                    description: Bill description
+                    example: null
+                services:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            key:
+                                type: string
+                                format: uuid
+                                description: Service key
+                                example: 0ddd66d8-f5ca-4f43-8f45-43e21d4a46d1
+                            serviceId:
+                                type: string
+                                format: uuid
+                                description: Service ID
+                                example: d24c0978-7d56-44f7-9ffd-14012e8ccc78
+                            name:
+                                type: string
+                                description: Service name
+                                example: Điện
+                            oldValue:
+                                type: string
+                                description: Old value
+                                example: 100
+                            newValue:
+                                type: string
+                                description: New value
+                                example: 150
+                            unitPrice:
+                                type: number
+                                description: Unit price
+                                example: 3500
+                        required:
+                            - key
+                            - serviceId
+                            - name
+                            - oldValue
+                            - newValue
+                            - unitPrice
+
+        BillUpdateSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: UPDATE_BILL_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Bill updated successfully
+
+        BillUpdateStatusRequest:
+            type: object
+            properties:
+                data:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            id:
+                                type: string
+                                format: uuid
+                                description: Bill ID
+                                example: 2c28c8ae-230a-49dc-9c8c-fc182a4193d4
+                            status:
+                                type: string
+                                enum:
+                                    - PAID
+                                    - UNPAID
+                                    - OVERDUE
+                                    - CANCELLED
+                                    - IN_DEBT
+                                description: Bill status
+                                example: PAID
+
+        BillStatusIsPaidOrCancel:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: false
+                code:
+                    type: string
+                    description: Response code
+                    example: BILL_STATUS_PAID_OR_CANCELLED
+                message:
+                    type: string
+                    description: Response message
+                    example: Bill status cannot be updated because it is already paid or cancelled
+
+        BillUpdateStatusSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: UPDATE_BILL_STATUS_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Bill status updated successfully
+
+        BillByIdsRequest:
+            type: object
+            properties:
+                ids:
+                    type: array
+                    items:
+                        type: string
+                        format: uuid
+                    description: Bill IDs
+                    example: ["2c28c8ae-230a-49dc-9c8c-fc182a4193d4"]
+
+        BillByIdsResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: GET_BILL_LIST_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Bill list retrieved successfully
+                data:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/BillUpdateData"
+
+        BillCreateRequest:
+            type: object
+            properties:
+                data:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            roomId:
+                                type: string
+                                format: uuid
+                                description: Room ID
+                                example: 02ebde3d-ac50-4c2a-afa9-4da1adc52f5b
+                            title:
+                                type: string
+                                description: Bill title
+                                example: Hóa đơn tiền nhà tháng 1
+                            startDate:
+                                type: string
+                                format: date
+                                description: Start date
+                                example: 2019-03-01
+                            endDate:
+                                type: string
+                                format: date
+                                description: End date
+                                example: 2019-04-01
+                            services:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        id:
+                                            type: string
+                                            format: uuid
+                                            description: Service ID
+                                            example: d24c0978-7d56-44f7-9ffd-14012e8ccc78
+                                        oldValue:
+                                            type: number
+                                            description: Old value
+                                            example: 10
+                                        newValue:
+                                            type: number
+                                            description: New value
+                                            example: 20
+                        required:
+                            - roomId
+                            - startDate
+                            - endDate
+
+        BillDeleteServiceRequest:
+            type: object
+            properties:
+                billId:
+                    type: string
+                    format: uuid
+                    description: Bill ID
+                    example: 2c28c8ae-230a-49dc-9c8c-fc182a4193d4
+                key:
+                    type: string
+                    format: uuid
+                    description: Service key, this is id in bill details
+                    example: 0ddd66d8-f5ca-4f43-8f45-43e21d4a46d1
+
+        BillDeleteServiceSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: DELETE_SERVICE_IN_BILL_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Service in bill deleted successfully
+
+        BillNotFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: false
+                code:
+                    type: string
+                    description: Response code
+                    example: BILL_NOT_FOUND
+                message:
+                    type: string
+                    description: Response message
+                    example: Bill not found
+
+        BillCreateSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: CREATE_BILL_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Bill created successfully
+
+        BillExists:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: false
+                code:
+                    type: string
+                    description: Response code
+                    example: BILL_EXISTS
+                message:
+                    type: string
+                    description: Response message
+                    example: Bill already exists
+
+        NoBillsFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: false
+                code:
+                    type: string
+                    description: Response code
+                    example: NO_BILLS_FOUND
+                message:
+                    type: string
+                    description: Response message
+                    example: No bills found
+
+paths:
+    /bills/{billId}/details:
+        get:
+            tags:
+                - Bill
+            summary: Get bill details
+            description: Get bill details by bill ID
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: billId
+                  in: path
+                  description: Bill ID
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 2c28c8ae-230a-49dc-9c8c-fc182a4193d4
+            responses:
+                "200":
+                    description: Bill details retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BillDetailsResponse"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Bill not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BillNotFound"
+
+    /bills/{houseId}/list:
+        get:
+            tags:
+                - Bill
+            summary: Get bill list
+            description: Get bill list by house ID
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: houseId
+                  in: path
+                  description: House ID
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 2c28c8ae-230a-49dc-9c8c-fc182a4193d4
+                - in: query
+                  name: filter[]
+                  description: Filter criteria array with field, operator, and value
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the filter on, e.g. houses.name"
+                              operator:
+                                  type: string
+                                  example: "ew"
+                                  description: "The operator to apply (e.g., 'ew' for endsWith, 'eq' for equals, etc.)"
+                              value:
+                                  type: string
+                                  example: "qui"
+                                  description: "The value to filter by, e.g. 'qui'"
+                - in: query
+                  name: sort[]
+                  description: Sort criteria array with field and order
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the sort on, e.g. houses.name"
+                              direction:
+                                  type: string
+                                  enum:
+                                      - "asc"
+                                      - "desc"
+                                  example: "asc"
+                                  description: "The order to sort by (asc or desc)"
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      example: 1
+                  description: Current page number
+                  required: false
+                - in: query
+                  name: pageSize
+                  schema:
+                      type: integer
+                      example: 10
+                  description: Number of items per page
+                  required: false
+            responses:
+                "200":
+                    description: Bill list retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BillListResponse"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Bill not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoBillsFound"
+
+    /bills/list-by-ids:
+        post:
+            tags:
+                - Bill
+            summary: Get bill list by IDs
+            description: Get bill list by IDs
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/BillByIdsRequest"
+            responses:
+                "200":
+                    description: Bill list retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BillByIdsResponse"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Bill not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoBillsFound"
+
+    /bills/{houseId}/create:
+        post:
+            tags:
+                - Bill
+            summary: Create bill
+            description: Create bill by house ID
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: houseId
+                  in: path
+                  description: House ID
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 2c28c8ae-230a-49dc-9c8c-fc182a4193d4
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/BillCreateRequest"
+            responses:
+                "200":
+                    description: Bill created successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BillCreateSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Bill not found
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/RoomNotFound"
+                                    - $ref: "#/components/schemas/ServiceNotFound"
+                "409":
+                    description: Bill already exists
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BillExists"
+
+    /bills/update:
+        put:
+            tags:
+                - Bill
+            summary: Update bill
+            description: Update bill by bill ID
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/BillCreateRequest"
+            responses:
+                "200":
+                    description: Bill updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BillUpdateSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Bill not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BillNotFound"
+
+    /bills/update-status:
+        patch:
+            tags:
+                - Bill
+            summary: Update bill status
+            description: Update bill status by bill ID
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/BillUpdateStatusRequest"
+            responses:
+                "200":
+                    description: Bill status updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BillUpdateStatusSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Bill not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BillNotFound"
+                "409":
+                    description: Bill status cannot be updated
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BillStatusIsPaidOrCancel"
+
+    /bills/delete-service:
+        delete:
+            tags:
+                - Bill
+            summary: Delete service
+            description: Delete service by service ID
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/BillDeleteServiceRequest"
+            responses:
+                "200":
+                    description: Service deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BillDeleteServiceSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Service not found
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/BillNotFound"
+                                    - $ref: "#/components/schemas/RoomNotFound"
+                                    - $ref: "#/components/schemas/ServiceNotFound"
