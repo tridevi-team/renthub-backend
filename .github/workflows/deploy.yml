@@ -3,7 +3,7 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - master 
+      - master
 
 jobs:
   deploy:
@@ -17,7 +17,7 @@ jobs:
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-        
+
     - name: Add server to known_hosts
       run: |
         mkdir -p ~/.ssh
@@ -30,4 +30,4 @@ jobs:
 
     - name: Execute deploy script
       run: |
-        ssh renthouse@15.235.147.26 'cd /home/renthouse/renthub/backend && ./src/commands/deploy.sh'
+        ssh renthouse@15.235.147.26 'cd /home/renthouse/renthub/backend && /home/renthouse/renthub/backend/src/commands/deploy.sh'
