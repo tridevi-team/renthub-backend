@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "Deploy script started."
+
 echo "Current directory: $(pwd)"
 
 # Check Yarn version
@@ -9,7 +10,6 @@ then
     echo "Yarn is installed: $(yarn --version)"
 else
     echo "Yarn is not installed."
-    npm install -g yarn
     exit 1
 fi
 
