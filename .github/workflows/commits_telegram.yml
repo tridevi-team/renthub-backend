@@ -11,9 +11,9 @@ jobs:
                   to: ${{ secrets.TELEGRAM_TO }}
                   token: ${{ secrets.TELEGRAM_TOKEN }}
                   message: |
-                      🚀 New Commit by: * ${{ github.actor }} *
+                      🚀 New Commit by: *${{ github.actor }}*
 
-                      📝 Commit Message: _ ${{ github.event.commits[0].message }} _
+                      📝 Commit Message: _${{ github.event.commits[0].message }}_
 
                       📂 Repository: [${{ github.repository }}](https://github.com/${{ github.repository }})
 
