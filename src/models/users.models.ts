@@ -22,6 +22,7 @@ class Users extends Model {
     updated_at!: string;
     phoneNumber: string;
     firstLogin: boolean;
+    fullName: string;
 
     static get tableName() {
         return "users";

@@ -1,7 +1,7 @@
 import "dotenv/config";
 import redisConfig from "../config/redis.config";
 import { messageResponse } from "../enums";
-import type { AccessTokenPayload, UserCreate, UserUpdate } from "../interfaces";
+import type { AccessTokenPayload, RefreshTokenPayload, UserCreate, UserUpdate } from "../interfaces";
 import { Users } from "../models";
 import { ApiException, bcrypt, camelToSnake, jwtToken } from "../utils";
 import { HouseService } from "./";
@@ -48,7 +48,7 @@ class UserService {
         const { accessToken, refreshToken } = await this.generateToken({
             id: user.id,
             email: user.email,
-            password: user.password,
+            fullName: user.full_name,
             phoneNumber: user.phone_number,
             role: user.role,
             status: user.status,
@@ -78,14 +78,17 @@ class UserService {
     }
 
     static async generateToken(user: AccessTokenPayload) {
-        const accessToken = jwtToken.signAccessToken(user);
-        const refreshToken = jwtToken.signRefreshToken({
-            id: user.id,
-            email: user.email,
-            role: user.role,
-            status: user.status,
-        });
+        const accessToken = this.generateAccessToken(user);
+        const refreshToken = this.generateRefreshToken(user);
         return { accessToken, refreshToken };
+    }
+
+    static async generateAccessToken(user: AccessTokenPayload) {
+        return jwtToken.signAccessToken(user);
+    }
+
+    static async generateRefreshToken(user: RefreshTokenPayload) {
+        return jwtToken.signRefreshToken(user);
     }
 
     static async createUser(data: UserCreate) {

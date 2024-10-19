@@ -19,7 +19,7 @@ const jwtToken = {
             expiresIn: time,
         }),
     signRefreshToken: (payload: RefreshTokenPayload | RefreshTokenRenterPayload, time = "7d") =>
-        jwt.sign(payload, JWT_SECRET, {
+        jwt.sign(payload, JWT_SECRET_REFRESH, {
             expiresIn: time,
         }),
     verifyAccessToken: (token: string) => {
@@ -28,18 +28,21 @@ const jwtToken = {
             const data = jwt.verify(token, JWT_SECRET);
             return data;
         } catch (e) {
-            if (e instanceof Error && e.name === "TokenExpiredError")
-                throw new ApiException(messageResponse.TOKEN_EXPIRED, 401);
+            if (e instanceof jwt.TokenExpiredError)
+                if (e.message === "jwt expired") throw new ApiException(messageResponse.TOKEN_EXPIRED, 401);
+
             throw new ApiException(messageResponse.TOKEN_INVALID, 401);
         }
     },
     verifyRefreshToken: (token: string) => {
-        const data = jwt.verify(token, JWT_SECRET_REFRESH);
-        const currentTime = Date.now() / 1000;
+        try {
+            const data = jwt.verify(token, JWT_SECRET_REFRESH);
 
-        if ((data as jwt.JwtPayload).exp! < currentTime) {
-            throw new ApiException(messageResponse.TOKEN_EXPIRED, 401);
-        } else if ((data as jwt.JwtPayload).iat! > currentTime) {
+            return data;
+        } catch (err) {
+            if (err instanceof jwt.JsonWebTokenError)
+                if (err.message === "jwt expired") throw new ApiException(messageResponse.TOKEN_EXPIRED, 401);
+
             throw new ApiException(messageResponse.TOKEN_INVALID, 401);
         }
     },

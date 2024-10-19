@@ -44,7 +44,9 @@ const limiter = rateLimit({
 
 app.use(requestLogger);
 app.use(limiter);
-app.use(cors());
+app.use(cors({
+    credentials: true,
+}));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));

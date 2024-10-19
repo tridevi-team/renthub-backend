@@ -3,7 +3,10 @@ import "dotenv/config";
 import { check } from "express-validator";
 import { comparePassword, validatePassword } from "./password.validator";
 
-// email, fullName, password: min 8 characters, least one number, one lowercase, confirmPassword
+const refreshTokenValidator = [
+    check("refreshToken", "Refresh token is required.").notEmpty().isJWT().withMessage("Invalid refresh token."),
+];
+
 const registerValidator = [
     check("email", "Please provide a valid email address.").isEmail(),
     check("fullName", "Please provide your full name.").isLength({
@@ -84,6 +87,7 @@ const updateProfileValidator = [
 ];
 
 const userValidator = {
+    refreshToken: refreshTokenValidator,
     register: registerValidator,
     login: loginValidator,
     verifyAccount: verifyAccountValidator,

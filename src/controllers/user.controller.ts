@@ -4,7 +4,9 @@ import redisClient from "../config/redis.config";
 import { AccountRoles, messageResponse } from "../enums";
 import { UserService } from "../services";
 import MailService from "../services/mail.service";
-import { ApiException, apiResponse, bcrypt, Exception } from "../utils";
+import { ApiException, apiResponse, bcrypt, Exception, jwtToken, RedisUtils } from "../utils";
+
+const REDIS_EXPIRE_REFRESH_TOKEN = 3600;
 
 class UserController {
     static async getAllUsers(req, res) {
@@ -37,9 +39,7 @@ class UserController {
             // const decryptPassword = aesDecrypt(password);
             // const user = await UserService.login(username, decryptPassword);
             const userData = await UserService.login(username, password);
-            res.cookie("accessToken", userData.token.refreshToken, {
-                httpOnly: true,
-            });
+            res.cookie("refreshToken", userData.token.refreshToken);
             const userInfo = {
                 id: userData.user.id,
                 email: userData.user.email,
@@ -53,9 +53,14 @@ class UserController {
                 status: userData.user.status,
                 verify: userData.user.verify,
                 firstLogin: userData.user.firstLogin,
-                token: userData.token.accessToken,
+                accessToken: userData.token.accessToken,
+                refreshToken: userData.token.refreshToken,
                 houses: userData.houses,
             };
+
+            const redisKey = `users:${userInfo.id}:${userData.token.refreshToken}`;
+            await RedisUtils.setString(redisKey, userData.token.accessToken, REDIS_EXPIRE_REFRESH_TOKEN);
+
             return res.status(200).json(apiResponse(messageResponse.LOGIN_SUCCESS, true, userInfo));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -198,6 +203,71 @@ class UserController {
         try {
             await UserService.updateFirstLoginStatus(user.id);
             return res.status(200).json(apiResponse(messageResponse.FIRST_LOGIN_STATUS_UPDATE_SUCCESS, true, {}));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async refreshToken(req, res) {
+        const { refreshToken } = req.body;
+        const { authorization } = req.headers;
+        const user = req.user;
+
+        const accessToken = authorization?.split(" ")[1];
+
+        try {
+            // verify refresh token
+            jwtToken.verifyRefreshToken(refreshToken);
+
+            // check in redis
+            const redisKey = `users:${user.id}:${refreshToken}`;
+            const aToken = await RedisUtils.getString(redisKey);
+
+            if (aToken !== accessToken) {
+                throw new ApiException(messageResponse.TOKEN_INVALID, 401);
+            }
+
+            // sign new access token
+            const userData = await UserService.getUserById(user.id);
+
+            const newAccessToken = await UserService.generateAccessToken({
+                id: userData.id,
+                email: userData.email,
+                fullName: userData.fullName,
+                phoneNumber: userData.phoneNumber,
+                role: userData.role,
+                status: userData.status,
+            });
+
+            return res.send(apiResponse(messageResponse.REFRESH_TOKEN_SUCCESS, true, { accessToken: newAccessToken }));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async logout(req, res) {
+        const { refreshToken } = req.body;
+        const { authorization } = req.headers;
+        const user = req.user;
+
+        const accessToken = authorization?.split(" ")[1];
+
+        try {
+            // verify refresh token
+            jwtToken.verifyRefreshToken(refreshToken);
+
+            // check in redis
+            const redisKey = `users:${user.id}:${refreshToken}`;
+            const aToken = await RedisUtils.getString(redisKey);
+
+            if (aToken !== accessToken) {
+                throw new ApiException(messageResponse.TOKEN_INVALID, 401);
+            }
+
+            // delete refresh token in redis
+            await RedisUtils.deleteString(redisKey);
+
+            return res.send(apiResponse(messageResponse.LOGOUT_SUCCESS, true, {}));
         } catch (err) {
             Exception.handle(err, req, res);
         }

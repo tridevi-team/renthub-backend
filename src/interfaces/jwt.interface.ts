@@ -1,7 +1,7 @@
 export interface AccessTokenPayload {
     id: string;
     email: string;
-    password: string;
+    fullName: string;
     phoneNumber: string;
     role: string;
     status: boolean;

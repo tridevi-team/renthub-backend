@@ -58,4 +58,53 @@ export class RedisUtils {
 
         return true;
     }
+
+    static async addHashMember(key: string, field: string, value: any, expire: number = REDIS_EXPIRE) {
+        const redis = await redisConfig;
+        const multi = redis.multi();
+
+        multi.hSet(key, field, value);
+        multi.expire(key, expire);
+
+        multi.exec(true);
+
+        return true;
+    }
+
+    static async getHashMember(key: string, field: string) {
+        const redis = await redisConfig;
+        return redis.hGet(key, field);
+    }
+
+    static async deleteHashMember(key: string, field: string) {
+        const redis = await redisConfig;
+        return redis.hDel(key, field);
+    }
+
+    static async deleteHash(key: string) {
+        const redis = await redisConfig;
+        return redis.del(key);
+    }
+
+    static async setString(key: string, value: any, expire: number = REDIS_EXPIRE) {
+        const redis = await redisConfig;
+        const multi = redis.multi();
+
+        multi.set(key, value);
+        multi.expire(key, expire);
+
+        multi.exec(true);
+
+        return true;
+    }
+
+    static async getString(key: string) {
+        const redis = await redisConfig;
+        return redis.get(key);
+    }
+
+    static async deleteString(key: string) {
+        const redis = await redisConfig;
+        return redis.del(key);
+    }
 }

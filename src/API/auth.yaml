@@ -477,6 +477,47 @@ components:
                     example: Password reset successfully
 
 paths:
+    /auth/refresh-token:
+        post:
+            tags: [Auth]
+            summary: Refresh token to get new token
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                refreshToken:
+                                    type: string
+                                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMzFjNjY1Yy1kYzUzLTQyYzYtODhjYy1lMzY0OTBjYjUyYTgiLCJpYXQiOjE2MjYwNjYwNzYsImV4cCI6MTYyNjA2NjA3N30.7qkjhwkhjweyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIzMWM2NjVjLWRjNTMtNDJjNi04OGNjLWUzNjQ5MGNiNTJhOCIsImVtYWlsIjoidG1xdWFuZzAyMDlAZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkRlEyenA1TjJpeDFyWWxBanVRTWtZLnpiWFFFQ1VtZU1wMHgzRDVsRnJtNnZUOVFtb0lmdnkiLCJyb2xlIjoidXNlciIsInN0YXR1cyI6MSwiaWF0IjoxNzI2OTI4MjUzLCJleHAiOjE3MjY5MzE4NTN9.bC3TooxQsvvdBucF_QR2I14c1OKBBAUrUlEKHx0jbvc
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    accessToken:
+                                        type: string
+                                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMzFjNjY1Yy1kYzUzLTQyYzYtODhjYy1lMzY0OTBjYjUyYTgiLCJpYXQiOjE2MjYwNjYwNzYsImV4cCI6MTYyNjA2NjA3N30.7qkjhwkhjweyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIzMWM2NjVjLWRjNTMtNDJjNi04OGNjLWUzNjQ5MGNiNTJhOCIsImVtYWlsIjoidG1xdWFuZzAyMDlAZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkRlEyenA1TjJpeDFyWWxBanVRTWtZLnpiWFFFQ1VtZU1wMHgzRDVsRnJtNnZUOVFtb0lmdnkiLCJyb2xlIjoidXNlciIsInN0YXR1cyI6MSwiaWF0IjoxNzI2OTI4MjUzLCJleHAiOjE3MjY5MzE4NTN9.bC3TooxQsvvdBucF_QR2I14c1OKBBAUrUlEKHx0jbvc
+                "400":
+                    description: Input data is invalid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Refresh token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
     /auth/login:
         post:
             tags: [Auth]
@@ -730,3 +771,33 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/GetUserNotFound"
+
+    /auth/logout:
+        put:
+            tags: [Auth]
+            summary: Logout
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                refreshToken:
+                                    type: string
+                                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMzFjNjY1Yy1kYzUzLTQyYzYtODhjYy1lMzY0OTBjYjUyYTgiLCJpYXQiOjE2MjYwNjYwNzYsImV4cCI6MTYyNjA2NjA3N30.7qkjhwkhjweyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIzMWM2NjVjLWRjNTMtNDJjNi04OGNjLWUzNjQ5MGNiNTJhOCIsImVtYWlsIjoidG1xdWFuZzAyMDlAZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkRlEyenA1TjJpeDFyWWxBanVRTWtZLnpiWFFFQ1VtZU1wMHgzRDVsRnJtNnZUOVFtb0lmdnkiLCJyb2xlIjoidXNlciIsInN0YXR1cyI6MSwiaWF0IjoxNzI2OTI4MjUzLCJleHAiOjE3MjY5MzE4NTN9.bC3TooxQsvvdBucF_QR2I14c1OKBBAUrUlEKHx0jbvc
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/LogoutSuccess"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
