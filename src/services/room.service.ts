@@ -1,8 +1,8 @@
 import { ForeignKeyViolationError } from "objection";
-import type { Pagination, Room, RoomServiceInfo } from "../interfaces";
+import { messageResponse } from "../enums";
+import type { Room, RoomServiceInfo } from "../interfaces";
 import { Renters, Roles, RoomImages, Rooms, RoomServices, Services } from "../models";
 import { ApiException, camelToSnake } from "../utils";
-import { messageResponse } from "../enums";
 
 class RoomService {
     static async create(houseId: string, data: Room) {
@@ -105,57 +105,57 @@ class RoomService {
         return service;
     }
 
-    static async listByHouse(houseId: string, pagination: Pagination = { page: 1, pageSize: 10 }) {
-        // Get list of rooms by house
-        const rooms = await Rooms.query()
-            .withGraphFetched("floor.house")
-            .where("floor.house_id", houseId)
-            .withGraphJoined("services.service")
-            .withGraphJoined("images")
-            .page(pagination.page - 1, pagination.pageSize);
-        if (rooms.results.length === 0) {
-            throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
-        }
-        return {
-            results: rooms.results.map((room) => {
-                return {
-                    id: room.id,
-                    name: room.name,
-                    maxRenters: room.maxRenters,
-                    roomArea: room.roomArea,
-                    price: room.price,
-                    description: room.description,
-                    house: {
-                        id: room.floor.house.id,
-                        name: room.floor.house.name,
-                        description: room.floor.house.description,
-                        floor: {
-                            id: room.floor.id,
-                            name: room.floor.name,
-                            description: room.floor.description,
-                        },
-                    },
-                    services: room.services.map((service) => {
-                        return {
-                            id: service.serviceId,
-                            name: service.service.name,
-                            quantity: service.quantity,
-                            unitPrice: service.service.unitPrice,
-                            type: service.service.type,
-                            description: service.description,
-                        };
-                    }),
-                    images: room.images.map((image) => image.imageUrl),
-                    status: room.status,
-                    createdBy: room.createdBy,
-                    createdAt: room.createdAt,
-                    updatedBy: room.updatedBy,
-                    updatedAt: room.updatedAt,
-                };
-            }),
-            total: rooms.total,
-        };
-    }
+    // static async listByHouse(houseId: string, pagination: Pagination = { page: 1, pageSize: 10 }) {
+    //     // Get list of rooms by house
+    //     const rooms = await Rooms.query()
+    //         .withGraphFetched("floor.house")
+    //         .where("floor.house_id", houseId)
+    //         .withGraphJoined("services.service")
+    //         .withGraphJoined("images")
+    //         .page(pagination.page - 1, pagination.pageSize);
+    //     if (rooms.results.length === 0) {
+    //         throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
+    //     }
+    //     return {
+    //         results: rooms.results.map((room) => {
+    //             return {
+    //                 id: room.id,
+    //                 name: room.name,
+    //                 maxRenters: room.maxRenters,
+    //                 roomArea: room.roomArea,
+    //                 price: room.price,
+    //                 description: room.description,
+    //                 house: {
+    //                     id: room.floor.house.id,
+    //                     name: room.floor.house.name,
+    //                     description: room.floor.house.description,
+    //                     floor: {
+    //                         id: room.floor.id,
+    //                         name: room.floor.name,
+    //                         description: room.floor.description,
+    //                     },
+    //                 },
+    //                 services: room.services.map((service) => {
+    //                     return {
+    //                         id: service.serviceId,
+    //                         name: service.service.name,
+    //                         quantity: service.quantity,
+    //                         unitPrice: service.service.unitPrice,
+    //                         type: service.service.type,
+    //                         description: service.description,
+    //                     };
+    //                 }),
+    //                 images: room.images.map((image) => image.imageUrl),
+    //                 status: room.status,
+    //                 createdBy: room.createdBy,
+    //                 createdAt: room.createdAt,
+    //                 updatedBy: room.updatedBy,
+    //                 updatedAt: room.updatedAt,
+    //             };
+    //         }),
+    //         total: rooms.total,
+    //     };
+    // }
 
     static async updateRoom(id: string, data: Room) {
         try {

@@ -1,42 +1,83 @@
-import { messageResponse } from "../enums";
-import { IssueFilter, IssueRequest, Pagination } from "../interfaces";
-import { Issues } from "../models";
-import { ApiException, camelToSnake } from "../utils";
+import { EPagination, messageResponse } from "../enums";
+import { Filter, IssueRequest } from "../interfaces";
+import { Houses, Issues } from "../models";
+import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 import { UserService } from "./";
 
 class IssueService {
     static async getById(id: string) {
-        const details = await Issues.query().findById(id);
+        const details = await Issues.query()
+            .leftJoin("house_floors", "house_floors.id", "issues.floor_id")
+            .leftJoin("rooms", "rooms.id", "issues.room_id")
+            .leftJoin("equipment", "equipment.id", "issues.equipment_id")
+            .leftJoin("renters", "renters.id", "issues.created_by")
+            .leftJoin("users as assignee", "assignee.id", "issues.assign_to")
+            .select(
+                "issues.*",
+                "house_floors.name as floorName",
+                "rooms.name as roomName",
+                "equipment.name as equipmentName",
+                "renters.name as createdName",
+                "assignee.full_name as assigneeName"
+            )
+            .findById(id);
 
         if (!details) throw new ApiException(messageResponse.ISSUE_NOT_FOUND, 404);
 
         return details;
     }
 
-    static async search(filter: IssueFilter, pagination: Pagination) {
-        const issues = Issues.query().andWhere((builder) => {
-            if (filter.houseId) builder.where("house_id", filter.houseId);
-            if (filter.floorId) builder.where("floor_id", filter.floorId);
-            if (filter.roomId) builder.where("room_id", filter.roomId);
-            if (filter.equipmentId) builder.where("equipment_id", filter.equipmentId);
-            if (filter.title) builder.where("title", "like", `%${filter.title}%`);
-            if (filter.content) builder.where("content", "like", `%${filter.content}%`);
-            if (filter.status) builder.where("status", filter.status);
-            if (filter.description) builder.where("description", "like", `%${filter.description}%`);
-            if (filter.assignTo) builder.where("assignTo", filter.assignTo);
-        });
+    static async search(houseId: string, filterData?: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
+        } = filterData || {};
 
-        if (pagination.page !== -1) {
-            const result = await issues.page(pagination.page, pagination.pageSize);
-            if (!result.results.length) throw new ApiException(messageResponse.NO_ISSUES_FOUND, 404);
-            return result;
+        let query = Houses.query()
+            .join("issues", "houses.id", "issues.house_id")
+            .leftJoin("house_floors", "house_floors.id", "issues.floor_id")
+            .leftJoin("rooms", "rooms.id", "issues.room_id")
+            .leftJoin("equipment", "equipment.id", "issues.equipment_id")
+            .leftJoin("renters", "renters.id", "issues.created_by")
+            .leftJoin("users as assignee", "assignee.id", "issues.assign_to")
+            .select(
+                "issues.*",
+                "houses.name as houseName",
+                "house_floors.name as floorName",
+                "rooms.name as roomName",
+                "equipment.name as equipmentName",
+                "renters.name as createdName",
+                "assignee.full_name as assigneeName"
+            )
+            .where("houses.id", houseId);
+
+        query = filterHandler(query, filter);
+
+        query = sortingHandler(query, sort);
+
+        const clone = query.clone();
+        const total = await clone.resultSize();
+
+        if (total === 0) throw new ApiException(messageResponse.NO_ISSUES_FOUND, 404);
+
+        const totalPages = Math.ceil(total / pageSize);
+
+        if (page === -1 && pageSize === -1) {
+            await query.page(0, total);
+        } else {
+            await query.page(page - 1, pageSize);
         }
 
-        const query = await issues;
+        const fetchData = await query;
 
-        if (!query) throw new ApiException(messageResponse.NO_ISSUES_FOUND, 404);
-
-        return query;
+        return {
+            ...fetchData,
+            total,
+            page,
+            pageCount: totalPages,
+            pageSize,
+        };
     }
 
     static async create(data: IssueRequest) {

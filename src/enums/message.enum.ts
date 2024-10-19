@@ -1,6 +1,7 @@
 enum messageResponse {
     UNKNOWN_ERROR = "An unknown error occurred",
-    INVALID_SORT_VALUE = "Invalid sort value",
+    PARSE_ERROR = "Error occurred while parsing data",
+    INVALID_COLUMN = "Invalid column",
     UNAUTHORIZED = "You are not authorized to access this resource",
     FILE_UPLOAD_SUCCESS = "File uploaded successfully",
     FILE_UPLOAD_FAILED = "File upload failed",

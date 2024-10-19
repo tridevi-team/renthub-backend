@@ -8,7 +8,7 @@ const renterRouter = express.Router();
 
 renterRouter.post("/auth", (req, res) => {
     const { token } = req.headers;
-    console.log("🚀 ~ renterRouter.post ~ token:", token)
+    console.log("🚀 ~ renterRouter.post ~ token:", token);
     return res.json({ message: "Renter auth" });
 });
 
@@ -24,7 +24,7 @@ renterRouter.post(
     RenterController.addNewRenter
 );
 renterRouter.get(
-    "/rooms/:roomId/list",
+    "/rooms/:roomId/search",
     authentication,
     authorize(Module.RENTER, Action.READ),
     roomsValidator.roomId,
@@ -32,7 +32,7 @@ renterRouter.get(
     RenterController.getRentersByRoom
 );
 renterRouter.get(
-    "/houses/:houseId/list",
+    "/houses/:houseId/search",
     authentication,
     authorize(Module.RENTER, Action.READ),
     houseValidator.houseIdValidator,

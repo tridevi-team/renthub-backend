@@ -1,7 +1,7 @@
-import { messageResponse } from "../enums";
-import type { Floor } from "../interfaces";
+import { EPagination, messageResponse } from "../enums";
+import type { Filter, Floor } from "../interfaces";
 import { HouseFloors } from "../models";
-import { ApiException, camelToSnake } from "../utils";
+import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 
 class FloorService {
     static async createFloor(data: Floor) {
@@ -34,12 +34,39 @@ class FloorService {
         return floor;
     }
 
-    static async listByHouse(houseId: string) {
-        const floors = await HouseFloors.query().where("house_id", houseId);
-        if (floors.length === 0) {
-            throw new ApiException(messageResponse.NO_FLOORS_FOUND, 404);
+    static async listByHouse(houseId: string, filterData?: Filter) {
+        const { filter = [], sort = [], pagination } = filterData || {};
+
+        const page = pagination?.page || EPagination.DEFAULT_PAGE;
+        const pageSize = pagination?.pageSize || EPagination.DEFAULT_LIMIT;
+
+        let query = HouseFloors.query().where("house_id", houseId);
+
+        // filter
+        query = filterHandler(query, filter);
+
+        // sort
+        query = sortingHandler(query, sort);
+
+        const clone = query.clone();
+        const total = await clone.resultSize();
+        const totalPages = Math.ceil(total / pageSize);
+
+        if (page !== -1 && pageSize !== -1) {
+            query.page(page - 1, pageSize);
+        } else {
+            query.page(0, total);
         }
-        return floors;
+
+        const fetchData = await query;
+
+        return {
+            ...fetchData,
+            page,
+            pageCount: totalPages,
+            total,
+            pageSize,
+        };
     }
 
     static async updateFloor(floorId: string, data: Floor) {

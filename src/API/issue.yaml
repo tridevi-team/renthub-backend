@@ -98,6 +98,23 @@ components:
                     format: date-time
                     description: The date and time when the issue was updated
                     example: 2024-10-04T17:25:33.000Z
+                equipmentId:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the equipment
+                    example: 0005a2e7-ff4a-41bb-a849-31883c22c61d
+                equipmentName:
+                    type: string
+                    description: The name of the equipment
+                    example: TV
+                createdName:
+                    type: string
+                    description: The name of the user who created the issue
+                    example: Juana Lockman
+                assigneeName:
+                    type: string
+                    description: The name of the user who is assigned to solve the issue
+                    example: Juana Lockman
             required:
                 - houseId
                 - title
@@ -181,11 +198,26 @@ components:
                     example: GET_ISSUE_LIST_SUCCESS
                 message:
                     type: string
-                    example: Get issue list successfully
+                    example: Issue list retrieved successfully
                 data:
-                    type: array
-                    items:
-                        $ref: "#/components/schemas/IssueInfo"
+                    type: object
+                    properties:
+                        results:
+                            type: array
+                            items:
+                                $ref: "#/components/schemas/IssueInfo"
+                        total:
+                            type: integer
+                            example: 1
+                        page:
+                            type: integer
+                            example: 1
+                        pageCount:
+                            type: integer
+                            example: 1
+                        pageSize:
+                            type: integer
+                            example: 25
 
         CreateIssueSuccess:
             type: object
@@ -252,7 +284,8 @@ paths:
                 - Issue
             summary: Create an issue
             description: Create an issue for a house
-            operationId: createIssue
+            security:
+                - BearerAuth: []
             parameters:
                 - name: houseId
                   in: path
@@ -302,13 +335,14 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/NoHouseFound"
 
-    /issues/{houseId}/list:
+    /issues/{houseId}/search:
         get:
             tags:
                 - Issue
             summary: Get issue list
             description: Get list of issues for a house
-            operationId: getIssueList
+            security:
+                - BearerAuth: []
             parameters:
                 - name: houseId
                   in: path
@@ -318,73 +352,65 @@ paths:
                       type: string
                       format: uuid
                   example: 13251603-a1b5-488a-8a06-44c9bbed67e0
-                - name: floorId
-                  in: query
-                  description: The unique identifier of the floor
+                - in: query
+                  name: filter[]
+                  description: Filter criteria array with field, operator, and value
                   required: false
+                  style: deepObject
+                  explode: true
                   schema:
-                      type: string
-                      format: uuid
-                  example: 9507caea-f99d-4e49-bde8-764286639506
-                - name: roomId
-                  in: query
-                  description: The unique identifier of the room
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the filter on, e.g. houses.name"
+                              operator:
+                                  type: string
+                                  example: "ew"
+                                  description: "The operator to apply (e.g., 'ew' for endsWith, 'eq' for equals, etc.)"
+                              value:
+                                  type: string
+                                  example: "qui"
+                                  description: "The value to filter by, e.g. 'qui'"
+                - in: query
+                  name: sort[]
+                  description: Sort criteria array with field and order
                   required: false
+                  style: deepObject
+                  explode: true
                   schema:
-                      type: string
-                      format: uuid
-                  example: 0005a2e7-ff4a-41bb-a849-31883c22c61d
-                - name: equipmentId
-                  in: query
-                  description: The unique identifier of the equipment
-                  required: false
-                  schema:
-                      type: string
-                      format: uuid
-                  example: 0005a2e7-ff4a-41bb-a849-31883c22c61d
-                - name: title
-                  in: query
-                  description: The title of the issue
-                  required: false
-                  schema:
-                      type: string
-                  example: TV is not working
-                - name: status
-                  in: query
-                  description: The status of the issue
-                  required: false
-                  schema:
-                      type: string
-                      enum:
-                          - open
-                          - pending
-                          - in_progress
-                          - done
-                          - cancelled
-                          - confirmed
-                  example: open
-                - name: assignee
-                  in: query
-                  description: The unique identifier of the user who is assigned to solve the issue
-                  required: false
-                  schema:
-                      type: string
-                      format: uuid
-                  example: 1fa091e7-c977-44be-ae41-efa38958851f
-                - name: page
-                  in: query
-                  description: The page number
-                  required: false
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the sort on, e.g. houses.name"
+                              direction:
+                                  type: string
+                                  enum:
+                                      - "asc"
+                                      - "desc"
+                                  example: "asc"
+                                  description: "The order to sort by (asc or desc)"
+                - in: query
+                  name: page
                   schema:
                       type: integer
                       example: 1
-                - name: limit
-                  in: query
-                  description: The number of items per page
+                  description: Current page number
                   required: false
+                - in: query
+                  name: pageSize
                   schema:
                       type: integer
                       example: 10
+                  description: Number of items per page
+                  required: false
             responses:
                 "200":
                     description: Success
@@ -425,7 +451,8 @@ paths:
                 - Issue
             summary: Get issue details
             description: Get details of an issue
-            operationId: getIssueDetails
+            security:
+                - BearerAuth: []
             parameters:
                 - name: issueId
                   in: path
@@ -475,7 +502,8 @@ paths:
                 - Issue
             summary: Update an issue
             description: Update an issue
-            operationId: updateIssue
+            security:
+                - BearerAuth: []
             parameters:
                 - name: issueId
                   in: path
@@ -530,7 +558,8 @@ paths:
                 - Issue
             summary: Update an issue status
             description: Update an issue status
-            operationId: updateIssueStatus
+            security:
+                - BearerAuth: []
             parameters:
                 - name: issueId
                   in: path
@@ -598,7 +627,8 @@ paths:
                 - Issue
             summary: Assign an issue
             description: Assign an issue to a user
-            operationId: assignIssue
+            security:
+                - BearerAuth: []
             parameters:
                 - name: issueId
                   in: path
@@ -660,7 +690,8 @@ paths:
                 - Issue
             summary: Delete an issue
             description: Delete an issue
-            operationId: deleteIssue
+            security:
+                - BearerAuth: []
             parameters:
                 - name: issueId
                   in: path

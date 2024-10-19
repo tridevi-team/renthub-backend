@@ -7,7 +7,7 @@ import { houseValidator, roomsValidator, serviceValidator } from "../middlewares
 const serviceRouter = express.Router();
 
 serviceRouter.get(
-    "/:houseId/list",
+    "/:houseId/search",
     authentication,
     houseValidator.houseIdValidator,
     handleErrors,

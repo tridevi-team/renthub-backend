@@ -1,12 +1,12 @@
 import { QueryBuilder } from "objection";
 import { Operator } from "../enums";
 
-const jsonSearch = ["city", "district", "ward", "street", "address"];
+const jsonSearch = ["city", "district", "ward", "street", "address", "date.from", "date.to"];
 
 export const filterHandler = (query, filter) => {
     if (Array.isArray(filter)) {
         for (const item of filter) {
-            const [, value] = item.field.split(".");
+            const [_, value] = item.field.split(".");
             if (jsonSearch.includes(value)) {
                 applyFilterJson(query, item.field, item.operator, item.value);
             } else {
@@ -16,10 +16,6 @@ export const filterHandler = (query, filter) => {
     }
     return query;
 };
-
-// const applyFilterCount = (query: QueryBuilder<any>, key: string, op: Operator, value: string) => {
-
-// };
 
 const applyFilterJson = (query: QueryBuilder<any>, key: string, op: Operator, value: string) => {
     const addressFields = ["city", "district", "ward", "street"];

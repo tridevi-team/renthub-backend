@@ -6,11 +6,9 @@ import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../ut
 
 class HouseService {
     static async getHouseByUser(userId: string, data?: Filter) {
-        const {
-            filter = [],
-            sort = [],
-            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
-        } = data || {};
+        const { filter = [], sort = [], pagination } = data || {};
+
+        const { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = pagination || {};
 
         let list = Houses.query()
             .leftJoin("user_roles", "houses.id", "user_roles.house_id")
@@ -58,7 +56,7 @@ class HouseService {
 
         const fetchData = await list;
 
-        return { ...fetchData, page: page, pageCount: totalPages, pageSize: pageSize, total };
+        return { ...fetchData, page, pageCount: totalPages, pageSize, total };
     }
 
     static async isRoomInHouse(houseId: string, roomId: string) {
@@ -107,7 +105,8 @@ class HouseService {
         const total = await totalQuery.resultSize();
         const totalPages = Math.ceil(total / pageSize);
 
-        query.page(page - 1, pageSize); // Pagination
+        if (page === -1 && pageSize === -1) await query.page(0, total);
+        else await query.page(page - 1, pageSize);
 
         const fetchData = await query;
 
@@ -265,11 +264,34 @@ class HouseService {
         return serviceDetails;
     }
 
-    static async listServicesByHouse(houseId: string) {
-        const services = await Services.query().where("house_id", houseId);
-        if (services.length === 0) throw new ApiException(messageResponse.NO_SERVICES_FOUND, 404);
+    static async listServicesByHouse(houseId: string, filterData?: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
+        } = filterData || {};
 
-        return services;
+        let query = Services.query().where("house_id", houseId);
+
+        // Filter
+        query = filterHandler(query, filter);
+
+        // Sort
+        query = sortingHandler(query, sort);
+
+        const totalQuery = query.clone();
+        const total = await totalQuery.resultSize();
+
+        if (total === 0) throw new ApiException(messageResponse.NO_SERVICES_FOUND, 404);
+
+        const totalPages = Math.ceil(total / pageSize);
+
+        if (page === -1 && pageSize === -1) await query.page(0, total);
+        else await query.page(page - 1, pageSize);
+
+        const fetchData = await query;
+
+        return { ...fetchData, total, page, pageCount: totalPages, pageSize };
     }
 
     static async updateService(serviceId: string, data: HouseServiceInfo) {

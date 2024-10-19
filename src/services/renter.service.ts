@@ -1,8 +1,8 @@
 import { ConstraintViolationError } from "objection";
-import type { Pagination, Renter } from "../interfaces";
+import { EPagination, messageResponse } from "../enums";
+import type { Filter, Renter } from "../interfaces";
 import { Houses, Renters, Roles } from "../models";
-import { ApiException, camelToSnake, jwtToken } from "../utils";
-import { messageResponse } from "../enums";
+import { ApiException, camelToSnake, filterHandler, jwtToken, sortingHandler } from "../utils";
 
 class RenterService {
     static async create(data: Renter) {
@@ -37,8 +37,14 @@ class RenterService {
         return renter;
     }
 
-    static async listByHouse(houseId: string, pagination: Pagination) {
-        const renters = await Renters.query()
+    static async listByHouse(houseId: string, filterData?: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination = { page: EPagination.DEFAULT_PAGE, pageSize: EPagination.DEFAULT_LIMIT },
+        } = filterData || {};
+
+        let renters = Renters.query()
             .join("rooms", "renters.room_id", "rooms.id")
             .join("house_floors", "rooms.floor_id", "house_floors.id")
             .join("houses", "house_floors.house_id", "houses.id")
@@ -60,19 +66,72 @@ class RenterService {
                 "renters.represent",
                 "renters.move_in_date",
                 "renters.note"
-            )
-            .page(pagination.page - 1, pagination.pageSize);
+            );
 
-        return renters;
-    }
+        // Filter
+        renters = filterHandler(renters, filter);
 
-    static async listByRoom(roomId: string) {
-        // Get list of renters by room
-        const renters = await Renters.query().where("room_id", roomId);
-        if (renters.length === 0) {
+        // Sort
+        renters = sortingHandler(renters, sort);
+
+        const clone = renters.clone();
+        const total = await clone.resultSize();
+
+        if (total === 0) {
             throw new ApiException(messageResponse.NO_RENTERS_FOUND, 404);
         }
-        return renters;
+
+        const totalPages = Math.ceil(total / pagination.pageSize);
+
+        if (pagination.page === -1 && pagination.pageSize === -1) await renters.page(0, total);
+        else await renters.page(pagination.page - 1, pagination.pageSize);
+
+        const fetchData = await renters;
+
+        return {
+            ...fetchData,
+            total,
+            page: pagination.page,
+            pageCount: totalPages,
+            pageSize: pagination.pageSize,
+        };
+    }
+
+    static async listByRoom(roomId: string, filterData?: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
+        } = filterData || {};
+
+        let query = Renters.query().where("room_id", roomId);
+
+        // Filter
+        query = filterHandler(query, filter);
+
+        // Sort
+        query = sortingHandler(query, sort);
+
+        const clone = query.clone();
+        const total = await clone.resultSize();
+        if (total === 0) {
+            throw new ApiException(messageResponse.NO_RENTERS_FOUND, 404);
+        }
+
+        const totalPages = Math.ceil(total / pageSize);
+
+        if (page === -1 && pageSize === -1) await query.page(0, total);
+        else await query.page(page - 1, pageSize);
+
+        const renters = await query;
+
+        return {
+            ...renters,
+            total,
+            page,
+            pageCount: totalPages,
+            pageSize,
+        };
     }
 
     static async update(id: string, data: Renter) {
@@ -144,7 +203,8 @@ class RenterService {
     static async changeRepresent(renterId: string, roomId: string) {
         // Change representative
         const renter = await this.get(renterId);
-        const roomRenters = await this.listByRoom(roomId);
+        const roomRenters = await Renters.query().where("room_id", roomId);
+
         const representRenter = roomRenters.find((r) => r.represent);
         if (representRenter) {
             await Renters.query().patchAndFetchById(representRenter.id, {

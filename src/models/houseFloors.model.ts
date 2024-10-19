@@ -85,8 +85,8 @@ class HouseFloors extends Model {
         return {
             idAndName(builder) {
                 return builder.select("id", "name");
-            }
-        }
+            },
+        };
     }
 }
 

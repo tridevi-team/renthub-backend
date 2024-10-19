@@ -4,14 +4,17 @@ import redisConfig from "../config/redis.config";
 import { messageResponse } from "../enums";
 import { RenterService } from "../services";
 import MailService from "../services/mail.service";
-import { ApiException, apiResponse, Exception } from "../utils";
+import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
 
+const prefix = "renters";
+const cachePattern = `${prefix}:*`;
 class RenterController {
     static async addNewRenter(req, res) {
         const { roomId } = req.params;
         const user = req.user;
         const { name, citizenId, birthday, gender, email, phoneNumber, address, tempReg, moveInDate, represent, note } =
             req.body;
+
         try {
             // check max renter
             const data = {
@@ -30,6 +33,10 @@ class RenterController {
                 createdBy: user.id,
             };
             const createRenter = await RenterService.create(data);
+
+            // delete cache
+            await RedisUtils.deletePattern(cachePattern);
+
             return res.json(apiResponse(messageResponse.CREATE_RENTER_SUCCESS, true, createRenter));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -38,8 +45,28 @@ class RenterController {
 
     static async getRentersByRoom(req, res) {
         const { roomId } = req.params;
+        const { filter = [], sort = [], pagination = {} } = req.query;
+        const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + `:getRentersByRoom_${roomId}`, {
+            filter,
+            sort,
+            pagination,
+        });
         try {
-            const renters = await RenterService.listByRoom(roomId);
+            const isExistsCache = await RedisUtils.isExists(cacheKey);
+            if (isExistsCache) {
+                const renters = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(apiResponse(messageResponse.GET_RENTERS_BY_ROOM_SUCCESS, true, JSON.parse(renters[0])));
+            }
+
+            const renters = await RenterService.listByRoom(roomId, {
+                filter,
+                sort,
+                pagination,
+            });
+
+            // set cache
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(renters));
+
             return res.json(apiResponse(messageResponse.GET_RENTERS_BY_ROOM_SUCCESS, true, renters));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -48,12 +75,30 @@ class RenterController {
 
     static async getRentersByHouse(req, res) {
         const { houseId } = req.params;
-        const { page, limit } = req.query;
+        const { filter = [], sort = [], pagination = {} } = req.query;
+        const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + `:getRentersByHouse_${houseId}`, {
+            filter,
+            sort,
+            pagination,
+        });
         try {
+            const isExistsCache = await RedisUtils.isExists(cacheKey);
+            if (isExistsCache) {
+                const renters = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(
+                    apiResponse(messageResponse.GET_RENTERS_BY_HOUSE_SUCCESS, true, JSON.parse(renters[0]))
+                );
+            }
+
             const renters = await RenterService.listByHouse(houseId, {
-                page: parseInt(page),
-                pageSize: parseInt(limit),
+                filter,
+                sort,
+                pagination,
             });
+
+            // set cache
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(renters));
+
             return res.json(apiResponse(messageResponse.GET_RENTERS_BY_HOUSE_SUCCESS, true, renters));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -62,8 +107,20 @@ class RenterController {
 
     static async getRenterDetails(req, res) {
         const { renterId } = req.params;
+
+        const cacheKey = RedisUtils.generateCacheKeyWithId(prefix, renterId, "details");
         try {
+            const isExistsCache = await RedisUtils.isExists(cacheKey);
+            if (isExistsCache) {
+                const renter = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(apiResponse(messageResponse.GET_RENTER_DETAILS_SUCCESS, true, renter));
+            }
+
             const renter = await RenterService.get(renterId);
+
+            // set cache
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(renter));
+
             return res.json(apiResponse(messageResponse.GET_RENTER_DETAILS_SUCCESS, true, renter));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -93,6 +150,9 @@ class RenterController {
 
             const updateRenter = await RenterService.update(renterId, data);
 
+            // delete cache
+            await RedisUtils.deletePattern(cachePattern);
+
             return res.json(apiResponse(messageResponse.UPDATE_RENTER_SUCCESS, true, updateRenter));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -103,6 +163,10 @@ class RenterController {
         const { renterId } = req.params;
         try {
             await RenterService.delete(renterId);
+
+            // delete cache
+            await RedisUtils.deletePattern(cachePattern);
+
             return res.json(apiResponse(messageResponse.DELETE_RENTER_SUCCESS, true));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -114,6 +178,10 @@ class RenterController {
         const user = req.user;
         try {
             const changeRepresent = await RenterService.changeRepresent(renterId, user.id);
+
+            // delete cache
+            await RedisUtils.deletePattern(cachePattern);
+
             return res.json(apiResponse(messageResponse.CHANGE_REPRESENT_SUCCESS, true, changeRepresent));
         } catch (err) {
             Exception.handle(err, req, res);

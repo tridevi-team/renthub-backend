@@ -3,15 +3,23 @@ import { BillStatus, messageResponse, ServiceTypes } from "../enums";
 import { BillInfo } from "../interfaces";
 import { Bills } from "../models";
 import { BillService, HouseService, PaymentService, RoomService } from "../services";
-import { ApiException, apiResponse, camelToSnake, Exception } from "../utils";
+import { ApiException, apiResponse, camelToSnake, Exception, RedisUtils } from "../utils";
 
 const { RETURN_URL, CANCEL_URL } = process.env;
-
+const prefix = "bills";
 class BillController {
     static async getBillDetails(req, res) {
         const { billId } = req.params;
+        const cacheKey = RedisUtils.generateCacheKeyWithId(prefix, billId, "details");
 
         try {
+            // check redis cache
+            const isCacheExists = await RedisUtils.isExists(cacheKey);
+            if (isCacheExists) {
+                const cacheData = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(apiResponse(messageResponse.GET_BILL_DETAILS_SUCCESS, true, JSON.parse(cacheData[0])));
+            }
+
             const bill = await BillService.getById(billId);
 
             return res.json(apiResponse(messageResponse.GET_BILL_DETAILS_SUCCESS, true, bill));
@@ -22,19 +30,28 @@ class BillController {
 
     static async getBills(req, res) {
         const { houseId } = req.params;
-        const { filter = {}, sort = [], page, limit } = req.query;
-        const sortValues = ["name", "title", "amount", "status", "date.from", "date.to", "createdAt", "updatedAt"];
+        const { filter = [], sort = [], pagination } = req.query;
+        const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix, {
+            filter,
+            sort,
+            pagination,
+        });
 
         try {
-            // Validate sort fields
-            for (const item of sort) {
-                const sortField = item.startsWith("-") ? item.slice(1) : item; // Remove leading '-' if present
-                if (!sortValues.includes(sortField)) {
-                    throw new ApiException(messageResponse.INVALID_SORT_VALUE, 400);
-                }
+            const isCacheExists = await RedisUtils.isExists(cacheKey);
+            if (isCacheExists) {
+                const cacheData = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(apiResponse(messageResponse.GET_BILL_LIST_SUCCESS, true, JSON.parse(cacheData[0])));
             }
 
-            const bills = await BillService.search(houseId, filter, sort, { page: page || -1, pageSize: limit || -1 });
+            const bills = await BillService.search(houseId, {
+                filter,
+                sort,
+                pagination,
+            });
+
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(bills));
+
             return res.json(apiResponse(messageResponse.GET_BILL_LIST_SUCCESS, true, bills));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -44,7 +61,17 @@ class BillController {
     static async getDataForUpdate(req, res) {
         const { ids } = req.body;
         try {
+            const cacheKey = RedisUtils.generateCacheKeyWithId(prefix, "update", ids.join("_"));
+            const isCacheExists = await RedisUtils.isExists(cacheKey);
+            if (isCacheExists) {
+                const cacheData = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(apiResponse(messageResponse.GET_BILL_LIST_SUCCESS, true, JSON.parse(cacheData[0])));
+            }
+
             const bills = await BillService.dataListForUpdate(ids);
+
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(bills));
+
             return res.json(apiResponse(messageResponse.GET_BILL_LIST_SUCCESS, true, bills));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -211,6 +238,11 @@ class BillController {
             }
 
             await trx.commit(); // Commit the transaction if everything succeeds
+
+            // delete cache
+            const cacheKey = `${prefix}:*`;
+            await RedisUtils.deletePattern(cacheKey);
+
             return res.json(apiResponse(messageResponse.CREATE_BILL_SUCCESS, true));
         } catch (err) {
             await trx.rollback(); // Rollback the transaction in case of error
@@ -344,6 +376,11 @@ class BillController {
                     }
                 }
             }
+
+            // delete cache
+            const cacheKey = `${prefix}:*`;
+            await RedisUtils.deletePattern(cacheKey);
+
             return res.json(apiResponse(messageResponse.UPDATE_BILL_SUCCESS, true));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -360,6 +397,10 @@ class BillController {
             }
 
             await trx.commit();
+
+            // delete cache
+            const cacheKey = `${prefix}:*`;
+            await RedisUtils.deletePattern(cacheKey);
 
             return res.json(apiResponse(messageResponse.UPDATE_BILL_STATUS_SUCCESS, true));
         } catch (err) {
@@ -410,6 +451,10 @@ class BillController {
             }
 
             await trx.commit();
+
+            // delete cache
+            const cacheKey = `${prefix}:*`;
+            await RedisUtils.deletePattern(cacheKey);
 
             return res.json(apiResponse(messageResponse.DELETE_SERVICE_IN_BILL_SUCCESS, true));
         } catch (err) {

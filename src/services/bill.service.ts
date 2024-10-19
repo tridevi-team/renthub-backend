@@ -1,8 +1,8 @@
 import { raw, TransactionOrKnex } from "objection";
-import { BillStatus, messageResponse } from "../enums";
-import { BillDetailRequest, BillFilter, BillInfo, BillUpdate, Pagination } from "../interfaces";
+import { BillStatus, EPagination, messageResponse } from "../enums";
+import { BillDetailRequest, BillInfo, BillUpdate, Filter } from "../interfaces";
 import { BillDetails, Bills, Houses } from "../models";
-import { ApiException, camelToSnake } from "../utils";
+import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 
 class BillService {
     static async getById(id: string) {
@@ -70,80 +70,59 @@ class BillService {
         return bills;
     }
 
-    static async search(
-        houseId: string,
-        filter: BillFilter,
-        sort: Array<string>,
-        pagination: Pagination = { page: -1, pageSize: -1 }
-    ) {
-        console.log("🚀 ~ BillService ~ pagination:", pagination)
-        const query = Houses.query()
-            .joinRelated("floors.rooms.bills")
+    static async search(houseId: string, filterData?: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
+        } = filterData || {};
+
+        let query = Houses.query()
+            .join("house_floors as floors", "floors.house_id", "houses.id")
+            .join("rooms", "floors.id", "rooms.floor_id")
+            .join("bills", "rooms.id", "bills.room_id")
+            .leftJoin("payment_methods as payment", "bills.payment_method_id", "payment.id")
             .where("houses.id", houseId)
-            .select("floors:rooms.name", "floors:rooms:bills.*")
-            .andWhere((builder) => {
-                if (filter.roomName) {
-                    builder.where("name", "bill");
-                }
-                // for (const key in filter.title) {
-                //     switch (key) {
-                //         case StringOperator.In:
-                //             const inValues = filter.title[key]?.split(",");
-                //             for (const value of inValues || []) {
-                //                 builder.orWhereLike("title", "%" + value + "%");
-                //             }
-                //             break;
-                //         case StringOperator.Equals:
-                //             if (filter.title[key]) builder.where("title", filter.title[key]);
-                //             break;
-                //         case StringOperator.NotEquals:
-                //             if (filter.title[key]) builder.where("title", "<>", filter.title[key]);
-                //             break;
-                //         case StringOperator.Contains:
-                //             if (filter.title[key]) builder.where("title", "like", `%${filter.title[key]}%`);
-                //             break;
-                //         case StringOperator.DoesNotContain:
-                //             if (filter.title[key]) builder.where("title", "not like", `%${filter.title[key]}%`);
-                //             break;
-                //         case StringOperator.StartsWith:
-                //             if (filter.title[key]) builder.where("title", "like", `${filter.title[key]}%`);
-                //             break;
-                //         case StringOperator.EndsWith:
-                //             if (filter.title[key]) builder.where("title", "like", `%${filter.title[key]}`);
-                //             break;
-                //         case StringOperator.Matches:
-                //             if (filter.title[key]) builder.where("title", "regexp", filter.title[key]);
-                //             break;
-                //         case StringOperator.DoesNotMatch:
-                //             if (filter.title[key]) builder.where("title", "not regexp", filter.title[key]);
-                //             break;
-                //         default:
-                //             break;
-                //     }
-                // }
-            });
+            .select(
+                "bills.id",
+                "bills.room_id as room_id",
+                "rooms.name as room_name",
+                "bills.title",
+                "bills.amount",
+                raw("JSON_UNQUOTE(JSON_EXTRACT(bills.date, '$.from')) as start_date"),
+                raw("JSON_UNQUOTE(JSON_EXTRACT(bills.date, '$.to')) as end_date"),
+                "bills.status",
+                "bills.description",
+                "payment.name as account_name",
+                "payment.account_number as account_number",
+                "payment.bank_name as bank_name",
+                "bills.created_at"
+            );
 
-        const page = 0;
-        const limit = await query.resultSize();
-
-        // if (pagination.page !== -1) {
-        //     page = pagination.page - 1;
-        //     limit = pagination.limit;
-        // }
+        // filter
+        query = filterHandler(query, filter);
 
         // sort
-        sort.forEach((item) => {
-            if (item.startsWith("-")) {
-                query.orderBy(`floors:rooms:bills.${item.slice(1)}`, "desc");
-            } else {
-                query.orderBy(item, "asc");
-            }
-        });
+        query = sortingHandler(query, sort);
 
-        const results = await query.page(page, limit).orderBy("floors:rooms:bills.created_at", "asc");
-        if (!results) throw new ApiException(messageResponse.NO_BILLS_FOUND, 404);
+        const cloneQuery = query.clone();
+        const total = await cloneQuery.resultSize();
+        const totalPages = Math.ceil(total / pageSize);
 
-        return results;
+        if (page === -1 && pageSize === -1) await query.page(0, total);
+        else await query.page(page - 1, pageSize);
+
+        const fetchData = await query;
+
+        if (!total) throw new ApiException(messageResponse.NO_BILLS_FOUND, 404);
+
+        return {
+            ...fetchData,
+            total,
+            page,
+            pageCount: totalPages,
+            pageSize,
+        };
     }
 
     static async create(data: BillInfo, trx) {

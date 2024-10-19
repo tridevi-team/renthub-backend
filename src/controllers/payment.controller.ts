@@ -5,10 +5,10 @@ import "dotenv/config";
 import { BillStatus, messageResponse } from "../enums";
 import { Bills } from "../models";
 import { BillService, HouseService, PaymentService } from "../services";
-import { apiResponse, Exception, isValidData } from "../utils";
+import { apiResponse, Exception, isValidData, RedisUtils } from "../utils";
 
 const HOOK_URL = process.env.WEBHOOK_URL || "";
-
+const prefix = "paymentMethods";
 class PaymentController {
     static async createNewPaymentMethod(req, res) {
         const { houseId } = req.params;
@@ -46,6 +46,10 @@ class PaymentController {
                 await payos.confirmWebhook(HOOK_URL);
             }
 
+            // delete cache
+            const cacheKey = `${prefix}:*`;
+            await RedisUtils.deletePattern(cacheKey);
+
             return res.json(apiResponse(messageResponse.CREATE_PAYMENT_METHOD_SUCCESS, true, paymentMethod));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -54,9 +58,31 @@ class PaymentController {
 
     static async getPaymentMethods(req, res) {
         const { houseId } = req.params;
+        const { filter = [], sort = [], pagination } = req.query;
+        const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + ":search", {
+            filter,
+            sort,
+            pagination,
+        });
         try {
+            const isExistsCache = await RedisUtils.isExists(cacheKey);
+            if (isExistsCache) {
+                const data = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(
+                    apiResponse(messageResponse.GET_PAYMENT_METHOD_LIST_SUCCESS, true, JSON.parse(data[0]))
+                );
+            }
+
             await HouseService.getHouseById(houseId);
-            const paymentMethods = await PaymentService.getByHouse(houseId);
+            const paymentMethods = await PaymentService.getByHouse(houseId, {
+                filter,
+                sort,
+                pagination,
+            });
+
+            // set cache
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(paymentMethods));
+
             return res.json(apiResponse(messageResponse.GET_PAYMENT_METHOD_LIST_SUCCESS, true, paymentMethods));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -65,8 +91,21 @@ class PaymentController {
 
     static async getPaymentMethodDetails(req, res) {
         const { paymentMethodId } = req.params;
+        const cacheKey = RedisUtils.generateCacheKeyWithId(prefix, paymentMethodId, "details");
         try {
+            const isExistsCache = await RedisUtils.isExists(cacheKey);
+            if (isExistsCache) {
+                const data = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(
+                    apiResponse(messageResponse.GET_PAYMENT_METHOD_DETAILS_SUCCESS, true, JSON.parse(data[0]))
+                );
+            }
+
             const paymentMethod = await PaymentService.getById(paymentMethodId);
+
+            // set cache
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(paymentMethod));
+
             return res.json(apiResponse(messageResponse.GET_PAYMENT_METHOD_DETAILS_SUCCESS, true, paymentMethod));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -108,6 +147,10 @@ class PaymentController {
                 await payos.confirmWebhook(HOOK_URL);
             }
 
+            // delete cache
+            const cacheKey = `${prefix}:*`;
+            await RedisUtils.deletePattern(cacheKey);
+
             return res.json(apiResponse(messageResponse.UPDATE_PAYMENT_METHOD_SUCCESS, true, paymentMethod));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -117,8 +160,13 @@ class PaymentController {
     static async deletePaymentMethod(req, res) {
         const { paymentMethodId } = req.params;
         const user = req.user;
+        const cacheKey = `${prefix}:*`;
         try {
             await PaymentService.deletePaymentMethod(user.id, paymentMethodId);
+
+            // delete cache
+            await RedisUtils.deletePattern(cacheKey);
+
             return res.json(apiResponse(messageResponse.DELETE_PAYMENT_METHOD_SUCCESS, true));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -129,8 +177,14 @@ class PaymentController {
         const { paymentMethodId } = req.params;
         const { status } = req.body;
         const user = req.user;
+        const cacheKey = `${prefix}:*`;
+
         try {
             const paymentMethod = await PaymentService.updateStatus(user.id, paymentMethodId, status);
+
+            // delete cache
+            await RedisUtils.deletePattern(cacheKey);
+
             return res.json(apiResponse(messageResponse.UPDATE_PAYMENT_METHOD_SUCCESS, true, paymentMethod));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -141,8 +195,14 @@ class PaymentController {
         const { paymentMethodId } = req.params;
         const { isDefault } = req.body;
         const user = req.user;
+        const cacheKey = `${prefix}:*`;
+
         try {
             const paymentMethod = await PaymentService.updateDefault(user.id, paymentMethodId, isDefault);
+
+            // delete cache
+            await RedisUtils.deletePattern(cacheKey);
+
             return res.json(apiResponse(messageResponse.UPDATE_PAYMENT_METHOD_SUCCESS, true, paymentMethod));
         } catch (err) {
             Exception.handle(err, req, res);

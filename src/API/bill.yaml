@@ -2,84 +2,7 @@ openapi: "3.0.3"
 tags:
     - name: Bill
       description: Bill API
-# id": "2c28c8ae-230a-49dc-9c8c-fc182a4193d4",
-#     "roomId": "02ebde3d-ac50-4c2a-afa9-4da1adc52f5b",
-#     "roomName": "Phòng 205",
-#     "title": "Hóa đơn tiền nhà tháng 1",
-#     "amount": 3675000,
-#     "date": {
-#       "from": "2019-03-01",
-#       "to": "2019-04-01"
-#     },
-#     "paymentDate": null,
-#     "status": "PAID",
-#     "description": null,
-#     "accountName": null,
-#     "accountNumber": null,
-#     "bankName": null,
-#     "services": [
-#       {
-#         "serviceId": "d24c0978-7d56-44f7-9ffd-14012e8ccc78",
-#         "name": "Điện",
-#         "oldValue": "100",
-#         "newValue": "150",
-#         "amount": 50,
-#         "unitPrice": 3500,
-#         "totalPrice": 175000,
-#         "description": ""
-#       },
-#       {
-#         "serviceId": null,
-#         "name": "Tiền phòng",
-#         "oldValue": "0",
-#         "newValue": "0",
-#         "amount": 1,
-#         "unitPrice": 3500000,
-#         "totalPrice": 3500000,
-#         "description": ""
-#       },
-#       {
-#         "serviceId": "81e5ceb7-520c-4475-bfba-0bc813dddf12",
-#         "name": "Giữ xe",
-#         "oldValue": "0",
-#         "newValue": "0",
-#         "amount": 2,
-#         "unitPrice": 50000,
-#         "totalPrice": 100000,
-#         "description": ""
-#       },
-#       {
-#         "serviceId": "de3187d3-c7a0-4217-93b3-f0a0668dae69",
-#         "name": "Rác",
-#         "oldValue": "0",
-#         "newValue": "0",
-#         "amount": 2,
-#         "unitPrice": 50000,
-#         "totalPrice": 100000,
-#         "description": ""
-#       },
-#       {
-#         "serviceId": "bfb96e1b-5fcd-4844-8b12-ee6ee2ce23a7",
-#         "name": "Internet",
-#         "oldValue": "0",
-#         "newValue": "0",
-#         "amount": 1,
-#         "unitPrice": 100000,
-#         "totalPrice": 100000,
-#         "description": ""
-#       },
-#       {
-#         "serviceId": "b608c554-e67a-405c-90a3-dc0223be07a5",
-#         "name": "Nước",
-#         "oldValue": "10",
-#         "newValue": "20",
-#         "amount": 10,
-#         "unitPrice": 10000,
-#         "totalPrice": 100000,
-#         "description": ""
-#       }
-#     ]
-#   }
+
 components:
     schemas:
         BillDetailsInfo:
@@ -230,9 +153,24 @@ components:
                     description: Response message
                     example: Bill list retrieved successfully
                 data:
-                    type: array
-                    items:
-                        $ref: "#/components/schemas/BillDetailsInfo"
+                    type: object
+                    properties:
+                        results:
+                            type: array
+                            items:
+                                $ref: "#/components/schemas/BillDetailsInfo"
+                        total:
+                            type: integer
+                            description: Total number of bills
+                            example: 1
+                        pageSize:
+                            type: integer
+                            description: Number of bills per page
+                            example: 10
+                        page:
+                            type: integer
+                            description: Current page number
+                            example: 1
 
         BillUpdateData:
             type: object
@@ -640,6 +578,65 @@ paths:
                       type: string
                       format: uuid
                   example: 2c28c8ae-230a-49dc-9c8c-fc182a4193d4
+                - in: query
+                  name: filter[]
+                  description: Filter criteria array with field, operator, and value
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the filter on, e.g. houses.name"
+                              operator:
+                                  type: string
+                                  example: "ew"
+                                  description: "The operator to apply (e.g., 'ew' for endsWith, 'eq' for equals, etc.)"
+                              value:
+                                  type: string
+                                  example: "qui"
+                                  description: "The value to filter by, e.g. 'qui'"
+                - in: query
+                  name: sort[]
+                  description: Sort criteria array with field and order
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the sort on, e.g. houses.name"
+                              direction:
+                                  type: string
+                                  enum:
+                                      - "asc"
+                                      - "desc"
+                                  example: "asc"
+                                  description: "The order to sort by (asc or desc)"
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      example: 1
+                  description: Current page number
+                  required: false
+                - in: query
+                  name: pageSize
+                  schema:
+                      type: integer
+                      example: 10
+                  description: Number of items per page
+                  required: false
             responses:
                 "200":
                     description: Bill list retrieved successfully

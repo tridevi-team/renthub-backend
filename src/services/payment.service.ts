@@ -1,9 +1,9 @@
 import PayOS from "@payos/node";
 import { raw } from "objection";
-import { Action, messageResponse } from "../enums";
-import { PaymentRequest } from "../interfaces";
+import { Action, EPagination, messageResponse } from "../enums";
+import { Filter, PaymentRequest } from "../interfaces";
 import { PaymentMethods, Roles } from "../models";
-import { ApiException, camelToSnake } from "../utils";
+import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 import { HouseService } from "./";
 
 class PaymentService {
@@ -13,10 +13,41 @@ class PaymentService {
         return details;
     }
 
-    static async getByHouse(houseId: string) {
-        const paymentsList = await PaymentMethods.query().where("house_id", houseId);
-        if (!paymentsList) throw new ApiException(messageResponse.PAYMENT_METHOD_NOT_FOUND, 404);
-        return paymentsList;
+    static async getByHouse(houseId: string, filterData?: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_PAGE } = {},
+        } = filterData || {};
+
+        let query = PaymentMethods.query().where("house_id", houseId);
+
+        // filter
+        query = filterHandler(query, filter);
+
+        // sort
+        query = sortingHandler(query, sort);
+
+        // clone
+        const clone = query.clone();
+        const total = await clone.resultSize();
+
+        if (total === 0) throw new ApiException(messageResponse.PAYMENT_METHOD_NOT_FOUND, 404);
+
+        const totalPages = Math.ceil(total / pageSize);
+
+        // pagination
+        if (page === -1 && pageSize === -1) await query.page(0, total);
+        else await query.page(page - 1, pageSize);
+
+        const fetchData = await query;
+        return {
+            ...fetchData,
+            total,
+            page,
+            pageCount: totalPages,
+            pageSize,
+        };
     }
 
     static async createPaymentMethod(data: PaymentRequest) {

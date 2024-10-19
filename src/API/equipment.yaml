@@ -268,6 +268,15 @@ components:
                         total:
                             type: integer
                             example: 1
+                        page:
+                            type: integer
+                            example: 1
+                        pageCount:
+                            type: integer
+                            example: 1
+                        pageSize:
+                            type: integer
+                            example: 10
 
         # EquipmentSearchRequest:
         #   type: object
@@ -312,7 +321,7 @@ components:
         #       description: The shared type of the equipment
         #       example: HOUSE
 paths:
-    /equipment/search:
+    /equipment/{houseId}/search:
         get:
             tags:
                 - Equipment
@@ -320,64 +329,72 @@ paths:
             security:
                 - BearerAuth: []
             parameters:
-                - in: query
+                - in: path
                   name: houseId
+                  required: true
                   schema:
                       type: string
                       format: uuid
                   description: The unique identifier of the house
                 - in: query
-                  name: floorId
+                  name: filter[]
+                  description: Filter criteria array with field, operator, and value
+                  required: false
+                  style: deepObject
+                  explode: true
                   schema:
-                      type: string
-                      format: uuid
-                  description: The unique identifier of the floor
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the filter on, e.g. houses.name"
+                              operator:
+                                  type: string
+                                  example: "ew"
+                                  description: "The operator to apply (e.g., 'ew' for endsWith, 'eq' for equals, etc.)"
+                              value:
+                                  type: string
+                                  example: "qui"
+                                  description: "The value to filter by, e.g. 'qui'"
                 - in: query
-                  name: roomId
+                  name: sort[]
+                  description: Sort criteria array with field and order
+                  required: false
+                  style: deepObject
+                  explode: true
                   schema:
-                      type: string
-                      format: uuid
-                  description: The unique identifier of the room
-                - in: query
-                  name: code
-                  schema:
-                      type: string
-                  description: The code of the equipment
-                - in: query
-                  name: name
-                  schema:
-                      type: string
-                  description: The name of the equipment
-                - in: query
-                  name: status
-                  schema:
-                      type: string
-                      enum:
-                          - NORMAL
-                          - BROKEN
-                          - REPAIRING
-                          - DISPOSED
-                  description: The status of the equipment
-                - in: query
-                  name: sharedType
-                  schema:
-                      type: string
-                      enum:
-                          - HOUSE
-                          - ROOM
-                  description: The shared type of the equipment
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the sort on, e.g. houses.name"
+                              direction:
+                                  type: string
+                                  enum:
+                                      - "asc"
+                                      - "desc"
+                                  example: "asc"
+                                  description: "The order to sort by (asc or desc)"
                 - in: query
                   name: page
                   schema:
                       type: integer
-                      minimum: 1
-                  description: The page number
+                      example: 1
+                  description: Current page number
+                  required: false
                 - in: query
-                  name: limit
+                  name: pageSize
                   schema:
                       type: integer
-                      minimum: 1
-                  description: The number of items in a page
+                      example: 10
+                  description: Number of items per page
+                  required: false
             responses:
                 "200":
                     description: Get equipment list successfully

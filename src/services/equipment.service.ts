@@ -1,7 +1,8 @@
-import { Action, EquipmentStatus, EquipmentType, messageResponse } from "../enums";
-import { EquipmentInfo, Pagination } from "../interfaces";
-import { Equipment, Renters, Roles, Rooms, Users } from "../models";
-import { ApiException, camelToSnake } from "../utils";
+import assert from "assert";
+import { Action, EPagination, EquipmentStatus, EquipmentType, messageResponse } from "../enums";
+import { EquipmentInfo, Filter } from "../interfaces";
+import { Equipment, Houses, Renters, Roles, Rooms, Users } from "../models";
+import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 
 class EquipmentService {
     static async create(data: EquipmentInfo) {
@@ -34,69 +35,54 @@ class EquipmentService {
         return data;
     }
 
-    static async listEquipment(
-        filter: {
-            houseId?: string;
-            floorId?: string;
-            roomId?: string;
-            code?: string;
-            name?: string;
-            status?: string;
-            sharedType?: string;
-        },
-        pagination: Pagination = { page: -1, pageSize: -1 },
-        sort: { orderBy?: string; sortBy?: "DESC" | "ASC" } = { orderBy: "created_at", sortBy: "DESC" }
-    ) {
-        const { houseId, floorId, roomId } = filter;
-        let query = Equipment.query().where((builder) => {
-            if (filter.code) builder.where("code", filter.code);
-            if (filter.name) builder.where("name", filter.name);
-            if (filter.status) builder.where("status", filter.status);
-            if (filter.sharedType) builder.where("shared_type", filter.sharedType);
-        });
+    static async listEquipment(houseId: string, dataFilter?: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
+        } = dataFilter || {};
 
-        if (houseId) {
-            query = query.where("house_id", houseId);
-        } else if (floorId) {
-            query = query
-                .where("floor_id", floorId)
-                .joinRelated("floor")
-                .select("equipment.*", "floor.name as floorName");
-        } else if (roomId) {
-            query = query.where("room_id", roomId).joinRelated("room").select("equipment.*", "room.name as roomName");
+        let query = Houses.query()
+            .join("equipment", "houses.id", "equipment.houseId")
+            .leftJoin("house_floors", "equipment.floor_id", "house_floors.id")
+            .leftJoin("rooms", "equipment.room_id", "rooms.id")
+            .where("houses.id", houseId)
+            .select("equipment.*", "house_floors.name as floorName", "rooms.name as roomName");
+
+        // filter
+        query = filterHandler(query, filter);
+
+        // sort
+        query = sortingHandler(query, sort);
+
+        // clone
+        const clone = query.clone();
+        const total = await clone.resultSize();
+
+        if (total === 0) throw new ApiException(messageResponse.EQUIPMENT_NOT_FOUND, 404);
+
+        const totalPages = Math.ceil(total / pageSize);
+
+        if (page === -1 && pageSize === -1) {
+            await query.page(0, total);
+        } else {
+            await query.page(page - 1, pageSize);
         }
 
-        if (sort.orderBy && sort.sortBy) {
-            query = query.orderBy(sort.orderBy, sort.sortBy);
-        }
+        const fetchData = await query;
 
-        if (pagination.page === -1 && pagination.pageSize === -1) {
-            const data = await query;
-            return [
-                {
-                    data,
-                    pagination: {
-                        total: data.length,
-                        page: 1,
-                        limit: data.length,
-                    },
-                },
-            ];
-        }
-        const clone = await query.clone();
-        if (!clone) {
-            throw new ApiException(messageResponse.EQUIPMENT_NOT_FOUND, 404);
-        }
-
-        const data = await query.page(pagination.page - 1, pagination.pageSize);
-        return data;
+        return {
+            ...fetchData,
+            total,
+            page,
+            pageCount: totalPages,
+            pageSize,
+        };
     }
 
     static async update(actionBy: string, id: string, data: EquipmentInfo) {
         const equipment = await this.getById(id);
-        if (!equipment) {
-            throw new ApiException(messageResponse.EQUIPMENT_NOT_FOUND, 404);
-        }
+        assert(equipment);
         await equipment.$query().patch(camelToSnake({ updatedBy: actionBy }));
         await equipment.$query().patchAndFetch(camelToSnake(data));
         return equipment;

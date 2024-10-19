@@ -7,12 +7,9 @@ import { equipmentValidator } from "../middlewares/validator";
 const equipmentRouter = express.Router();
 
 equipmentRouter.get(
-    "/search",
-    authentication,
-    equipmentValidator.equipmentId,
-    handleErrors,
-    equipmentValidator.searchEquipment,
-    authorize(Module.EQUIPMENT, Action.READ),
+    "/:houseId/search",
+    // authentication,
+    // authorize(Module.EQUIPMENT, Action.READ),
     EquipmentController.searchEquipment
 );
 

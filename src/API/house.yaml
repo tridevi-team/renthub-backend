@@ -831,7 +831,6 @@ paths:
                       example: 10
                   description: Number of items per page
                   required: false
-
             responses:
                 "200":
                     description: List of houses

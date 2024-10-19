@@ -18,10 +18,10 @@ issueRouter.post(
 );
 
 issueRouter.get(
-    "/:houseId/list",
+    "/:houseId/search",
     authentication,
     authorize(Module.ISSUE, Action.READ),
-    issueValidator.getIssues,
+    houseValidator.houseIdValidator,
     handleErrors,
     IssueController.getIssues
 );

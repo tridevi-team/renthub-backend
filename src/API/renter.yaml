@@ -550,9 +550,24 @@ components:
                     description: Response message
                     default: Renters by room retrieved successfully
                 data:
-                    type: array
-                    items:
-                        $ref: "#/components/schemas/RenterInfo"
+                    type: object
+                    properties:
+                        results:
+                            type: array
+                            items:
+                                $ref: "#/components/schemas/RenterInfo"
+                        total:
+                            type: integer
+                            example: 1
+                        page:
+                            type: integer
+                            example: 1
+                        pageCount:
+                            type: integer
+                            example: 1
+                        pageSize:
+                            type: integer
+                            example: 10
             required:
                 - success
                 - code
@@ -575,9 +590,112 @@ components:
                     description: Response message
                     default: Renters by house retrieved successfully
                 data:
-                    type: array
-                    items:
-                        $ref: "#/components/schemas/RenterInfo"
+                    type: object
+                    properties:
+                        results:
+                            type: array
+                            items:
+                                type: object
+                                properties:
+                                    floorId:
+                                        type: string
+                                        format: uuid
+                                        description: Floor ID
+                                        example: 36f9a639-5cc7-437d-a228-1305521a4b06
+                                    floorName:
+                                        type: string
+                                        description: Floor name
+                                        example: Tầng 2
+                                    roomId:
+                                        type: string
+                                        format: uuid
+                                        description: Room ID
+                                        example: 02ebde3d-ac50-4c2a-afa9-4da1adc52f5b
+                                    roomName:
+                                        type: string
+                                        description: Room name
+                                        example: Phòng 205
+                                    renterId:
+                                        type: string
+                                        format: uuid
+                                        description: Renter ID
+                                        example: 1fa091e7-c977-44be-ae41-efa38958851f
+                                    renterName:
+                                        type: string
+                                        description: Renter name
+                                        example: Juana Lockman
+                                    citizenId:
+                                        type: string
+                                        description: Renter citizen ID
+                                        example: 026203002093
+                                    birthday:
+                                        type: string
+                                        format: date
+                                        description: Renter birthday
+                                        example: 1990-01-01
+                                    gender:
+                                        type: string
+                                        enum:
+                                            - male
+                                            - female
+                                            - other
+                                        example: male
+                                    email:
+                                        type: string
+                                        format: email
+                                        description: Renter email
+                                        example:
+                                    phoneNumber:
+                                        type: string
+                                        description: Renter phone number
+                                        example: 0397847806
+                                    address:
+                                        type: string
+                                        description: Renter address
+                                        example: Ha Noi
+                                    tempReg:
+                                        type: boolean
+                                        description: Temporary registration
+                                        example: true
+                                    moveInDate:
+                                        type: string
+                                        format: date-time
+                                        description: Move in date
+                                        example: 2023-12-31T17:00:00.000Z
+                                    represent:
+                                        type: boolean
+                                        description: Set as representative of room
+                                        example: true
+                                    note:
+                                        type: string
+                                        description: Note
+                                        example: Note
+                                required:
+                                    - floorId
+                                    - floorName
+                                    - roomId
+                                    - roomName
+                                    - renterId
+                                    - renterName
+                                    - citizenId
+                                    - email
+                                    - phoneNumber
+                                    - address
+                                    - tempReg
+                                    - moveInDate
+                                    - represent
+                        total:
+                            type: integer
+                            example: 1
+                        page:
+                            type: integer
+                            example: 1
+                        pageCount:
+                            type: integer
+                            example: 1
+                        pageSize:
+                            type: integer
+                            example: 10
             required:
                 - success
                 - code
@@ -726,7 +844,7 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/Unauthorized"
 
-    /renters/rooms/{roomId}/list:
+    /renters/rooms/{roomId}/search:
         get:
             tags:
                 - Renter
@@ -765,7 +883,7 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/Unauthorized"
 
-    /renters/houses/{houseId}/list:
+    /renters/houses/{houseId}/search:
         get:
             tags:
                 - Renter

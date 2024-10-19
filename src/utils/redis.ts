@@ -1,9 +1,22 @@
 import "dotenv/config";
 import redisConfig from "../config/redis.config";
+import { Filter } from "../interfaces";
 
 const REDIS_EXPIRE = parseInt(process.env.REDIS_EXPIRE_TIME || "300");
 
 export class RedisUtils {
+    static generateCacheKeyWithFilter(prefix: string, filterData: Filter) {
+        const filterString = filterData.filter?.map((f) => `${f.field}:${f.operator}:${f.value}`).join("|");
+        const sortString = filterData.sort?.map((s) => `${s.field}:${s.direction}`).join("|");
+        const paginationString = `page_${filterData.pagination.page},pageSize_${filterData.pagination.pageSize}`;
+
+        return `${prefix}:filter_${filterString}:sort_${sortString}:${paginationString}`;
+    }
+
+    static generateCacheKeyWithId(prefix: string, id: string, postfix?: string) {
+        return `${prefix}:${id}${postfix ? `:${postfix}` : ""}`;
+    }
+
     static async isExists(member: string) {
         const redis = await redisConfig;
         const exists = await redis.exists(member);
@@ -29,7 +42,7 @@ export class RedisUtils {
     }
 
     static async deleteMember(member: string) {
-        console.log("🚀 ~ RedisUtils ~ deleteMember ~ member:", member)
+        console.log("🚀 ~ RedisUtils ~ deleteMember ~ member:", member);
         const redis = await redisConfig;
         redis.del(member);
 

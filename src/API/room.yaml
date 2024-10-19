@@ -421,41 +421,41 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/RoomAlreadyExists"
 
-    /rooms/{houseId}/list:
-        get:
-            tags:
-                - Room
-            summary: Get rooms by house
-            description: Get rooms by house ID
-            operationId: getRoomsByHouse
-            parameters:
-                - in: path
-                  name: houseId
-                  required: true
-                  description: House ID
-                  schema:
-                      type: string
-                      format: uuid
-                      example: 123e4567-e89b-12d3-a456-426614174000
-            responses:
-                "200":
-                    description: Rooms by house retrieved successfully
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/GetRoomByHouseSuccess"
-                "400":
-                    description: Invalid input
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/ValidationError"
-                "404":
-                    description: House not found
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/NoHouseFound"
+    # /rooms/{houseId}/list:
+    #     get:
+    #         tags:
+    #             - Room
+    #         summary: Get rooms by house
+    #         description: Get rooms by house ID
+    #         operationId: getRoomsByHouse
+    #         parameters:
+    #             - in: path
+    #               name: houseId
+    #               required: true
+    #               description: House ID
+    #               schema:
+    #                   type: string
+    #                   format: uuid
+    #                   example: 123e4567-e89b-12d3-a456-426614174000
+    #         responses:
+    #             "200":
+    #                 description: Rooms by house retrieved successfully
+    #                 content:
+    #                     application/json:
+    #                         schema:
+    #                             $ref: "#/components/schemas/GetRoomByHouseSuccess"
+    #             "400":
+    #                 description: Invalid input
+    #                 content:
+    #                     application/json:
+    #                         schema:
+    #                             $ref: "#/components/schemas/ValidationError"
+    #             "404":
+    #                 description: House not found
+    #                 content:
+    #                     application/json:
+    #                         schema:
+    #                             $ref: "#/components/schemas/NoHouseFound"
 
     /rooms/{roomId}/details:
         get:

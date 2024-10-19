@@ -1,5 +1,3 @@
-import { NumberFilter, StringFilter } from "./";
-
 export interface BillInfo {
     roomId: string;
     paymentMethodId?: string;
@@ -44,19 +42,4 @@ export interface BillDetailRequest {
     description?: string;
     createdBy?: string;
     updatedBy?: string;
-}
-
-export interface BillFilter {
-    roomName?: StringFilter;
-    paymentMethodId?: StringFilter;
-    title?: StringFilter;
-    amount?: NumberFilter;
-    paymentDate?: NumberFilter;
-    startDate?: NumberFilter;
-    endDate?: NumberFilter;
-    status?: StringFilter;
-    createdBy?: StringFilter;
-    createdAt?: NumberFilter;
-    updatedBy?: StringFilter;
-    updatedAt?: NumberFilter;
 }

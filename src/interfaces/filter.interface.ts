@@ -11,5 +11,5 @@ export interface Filter {
         field: string;
         direction: "asc" | "desc";
     }[];
-    pagination?: Pagination;
+    pagination: Pagination;
 }

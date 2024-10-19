@@ -1,8 +1,8 @@
 import Objection from "objection";
-import { messageResponse } from "../enums";
-import type { Role } from "../interfaces";
+import { EPagination, messageResponse } from "../enums";
+import type { Filter, Role } from "../interfaces";
 import { Roles, UserRoles } from "../models";
-import { ApiException, camelToSnake } from "../utils";
+import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 
 class RoleService {
     static async create(houseId: string, data: Role) {
@@ -29,11 +29,40 @@ class RoleService {
         return roleDetails;
     }
 
-    static async getByHouse(houseId: string) {
-        const rolesList = await Roles.query().where(camelToSnake({ houseId }));
-        if (rolesList.length === 0) throw new ApiException(messageResponse.HOUSE_NO_ROLE_CREATED, 404);
+    static async getByHouse(houseId: string, filterData?: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
+        } = filterData || {};
 
-        return rolesList;
+        let query = Roles.query().where(camelToSnake({ houseId }));
+
+        // Filter
+        query = filterHandler(query, filter);
+
+        // Sort
+        query = sortingHandler(query, sort);
+
+        const clone = query.clone();
+        const total = await clone.resultSize();
+
+        if (total === 0) throw new ApiException(messageResponse.HOUSE_NO_ROLE_CREATED, 404);
+
+        const totalPages = Math.ceil(total / pageSize);
+
+        if (page === -1 && pageSize === -1) await query.page(0, total);
+        else await query.page(page - 1, pageSize);
+
+        const fetchData = await query;
+
+        return {
+            ...fetchData,
+            total,
+            page,
+            pageCount: totalPages,
+            pageSize,
+        };
     }
 
     static async update(roleId: string, data: Role) {

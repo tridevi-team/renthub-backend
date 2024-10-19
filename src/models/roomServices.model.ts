@@ -84,9 +84,18 @@ class RoomServices extends Model {
     static get modifiers() {
         return {
             basic(builder) {
-                return builder.join("services", "room_services.service_id", "services.id").select("services.id", "services.name", "services.unit_price", "services.type", "room_services.quantity", "services.description");
-            }
-        }
+                return builder
+                    .join("services", "room_services.service_id", "services.id")
+                    .select(
+                        "services.id",
+                        "services.name",
+                        "services.unit_price",
+                        "services.type",
+                        "room_services.quantity",
+                        "services.description"
+                    );
+            },
+        };
     }
 }
 

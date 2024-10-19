@@ -18,7 +18,7 @@ paymentMethodRouter.post(
 );
 
 paymentMethodRouter.get(
-    "/:houseId/list",
+    "/:houseId/search",
     authentication,
     authorize(Module.PAYMENT, Action.READ),
     houseValidator.houseIdValidator,

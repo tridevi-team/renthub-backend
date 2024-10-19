@@ -40,14 +40,14 @@ class EquipmentController {
     }
 
     static async searchEquipment(req, res) {
-        const { houseId, floorId, code, name, status, sharedType, roomId, page, limit, orderBy, sortBy } = req.query;
-
+        const { houseId } = req.params;
+        const { filter = [], sort = [], pagination } = req.query;
         try {
-            const data = await EquipmentService.listEquipment(
-                { houseId, floorId, roomId, code, name, status, sharedType },
-                { page: Number(page), pageSize: Number(limit) },
-                { orderBy: orderBy, sortBy: sortBy }
-            );
+            const data = await EquipmentService.listEquipment(houseId, {
+                filter,
+                sort,
+                pagination,
+            });
             return res.json(apiResponse(messageResponse.GET_EQUIPMENT_LIST_SUCCESS, true, data));
         } catch (err) {
             Exception.handle(err, req, res);

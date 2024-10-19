@@ -7,7 +7,7 @@ import { houseValidator, roleValidator } from "../middlewares/validator";
 const roleRoute = express.Router();
 
 roleRoute.post(
-    "/:houseId/create/role",
+    "/:houseId/create",
     authentication,
     authorize(Module.ROLE, Action.CREATE),
     roleValidator.createRoleValidator,
@@ -15,7 +15,7 @@ roleRoute.post(
     RoleController.createRole
 );
 roleRoute.get(
-    "/:houseId/list",
+    "/:houseId/search",
     authentication,
     authorize(Module.ROLE, Action.READ),
     houseValidator.houseIdValidator,

@@ -11,7 +11,7 @@ billRouter.get("/:billId/details", billValidator.billId, handleErrors, BillContr
 billRouter.get(
     "/:houseId/list",
     authentication,
-    authorize(Module.BILL, Action.READ),
+    // authorize(Module.BILL, Action.READ),
     houseValidator.houseIdValidator,
     handleErrors,
     BillController.getBills
