@@ -26,8 +26,8 @@ jobs:
 
     - name: Copy files via SSH
       run: |
-        scp -r ./ renthouse@15.235.147.26:/home/renthouse/renthub/backend
+        scp -r * renthouse@15.235.147.26:/home/renthouse/renthub/backend
 
     - name: Execute deploy script
       run: |
-        ssh renthouse@15.235.147.26 'cd /home/renthouse/renthub/backend && /home/renthouse/renthub/backend/src/commands/deploy.sh'
+        ssh renthouse@15.235.147.26 'cd /home/renthouse/renthub/backend && ./src/commands/deploy.sh'
