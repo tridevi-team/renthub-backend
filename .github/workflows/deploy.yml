@@ -20,7 +20,7 @@ jobs:
 
     - name: Copy files via SSH
       run: |
-        scp -r ./ tmquang0209@gmail.com:./home/renthouse/renthub/backend
+        scp -r ./ renthub@15.235.147.26:./home/renthouse/renthub/backend
 
     - name: Execute deploy script
       run: |
