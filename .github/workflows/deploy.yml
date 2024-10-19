@@ -16,7 +16,13 @@ jobs:
     - name: Setup SSH agent
       uses: webfactory/ssh-agent@v0.5.3
       with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }} # Thêm SSH private key vào GitHub Secrets
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        
+    - name: Add server to known_hosts
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SERVER_KEY }}" >> ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
 
     - name: Copy files via SSH
       run: |
