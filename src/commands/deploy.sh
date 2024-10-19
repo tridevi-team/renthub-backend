@@ -4,27 +4,26 @@ echo "Deploy script started."
 
 echo "Current directory: $(pwd)"
 
-# Kiểm tra và cài đặt Node.js nếu chưa có
+# Cài đặt Node.js mà không cần sudo
 if command -v node &> /dev/null
 then
     echo "Node.js is installed: $(node --version)"
 else
-    echo "Node.js is not installed. Installing Node.js..."
-    curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-    sudo apt-get install -y nodejs
+    echo "Node.js is not installed. Installing Node.js locally..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+    nvm install 18
+    nvm use 18
     echo "Node.js installed: $(node --version)"
 fi
 
-# Kiểm tra và cài đặt Yarn
+# Cài đặt Yarn mà không cần sudo
 if command -v yarn &> /dev/null
 then
     echo "Yarn is installed: $(yarn --version)"
 else
-    echo "Yarn is not installed. Installing Yarn..."
-    if [ -d "$HOME/.yarn" ]; then
-        echo "Removing old Yarn installation..."
-        rm -rf "$HOME/.yarn"
-    fi
+    echo "Yarn is not installed. Installing Yarn locally..."
     curl -o- -L https://yarnpkg.com/install.sh | bash
     export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
     echo "Yarn installed: $(yarn --version)"
@@ -40,7 +39,7 @@ git stash --include-untracked --all
 git pull origin master --ff-only
 
 # Cài đặt dependencies
-yarn install --production
+yarn install
 
 # Khởi động ứng dụng
 yarn start
