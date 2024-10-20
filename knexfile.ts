@@ -8,7 +8,7 @@ const DEFAULT_PORT: string = "3306";
 
 const config: { [key: string]: Knex.Config } = {
     development: {
-        client: "mysql",
+        client: "mysql2",
         connection: {
             host: process.env.MYSQL_HOST_DEV,
             port: parseInt(process.env.MYSQL_PORT_DEV || DEFAULT_PORT),
@@ -31,7 +31,7 @@ const config: { [key: string]: Knex.Config } = {
     },
 
     staging: {
-        client: "mysql",
+        client: "mysql2",
         connection: {
             host: process.env.MYSQL_HOST_LOCAL,
             port: parseInt(process.env.MYSQL_PORT_LOCAL || DEFAULT_PORT),
@@ -54,7 +54,7 @@ const config: { [key: string]: Knex.Config } = {
     },
 
     production: {
-        client: "mysql",
+        client: "mysql2",
         connection: {
             host: process.env.MYSQL_HOST_PROD,
             port: parseInt(process.env.MYSQL_PORT_PROD || DEFAULT_PORT),
