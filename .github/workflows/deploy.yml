@@ -1,40 +1,42 @@
 name: Deploy to Server
 
 on:
-    push:
-        branches:
-            - master
+  push:
+    branches:
+      - master
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 18
-                  cache: 'yarn'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-            - name: Setup SSH agent
-              uses: webfactory/ssh-agent@v0.5.3
-              with:
-                  ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_KEY }}" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
 
-            - name: Add server to known_hosts
-              run: |
-                  mkdir -p ~/.ssh
-                  echo "${{ secrets.SERVER_KEY }}" >> ~/.ssh/known_hosts
-                  chmod 644 ~/.ssh/known_hosts
+      - name: Copy files via SSH
+        run: |
+          scp -r * renthouse@15.235.147.26:/home/renthouse/renthub/backend
 
-            - name: Copy files via SSH
-              run: |
-                  scp -r * renthouse@15.235.147.26:/home/renthouse/renthub/backend
+      - name: Set execute permissions for deploy.sh
+        run: |
+          ssh renthouse@15.235.147.26 'chmod +x /home/renthouse/renthub/backend/src/commands/deploy.sh'
 
-            - name: Execute deploy script
-              run: |
-                  ssh renthouse@15.235.147.26 'cd /home/renthouse/renthub/backend && /home/renthouse/renthub/backend/src/commands/deploy.sh'
+      - name: Execute deploy script
+        run: |
+          ssh renthouse@15.235.147.26 'cd /home/renthouse/renthub/backend && /home/renthouse/renthub/backend/src/commands/deploy.sh'
