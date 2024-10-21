@@ -116,7 +116,7 @@ class RenterController {
                 return res.json(apiResponse(messageResponse.GET_RENTER_DETAILS_SUCCESS, true, renter));
             }
 
-            const renter = await RenterService.get(renterId);
+            const renter = await RenterService.getById(renterId);
 
             // set cache
             await RedisUtils.setAddMember(cacheKey, JSON.stringify(renter));

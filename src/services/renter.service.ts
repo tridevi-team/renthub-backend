@@ -28,9 +28,33 @@ class RenterService {
         }
     }
 
-    static async get(id: string) {
+    static async getById(id: string) {
         // Get renter by id
         const renter = await Renters.query().findById(id);
+        if (!renter) {
+            throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
+        }
+        return renter;
+    }
+
+    static async getByEmail(email: string) {
+        // Get renter by email
+        const renter = await Renters.query().where("email", email).first();
+        if (!renter) {
+            throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
+        }
+        return renter;
+    }
+
+    static async getByPhoneNumber(phoneNumber: string) {
+        const internationalPhoneNumber = phoneNumber.startsWith("+84") ? phoneNumber : phoneNumber.replace(/^0/, "+84");
+        const domesticPhoneNumber = phoneNumber.startsWith("0") ? phoneNumber : phoneNumber.replace(/^\+84/, "0");
+
+        // Get renter by phone number
+        const renter = await Renters.query()
+            .where("phone_number", internationalPhoneNumber)
+            .orWhere("phone_number", domesticPhoneNumber)
+            .first();
         if (!renter) {
             throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
         }
@@ -135,13 +159,13 @@ class RenterService {
     }
 
     static async update(id: string, data: Renter) {
-        const renter = await this.get(id);
+        const renter = await this.getById(id);
         const updatedRenter = await renter.$query().patchAndFetch(camelToSnake(data));
         return updatedRenter;
     }
 
     static async delete(id: string) {
-        const renter = await this.get(id);
+        const renter = await this.getById(id);
         if (renter.represent) {
             throw new ApiException(messageResponse.CHANGE_REPRESENT_BEFORE_DELETE, 409);
         }
@@ -202,7 +226,7 @@ class RenterService {
 
     static async changeRepresent(renterId: string, roomId: string) {
         // Change representative
-        const renter = await this.get(renterId);
+        const renter = await this.getById(renterId);
         const roomRenters = await Renters.query().where("room_id", roomId);
 
         const representRenter = roomRenters.find((r) => r.represent);
