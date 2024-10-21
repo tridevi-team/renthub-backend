@@ -44,9 +44,11 @@ const limiter = rateLimit({
 
 app.use(requestLogger);
 app.use(limiter);
-app.use(cors({
-    credentials: true,
-}));
+app.use(
+    cors({
+        credentials: true,
+    })
+);
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
@@ -61,7 +63,7 @@ app.use(express.static(path.join(__dirname, "src/public")));
 // config query parser
 app.use(queryParser);
 
-const UPLOADS_DIR = path.join("./src/public/uploads");
+const UPLOADS_DIR = path.join(__dirname, "/src/public/uploads");
 mkdirSync(UPLOADS_DIR, { recursive: true });
 
 app.post(
@@ -82,7 +84,7 @@ app.post(
         return res.json(
             apiResponse(messageResponse.FILE_UPLOAD_SUCCESS, true, {
                 file: req.file?.originalname,
-                url: `${req.protocol}://${req.get("host")}/public/uploads/${req.file?.originalname}`,
+                url: `${req.protocol}://${req.get("host")}/uploads/${req.file?.originalname}`,
             })
         );
     }
