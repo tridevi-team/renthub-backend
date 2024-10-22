@@ -1,7 +1,7 @@
 import assert from "assert";
-import { Action, EPagination, EquipmentStatus, EquipmentType, messageResponse } from "../enums";
+import { EPagination, EquipmentStatus, EquipmentType, messageResponse } from "../enums";
 import { EquipmentInfo, Filter } from "../interfaces";
-import { Equipment, Houses, Renters, Roles, Rooms, Users } from "../models";
+import { Equipment, Houses } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 
 class EquipmentService {
@@ -115,65 +115,6 @@ class EquipmentService {
         await equipment.$query().patch(camelToSnake({ updatedBy: actionBy }));
         await equipment.$query().delete();
         return equipment;
-    }
-
-    static async isAccessible(userId: string, equipmentId: string, action: string) {
-        const userData = (await Users.query().findById(userId)) || (await Renters.query().findById(userId));
-        if (userData instanceof Users) {
-            // owner check
-            const isOwner = await Equipment.query().findById(equipmentId).joinRelated("house").findOne({
-                "house.createdBy": userId,
-                "equipment.id": equipmentId,
-            });
-            if (isOwner) return true;
-            else {
-                // access check
-                const equipment = await Equipment.query().findById(equipmentId);
-                if (!equipment) return false;
-
-                const isAccess = await Roles.query()
-                    .joinRelated("userRoles")
-                    .findOne(
-                        camelToSnake({
-                            "userRoles.userId": userId,
-                            "userRoles.houseId": equipment.houseId,
-                        })
-                    );
-
-                if (!isAccess) return false;
-
-                if (action === Action.READ) {
-                    return (
-                        isAccess.permissions.equipment.create ||
-                        isAccess.permissions.equipment.read ||
-                        isAccess.permissions.equipment.update ||
-                        isAccess.permissions.equipment.delete
-                    );
-                } else if (action === Action.UPDATE) {
-                    return isAccess.permissions.equipment.update;
-                } else if (action === Action.DELETE) {
-                    return isAccess.permissions.equipment.delete;
-                } else if (action === Action.CREATE) {
-                    return isAccess.permissions.equipment.create;
-                }
-            }
-        } else if (userData instanceof Renters) {
-            if (!userData.represent) return false;
-
-            const houseData = await Rooms.query().joinRelated("floor").joinRelated("house").findOne({
-                "rooms.id": userData.roomId,
-            });
-            if (!houseData) return false;
-
-            const equipment = await Equipment.query().findOne({
-                "equipment.id": equipmentId,
-                "equipment.houseId": houseData.houseId,
-            });
-
-            if (!equipment) return false;
-            return true;
-        }
-        return false;
     }
 }
 

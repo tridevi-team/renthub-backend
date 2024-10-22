@@ -1,6 +1,7 @@
 import express from "express";
 import { FloorController } from "../controllers";
-import { authentication, handleErrors } from "../middlewares";
+import { Action, Module } from "../enums";
+import { authentication, authorize, handleErrors } from "../middlewares";
 import { houseValidator } from "../middlewares/validator";
 import floorValidator from "../middlewares/validator/floor.validator";
 
@@ -9,11 +10,13 @@ const floorRouter = express.Router();
 floorRouter.post(
     "/:houseId/create",
     authentication,
+    authorize(Module.FLOOR, Action.CREATE),
     houseValidator.houseIdValidator,
     floorValidator.createFloor,
     handleErrors,
     FloorController.createFloor
 );
+
 floorRouter.get(
     "/:houseId/list",
     authentication,
@@ -21,6 +24,7 @@ floorRouter.get(
     handleErrors,
     FloorController.getFloorsByHouse
 );
+
 floorRouter.get(
     "/:floorId/details",
     authentication,
@@ -29,6 +33,7 @@ floorRouter.get(
     handleErrors,
     FloorController.getFloorDetails
 );
+
 floorRouter.put(
     "/:floorId/update",
     authentication,
@@ -38,6 +43,7 @@ floorRouter.put(
     handleErrors,
     FloorController.updateFloor
 );
+
 floorRouter.delete(
     "/:floorId/delete",
     authentication,

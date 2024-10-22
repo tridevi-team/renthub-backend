@@ -1,8 +1,16 @@
 import { raw } from "objection";
-import { Action, EPagination, messageResponse } from "../enums";
-import type { Filter, HouseCreate, HouseServiceInfo, HouseUpdate } from "../interfaces";
+import { Action, EPagination, messageResponse, Module } from "../enums";
+import type { Filter, HouseCreate, HouseServiceInfo, HouseUpdate, ResourceIdentifier } from "../interfaces";
 import { HouseFloors, Houses, Rooms, Services } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
+import BillService from "./bill.service";
+import EquipmentService from "./equipment.service";
+import FloorService from "./floor.service";
+import IssueService from "./issue.service";
+import PaymentService from "./payment.service";
+import RenterService from "./renter.service";
+import RoleService from "./role.service";
+import RoomService from "./room.service";
 
 class HouseService {
     static async getHouseByUser(userId: string, data?: Filter) {
@@ -224,23 +232,102 @@ class HouseService {
         return !!house;
     }
 
-    static async isAccessible(userId: string, houseId: string, action: string) {
-        const housePermissions = await Houses.query()
-            .leftJoin("user_roles", "houses.id", "user_roles.house_id")
-            .leftJoin("roles", "user_roles.role_id", "roles.id")
-            .where("houses.id", houseId)
-            .andWhere("user_roles.user_id", userId)
-            .select("roles.permissions")
-            .first();
-        if (!housePermissions?.permissions) return false;
-        else if (action === Action.READ) {
-            return (
-                housePermissions.permissions.house.read ||
-                housePermissions.permissions.house.update ||
-                housePermissions.permissions.house.delete
-            );
+    static async isAccessToResource(userId: string, resource: ResourceIdentifier, module: Module, action: Action) {
+        const { houseId, roomId, floorId, equipmentId, paymentId, billId, serviceId, issueId, renterId, roleId } =
+            resource;
+
+        let houseIdAccess: string | undefined = houseId;
+        if (roomId) {
+            houseIdAccess = await RoomService.getHouseId(roomId);
+        } else if (floorId) {
+            const floorDetails = await FloorService.getFloorById(floorId);
+            houseIdAccess = floorDetails.houseId;
+        } else if (equipmentId) {
+            const equipmentDetails = await EquipmentService.getById(equipmentId);
+            if (!equipmentDetails) return false;
+            houseIdAccess = equipmentDetails.houseId;
+        } else if (paymentId) {
+            const paymentDetails = await PaymentService.getById(paymentId);
+            houseIdAccess = paymentDetails.houseId;
+        } else if (billId) {
+            houseIdAccess = await BillService.getHouseId(billId);
+        } else if (serviceId) {
+            const serviceDetails = await this.getServiceDetails(serviceId);
+            houseIdAccess = serviceDetails.houseId;
+        } else if (issueId) {
+            houseIdAccess = await IssueService.getHouseId(issueId);
+        } else if (renterId) {
+            houseIdAccess = await RenterService.getHouseId(renterId);
+        } else if (roleId) {
+            houseIdAccess = await RoleService.getHouseId(roleId);
         }
-        return housePermissions.permissions.house[action];
+
+        if (!houseIdAccess) return false;
+
+        // get role
+        const role = await RoleService.getRolesByUser(userId, houseIdAccess);
+        if (action === Action.READ) {
+            // if any permission in module is true, return true
+            console.log(role.permissions[module]);
+        }
+        role.$query().where(raw(`JSON_UNQUOTE(JSON_EXTRACT(permissions, "$.house.${action}")) = 1`));
+        return false;
+    }
+
+    static async isRenterAccessToResource(userId: string, resource: ResourceIdentifier) {
+        const { houseId, roomId, floorId, equipmentId, paymentId, issueId, renterId, serviceId, billId } = resource;
+
+        // Fetch renter's house and room information upfront
+        const [houseRenterStay, roomRenterStay] = await Promise.all([
+            RenterService.getHouseId(userId),
+            RenterService.getRoomId(userId),
+        ]);
+
+        // Check house access first
+        if (houseId && houseId !== houseRenterStay) {
+            return false;
+        }
+        // Check room access if roomId is provided
+        else if (roomId && roomId !== roomRenterStay) {
+            return false;
+        }
+        // Floor check if floorId is provided
+        else if (floorId) {
+            const floorDetails = await FloorService.getFloorById(floorId);
+            if (floorDetails?.houseId !== houseRenterStay) return false;
+        }
+        // Equipment check if equipmentId is provided
+        else if (equipmentId) {
+            const equipmentDetails = await EquipmentService.getById(equipmentId);
+            if (!equipmentDetails || equipmentDetails.houseId !== houseRenterStay) return false;
+        }
+        // Payment check if paymentId is provided
+        else if (paymentId) {
+            const paymentDetails = await PaymentService.getById(paymentId);
+            if (paymentDetails?.houseId !== houseRenterStay) return false;
+        }
+        // Bill check if billId is provided
+        else if (billId) {
+            const billRoomId = await BillService.getRoomId(billId);
+            if (billRoomId !== roomRenterStay) return false;
+        }
+        // Service check if serviceId is provided
+        else if (serviceId) {
+            const serviceDetails = await this.getServiceDetails(serviceId);
+            if (serviceDetails?.houseId !== houseRenterStay) return false;
+        }
+        // Issue check if issueId is provided
+        else if (issueId) {
+            const issueRoomId = await IssueService.getRoomId(issueId);
+            if (issueRoomId !== roomRenterStay) return false;
+        }
+        // Renter check if renterId is provided
+        else if (renterId) {
+            const renterDetails = await RenterService.getById(renterId);
+            if (renterDetails?.roomId !== roomRenterStay) return false;
+        }
+
+        return true;
     }
 
     static async createService(houseId: string, data: HouseServiceInfo) {

@@ -1,7 +1,7 @@
 import { ForeignKeyViolationError } from "objection";
 import { messageResponse } from "../enums";
 import type { Room, RoomServiceInfo } from "../interfaces";
-import { Renters, Roles, RoomImages, Rooms, RoomServices, Services } from "../models";
+import { Renters, RoomImages, Rooms, RoomServices, Services } from "../models";
 import { ApiException, camelToSnake } from "../utils";
 
 class RoomService {
@@ -26,6 +26,21 @@ class RoomService {
             }
             throw err;
         }
+    }
+
+    static async getHouseId(roomId: string) {
+        const house = await Rooms.query()
+            .join("house_floors", "rooms.floor_id", "house_floors.id")
+            .findOne({
+                "rooms.id": roomId,
+            })
+            .select("house_floors.house_id");
+
+        if (!house) {
+            throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
+        }
+
+        return house.houseId;
     }
 
     static async getRoomById(id: string) {
@@ -268,47 +283,6 @@ class RoomService {
         await room.$relatedQuery("images").unrelate().whereIn("id", images);
 
         return room;
-    }
-
-    static async isRoomAccessible(userId: string, roomId: string, action: string) {
-        const room = await Rooms.query().findById(roomId);
-
-        if (!room) throw new ApiException(messageResponse.ROLE_NOT_FOUND, 404);
-        // get houseId
-        const houseDetails = await Rooms.query()
-            .join("house_floors", "rooms.floor_id", "house_floors.id")
-            .join("houses", "house_floors.house_id", "houses.id")
-            .where("rooms.id", roomId)
-            .select("houses.created_by", "houses.id")
-            .first();
-        if (!houseDetails) throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
-
-        if (houseDetails.createdBy === userId) return true;
-
-        // get house permissions
-        const housePermissions = await Roles.query()
-            .leftJoin("user_roles", "roles.id", "user_roles.role_id")
-            .findOne(
-                camelToSnake({
-                    "roles.houseId": houseDetails.id,
-                    "userRoles.userId": userId,
-                })
-            );
-
-        if (!housePermissions?.permissions) return false;
-        else if (action === "read") {
-            return (
-                housePermissions.permissions.role.read ||
-                housePermissions.permissions.role.update ||
-                housePermissions.permissions.role.delete
-            );
-        } else if (action === "update") {
-            return housePermissions.permissions.role.update;
-        } else if (action === "delete") {
-            return housePermissions.permissions.role.delete;
-        }
-
-        return false;
     }
 }
 

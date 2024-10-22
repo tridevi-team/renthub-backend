@@ -27,6 +27,29 @@ class IssueService {
         return details;
     }
 
+    static async getHouseId(issueId: string) {
+        const issue = await Issues.query().findById(issueId).select("house_id");
+
+        if (!issue) {
+            throw new ApiException(messageResponse.ISSUE_NOT_FOUND, 404);
+        }
+
+        return issue.houseId;
+    }
+
+    static async getRoomId(issueId: string) {
+        const issue = await Issues.query()
+            .findById(issueId)
+            .leftJoin("rooms", "rooms.id", "issues.room_id")
+            .select("rooms.id");
+
+        if (!issue) {
+            throw new ApiException(messageResponse.ISSUE_NOT_FOUND, 404);
+        }
+
+        return issue.roomId;
+    }
+
     static async search(houseId: string, filterData?: Filter) {
         const {
             filter = [],

@@ -73,3 +73,16 @@ export interface HouseServiceInfo {
     createdBy?: string;
     updatedBy?: string;
 }
+
+export interface ResourceIdentifier {
+    houseId?: string;
+    roomId?: string;
+    floorId?: string;
+    equipmentId?: string;
+    paymentId?: string;
+    billId?: string;
+    serviceId?: string;
+    issueId?: string;
+    renterId?: string;
+    roleId?: string;
+}

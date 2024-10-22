@@ -21,6 +21,14 @@ class RoleService {
         return createRole;
     }
 
+    static async getHouseId(roleId: string) {
+        const role = await Roles.query().findById(roleId);
+
+        if (!role) throw new ApiException(messageResponse.ROLE_NOT_FOUND, 404);
+
+        return role.houseId;
+    }
+
     static async getById(roleId: string) {
         const roleDetails = await Roles.query().findById(roleId);
 
@@ -66,11 +74,14 @@ class RoleService {
     }
 
     static async getRolesByUser(userId: string, houseId: string) {
-        const roles = await UserRoles.query()
-            .join("roles", "user_roles.role_id", "roles.id")
+        const roles = await Roles.query()
+            .join("user_roles", "roles.id", "user_roles.role_id")
             .where("user_id", userId)
-            .andWhere("house_id", houseId)
-            .select("roles.*");
+            .andWhere("roles.house_id", houseId)
+            .select("roles.permissions")
+            .first();
+
+        if (!roles) throw new ApiException(messageResponse.ROLE_NOT_FOUND, 404);
 
         return roles;
     }
@@ -145,40 +156,6 @@ class RoleService {
                 createdBy,
             })
         );
-    }
-
-    static async isAccessible(userId: string, roleId: string, action: string): Promise<boolean> {
-        const role = await Roles.query().findById(roleId);
-
-        if (!role) throw new ApiException(messageResponse.ROLE_NOT_FOUND, 404);
-        // get houseId
-        const houseDetails = await Roles.query()
-            .join("houses", "roles.house_id", "houses.id")
-            .where("roles.id", roleId)
-            .select("houses.created_by")
-            .first();
-        if (!houseDetails) throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
-
-        if (houseDetails.createdBy === userId) return true;
-
-        // get house permissions
-        const housePermissions = await Roles.query()
-            .leftJoin("user_roles", "roles.id", "user_roles.role_id")
-            .where("roles.id", roleId)
-            .andWhere("user_id", userId)
-            .select("roles.permissions")
-            .first();
-
-        if (!housePermissions?.permissions) return false;
-        else if (action === "read") {
-            return (
-                housePermissions.permissions.role.read ||
-                housePermissions.permissions.role.update ||
-                housePermissions.permissions.role.delete
-            );
-        }
-
-        return true;
     }
 }
 

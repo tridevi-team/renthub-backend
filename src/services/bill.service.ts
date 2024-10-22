@@ -31,6 +31,28 @@ class BillService {
         return bill;
     }
 
+    static async getHouseId(billId: string) {
+        const bill = await Bills.query()
+            .join("rooms", "bills.room_id", "rooms.id")
+            .join("house_floors", "rooms.floor_id", "house_floors.id")
+            .select("house_floors.house_id")
+            .findById(billId);
+
+        if (!bill) {
+            throw new ApiException(messageResponse.BILL_NOT_FOUND, 404);
+        }
+
+        return bill.houseId;
+    }
+
+    static async getRoomId(billId: string) {
+        const bill = await Bills.query().findById(billId).select("room_id");
+        if (!bill) {
+            throw new ApiException(messageResponse.BILL_NOT_FOUND, 404);
+        }
+        return bill.roomId;
+    }
+
     static async getServicesInBill(billId: string, trx: TransactionOrKnex | undefined = undefined) {
         const bill = await BillDetails.query(trx)
             .where("bill_id", billId)

@@ -14,6 +14,7 @@ class HouseFloors extends Model {
     updated_at: string;
     house: Houses;
     rooms: Rooms[];
+    houseId: string;
 
     static get tableName() {
         return "house_floors";

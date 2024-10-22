@@ -1,5 +1,6 @@
 export enum Module {
     HOUSE = "house",
+    FLOOR = "floor",
     ROLE = "role",
     ROOM = "room",
     RENTER = "renter",

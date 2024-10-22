@@ -1,7 +1,7 @@
 import { ConstraintViolationError } from "objection";
 import { EPagination, messageResponse } from "../enums";
 import type { Filter, Renter } from "../interfaces";
-import { Houses, Renters, Roles } from "../models";
+import { Houses, Renters } from "../models";
 import { ApiException, camelToSnake, filterHandler, jwtToken, sortingHandler } from "../utils";
 
 class RenterService {
@@ -26,6 +26,28 @@ class RenterService {
             }
             throw err;
         }
+    }
+
+    static async getHouseId(renterId: string) {
+        const house = await Renters.query()
+            .join("rooms", "renters.room_id", "rooms.id")
+            .join("house_floors", "rooms.floor_id", "house_floors.id")
+            .join("houses", "house_floors.house_id", "houses.id")
+            .where("renters.id", renterId)
+            .select("houses.id")
+            .first();
+        if (!house) {
+            throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
+        }
+        return house.id;
+    }
+
+    static async getRoomId(renterId: string) {
+        const room = await Renters.query().findById(renterId).select("room_id");
+        if (!room) {
+            throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
+        }
+        return room.roomId;
     }
 
     static async getById(id: string) {
@@ -258,46 +280,6 @@ class RenterService {
             .first();
         if (room) {
             return true;
-        }
-
-        return false;
-    }
-
-    static async isRenterAccessible(userId: string, renterId: string, action: string) {
-        const renter = await Renters.query().findById(renterId);
-        if (!renter) {
-            throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
-        }
-
-        const houseDetails = await Renters.query()
-            .join("rooms", "renters.room_id", "rooms.id")
-            .join("house_floors", "rooms.floor_id", "house_floors.id")
-            .join("houses", "house_floors.house_id", "houses.id")
-            .where("renters.id", renterId)
-            .select("houses.created_by", "houses.id")
-            .first();
-        if (houseDetails && houseDetails.createdBy === userId) return true;
-
-        const housePermissions = await Roles.query()
-            .leftJoin("user_roles", "roles.id", "user_roles.role_id")
-            .findOne(
-                camelToSnake({
-                    "roles.house_id": houseDetails?.id,
-                    "user_roles.user_id": userId,
-                })
-            );
-
-        if (!housePermissions?.permissions) return false;
-        else if (action === "read") {
-            return (
-                housePermissions.permissions.role.read ||
-                housePermissions.permissions.role.update ||
-                housePermissions.permissions.role.delete
-            );
-        } else if (action === "update") {
-            return housePermissions.permissions.role.update;
-        } else if (action === "delete") {
-            return housePermissions.permissions.role.delete;
         }
 
         return false;
