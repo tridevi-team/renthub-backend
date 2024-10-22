@@ -20,11 +20,18 @@ yarn install
 
 npm install -g typescript copyfiles rimraf pm2
 
-# move uploads file to outside of the dist folder
-# check ./dist/public/uploads exists
+# create uploads_backup directory
+if [ ! -d "./uploads_backup" ]; then
+    echo "Creating uploads_backup directory"
+    mkdir uploads_backup
+else
+    echo "Directory uploads_backup already exists."
+fi
+
+# Move uploads directory outside of dist
 if [ -d "./dist/public/uploads" ]; then
-    echo "Directory ./dist/public/uploads exists."
-    mv ./dist/public/uploads ./uploads
+    echo "Moving ./dist/public/uploads to ./uploads_backup"
+    mv ./dist/public/uploads ./uploads_backup
 else
     echo "Directory ./dist/public/uploads does not exist."
 fi
@@ -39,7 +46,13 @@ copyfiles ./src/API/*.yaml ./dist
 copyfiles ./src/public/* ./dist
 copyfiles ./src/views/* ./dist
 
-mv ./uploads ./dist/public/uploads
+# Move the uploads folder back to dist after build
+if [ -d "./uploads_backup" ]; then
+    echo "Moving ./uploads_backup back to ./dist/public/uploads"
+    mv ./uploads_backup ./dist/public/uploads
+else
+    echo "No backup uploads folder found."
+fi
 
 # check pm2 exists name renthub-backend
 if pm2 list | grep -q "renthub-backend"; then
