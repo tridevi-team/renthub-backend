@@ -65,6 +65,16 @@ class RoleService {
         };
     }
 
+    static async getRolesByUser(userId: string, houseId: string) {
+        const roles = await UserRoles.query()
+            .join("roles", "user_roles.role_id", "roles.id")
+            .where("user_id", userId)
+            .andWhere("house_id", houseId)
+            .select("roles.*");
+
+        return roles;
+    }
+
     static async update(roleId: string, data: Role) {
         const roleDetails = await this.getById(roleId);
         // check name by house
