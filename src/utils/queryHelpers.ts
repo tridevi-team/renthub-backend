@@ -49,8 +49,14 @@ const applyFilterCondition = (query: QueryBuilder<any>, key: string, op: Operato
         [Operator.GreaterThanOrEqual]: () => query.where(key, ">=", value),
         [Operator.LessThan]: () => query.where(key, "<", value),
         [Operator.LessThanOrEqual]: () => query.where(key, "<=", value),
-        [Operator.In]: () => query.whereIn(key, value),
-        [Operator.NotIn]: () => query.whereNotIn(key, value),
+        [Operator.In]: () => {
+            const splitValue = value.split("|");
+            return query.whereIn(key, splitValue);
+        },
+        [Operator.NotIn]: () => {
+            const splitValue = value.split("|");
+            return query.whereNotIn(key, splitValue);
+        },
         [Operator.Contains]: () => query.where(key, "like", `%${value}%`),
         [Operator.DoesNotContain]: () => query.where(key, "not like", `%${value}%`),
         [Operator.StartsWith]: () => query.where(key, "like", `${value}%`),
