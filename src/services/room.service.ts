@@ -37,7 +37,7 @@ class RoomService {
             .select("house_floors.house_id");
 
         if (!house) {
-            throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
+            throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
         }
 
         return house.houseId;

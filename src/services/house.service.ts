@@ -228,8 +228,8 @@ class HouseService {
     }
 
     static async isOwner(userId: string, houseId: string) {
-        const house = await Houses.query().findOne(camelToSnake({ id: houseId, createdBy: userId }));
-        return !!house;
+        const details = await this.getHouseById(houseId);
+        return details.createdBy === userId;
     }
 
     static async isAccessToResource(userId: string, resource: ResourceIdentifier, module: Module, action: Action) {
@@ -237,7 +237,10 @@ class HouseService {
             resource;
 
         let houseIdAccess: string | undefined = houseId;
-        if (roomId) {
+        if (houseId) {
+            const houseData = await this.getHouseById(houseId);
+            houseIdAccess = houseData.id;
+        } else if (roomId) {
             houseIdAccess = await RoomService.getHouseId(roomId);
         } else if (floorId) {
             const floorDetails = await FloorService.getFloorById(floorId);
@@ -268,7 +271,13 @@ class HouseService {
         const role = await RoleService.getRolesByUser(userId, houseIdAccess);
         if (action === Action.READ) {
             // if any permission in module is true, return true
-            console.log(role.permissions[module]);
+            if (
+                role.permissions[module].read ||
+                role.permissions[module].create ||
+                role.permissions[module].update ||
+                role.permissions[module].delete
+            )
+                return true;
         }
         role.$query().where(raw(`JSON_UNQUOTE(JSON_EXTRACT(permissions, "$.house.${action}")) = 1`));
         return false;
