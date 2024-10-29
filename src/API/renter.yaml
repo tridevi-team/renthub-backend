@@ -793,6 +793,36 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/InvalidVerificationCode"
 
+    /renters/info:
+        get:
+            tags:
+                - Renter
+            summary: Get renter info by token
+            description: Get renter info by token
+            security:
+                - BearerAuth: []
+            responses:
+                "200":
+                    description: Renter info retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterInfoResponse"
+                "401":
+                    description: Invalid token
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "404":
+                    description: Renter not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterNotFound"
+
     /renters/{roomId}/add:
         post:
             tags:

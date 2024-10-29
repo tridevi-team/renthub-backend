@@ -25,24 +25,15 @@ const authentication = async (req, res, next) => {
 
         // Check if it's a Firebase token (has "iss" and "aud")
         if ("iss" in data && "aud" in data) {
-            const { email, phone_number: phoneNumber } = data as FirebaseToken;
+            const { email, phone_number: phoneNumber, uid } = data as FirebaseToken;
+
+            const key = email || phoneNumber || uid;
 
             // Search for renter by phone number or email
-            if (phoneNumber) {
-                const renter = await RenterService.getByPhoneNumber(phoneNumber);
-                if (renter) {
-                    req.user = renter;
-                    return next();
-                }
-            }
+            const renter = await RenterService.findOne(key);
 
-            if (email) {
-                const renter = await RenterService.getByEmail(email);
-                if (renter) {
-                    req.user = renter;
-                    return next();
-                }
-            }
+            req.user = renter ? renter : data;
+            return next();
         }
 
         // Handle standard JWT token (AccessTokenPayload)

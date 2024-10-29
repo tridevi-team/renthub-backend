@@ -59,6 +59,29 @@ class RenterService {
         return renter;
     }
 
+    static async findOne(key: string) {
+        // if key match phone number
+        if (key.match(/^\+84\d{9,10}$/) || key.match(/^0\d{9,10}$/)) {
+            const internationalPhoneNumber = key.startsWith("+84") ? key : key.replace(/^0/, "+84");
+            const domesticPhoneNumber = key.startsWith("0") ? key : key.replace(/^\+84/, "0");
+            const renter = await Renters.query()
+                .where("phone_number", internationalPhoneNumber)
+                .orWhere("phone_number", domesticPhoneNumber)
+                .first();
+            return renter;
+        }
+
+        // if key match email
+        if (key.match(/.+@.+\..+/)) {
+            const renter = await Renters.query().where("email", key).first();
+            return renter;
+        }
+
+        // if key match id
+        const renter = await Renters.query().findById(key);
+        return renter;
+    }
+
     static async getByEmail(email: string) {
         // Get renter by email
         const renter = await Renters.query().where("email", email).first();

@@ -2,6 +2,7 @@
 
 import redisConfig from "../config/redis.config";
 import { messageResponse } from "../enums";
+import { FirebaseToken } from "../interfaces";
 import { RenterService } from "../services";
 import MailService from "../services/mail.service";
 import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
@@ -68,6 +69,23 @@ class RenterController {
             await RedisUtils.setAddMember(cacheKey, JSON.stringify(renters));
 
             return res.json(apiResponse(messageResponse.GET_RENTERS_BY_ROOM_SUCCESS, true, renters));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async getRenterInfo(req, res) {
+        const user: FirebaseToken = req.user;
+
+        try {
+            const key = user.phone_number || user.email || user.uid;
+            const renter = await RenterService.findOne(key);
+
+            if (!renter) {
+                throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
+            }
+
+            return res.json(apiResponse(messageResponse.GET_RENTER_DETAILS_SUCCESS, true, renter));
         } catch (err) {
             Exception.handle(err, req, res);
         }
