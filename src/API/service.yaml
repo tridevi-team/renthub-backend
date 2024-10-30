@@ -28,9 +28,6 @@ components:
                 type:
                     type: string
                     default: "AMOUNT"
-                hasIndex:
-                    type: number
-                    default: 1
                 description:
                     type: string
                     default: null
@@ -137,9 +134,6 @@ components:
                 type:
                     type: string
                     default: "AMOUNT"
-                hasIndex:
-                    type: number
-                    default: 1
                 description:
                     type: string
                     default: null

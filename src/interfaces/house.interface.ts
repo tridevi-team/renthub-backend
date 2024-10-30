@@ -68,7 +68,6 @@ export interface HouseServiceInfo {
     name: string;
     unitPrice: number;
     type: ServiceTypes;
-    hasIndex?: boolean;
     description?: string;
     createdBy?: string;
     updatedBy?: string;
