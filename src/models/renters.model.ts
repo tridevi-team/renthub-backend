@@ -1,6 +1,7 @@
 import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
+import { Address } from "../interfaces";
 import { currentDateTime } from "../utils/currentTime";
 import Rooms from "./rooms.model";
 
@@ -13,7 +14,7 @@ class Renters extends Model {
     gender: "male" | "female" | "other";
     email: string;
     phone_number: string;
-    address: string;
+    address: Address;
     temp_reg: boolean;
     move_in_date: string;
     represent: boolean;
@@ -56,7 +57,7 @@ class Renters extends Model {
                 gender: { type: "string", maxLength: 6 },
                 email: { type: "string", maxLength: 255 },
                 phone_number: { type: "string", maxLength: 255 },
-                address: { type: "string", maxLength: 255 },
+                address: { type: "object" },
                 temp_reg: { type: "boolean" },
                 move_in_date: { type: "string", format: "date" },
                 represent: { type: "boolean" },

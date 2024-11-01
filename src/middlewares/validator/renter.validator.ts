@@ -21,7 +21,19 @@ const renterInfo = [
         .isLength({ min: 10, max: 11 })
         .withMessage("Phone number must be 10 characters"),
     check("email").optional().isEmail().withMessage("Email must be a valid email"),
-    check("address").optional().isString().withMessage("Address must be a string"),
+    check("address")
+        .optional()
+        .isObject()
+        .withMessage("Address must be an object")
+        .custom((value) => {
+            const keys = ["city", "district", "street", "ward"];
+            for (const key of keys) {
+                if (!Object.prototype.hasOwnProperty.call(value, key)) {
+                    throw new Error(`address must have a ${key} property`);
+                }
+            }
+            return true;
+        }),
     check("tempReg").isBoolean().withMessage("Temporary registration must be a boolean"),
     check("moveInDate").isString().withMessage("Move in date must be a string"),
     check("represent").isBoolean().withMessage("Represent must be a boolean"),

@@ -49,9 +49,25 @@ components:
                     description: Renter phone number
                     example: 0397847806
                 address:
-                    type: string
+                    type: object
                     description: Renter address
-                    example: Ha Noi
+                    properties:
+                        city:
+                            type: string
+                            description: City
+                            example: Ha Noi
+                        district:
+                            type: string
+                            description: District
+                            example: Cau Giay
+                        ward:
+                            type: string
+                            description: Ward
+                            example: Nghia Tan
+                        street:
+                            type: string
+                            description: Street
+                            example: Nguyen Trai
                 tempReg:
                     type: boolean
                     description: Temporary registration
@@ -220,9 +236,25 @@ components:
                                         description: Renter phone number
                                         example: 0397847806
                                     address:
-                                        type: string
+                                        type: object
                                         description: Renter address
-                                        example: Ha Noi
+                                        properties:
+                                            city:
+                                                type: string
+                                                description: City
+                                                example: Ha Noi
+                                            district:
+                                                type: string
+                                                description: District
+                                                example: Cau Giay
+                                            ward:
+                                                type: string
+                                                description: Ward
+                                                example: Nghia Tan
+                                            street:
+                                                type: string
+                                                description: Street
+                                                example: Nguyen Trai
                                     tempReg:
                                         type: boolean
                                         description: Temporary registration
@@ -308,9 +340,25 @@ components:
                     description: Renter phone number
                     example: 0397847806
                 address:
-                    type: string
+                    type: object
                     description: Renter address
-                    example: Ha Noi
+                    properties:
+                        city:
+                            type: string
+                            description: City
+                            example: Ha Noi
+                        district:
+                            type: string
+                            description: District
+                            example: Cau Giay
+                        ward:
+                            type: string
+                            description: Ward
+                            example: Nghia Tan
+                        street:
+                            type: string
+                            description: Street
+                            example: Nguyen Trai
                 tempReg:
                     type: boolean
                     description: Temporary registration
@@ -483,9 +531,25 @@ components:
                     description: Renter phone number
                     example: 0397847806
                 address:
-                    type: string
+                    type: object
                     description: Renter address
-                    example: Ha Noi
+                    properties:
+                        city:
+                            type: string
+                            description: City
+                            example: Ha Noi
+                        district:
+                            type: string
+                            description: District
+                            example: Cau Giay
+                        ward:
+                            type: string
+                            description: Ward
+                            example: Nghia Tan
+                        street:
+                            type: string
+                            description: Street
+                            example: Nguyen Trai
                 birthday:
                     type: string
                     format: date
@@ -650,9 +714,25 @@ components:
                                         description: Renter phone number
                                         example: 0397847806
                                     address:
-                                        type: string
+                                        type: object
                                         description: Renter address
-                                        example: Ha Noi
+                                        properties:
+                                            city:
+                                                type: string
+                                                description: City
+                                                example: Ha Noi
+                                            district:
+                                                type: string
+                                                description: District
+                                                example: Cau Giay
+                                            ward:
+                                                type: string
+                                                description: Ward
+                                                example: Nghia Tan
+                                            street:
+                                                type: string
+                                                description: Street
+                                                example: Nguyen Trai
                                     tempReg:
                                         type: boolean
                                         description: Temporary registration
