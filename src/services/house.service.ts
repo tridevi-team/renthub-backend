@@ -1,6 +1,13 @@
 import { raw } from "objection";
 import { Action, EPagination, messageResponse, Module } from "../enums";
-import type { Filter, HouseCreate, HouseServiceInfo, HouseUpdate, ResourceIdentifier } from "../interfaces";
+import type {
+    Filter,
+    HouseCreate,
+    HouseServiceInfo,
+    HouseUpdate,
+    Permissions,
+    ResourceIdentifier,
+} from "../interfaces";
 import { HouseFloors, Houses, Rooms, Services } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 import BillService from "./bill.service";
@@ -28,7 +35,7 @@ class HouseService {
 
         if (!data) {
             const fetchData = await list;
-            const fullPermissions = {
+            const fullPermissions: Permissions = {
                 house: { create: false, read: true, update: true, delete: true },
                 role: { create: true, read: true, update: true, delete: true },
                 room: { create: true, read: true, update: true, delete: true },
@@ -37,6 +44,7 @@ class HouseService {
                 bill: { create: true, read: true, update: true, delete: true },
                 equipment: { create: true, read: true, update: true, delete: true },
                 payment: { create: true, read: true, update: true, delete: true },
+                notification: { create: true, read: true, update: true, delete: true },
             };
 
             const enhancedList = fetchData.map((house) => {
