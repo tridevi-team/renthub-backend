@@ -80,7 +80,7 @@ class NotificationService {
             .joinRelated("recipients(statusOnly)")
             .where("recipient_id", userId)
             .orderBy("created_at", "desc")
-            .orderBy("title", "desc")
+            .orderBy("title", "desc");
 
         // filter
         query = filterHandler(query, filter);

@@ -20,7 +20,7 @@ yarn install
 
 npm install -g typescript copyfiles rimraf pm2
 
-cd ../..
+cd /home/renthouse/renthub/backend
 echo "Current directory: $(pwd)"
 # Check if uploads_backup directory exists
 if [ ! -d "./uploads_backup" ]; then
@@ -41,7 +41,7 @@ fi
 rimraf dist
 
 # tsc
-tsc
+tsc --build
 
 # copyfiles
 copyfiles ./src/API/*.yaml ./dist
