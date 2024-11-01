@@ -7,6 +7,14 @@ import { ApiException, bcrypt, camelToSnake, jwtToken } from "../utils";
 import { HouseService } from "./";
 
 class UserService {
+    static async getAllUsers() {
+        const users = await Users.query();
+        if (users.length === 0) {
+            throw new ApiException(messageResponse.NO_USERS_FOUND, 404);
+        }
+        return users;
+    }
+
     static async getUserById(id: string) {
         const user = await Users.query().findById(id);
         if (!user) {
@@ -161,6 +169,14 @@ class UserService {
             throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 404);
         }
         await user.$query().patch({ first_login: false });
+        return user;
+    }
+
+    static async getSystemUser() {
+        const user = await Users.query().findOne({ role: "system" });
+        if (!user) {
+            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 404);
+        }
         return user;
     }
 }
