@@ -7,3 +7,4 @@ yarn.lock
 **/uploads/*
 dist/
 credentials.json
+firebaseConfig.json
