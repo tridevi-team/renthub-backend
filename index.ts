@@ -20,6 +20,7 @@ import {
     FloorRoute,
     HouseRoute,
     IssueRoute,
+    NotificationRouter,
     PaymentMethodRoute,
     RenterRoute,
     RoleRoute,
@@ -103,6 +104,7 @@ app.use("/equipment", EquipmentRoute);
 app.use("/payment", PaymentMethodRoute);
 app.use("/issues", IssueRoute);
 app.use("/bills", BillRoute);
+app.use("/notifications", NotificationRouter);
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);

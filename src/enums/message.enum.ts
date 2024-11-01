@@ -143,6 +143,14 @@ enum messageResponse {
     UPDATE_BILL_STATUS_SUCCESS = "Bill status updated successfully",
     BILL_STATUS_PAID_OR_CANCELLED = "Bill status cannot be updated because it is already paid or cancelled",
     DELETE_SERVICE_IN_BILL_SUCCESS = "Service in bill deleted successfully",
+    CREATE_NOTIFICATION_SUCCESS = "Notification created successfully",
+    NO_NOTIFICATIONS_FOUND = "No notifications found",
+    NOTIFICATION_NOT_FOUND = "Notification not found",
+    GET_NOTIFICATION_LIST_SUCCESS = "Notification list retrieved successfully",
+    DELETE_NOTIFICATION_SUCCESS = "Notification deleted successfully",
+    GET_NOTIFICATION_DETAILS_SUCCESS = "Notification details retrieved successfully",
+    GET_NOTIFICATION_COUNT_SUCCESS = "Notification count retrieved successfully",
+    UPDATE_NOTIFICATION_STATUS_SUCCESS = "Notification status updated successfully",
 }
 
 export default messageResponse;

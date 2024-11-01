@@ -7,6 +7,7 @@ export * from "./floor.interface";
 export * from "./house.interface";
 export * from "./issue.interface";
 export * from "./jwt.interface";
+export * from "./notification.interface";
 export * from "./pagination.interface";
 export * from "./payment.interface";
 export * from "./renter.interface";

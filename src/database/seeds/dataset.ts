@@ -114,6 +114,7 @@ export async function seed(knex: Knex): Promise<void> {
             full_name: "System",
             phone_number: "0399999999",
             gender: "male",
+            role: "system",
             address: "Ha Noi",
             birthday: "2003/05/01",
             verify: true,

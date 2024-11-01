@@ -9,6 +9,7 @@ export enum Module {
     EQUIPMENT = "equipment",
     PAYMENT = "payment",
     ISSUE = "issue",
+    NOTIFICATION = "notification",
 }
 
 export enum Action {

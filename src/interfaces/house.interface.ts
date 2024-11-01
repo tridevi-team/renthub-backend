@@ -37,6 +37,8 @@ export interface CRUDPermissions {
     delete: boolean;
 }
 
+export type CRUDPermissionType = keyof CRUDPermissions;
+
 export interface Permissions {
     house: CRUDPermissions;
     role: CRUDPermissions;
@@ -45,7 +47,11 @@ export interface Permissions {
     bill: CRUDPermissions;
     equipment: CRUDPermissions;
     payment: CRUDPermissions;
+    renter: CRUDPermissions;
+    notification: CRUDPermissions;
 }
+
+export type PermissionType = keyof Permissions;
 
 export interface Role {
     id?: string;

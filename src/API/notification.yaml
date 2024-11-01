@@ -1,0 +1,626 @@
+openapi: "3.0.3"
+info:
+    title: Notification API
+    version: 1.0.0
+
+tags:
+    - name: Notification
+      description: Notification API
+
+components:
+    schemas:
+        NotificationDetails:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the notification.
+                    example: 12043ed2-e581-4a28-9fe4-acb777a7eca7
+                title:
+                    type: string
+                    description: The title of the notification.
+                    example: New Message
+                content:
+                    type: string
+                    description: The content of the notification.
+                    example: You have a new message from John Doe.
+                imageUrl:
+                    type: string
+                    description: The URL of the image to be displayed in the notification.
+                    example: https://example.com/image.jpg
+                type:
+                    type: string
+                    description: The type of the notification.
+                    example: system
+                    enum:
+                        - system
+                        - warning
+                        - reminder
+                        - promotion
+                        - update
+                        - alert
+                data:
+                    type: object
+                    description: Additional data associated with the notification.
+                    example: {}
+                status:
+                    type: string
+                    description: The status of the notification.
+                    example: unread
+                    enum:
+                        - unread
+                        - read
+                        - archived
+                createdBy:
+                    type: string
+                    format: uuid
+                    description: The unique identifier of the user who created the notification.
+                    example: 12043ed2-e581-4a28-9fe4-acb777a7eca7
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: The date and time when the notification was created.
+                    example: 2021-01-01T12:00:00Z
+
+        NotificationCreateRequest:
+            type: object
+            properties:
+                title:
+                    type: string
+                    description: The title of the notification.
+                    example: New Message
+                content:
+                    type: string
+                    description: The content of the notification.
+                    example: You have a new message from John Doe.
+                imageUrl:
+                    type: string
+                    description: The URL of the image to be displayed in the notification.
+                    example: https://example.com/image.jpg
+                type:
+                    type: string
+                    description: The type of the notification.
+                    example: system
+                    enum:
+                        - system
+                        - warning
+                        - reminder
+                        - promotion
+                        - update
+                        - alert
+                data:
+                    type: object
+                    description: Additional data associated with the notification.
+                    example: {}
+                scope:
+                    type: string
+                    description: The scope of the notification.
+                    example: all
+                    enum:
+                        - all
+                        - user
+                        - house
+                        - room
+                ids:
+                    type: array
+                    description: The unique identifiers of the users, houses, or rooms to send the notification to.
+                    items:
+                        type: string
+                        format: uuid
+                        example: 12043ed2-e581-4a28-9fe4-acb777a7eca7
+            required:
+                - title
+                - content
+                - type
+                - scope
+                - ids
+
+        NotificationUpdateRequest:
+            type: object
+            properties:
+                ids:
+                    type: array
+                    description: The unique identifiers of the notifications to update.
+                    items:
+                        type: string
+                        format: uuid
+                        example: 12043ed2-e581-4a28-9fe4-acb777a7eca7
+                status:
+                    type: string
+                    description: The status to update the notifications to.
+                    example: read
+                    enum:
+                        - read
+                        - unread
+                        - archived
+
+        NotificationDeleteRequest:
+            type: object
+            properties:
+                ids:
+                    type: array
+                    description: The unique identifiers of the notifications to delete.
+                    items:
+                        type: string
+                        format: uuid
+                        example: 12043ed2-e581-4a28-9fe4-acb777a7eca7
+
+        NotificationCreateSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Indicates whether the notification was created successfully.
+                    default: true
+                code:
+                    type: string
+                    description: The status code of the response.
+                    default: CREATE_NOTIFICATION_SUCCESS
+                message:
+                    type: string
+                    description: The message of the response.
+                    default: Notification created successfully
+                data:
+                    type: object
+                    description: Information about the created notification.
+                    example: {}
+            required:
+                - success
+                - code
+                - message
+
+        NotificationListSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Indicates whether the notifications were retrieved successfully.
+                    default: true
+                code:
+                    type: string
+                    description: The status code of the response.
+                    default: GET_NOTIFICATION_LIST_SUCCESS
+                message:
+                    type: string
+                    description: The message of the response.
+                    default: Notification list retrieved successfully
+                data:
+                    type: array
+                    description: A list of notifications.
+                    items:
+                        $ref: "#/components/schemas/NotificationDetails"
+            required:
+                - success
+                - code
+                - message
+
+        NotificationDetailsSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Indicates whether the notification was retrieved successfully.
+                    default: true
+                code:
+                    type: string
+                    description: The status code of the response.
+                    default: GET_NOTIFICATION_DETAILS_SUCCESS
+                message:
+                    type: string
+                    description: The message of the response.
+                    default: Notification details retrieved successfully
+                data:
+                    $ref: "#/components/schemas/NotificationDetails"
+            required:
+                - success
+                - code
+                - message
+
+        NotificationCountSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Indicates whether the notification count was retrieved successfully.
+                    default: true
+                code:
+                    type: string
+                    description: The status code of the response.
+                    default: GET_NOTIFICATION_COUNT_SUCCESS
+                message:
+                    type: string
+                    description: The message of the response.
+                    default: Notification count retrieved successfully
+                data:
+                    type: integer
+                    description: The number of notifications.
+                    example: 5
+            required:
+                - success
+                - code
+                - message
+
+        NotificationUpdateSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Indicates whether the notifications were updated successfully.
+                    default: true
+                code:
+                    type: string
+                    description: The status code of the response.
+                    default: UPDATE_NOTIFICATION_STATUS_SUCCESS
+                message:
+                    type: string
+                    description: The message of the response.
+                    default: Notification updated successfully
+            required:
+                - success
+                - code
+                - message
+
+        NotificationDeleteSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Indicates whether the notifications were deleted successfully.
+                    default: true
+                code:
+                    type: string
+                    description: The status code of the response.
+                    default: DELETE_NOTIFICATION_SUCCESS
+                message:
+                    type: string
+                    description: The message of the response.
+                    default: Notification deleted successfully
+            required:
+                - success
+                - code
+                - message
+
+        NoNotificationsFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Indicates whether no notifications were found.
+                    default: false
+                code:
+                    type: string
+                    description: The status code of the response.
+                    default: NO_NOTIFICATIONS_FOUND
+                message:
+                    type: string
+                    description: The message of the response.
+                    default: No notifications found
+            required:
+                - success
+                - code
+                - message
+
+        NotificationNotFound:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Indicates whether the notification was not found.
+                    default: false
+                code:
+                    type: string
+                    description: The status code of the response.
+                    default: NOTIFICATION_NOT_FOUND
+                message:
+                    type: string
+                    description: The message of the response.
+                    default: Notification not found
+            required:
+                - success
+                - code
+                - message
+
+paths:
+    /notifications/create:
+        post:
+            tags:
+                - Notification
+            summary: Create a new notification. Only user who has the permission can create a notification.
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/NotificationCreateRequest"
+            responses:
+                "200":
+                    description: Notification created successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NotificationCreateSuccess"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
+    /notifications/list:
+        get:
+            tags:
+                - Notification
+            summary: Get a list of notifications. User can filter, sort and paginate their notifications.
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: query
+                  name: filter[]
+                  description: Filter criteria array with field, operator, and value
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the filter on, e.g. houses.name"
+                              operator:
+                                  type: string
+                                  example: "ew"
+                                  description: "The operator to apply (e.g., 'ew' for endsWith, 'eq' for equals, etc.)"
+                              value:
+                                  type: string
+                                  example: "qui"
+                                  description: "The value to filter by, e.g. 'qui'"
+                - in: query
+                  name: sort[]
+                  description: Sort criteria array with field and order
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "notifications.title"
+                                  description: "The field to apply the sort on, e.g. houses.name"
+                              direction:
+                                  type: string
+                                  enum:
+                                      - "asc"
+                                      - "desc"
+                                  example: "asc"
+                                  description: "The order to sort by (asc or desc)"
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      example: 1
+                  description: Current page number
+                  required: false
+                - in: query
+                  name: pageSize
+                  schema:
+                      type: integer
+                      example: 10
+                  description: Number of items per page
+                  required: false
+            responses:
+                "200":
+                    description: Notification list retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NotificationListSuccess"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
+    /notifications/{id}/details:
+        get:
+            tags:
+                - Notification
+            summary: Get notification details by ID. Users can view their notification details.
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                      example: 12043ed2-e581-4a28-9fe4-acb777a7eca7
+                  description: The unique identifier of the notification.
+            responses:
+                "200":
+                    description: Notification details retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NotificationDetailsSuccess"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/sschemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: Notification not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NotificationNotFound"
+
+    /notifications/count:
+        get:
+            tags:
+                - Notification
+            summary: Get the count of notifications.
+            security:
+                - BearerAuth: []
+            responses:
+                "200":
+                    description: Notification count retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NotificationCountSuccess"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
+    /notifications/update:
+        put:
+            tags:
+                - Notification
+            summary: User can update only their status of the notifications.
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/NotificationUpdateRequest"
+            responses:
+                "200":
+                    description: Notification updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NotificationUpdateSuccess"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
+    /notifications/delete:
+        delete:
+            tags:
+                - Notification
+            summary: User can delete only their notifications.
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/NotificationDeleteRequest"
+            responses:
+                "200":
+                    description: Notification deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NotificationDeleteSuccess"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"

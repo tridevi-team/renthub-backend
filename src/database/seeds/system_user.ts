@@ -13,6 +13,7 @@ export async function seed(knex: Knex): Promise<void> {
             phone_number: "0399999999",
             gender: "male",
             address: "Ha Noi",
+            role: "system",
             birthday: "2003/05/01",
             verify: true,
         },
