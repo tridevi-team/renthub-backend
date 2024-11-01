@@ -1,6 +1,7 @@
 import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
+import { Address } from "../interfaces";
 import { currentDateTime } from "../utils/currentTime";
 
 class Users extends Model {
@@ -10,7 +11,7 @@ class Users extends Model {
     full_name!: string;
     gender!: string;
     phone_number!: string;
-    address!: string;
+    address!: Address;
     birthday!: string;
     role!: string;
     type!: string;
@@ -51,7 +52,7 @@ class Users extends Model {
                 full_name: { type: "string", maxLength: 50 },
                 gender: { type: "string", maxLength: 6 },
                 phone_number: { type: "string", maxLength: 11 },
-                address: { type: "string", maxLength: 255 },
+                address: { type: "object" },
                 birthday: { type: "string", format: "date" },
                 role: { type: "string", maxLength: 10 },
                 type: { type: "string", maxLength: 10 },

@@ -31,7 +31,7 @@ class RenterHistory extends Model {
                 gender: { type: "string", maxLength: 6 },
                 email: { type: "string", maxLength: 255 },
                 phone_number: { type: "string", maxLength: 255 },
-                address: { type: "string", maxLength: 255 },
+                address: { type: "object" },
                 temp_reg: { type: "boolean" },
                 move_in_date: { type: "string", format: "date" },
                 represent: { type: "boolean" },

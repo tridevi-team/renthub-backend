@@ -1,3 +1,5 @@
+import { Address } from "./";
+
 export interface UserCreate {
     email: string;
     fullName: string;
@@ -11,5 +13,7 @@ export interface UserCreate {
 export interface UserUpdate {
     fullName: string;
     phoneNumber: string;
+    gender?: "male" | "female" | "other";
     birthday: string;
+    address?: Address;
 }

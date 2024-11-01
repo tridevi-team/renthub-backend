@@ -77,9 +77,20 @@ components:
                     maxLength: 11
                     pattern: ^0\d{9,10}$
                 address:
-                    type: string
-                    example: 123 Nguyen Van Linh, District 7, Ho Chi Minh City
-                    maxLength: 255
+                    type: object
+                    properties:
+                        city:
+                            type: string
+                            example: Ho Chi Minh
+                        district:
+                            type: string
+                            example: District 1
+                        ward:
+                            type: string
+                            example: Ward 1
+                        street:
+                            type: string
+                            example: 123 Street
                 birthday:
                     type: string
                     example: 1969-12-31

@@ -35,6 +35,32 @@ components:
                 birthday:
                     type: string
                     example: 1999-01-01
+                gender:
+                    type: string
+                    enum:
+                        - male
+                        - female
+                        - other
+                    example: male
+                address:
+                    type: object
+                    properties:
+                        city:
+                            type: string
+                            example: Ho Chi Minh
+                        district:
+                            type: string
+                            example: District 1
+                        ward:
+                            type: string
+                            example: Ward 1
+                        street:
+                            type: string
+                            example: 123 Street
+            required:
+                - fullName
+                - phoneNumber
+                - birthday
 
         UserChangePassword:
             type: object

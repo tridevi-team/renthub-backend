@@ -84,6 +84,20 @@ const updateProfileValidator = [
     }),
     check("phoneNumber", "Please provide a valid phone number.").isMobilePhone("vi-VN"),
     check("birthday", "Please provide a valid date of birth.").isDate(),
+    check("gender", "Please provide a valid gender.").optional().isIn(["male", "female", "other"]),
+    check("address", "Please provide your address.")
+        .optional()
+        .isObject()
+        .withMessage("Address must be an object.")
+        .custom((value) => {
+            const keys = ["city", "district", "street", "ward"];
+            for (const key of keys) {
+                if (!Object.prototype.hasOwnProperty.call(value, key)) {
+                    throw new Error(`address must have a ${key} property`);
+                }
+            }
+            return true;
+        }),
 ];
 
 const userValidator = {
