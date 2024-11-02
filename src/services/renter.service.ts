@@ -245,13 +245,27 @@ class RenterService {
                     builder.orWhere("phone_number", data.phoneNumber);
                 }
             })
+            .select(
+                "id",
+                "room_id",
+                "name",
+                "citizen_id",
+                "birthday",
+                "gender",
+                "email",
+                "phone_number",
+                "address",
+                "temp_reg",
+                "move_in_date",
+                "represent"
+            )
             .first();
         if (!renter) {
             throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
         }
 
         // sign token
-        const accessToken = await jwtToken.signAccessToken({
+        const accessToken = jwtToken.signAccessToken({
             id: renter.id,
             email: renter.email,
             phoneNumber: renter.phoneNumber,
@@ -259,7 +273,7 @@ class RenterService {
             type: "renter",
         });
 
-        const refreshToken = await jwtToken.signRefreshToken({
+        const refreshToken = jwtToken.signRefreshToken({
             id: renter.id,
             name: renter.name,
             room_id: renter.roomId,
