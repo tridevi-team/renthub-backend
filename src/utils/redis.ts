@@ -24,6 +24,11 @@ export class RedisUtils {
         return exists;
     }
 
+    static async getTTL(member: string) {
+        const redis = await redisConfig;
+        return redis.ttl(member);
+    }
+
     static async setAddMember(member: string, value: any, expire: number = REDIS_EXPIRE) {
         const redis = await redisConfig;
         const multi = redis.multi();

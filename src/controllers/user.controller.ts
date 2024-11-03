@@ -1,14 +1,15 @@
 "use strict";
 
+import { JwtPayload } from "jsonwebtoken";
 import redisClient from "../config/redis.config";
 import { AccountRoles, messageResponse } from "../enums";
-import { AccessTokenPayload, AccessTokenRenterPayload } from "../interfaces";
+import { RefreshTokenPayload, RefreshTokenRenterPayload } from "../interfaces";
 import { Renters, Users } from "../models";
 import { RenterService, UserService } from "../services";
 import MailService from "../services/mail.service";
 import { ApiException, apiResponse, bcrypt, Exception, jwtToken, RedisUtils } from "../utils";
 
-const REDIS_EXPIRE_REFRESH_TOKEN = 3600;
+const REDIS_EXPIRE_REFRESH_TOKEN = 604800; // 7 days
 
 class UserController {
     static async getAllUsers(req, res) {
@@ -215,42 +216,46 @@ class UserController {
     static async refreshToken(req, res) {
         const { refreshToken } = req.body;
         const { authorization } = req.headers;
-        const user: AccessTokenPayload | AccessTokenRenterPayload = req.user;
 
         const accessToken = authorization?.split(" ")[1];
 
         try {
             // verify refresh token
-            jwtToken.verifyRefreshToken(refreshToken);
+            const payload = jwtToken.verifyRefreshToken(refreshToken);
 
-            const isRenter = user.role === "renter";
-            const redisKey = `${isRenter ? "renters" : "users"}:${user.id}:${refreshToken}`;
+            const isRenter = (payload as JwtPayload).role === "renter";
+            const redisKey = isRenter
+                ? `renters:${(payload as RefreshTokenRenterPayload).id}:${refreshToken}`
+                : `users:${(payload as RefreshTokenPayload).id}:${refreshToken}`;
+
             const aToken = await RedisUtils.getString(redisKey);
 
             if (aToken !== accessToken) throw new ApiException(messageResponse.TOKEN_INVALID, 401);
 
             // sign new access token
-            const userData: Renters | Users = isRenter
-                ? await RenterService.getById(user.id)
-                : await UserService.getUserById(user.id);
+            const user: Renters | Users = isRenter
+                ? await RenterService.getById((payload as RefreshTokenRenterPayload).id)
+                : await UserService.getUserById((payload as RefreshTokenPayload).id);
+
             const newAccessToken = isRenter
                 ? await RenterService.generateAccessToken({
-                      id: userData.id,
-                      email: userData.email,
-                      phoneNumber: userData.phoneNumber,
-                      roomId: (userData as Renters).roomId,
+                      id: user.id,
+                      email: user.email,
+                      phoneNumber: user.phoneNumber,
+                      roomId: (user as Renters).roomId,
                   })
                 : await UserService.generateAccessToken({
-                      id: userData.id,
-                      email: userData.email,
-                      fullName: (userData as Users).fullName,
-                      phoneNumber: userData.phoneNumber,
-                      role: (userData as Users).role,
-                      status: (userData as Users).status,
+                      id: user.id,
+                      email: user.email,
+                      fullName: (user as Users).fullName,
+                      phoneNumber: user.phoneNumber,
+                      role: (user as Users).role,
+                      status: (user as Users).status,
                   });
 
             // set new access token in redis
-            await RedisUtils.setString(redisKey, newAccessToken, REDIS_EXPIRE_REFRESH_TOKEN);
+            const getTTL = await RedisUtils.getTTL(redisKey);
+            await RedisUtils.setString(redisKey, newAccessToken, getTTL);
 
             return res.send(apiResponse(messageResponse.REFRESH_TOKEN_SUCCESS, true, { accessToken: newAccessToken }));
         } catch (err) {
