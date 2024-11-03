@@ -10,6 +10,7 @@ export class RedisUtils {
         const sortString = filterData.sort?.map((s) => `${s.field}:${s.direction}`).join("|");
         const paginationString = `page_${filterData.pagination.page},pageSize_${filterData.pagination.pageSize}`;
 
+        console.log("🚀 ~ RedisUtils ~ generateCacheKeyWithFilter ~ paginationString:", paginationString);
         return `${prefix}:filter_${filterString}:sort_${sortString}:${paginationString}`;
     }
 

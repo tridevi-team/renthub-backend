@@ -18,7 +18,7 @@ git pull origin master
 
 yarn install
 
-npm install -g typescript copyfiles rimraf pm2
+npm install -g typescript copyfiles rimraf pm2 ts-node ts-node-dev
 
 cd /home/renthouse/renthub/backend
 echo "Current directory: $(pwd)"

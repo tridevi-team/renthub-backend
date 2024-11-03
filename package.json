@@ -4,7 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "nodemon index.ts",
+        "start": "ts-node --watch index.ts",
+        "dev": "ts-node-dev --respawn --transpile-only --clear ./index.ts",
         "test": "echo \"Error: no test specified\" && exit 1",
         "format:check": "prettier --check .",
         "format:write": "prettier --write .",
@@ -41,11 +42,9 @@
         "multer": "^1.4.5-lts.1",
         "mysql2": "^3.11.2",
         "nodemailer": "^6.9.12",
-        "nodemon": "^3.1.0",
         "objection": "^3.1.4",
         "qrcode": "^1.5.4",
         "redis": "^4.7.0",
-        "renthouse": "file:",
         "ssh2": "^1.15.0",
         "swagger-jsdoc": "^6.2.8",
         "swagger-ui-express": "^5.0.1",
@@ -72,6 +71,7 @@
         "eslint-config-prettier": "^9.1.0",
         "globals": "^15.10.0",
         "prettier": "^3.3.3",
+        "ts-node-dev": "^2.0.0",
         "typescript-eslint": "^8.8.0"
     }
 }
