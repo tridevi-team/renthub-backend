@@ -893,16 +893,18 @@ paths:
                     application/json:
                         schema:
                             type: object
-                            properties:
-                                email:
-                                    type: string
-                                    format: email
-                                    description: Renter email
-                                    example: renter.mail@gmail.com
-                                phoneNumber:
-                                    type: string
-                                    description: Renter phone number
-                                    example: 0397847806
+                            oneOf:
+                                - properties:
+                                      email:
+                                          type: string
+                                          format: email
+                                          description: Renter email
+                                          example: renter.mail@gmail.com
+                                - properties:
+                                      phoneNumber:
+                                          type: string
+                                          description: Renter phone number
+                                          example: 0397847806
             responses:
                 "200":
                     description: Login successfully
