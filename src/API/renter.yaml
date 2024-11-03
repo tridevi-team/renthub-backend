@@ -937,20 +937,26 @@ paths:
                     application/json:
                         schema:
                             type: object
-                            properties:
-                                email:
-                                    type: string
-                                    format: email
-                                    description: Renter email
-                                    example: renter.mail@gmail.com
-                                phoneNumber:
-                                    type: string
-                                    description: Renter phone number
-                                    example: 0397847806
-                                code:
-                                    type: string
-                                    description: Verification code
-                                    example: 123456
+                            oneOf:
+                                - properties:
+                                      email:
+                                          type: string
+                                          format: email
+                                          description: Renter email
+                                          example: renter.mail@gmail.com
+                                      code:
+                                          type: string
+                                          description: Verification code
+                                          example: 123456
+                                - properties:
+                                      phoneNumber:
+                                          type: string
+                                          description: Renter phone number
+                                          example: 0397847806
+                                      code:
+                                          type: string
+                                          description: Verification code
+                                          example: 1234
                             required:
                                 - code
             responses:
