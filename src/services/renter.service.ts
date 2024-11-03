@@ -265,22 +265,32 @@ class RenterService {
         }
 
         // sign token
+        const accessToken = this.generateAccessToken(renter);
+
+        const refreshToken = await this.generateRefreshToken(renter);
+
+        return { ...renter, accessToken, refreshToken };
+    }
+
+    static async generateAccessToken(renter: { id: string; email: string; phoneNumber: string; roomId: string }) {
         const accessToken = jwtToken.signAccessToken({
             id: renter.id,
             email: renter.email,
             phoneNumber: renter.phoneNumber,
-            room_id: renter.roomId,
-            type: "renter",
+            roomId: renter.roomId,
+            role: "renter",
         });
+        return accessToken;
+    }
 
+    static async generateRefreshToken(renter: { id: string; name: string; roomId: string }) {
         const refreshToken = jwtToken.signRefreshToken({
             id: renter.id,
             name: renter.name,
-            room_id: renter.roomId,
-            type: "renter",
+            roomId: renter.roomId,
+            role: "renter",
         });
-
-        return { ...renter, accessToken, refreshToken };
+        return refreshToken;
     }
 
     static async changeRepresent(renterId: string, roomId: string) {

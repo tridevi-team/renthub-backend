@@ -1,5 +1,5 @@
 import messageResponse from "../enums/message.enum";
-import { AccessTokenPayload, FirebaseToken } from "../interfaces";
+import { AccessTokenPayload, AccessTokenRenterPayload, FirebaseToken } from "../interfaces";
 import { FirebaseService, RenterService, UserService } from "../services";
 import { ApiException, Exception, jwtToken } from "../utils";
 
@@ -10,11 +10,11 @@ const authentication = async (req, res, next) => {
             throw new ApiException(messageResponse.ACCESS_TOKEN_REQUIRED, 401);
         }
 
-        let data: AccessTokenPayload | FirebaseToken;
+        let data: AccessTokenPayload | AccessTokenRenterPayload | FirebaseToken;
 
         // Verify the token from JWT or Firebase
         try {
-            data = jwtToken.verifyAccessToken(authorization) as AccessTokenPayload;
+            data = jwtToken.verifyAccessToken(authorization) as AccessTokenPayload | AccessTokenRenterPayload;
         } catch (error) {
             try {
                 data = (await FirebaseService.verifyToken(authorization)) as FirebaseToken;
@@ -37,6 +37,14 @@ const authentication = async (req, res, next) => {
         }
 
         // Handle standard JWT token (AccessTokenPayload)
+        if (data.role === "renter") {
+            const renter = await RenterService.getById((data as AccessTokenRenterPayload).id);
+            if (renter) {
+                req.user = renter;
+                return next();
+            }
+        }
+
         const user = await UserService.getUserById((data as AccessTokenPayload).id);
         if (user) {
             req.user = user;

@@ -37,7 +37,6 @@ const jwtToken = {
     verifyRefreshToken: (token: string) => {
         try {
             const data = jwt.verify(token, JWT_SECRET_REFRESH);
-
             return data;
         } catch (err) {
             if (err instanceof jwt.JsonWebTokenError)

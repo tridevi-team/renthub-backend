@@ -18,13 +18,13 @@ export interface AccessTokenRenterPayload {
     id: string;
     email: string;
     phoneNumber: string;
-    room_id: string;
-    type: string;
+    roomId: string;
+    role: string;
 }
 
 export interface RefreshTokenRenterPayload {
     id: string;
     name: string;
-    room_id: string;
-    type: string;
+    roomId: string;
+    role: string;
 }

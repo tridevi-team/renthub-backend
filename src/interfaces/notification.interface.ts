@@ -7,5 +7,5 @@ export interface NotificationRequest {
         [key: string]: any;
     };
     recipients: string[];
-    createdBy: string;
+    createdBy?: string;
 }

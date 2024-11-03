@@ -2,7 +2,9 @@
 
 import redisClient from "../config/redis.config";
 import { AccountRoles, messageResponse } from "../enums";
-import { UserService } from "../services";
+import { AccessTokenPayload, AccessTokenRenterPayload } from "../interfaces";
+import { Renters, Users } from "../models";
+import { RenterService, UserService } from "../services";
 import MailService from "../services/mail.service";
 import { ApiException, apiResponse, bcrypt, Exception, jwtToken, RedisUtils } from "../utils";
 
@@ -213,7 +215,7 @@ class UserController {
     static async refreshToken(req, res) {
         const { refreshToken } = req.body;
         const { authorization } = req.headers;
-        const user = req.user;
+        const user: AccessTokenPayload | AccessTokenRenterPayload = req.user;
 
         const accessToken = authorization?.split(" ")[1];
 
@@ -221,25 +223,34 @@ class UserController {
             // verify refresh token
             jwtToken.verifyRefreshToken(refreshToken);
 
-            // check in redis
-            const redisKey = `users:${user.id}:${refreshToken}`;
+            const isRenter = user.role === "renter";
+            const redisKey = `${isRenter ? "renters" : "users"}:${user.id}:${refreshToken}`;
             const aToken = await RedisUtils.getString(redisKey);
 
-            if (aToken !== accessToken) {
-                throw new ApiException(messageResponse.TOKEN_INVALID, 401);
-            }
+            if (aToken !== accessToken) throw new ApiException(messageResponse.TOKEN_INVALID, 401);
 
             // sign new access token
-            const userData = await UserService.getUserById(user.id);
+            const userData: Renters | Users = isRenter
+                ? await RenterService.getById(user.id)
+                : await UserService.getUserById(user.id);
+            const newAccessToken = isRenter
+                ? await RenterService.generateAccessToken({
+                      id: userData.id,
+                      email: userData.email,
+                      phoneNumber: userData.phoneNumber,
+                      roomId: (userData as Renters).roomId,
+                  })
+                : await UserService.generateAccessToken({
+                      id: userData.id,
+                      email: userData.email,
+                      fullName: (userData as Users).fullName,
+                      phoneNumber: userData.phoneNumber,
+                      role: (userData as Users).role,
+                      status: (userData as Users).status,
+                  });
 
-            const newAccessToken = await UserService.generateAccessToken({
-                id: userData.id,
-                email: userData.email,
-                fullName: userData.fullName,
-                phoneNumber: userData.phoneNumber,
-                role: userData.role,
-                status: userData.status,
-            });
+            // set new access token in redis
+            await RedisUtils.setString(redisKey, newAccessToken, REDIS_EXPIRE_REFRESH_TOKEN);
 
             return res.send(apiResponse(messageResponse.REFRESH_TOKEN_SUCCESS, true, { accessToken: newAccessToken }));
         } catch (err) {
