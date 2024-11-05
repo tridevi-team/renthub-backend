@@ -2,7 +2,7 @@
 
 import { JwtPayload } from "jsonwebtoken";
 import redisClient from "../config/redis.config";
-import { AccountRoles, messageResponse } from "../enums";
+import { messageResponse } from "../enums";
 import { RefreshTokenPayload, RefreshTokenRenterPayload } from "../interfaces";
 import { Renters, Users } from "../models";
 import { RenterService, UserService } from "../services";
@@ -13,12 +13,28 @@ const REDIS_EXPIRE_REFRESH_TOKEN = 604800; // 7 days
 
 class UserController {
     static async getAllUsers(req, res) {
-        const user = req.user;
+        // const user = req.user;
         try {
-            if (user.role !== AccountRoles.ADMIN) {
-                throw new ApiException(messageResponse.PERMISSION_DENIED, 403);
-            }
+            // if (user.role !== AccountRoles.ADMIN) {
+            //     throw new ApiException(messageResponse.PERMISSION_DENIED, 403);
+            // }
             const users = await UserService.getUsers();
+            return res.status(200).json(apiResponse(messageResponse.GET_USERS_LIST_SUCCESS, true, users));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async getUserByHouseId(req, res) {
+        const { houseId } = req.params;
+        const { filter = [], sort = [], pagination = {} } = req.query;
+
+        try {
+            const users = await UserService.getUserInHouse(houseId, {
+                filter,
+                sort,
+                pagination,
+            });
             return res.status(200).json(apiResponse(messageResponse.GET_USERS_LIST_SUCCESS, true, users));
         } catch (err) {
             Exception.handle(err, req, res);

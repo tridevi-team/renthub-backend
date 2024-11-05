@@ -5,7 +5,20 @@ import { Houses, Roles, Users } from "./";
 
 class UserRoles extends Model {
     id: string;
+    user_id: string;
+    house_id: string;
+    role_id: string;
     created_by: string;
+    created_at: Date;
+    updated_by: string;
+    updated_at: Date;
+    userId: string;
+    houseId: string;
+    roleId: string;
+    createdBy: string;
+    createdAt: Date;
+    updatedBy: string;
+    updatedAt: Date;
 
     static get tableName() {
         return "user_roles";

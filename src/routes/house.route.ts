@@ -8,9 +8,13 @@ import { houseValidator } from "../middlewares/validator";
 const houseRouter = express.Router();
 
 houseRouter.post("/create", authentication, houseValidator.createHouse, handleErrors, HouseController.createHouse);
+
 houseRouter.get("/list", authentication, HouseController.getHouseList);
+
 houseRouter.get("/:houseId/details", houseValidator.houseIdValidator, handleErrors, HouseController.getHouseDetails);
+
 houseRouter.get("/:houseId/rooms", houseValidator.houseIdValidator, handleErrors, HouseController.getHouseWithRooms);
+
 houseRouter.put(
     "/:houseId/update",
     authentication,
@@ -19,6 +23,7 @@ houseRouter.put(
     handleErrors,
     HouseController.updateHouseDetails
 );
+
 houseRouter.patch(
     "/:houseId/update-status",
     authentication,
@@ -27,6 +32,7 @@ houseRouter.patch(
     handleErrors,
     HouseController.updateHouseStatus
 );
+
 houseRouter.delete(
     "/:houseId/delete",
     authentication,

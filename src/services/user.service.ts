@@ -1,9 +1,9 @@
 import "dotenv/config";
 import redisConfig from "../config/redis.config";
-import { messageResponse } from "../enums";
-import type { AccessTokenPayload, RefreshTokenPayload, UserCreate, UserUpdate } from "../interfaces";
-import { Users } from "../models";
-import { ApiException, bcrypt, camelToSnake, jwtToken } from "../utils";
+import { EPagination, messageResponse } from "../enums";
+import type { AccessTokenPayload, Filter, RefreshTokenPayload, UserCreate, UserUpdate } from "../interfaces";
+import { UserRoles, Users } from "../models";
+import { ApiException, bcrypt, camelToSnake, filterHandler, jwtToken, sortingHandler } from "../utils";
 import { HouseService } from "./";
 
 class UserService {
@@ -13,6 +13,39 @@ class UserService {
             throw new ApiException(messageResponse.NO_USERS_FOUND, 404);
         }
         return users;
+    }
+
+    static async getUserInHouse(houseId: string, filterData: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
+        } = filterData || {};
+
+        let query = UserRoles.query().where(camelToSnake({ houseId }));
+
+        query = filterHandler(query, filter);
+
+        query = sortingHandler(query, sort);
+
+        const cloneQuery = query.clone();
+        const total = await cloneQuery.resultSize();
+        const totalPages = Math.ceil(total / pageSize);
+
+        if (total === 0) throw new ApiException(messageResponse.NO_USERS_FOUND, 404);
+
+        if (page === -1 && pageSize === -1) await query.page(0, total);
+        else await query.page(page - 1, pageSize);
+
+        const fetchData = await query;
+
+        return {
+            ...fetchData,
+            total,
+            page,
+            pageCount: totalPages,
+            pageSize,
+        };
     }
 
     static async getUserById(id: string) {
