@@ -149,6 +149,49 @@ components:
                     type: object
                     nullable: true
 paths:
+    /users/search:
+        get:
+            tags:
+                - User
+            summary: Search users
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: query
+                  name: q
+                  schema:
+                      type: string
+                      example: mail.demo@gmail.com
+                  description: You mush provide correct email or phone number
+                  required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetUsersListSuccess"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid or expired
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
     /users/get-all-users:
         get:
             tags:

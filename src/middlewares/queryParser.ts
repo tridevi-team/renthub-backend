@@ -47,7 +47,7 @@ export const queryParser = async (req, res, next) => {
                 }
             }
         }
-        req.query = { filter: parsedFilter, sort: parsedSort, pagination };
+        req.query = { ...req.query, filter: parsedFilter, sort: parsedSort, pagination };
         next();
     } catch (err) {
         return res.status(400).json(apiResponse(messageResponse.PARSE_ERROR, false));

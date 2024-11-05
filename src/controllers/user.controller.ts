@@ -25,6 +25,16 @@ class UserController {
         }
     }
 
+    static async search(req, res) {
+        const { q } = req.query;
+        try {
+            const users = await UserService.search(q);
+            return res.status(200).json(apiResponse(messageResponse.GET_USERS_LIST_SUCCESS, true, users));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
     static async getUserByHouseId(req, res) {
         const { houseId } = req.params;
         const { filter = [], sort = [], pagination = {} } = req.query;

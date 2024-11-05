@@ -15,6 +15,17 @@ class UserService {
         return users;
     }
 
+    static async search(q: string) {
+        const users = await Users.query()
+            .where("email", "=", q)
+            .orWhere("phone_number", "=", q)
+            .select("id", "full_name");
+        if (users.length === 0) {
+            throw new ApiException(messageResponse.NO_USERS_FOUND, 404);
+        }
+        return users;
+    }
+
     static async getUserInHouse(houseId: string, filterData: Filter) {
         const {
             filter = [],
