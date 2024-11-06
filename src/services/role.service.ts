@@ -1,8 +1,10 @@
 import Objection from "objection";
-import { EPagination, messageResponse } from "../enums";
+import { EPagination, messageResponse, NotificationType } from "../enums";
 import type { Filter, Role } from "../interfaces";
 import { Roles, UserRoles } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
+import HouseService from "./house.service";
+import NotificationService from "./notification.service";
 
 class RoleService {
     static async create(houseId: string, data: Role) {
@@ -148,7 +150,7 @@ class RoleService {
                 })
             );
 
-        return await UserRoles.query().insertAndFetch(
+        const assigned = await UserRoles.query().insertAndFetch(
             camelToSnake({
                 userId,
                 houseId,
@@ -156,6 +158,24 @@ class RoleService {
                 createdBy,
             })
         );
+
+        const roleDetails = await this.getById(roleId);
+        const houseDetails = await HouseService.getHouseById(houseId);
+
+        if (assigned) {
+            await NotificationService.create({
+                title: "Phân quyền",
+                content: `Bạn đã được phân quyền ${roleDetails.name} trong nhà ${houseDetails.name}`,
+                createdBy: createdBy,
+                type: NotificationType.SYSTEM,
+                recipients: [userId],
+                data: {
+                    path: `/`,
+                },
+            });
+        }
+
+        return assigned;
     }
 }
 
