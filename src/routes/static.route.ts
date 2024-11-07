@@ -2,6 +2,7 @@ import PayOS from "@payos/node";
 import { CheckoutRequestType } from "@payos/node/lib/type";
 import "dotenv/config";
 import express from "express";
+import path from "path";
 import { Bills } from "../models";
 import { BillService } from "../services";
 import { aesEncrypt } from "../utils";
@@ -9,6 +10,12 @@ import { aesEncrypt } from "../utils";
 const { RETURN_URL, CANCEL_URL } = process.env;
 
 const staticRouter = express.Router();
+
+const rootDir = process.cwd();
+
+const UPLOADS_DIR = rootDir.includes("dist") ? `${rootDir}/../uploads` : `${rootDir}/uploads`;
+
+staticRouter.use("/uploads", express.static(path.join(UPLOADS_DIR)));
 
 staticRouter.get("/lookup", (_req, res) => {
     res.render("lookup", {

@@ -8,12 +8,14 @@ tags:
       description: File upload API
 
 paths:
-    /upload:
+    /uploads:
         post:
-            summary: Upload a file
-            description: Upload a file to the server
+            summary: Upload multiple files
+            description: Upload multiple files to the server
             tags:
                 - Upload
+            security:
+                - BearerAuth: []
             requestBody:
                 required: true
                 content:
@@ -21,13 +23,51 @@ paths:
                         schema:
                             type: object
                             properties:
-                                file:
-                                    type: string
-                                    format: binary
+                                files:
+                                    type: array
+                                    items:
+                                        type: string
+                                        format: binary
+                                    description: Array of files to upload
             responses:
                 "200":
                     description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Files uploaded successfully"
+                                    files:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                file:
+                                                    type: string
+                                                    example: "1670974118620-example.jpg"
+                                                url:
+                                                    type: string
+                                                    example: "http://localhost:3000/uploads/1670974118620-example.jpg"
                 "400":
                     description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: "Invalid file type or file is empty"
                 "500":
                     description: Internal Server Error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: "An error occurred while uploading files"

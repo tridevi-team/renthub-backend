@@ -20,23 +20,7 @@ yarn install
 
 npm install -g typescript copyfiles rimraf pm2 ts-node ts-node-dev
 
-cd /home/renthouse/renthub/backend
-echo "Current directory: $(pwd)"
-# Check if uploads_backup directory exists
-if [ ! -d "./uploads_backup" ]; then
-    echo "Creating uploads_backup directory"
-    mkdir ./uploads_backup
-else
-    echo "Directory uploads_backup already exists."
-fi
-
-# Move uploads directory outside of dist
-if [ -d "./dist/src/public/uploads" ]; then
-    echo "Moving ./dist/src/public/uploads to ./uploads_backup"
-    mv ./dist/src/public/uploads/* ./uploads_backup/
-else
-    echo "No uploads folder found."
-fi
+yarn knex migrate:latest
 
 rimraf dist
 

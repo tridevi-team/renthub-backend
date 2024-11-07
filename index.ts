@@ -5,13 +5,10 @@ import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import { rateLimit } from "express-rate-limit";
-import { mkdirSync } from "fs";
-import multer from "multer";
 import path from "path";
 import { serve, setup } from "swagger-ui-express";
 import { swaggerSpec } from "./src/API/swagger";
 import "./src/config/database.config";
-import messageResponse from "./src/enums/message.enum";
 import { authentication, queryParser, requestLogger } from "./src/middlewares";
 import {
     AuthRoute,
@@ -29,7 +26,7 @@ import {
     StaticRoute,
     UserRoute,
 } from "./src/routes";
-import { apiResponse } from "./src/utils";
+import uploadRoute from "./src/routes/upload.route";
 
 const PORT = process.env.PORT || 3000;
 
@@ -64,33 +61,6 @@ app.use(express.static(path.join(__dirname, "src/public")));
 // config query parser
 app.use(queryParser);
 
-const UPLOADS_DIR = path.join(__dirname, "/src/public/uploads");
-mkdirSync(UPLOADS_DIR, { recursive: true });
-
-app.post(
-    "/upload",
-    multer({
-        storage: multer.diskStorage({
-            destination: (_req, _file, cb) => {
-                cb(null, UPLOADS_DIR);
-            },
-            filename: (_req, file, cb) => {
-                const currentTimestamp = new Date().getTime();
-                file.originalname = `${currentTimestamp}-${file.originalname}`;
-                cb(null, file.originalname);
-            },
-        }),
-    }).single("file"),
-    (req, res) => {
-        return res.json(
-            apiResponse(messageResponse.FILE_UPLOAD_SUCCESS, true, {
-                file: req.file?.originalname,
-                url: `${req.protocol}://${req.get("host")}/uploads/${req.file?.originalname}`,
-            })
-        );
-    }
-);
-
 app.use(StaticRoute);
 app.use("/auth", AuthRoute);
 app.use("/users", authentication, UserRoute);
@@ -105,6 +75,7 @@ app.use("/payment", PaymentMethodRoute);
 app.use("/issues", IssueRoute);
 app.use("/bills", BillRoute);
 app.use("/notifications", NotificationRouter);
+app.use("/uploads", uploadRoute);
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
