@@ -245,50 +245,54 @@ class HouseService {
             resource;
 
         let houseIdAccess: string | undefined = houseId;
-        if (houseId) {
-            const houseData = await this.getHouseById(houseId);
-            houseIdAccess = houseData.id;
-        } else if (roomId) {
-            houseIdAccess = await RoomService.getHouseId(roomId);
-        } else if (floorId) {
-            const floorDetails = await FloorService.getFloorById(floorId);
-            houseIdAccess = floorDetails.houseId;
-        } else if (equipmentId) {
-            const equipmentDetails = await EquipmentService.getById(equipmentId);
-            if (!equipmentDetails) return false;
-            houseIdAccess = equipmentDetails.houseId;
-        } else if (paymentId) {
-            const paymentDetails = await PaymentService.getById(paymentId);
-            houseIdAccess = paymentDetails.houseId;
-        } else if (billId) {
-            houseIdAccess = await BillService.getHouseId(billId);
-        } else if (serviceId) {
-            const serviceDetails = await this.getServiceDetails(serviceId);
-            houseIdAccess = serviceDetails.houseId;
-        } else if (issueId) {
-            houseIdAccess = await IssueService.getHouseId(issueId);
-        } else if (renterId) {
-            houseIdAccess = await RenterService.getHouseId(renterId);
-        } else if (roleId) {
-            houseIdAccess = await RoleService.getHouseId(roleId);
-        }
+        try {
+            if (houseId) {
+                const houseData = await this.getHouseById(houseId);
+                houseIdAccess = houseData.id;
+            } else if (roomId) {
+                houseIdAccess = await RoomService.getHouseId(roomId);
+            } else if (floorId) {
+                const floorDetails = await FloorService.getFloorById(floorId);
+                houseIdAccess = floorDetails.houseId;
+            } else if (equipmentId) {
+                const equipmentDetails = await EquipmentService.getById(equipmentId);
+                if (!equipmentDetails) return false;
+                houseIdAccess = equipmentDetails.houseId;
+            } else if (paymentId) {
+                const paymentDetails = await PaymentService.getById(paymentId);
+                houseIdAccess = paymentDetails.houseId;
+            } else if (billId) {
+                houseIdAccess = await BillService.getHouseId(billId);
+            } else if (serviceId) {
+                const serviceDetails = await this.getServiceDetails(serviceId);
+                houseIdAccess = serviceDetails.houseId;
+            } else if (issueId) {
+                houseIdAccess = await IssueService.getHouseId(issueId);
+            } else if (renterId) {
+                houseIdAccess = await RenterService.getHouseId(renterId);
+            } else if (roleId) {
+                houseIdAccess = await RoleService.getHouseId(roleId);
+            }
 
-        if (!houseIdAccess) return false;
+            if (!houseIdAccess) return false;
 
-        // get role
-        const role = await RoleService.getRolesByUser(userId, houseIdAccess);
-        if (action === Action.READ) {
-            // if any permission in module is true, return true
-            if (
-                role.permissions[module].read ||
-                role.permissions[module].create ||
-                role.permissions[module].update ||
-                role.permissions[module].delete
-            )
-                return true;
+            // get role
+            const role = await RoleService.getRolesByUser(userId, houseIdAccess);
+            if (action === Action.READ) {
+                // if any permission in module is true, return true
+                if (
+                    role.permissions[module].read ||
+                    role.permissions[module].create ||
+                    role.permissions[module].update ||
+                    role.permissions[module].delete
+                )
+                    return true;
+            }
+            role.$query().where(raw(`JSON_UNQUOTE(JSON_EXTRACT(permissions, "$.house.${action}")) = 1`));
+            return false;
+        } catch (err) {
+            throw new ApiException(messageResponse.UNAUTHORIZED, 403);
         }
-        role.$query().where(raw(`JSON_UNQUOTE(JSON_EXTRACT(permissions, "$.house.${action}")) = 1`));
-        return false;
     }
 
     static async isRenterAccessToResource(userId: string, resource: ResourceIdentifier) {
