@@ -28,7 +28,7 @@ class RenterController {
                 phoneNumber: phoneNumber || null,
                 address: address || null,
                 tempReg: tempReg || false,
-                moveInDate: moveInDate || null,
+                moveInDate: moveInDate || "2000-01-01",
                 represent: represent || false,
                 note: note,
                 createdBy: user.id,

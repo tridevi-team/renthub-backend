@@ -17,7 +17,6 @@ import IssueService from "./issue.service";
 import PaymentService from "./payment.service";
 import RenterService from "./renter.service";
 import RoleService from "./role.service";
-import RoomService from "./room.service";
 
 class HouseService {
     static async getHouseByUser(userId: string, data?: Filter) {
@@ -240,44 +239,10 @@ class HouseService {
         return details.createdBy === userId;
     }
 
-    static async isAccessToResource(userId: string, resource: ResourceIdentifier, module: Module, action: Action) {
-        const { houseId, roomId, floorId, equipmentId, paymentId, billId, serviceId, issueId, renterId, roleId } =
-            resource;
-
-        let houseIdAccess: string | undefined = houseId;
+    static async isAccessToResource(userId: string, houseId: string, module: Module, action: Action) {
         try {
-            if (houseId) {
-                const houseData = await this.getHouseById(houseId);
-                houseIdAccess = houseData.id;
-            } else if (roomId) {
-                houseIdAccess = await RoomService.getHouseId(roomId);
-            } else if (floorId) {
-                const floorDetails = await FloorService.getFloorById(floorId);
-                houseIdAccess = floorDetails.houseId;
-            } else if (equipmentId) {
-                const equipmentDetails = await EquipmentService.getById(equipmentId);
-                if (!equipmentDetails) return false;
-                houseIdAccess = equipmentDetails.houseId;
-            } else if (paymentId) {
-                const paymentDetails = await PaymentService.getById(paymentId);
-                houseIdAccess = paymentDetails.houseId;
-            } else if (billId) {
-                houseIdAccess = await BillService.getHouseId(billId);
-            } else if (serviceId) {
-                const serviceDetails = await this.getServiceDetails(serviceId);
-                houseIdAccess = serviceDetails.houseId;
-            } else if (issueId) {
-                houseIdAccess = await IssueService.getHouseId(issueId);
-            } else if (renterId) {
-                houseIdAccess = await RenterService.getHouseId(renterId);
-            } else if (roleId) {
-                houseIdAccess = await RoleService.getHouseId(roleId);
-            }
-
-            if (!houseIdAccess) return false;
-
-            // get role
-            const role = await RoleService.getRolesByUser(userId, houseIdAccess);
+            if (!houseId) return false;
+            const role = await RoleService.getRolesByUser(userId, houseId);
             if (action === Action.READ) {
                 // if any permission in module is true, return true
                 if (

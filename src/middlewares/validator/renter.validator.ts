@@ -35,7 +35,7 @@ const renterInfo = [
             return true;
         }),
     check("tempReg").isBoolean().withMessage("Temporary registration must be a boolean"),
-    check("moveInDate").isString().withMessage("Move in date must be a string"),
+    check("moveInDate").optional().isString().withMessage("Move in date must be a string"),
     check("represent").isBoolean().withMessage("Represent must be a boolean"),
     check("note").optional().isString().withMessage("Note must be a string"),
 ];

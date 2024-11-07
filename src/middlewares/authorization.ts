@@ -1,5 +1,15 @@
 import { Action, messageResponse, Module } from "../enums";
-import { HouseService } from "../services";
+import {
+    BillService,
+    EquipmentService,
+    FloorService,
+    HouseService,
+    PaymentService,
+    RenterService,
+    RoleService,
+    RoomService,
+} from "../services";
+import IssueService from "../services/issue.service";
 import { ApiException, Exception } from "../utils";
 
 export const authorize = (module: Module, action: Action) => {
@@ -54,26 +64,42 @@ const renterAuthorize = (module: Module, action: Action) => {
 const managerAuthorize = (module: Module, action: Action) => {
     return async (req, _res, next) => {
         const user = req.user;
+
         const { roomId, roleId, houseId, equipmentId, paymentId, issueId, renterId, serviceId, floorId, billId } =
             req.params;
+        let houseIdAccess: string = houseId;
+        if (houseId) {
+            const houseData = await HouseService.getHouseById(houseId);
+            houseIdAccess = houseData.id;
+        } else if (roomId) {
+            houseIdAccess = await RoomService.getHouseId(roomId);
+        } else if (floorId) {
+            const floorDetails = await FloorService.getFloorById(floorId);
+            houseIdAccess = floorDetails.houseId;
+        } else if (equipmentId) {
+            const equipmentDetails = await EquipmentService.getById(equipmentId);
+            if (!equipmentDetails) return false;
+            houseIdAccess = equipmentDetails.houseId;
+        } else if (paymentId) {
+            const paymentDetails = await PaymentService.getById(paymentId);
+            houseIdAccess = paymentDetails.houseId;
+        } else if (billId) {
+            houseIdAccess = await BillService.getHouseId(billId);
+        } else if (serviceId) {
+            const serviceDetails = await HouseService.getServiceDetails(serviceId);
+            houseIdAccess = serviceDetails.houseId;
+        } else if (issueId) {
+            houseIdAccess = await IssueService.getHouseId(issueId);
+        } else if (renterId) {
+            houseIdAccess = await RenterService.getHouseId(renterId);
+        } else if (roleId) {
+            houseIdAccess = await RoleService.getHouseId(roleId);
+        }
 
-        const houseOwner = await HouseService.isOwner(user.id, houseId);
+        const houseOwner = await HouseService.isOwner(user.id, houseIdAccess);
         if (houseOwner) return next();
 
-        const resource = {
-            houseId,
-            roomId,
-            floorId,
-            equipmentId,
-            paymentId,
-            billId,
-            serviceId,
-            issueId,
-            renterId,
-            roleId,
-        };
-
-        const isAccess = await HouseService.isAccessToResource(user.id, resource, module, action);
+        const isAccess = await HouseService.isAccessToResource(user.id, houseId, module, action);
         if (!isAccess) {
             throw new ApiException(messageResponse.UNAUTHORIZED, 403);
         }
