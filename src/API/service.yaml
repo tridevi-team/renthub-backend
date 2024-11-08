@@ -27,7 +27,7 @@ components:
                     default: 3500
                 type:
                     type: string
-                    default: "AMOUNT"
+                    default: "ELECTRICITY_CONSUMPTION"
                 description:
                     type: string
                     default: null
@@ -133,7 +133,12 @@ components:
                     default: 3500
                 type:
                     type: string
-                    default: "AMOUNT"
+                    enum:
+                        - PEOPLE
+                        - ROOM
+                        - WATER_CONSUMPTION
+                        - ELECTRICITY_CONSUMPTION
+                    example: "ELECTRICITY_CONSUMPTION"
                 description:
                     type: string
                     default: null

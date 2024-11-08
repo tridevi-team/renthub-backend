@@ -171,7 +171,11 @@ class BillController {
                             newValue = 0,
                             amount = 0,
                             totalPrice = 0;
-                        if (service.type === ServiceTypes.AMOUNT) {
+                        if (
+                            [ServiceTypes.ELECTRICITY_CONSUMPTION, ServiceTypes.WATER_CONSUMPTION].includes(
+                                service.type as ServiceTypes
+                            )
+                        ) {
                             const serviceInput = bill.services.find((item) => item.id === service.id);
                             oldValue = serviceInput?.oldValue || 0;
                             newValue = serviceInput?.newValue || 0;
@@ -269,7 +273,8 @@ class BillController {
                             const serviceDetails = await HouseService.getServiceDetails(service.serviceId);
 
                             switch (serviceDetails.type) {
-                                case ServiceTypes.AMOUNT:
+                                case ServiceTypes.WATER_CONSUMPTION:
+                                case ServiceTypes.ELECTRICITY_CONSUMPTION:
                                     let serviceAmount = 0;
                                     let unitPrice = 0;
                                     let totalPrice = 0;
