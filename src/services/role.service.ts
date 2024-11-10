@@ -166,12 +166,12 @@ class RoleService {
             await NotificationService.create({
                 title: "Phân quyền",
                 content: `Bạn đã được phân quyền ${roleDetails.name} trong nhà ${houseDetails.name}`,
-                createdBy: createdBy,
                 type: NotificationType.SYSTEM,
                 recipients: [userId],
                 data: {
                     path: `/`,
                 },
+                createdBy: createdBy,
             });
         }
 

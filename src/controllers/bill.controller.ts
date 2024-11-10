@@ -1,8 +1,15 @@
 import "dotenv/config";
-import { BillStatus, messageResponse, ServiceTypes } from "../enums";
+import { BillStatus, messageResponse, NotificationType, ServiceTypes } from "../enums";
 import { BillInfo } from "../interfaces";
 import { Bills } from "../models";
-import { BillService, HouseService, PaymentService, RoomService } from "../services";
+import {
+    BillService,
+    HouseService,
+    NotificationService,
+    PaymentService,
+    RenterService,
+    RoomService,
+} from "../services";
 import { ApiException, apiResponse, camelToSnake, Exception, RedisUtils } from "../utils";
 
 const { RETURN_URL, CANCEL_URL } = process.env;
@@ -239,6 +246,21 @@ class BillController {
                 }
 
                 await newBill.$query(trx).patch(camelToSnake({ amount: total }));
+
+                // get renter in room
+                const renters = await RenterService.listByRoom(bill.roomId);
+                const renterIds = renters.map((renter) => renter.id);
+                await NotificationService.create(
+                    {
+                        title: newBill.title,
+                        content: `Hóa đơn ${newBill.title} đã được tạo. Vui lòng kiểm tra thông tin và thanh toán.`,
+                        type: NotificationType.REMINDER,
+                        data: { billId: newBill.id },
+                        recipients: renterIds,
+                        createdBy: user.id,
+                    },
+                    trx
+                );
             }
 
             await trx.commit(); // Commit the transaction if everything succeeds
@@ -373,6 +395,23 @@ class BillController {
                         }
 
                         await BillService.updateInfo(bill.id, { amount: total }, trx);
+
+                        // create notification
+                        const renters = await RenterService.listByRoom(billDetails.roomId);
+
+                        const renterIds = renters.map((renter) => renter.id);
+
+                        await NotificationService.create(
+                            {
+                                title: billDetails.title,
+                                content: `Hóa đơn ${billDetails.title} đã được cập nhật. Vui lòng kiểm tra lại thông tin và thanh toán.`,
+                                type: NotificationType.REMINDER,
+                                data: { billId: billDetails.id },
+                                recipients: renterIds,
+                                createdBy: user.id,
+                            },
+                            trx
+                        );
 
                         await trx.commit();
                     } catch (err) {

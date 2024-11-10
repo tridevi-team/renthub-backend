@@ -135,8 +135,9 @@ class IssueController {
     static async updateAssignee(req, res) {
         const { issueId } = req.params;
         const { assignee } = req.body;
+        const { user } = req;
         try {
-            const issue = await IssueService.updateAssignee(issueId, assignee);
+            const issue = await IssueService.updateAssignee(issueId, assignee, user.id);
 
             // delete cache
             const cacheKey = `${prefix}:*`;

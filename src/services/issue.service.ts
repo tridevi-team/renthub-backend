@@ -1,8 +1,8 @@
-import { EPagination, messageResponse } from "../enums";
+import { EPagination, messageResponse, NotificationType } from "../enums";
 import { Filter, IssueRequest } from "../interfaces";
 import { Houses, Issues } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
-import { UserService } from "./";
+import { NotificationService, UserService } from "./";
 
 class IssueService {
     static async getById(id: string) {
@@ -106,6 +106,11 @@ class IssueService {
     static async create(data: IssueRequest) {
         const issue = await Issues.query().insert(camelToSnake(data));
 
+        // send notification to owner and issue manager
+        // houseId?: string;
+        // floorId?: string;
+        // roomId?: string;
+
         return issue;
     }
 
@@ -133,13 +138,23 @@ class IssueService {
         return updated;
     }
 
-    static async updateAssignee(id: string, assignTo: string) {
+    static async updateAssignee(id: string, assignTo: string, updatedBy: string) {
         const issue = await this.getById(id);
 
         // Check if assignTo is valid
         await UserService.getUserById(assignTo);
 
-        const updated = issue.$query().patchAndFetch({ assignTo });
+        const updated = issue.$query().patchAndFetch({ assignTo, updatedBy });
+
+        // send notification to assignee
+        await NotificationService.create({
+            title: "Yêu cầu được giao cho bạn",
+            content: `Bạn đã được giao yêu cầu ${issue.title}`,
+            type: NotificationType.SYSTEM,
+            data: { issueId: id },
+            recipients: [assignTo],
+            createdBy: updatedBy,
+        });
 
         return updated;
     }

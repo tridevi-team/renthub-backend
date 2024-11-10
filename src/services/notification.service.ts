@@ -1,6 +1,6 @@
 import { BatchResponse } from "firebase-admin/lib/messaging/messaging-api";
 import { collection, getDocs, getFirestore } from "firebase/firestore";
-import { raw } from "objection";
+import { raw, Transaction } from "objection";
 import { firebaseAdmin, firebaseApp } from "../config/firebase.config";
 import { EPagination, messageResponse, NotificationStatus } from "../enums";
 import { Filter, NotificationRequest } from "../interfaces";
@@ -11,12 +11,12 @@ import UserService from "./user.service";
 class NotificationService {
     private static firebaseDb = getFirestore(firebaseApp);
 
-    static async create(notification: NotificationRequest) {
+    static async create(notification: NotificationRequest, trx?: Transaction) {
         if (!notification.createdBy) {
             const systemUser = await UserService.getSystemUser();
             notification.createdBy = systemUser.id;
         }
-        await Notifications.query().insertGraph({
+        await Notifications.query(trx).insertGraph({
             "#id": "notification",
             title: notification.title,
             content: notification.content,

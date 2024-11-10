@@ -1,10 +1,10 @@
 import "dotenv/config";
 import redisConfig from "../config/redis.config";
-import { EPagination, messageResponse } from "../enums";
+import { EPagination, messageResponse, NotificationType } from "../enums";
 import type { AccessTokenPayload, Filter, RefreshTokenPayload, UserCreate, UserUpdate } from "../interfaces";
 import { UserRoles, Users } from "../models";
 import { ApiException, bcrypt, camelToSnake, filterHandler, jwtToken, sortingHandler } from "../utils";
-import { HouseService } from "./";
+import { HouseService, NotificationService } from "./";
 
 class UserService {
     static async getAllUsers() {
@@ -151,6 +151,17 @@ class UserService {
             .insertAndFetch(camelToSnake(data))
             .select("id", "email", "full_name", "phone_number", "birthday");
 
+        // create notification for new user
+        await NotificationService.create({
+            title: "Chào mừng bạn đến với RentHub",
+            content: `Chào mừng ${user.full_name} đến với RentHub, hãy cùng khám phá các dịch vụ mà chúng tôi cung cấp.`,
+            type: NotificationType.SYSTEM,
+            data: {
+                path: "/",
+            },
+            recipients: [user.id],
+        });
+
         return user;
     }
 
@@ -169,6 +180,17 @@ class UserService {
         }
         await redis.del(`verify-account:${data.email}`);
         await user.$query().patch({ verify: true });
+
+        // send notification
+        await NotificationService.create({
+            title: "Xác thực tài khoản thành công",
+            content: `Tài khoản ${data.email} đã được xác thực thành công.`,
+            type: NotificationType.SYSTEM,
+            data: {
+                path: "/",
+            },
+            recipients: [user.id],
+        });
         return user;
     }
 
@@ -187,6 +209,17 @@ class UserService {
             throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 401);
         }
         this.changePassword(data.email, data.password);
+
+        // send notification
+        await NotificationService.create({
+            title: "Thay đổi mật khẩu thành công",
+            content: `Mật khẩu của tài khoản ${data.email} đã được thay đổi thành công.`,
+            type: NotificationType.WARNING,
+            data: {
+                path: "/",
+            },
+            recipients: [data.email],
+        });
         return true;
     }
 
