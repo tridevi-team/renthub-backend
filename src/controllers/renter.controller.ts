@@ -217,7 +217,7 @@ class RenterController {
                 phoneNumber,
             });
             const redis = await redisConfig;
-            const code = Math.floor(1000 + Math.random() * 9000);
+            const code = Math.floor(100000 + Math.random() * 900000);
             const username = email || phoneNumber;
             if (email) {
                 await MailService.sendLoginMail(email, renterDetails.name, String(code));
@@ -237,7 +237,7 @@ class RenterController {
         const { email, phoneNumber } = req.body;
         try {
             const redis = await redisConfig;
-            const code = Math.floor(1000 + Math.random() * 9000);
+            const code = Math.floor(100000 + Math.random() * 900000);
             const username = email || phoneNumber;
             const renterDetails = await RenterService.checkExists({
                 email,

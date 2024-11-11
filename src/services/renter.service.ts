@@ -265,7 +265,7 @@ class RenterService {
         }
 
         // sign token
-        const accessToken = this.generateAccessToken(renter);
+        const accessToken = await this.generateAccessToken(renter);
 
         const refreshToken = await this.generateRefreshToken(renter);
 
