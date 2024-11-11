@@ -37,36 +37,40 @@ class NotificationService {
     }
 
     private static async sendNotificationToDevices(recipient: string, notification: NotificationRequest) {
-        const collectionRef = collection(NotificationService.firebaseDb, "users", recipient, "devices");
-        const getData = await getDocs(collectionRef);
-        const fcmTokens = getData.docs.map((doc) => doc.data().FCM);
-        firebaseAdmin
-            .messaging()
-            .sendEachForMulticast({
-                tokens: fcmTokens,
-                notification: {
-                    title: notification.title,
-                    body: notification.content,
-                    imageUrl: notification.imageUrl,
-                },
-                data: notification.data,
-                android: {
-                    priority: "high",
+        try {
+            const collectionRef = collection(NotificationService.firebaseDb, "users", recipient, "devices");
+            const getData = await getDocs(collectionRef);
+            const fcmTokens = getData.docs.map((doc) => doc.data().FCM);
+            firebaseAdmin
+                .messaging()
+                .sendEachForMulticast({
+                    tokens: fcmTokens,
                     notification: {
                         title: notification.title,
                         body: notification.content,
-                        sticky: false,
                         imageUrl: notification.imageUrl,
-                        clickAction: "FLUTTER_NOTIFICATION_CLICK",
                     },
-                },
-            })
-            .then((response: BatchResponse) => {
-                console.log("Successfully sent message:", response);
-            })
-            .catch((error) => {
-                console.log("Error sending message:", error);
-            });
+                    data: notification.data,
+                    android: {
+                        priority: "high",
+                        notification: {
+                            title: notification.title,
+                            body: notification.content,
+                            sticky: false,
+                            imageUrl: notification.imageUrl,
+                            clickAction: "FLUTTER_NOTIFICATION_CLICK",
+                        },
+                    },
+                })
+                .then((response: BatchResponse) => {
+                    console.log("Successfully sent message:", response);
+                })
+                .catch((error) => {
+                    console.log("Error sending message:", error);
+                });
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     static async getNotificationByUser(userId: string, filterData?: Filter) {

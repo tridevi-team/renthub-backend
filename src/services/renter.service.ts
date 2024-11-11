@@ -166,7 +166,16 @@ class RenterService {
         };
     }
 
-    static async listByRoom(roomId: string, filterData?: Filter) {
+    static async listByRoom(
+        roomId: string,
+        filterData?: Filter
+    ): Promise<{
+        total: number;
+        page: number;
+        pageCount: number;
+        pageSize: number;
+        results: Renters[];
+    }> {
         const {
             filter = [],
             sort = [],
@@ -175,27 +184,32 @@ class RenterService {
 
         let query = Renters.query().where("room_id", roomId);
 
-        // Filter
+        // Apply Filters
         query = filterHandler(query, filter);
 
-        // Sort
+        // Apply Sorting
         query = sortingHandler(query, sort);
 
-        const clone = query.clone();
-        const total = await clone.resultSize();
+        // Clone the query to get the total count
+        const total = await query.clone().resultSize();
+
         if (total === 0) {
             throw new ApiException(messageResponse.NO_RENTERS_FOUND, 404);
         }
 
         const totalPages = Math.ceil(total / pageSize);
+        let renters;
 
-        if (page === -1 && pageSize === -1) await query.page(0, total);
-        else await query.page(page - 1, pageSize);
-
-        const renters = await query;
+        // If page and pageSize are not default, use pagination; otherwise, fetch all records
+        if (page === -1 && pageSize === -1) {
+            renters = await query;
+        } else {
+            const paginatedResults = await query.page(page - 1, pageSize);
+            renters = paginatedResults.results;
+        }
 
         return {
-            ...renters,
+            results: renters,
             total,
             page,
             pageCount: totalPages,

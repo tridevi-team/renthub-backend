@@ -27,6 +27,7 @@ class Renters extends Model {
     roomId: string;
     createdBy: string;
     count: number;
+    results: Renters[];
 
     static get tableName() {
         return "renters";

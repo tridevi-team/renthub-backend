@@ -10,7 +10,7 @@ const createBill = [
     check("data.*.paymentDate").optional().isISO8601().withMessage("Payment date is invalid"),
     check("data.*.startDate").isISO8601().withMessage("Start date is invalid"),
     check("data.*.endDate").isISO8601().withMessage("End date is invalid"),
-    check("data.*.services.*.serviceId").isUUID().withMessage("Service ID is invalid"),
+    check("data.*.services.*.id").isUUID().withMessage("Service ID is invalid"),
     check("data.*.services.*.oldValue").optional().isNumeric().withMessage("Old value is invalid"),
     check("data.*.services.*.newValue").optional().isNumeric().withMessage("New value is invalid"),
 ];

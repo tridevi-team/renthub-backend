@@ -249,7 +249,8 @@ class BillController {
 
                 // get renter in room
                 const renters = await RenterService.listByRoom(bill.roomId);
-                const renterIds = renters.map((renter) => renter.id);
+                const renterIds = renters.results.map((renter) => renter.id);
+
                 await NotificationService.create(
                     {
                         title: newBill.title,
@@ -399,7 +400,7 @@ class BillController {
                         // create notification
                         const renters = await RenterService.listByRoom(billDetails.roomId);
 
-                        const renterIds = renters.map((renter) => renter.id);
+                        const renterIds = renters.results.map((renter) => renter.id);
 
                         await NotificationService.create(
                             {
