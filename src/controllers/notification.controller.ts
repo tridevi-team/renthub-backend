@@ -47,7 +47,7 @@ class NotificationController {
                     }
 
                     const renters = await RenterService.listByRoom(id);
-                    recipients = [...recipients, ...renters.map((renter) => renter.id)];
+                    recipients = [...recipients, ...renters.results.map((renter) => renter.id)];
                 }
             } else if (scope === "user") {
                 if (user.role !== "admin") throw new ApiException(messageResponse.UNAUTHORIZED, 401);
