@@ -77,8 +77,8 @@ class NotificationService {
         } = filterData || {};
 
         let query = Notifications.query()
-            .joinRelated("recipients(statusOnly)")
-            .where("recipient_id", userId)
+            .joinRelated("recipients(statusOnly, recipientId)")
+            .where("recipients.recipient_id", userId)
             .orderBy("created_at", "desc")
             .orderBy("title", "desc");
 
