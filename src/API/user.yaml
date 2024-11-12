@@ -395,7 +395,7 @@ paths:
                                 $ref: "#/components/schemas/GetUserNotFound"
 
     /users/change-password:
-        put:
+        patch:
             tags:
                 - User
             summary: Change user password

@@ -14,7 +14,7 @@ usersRouter.get("/get-users-by-house/:houseId", UserController.getUserByHouseId)
 
 usersRouter.get("/get-info", UserController.getUserInfo);
 
-usersRouter.put("/update-password", userValidator.updatePassword, handleErrors, UserController.updatePassword);
+usersRouter.patch("/change-password", userValidator.updatePassword, handleErrors, UserController.updatePassword);
 
 usersRouter.put("/update-info", userValidator.updateProfile, handleErrors, UserController.updateProfile);
 

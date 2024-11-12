@@ -72,7 +72,7 @@ class UserController {
             const userInfo = {
                 id: userData.user.id,
                 email: userData.user.email,
-                fullName: userData.user.email,
+                fullName: userData.user.fullName,
                 gender: userData.user.gender,
                 phoneNumber: userData.user.phoneNumber,
                 address: userData.user.address,
