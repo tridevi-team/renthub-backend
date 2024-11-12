@@ -542,6 +542,12 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: No notifications found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoNotificationsFound"
 
     /notifications/update:
         put:

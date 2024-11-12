@@ -100,6 +100,8 @@ class NotificationController {
     static async getCount(req, res) {
         const user = req.user;
         try {
+            if (!user.id) throw new ApiException(messageResponse.NO_NOTIFICATIONS_FOUND, 404);
+
             const count = await NotificationService.getNotificationCount(user.id);
             return res.json(apiResponse(messageResponse.GET_NOTIFICATION_COUNT_SUCCESS, true, count));
         } catch (err) {
