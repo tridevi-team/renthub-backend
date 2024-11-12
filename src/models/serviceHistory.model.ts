@@ -27,7 +27,7 @@ class ServiceHistory extends Model {
                 house_id: { type: "string", format: "uuid" },
                 name: { type: "string", maxLength: 255 },
                 unit_price: { type: "integer" },
-                type: { type: "string", maxLength: 10 },
+                type: { type: "string", maxLength: 50 },
                 has_index: { type: "boolean" },
                 description: { type: "string" },
                 created_by: { type: "string", format: "uuid" },

@@ -6,7 +6,7 @@ export async function up(knex: Knex): Promise<void> {
         table.uuid("house_id").references("id").inTable("houses").onDelete("CASCADE").onUpdate("CASCADE");
         table.string("name").notNullable();
         table.integer("unit_price").unsigned().defaultTo(0);
-        table.string("type", 10).nullable();
+        table.string("type", 50).nullable();
         table.boolean("has_index").defaultTo(false);
         table.specificType("description", "text").nullable();
         table.uuid("created_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
