@@ -30,6 +30,9 @@ class Bills extends Model {
     payosResponse: any;
     payment: PaymentMethods;
     houseId: string;
+    payosClientId: string;
+    payosApiKey: string;
+    payosChecksum: string;
 
     static get tableName() {
         return "bills";

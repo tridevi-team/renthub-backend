@@ -71,6 +71,15 @@ class BillService {
         return bill.payosRequest;
     }
 
+    static async getPayOSKey(billId: string) {
+        const bill = await Bills.query()
+            .findById(billId)
+            .joinRelated("payment")
+            .select("payment.payos_client_id", "payment.payos_api_key", "payment.payos_checksum");
+        if (!bill) throw new ApiException(messageResponse.BILL_NOT_FOUND, 404);
+        return bill;
+    }
+
     static async dataListForUpdate(ids: string[]) {
         const bills = await Bills.query()
             .findByIds(ids)

@@ -71,7 +71,7 @@ staticRouter.get("/getInvoice", async (req, res) => {
                     amount: 5000,
                     description: parsedRequest.description || "Thanh toán hóa đơn",
                     // items: parsedRequest.items,
-                    cancelUrl: parsedRequest.cancel_url || CANCEL_URL,
+                    cancelUrl: parsedRequest.cancel_url || CANCEL_URL,      
                     returnUrl: parsedRequest.return_url || RETURN_URL,
                     // expiredAt: parsedRequest.expired_at,
                     // Add other necessary properties here

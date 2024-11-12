@@ -5,9 +5,10 @@ import "dotenv/config";
 import { BillStatus, messageResponse } from "../enums";
 import { Bills } from "../models";
 import { BillService, HouseService, PaymentService } from "../services";
-import { apiResponse, Exception, isValidData, RedisUtils } from "../utils";
+import { ApiException, apiResponse, Exception, isValidData, RedisUtils } from "../utils";
 
 const HOOK_URL = process.env.WEBHOOK_URL || "";
+const { RETURN_URL, CANCEL_URL } = process.env;
 const prefix = "paymentMethods";
 class PaymentController {
     static async createNewPaymentMethod(req, res) {
@@ -237,6 +238,62 @@ class PaymentController {
             return res.json({ message: "success" });
         } catch (err) {
             await trx.rollback();
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async createPaymentLink(req, res) {
+        const { billId } = req.body;
+
+        try {
+            const result = await Bills.query().findById(String(billId)).withGraphJoined("[details, payment]");
+
+            if (result && result.payment.payosClientId) {
+                const payos = new PayOS(
+                    result.payment.payosClientId,
+                    result.payment.payosApiKey,
+                    result.payment.payosChecksum
+                );
+                const parsedRequest = JSON.parse(result.payosRequest);
+
+                try {
+                    const payosResponse = await payos.getPaymentLinkInformation(parsedRequest.order_code);
+
+                    if (payosResponse.status === "CANCELLED")
+                        throw new ApiException(messageResponse.PAYMENT_CANCELLED, 409);
+
+                    return res.json(
+                        apiResponse(messageResponse.CREATE_PAYMENT_LINK_SUCCESS, true, {
+                            paymentUrl: `https://pay.payos.vn/web/${payosResponse.id}`,
+                        })
+                    );
+                } catch (error) {
+                    const orderCode = Math.floor(Math.random() * 1000000000);
+                    await BillService.updateInfo(String(billId), {
+                        payosRequest: {
+                            ...parsedRequest,
+                            order_code: orderCode,
+                        },
+                    });
+
+                    const checkoutRequest = {
+                        orderCode: orderCode,
+                        amount: 5000,
+                        description: parsedRequest?.description || "Thanh toán hóa đơn",
+                        cancelUrl: parsedRequest.cancel_url || CANCEL_URL,
+                        returnUrl: parsedRequest.return_url || RETURN_URL,
+                    };
+
+                    const data = await payos.createPaymentLink(checkoutRequest);
+
+                    return res.json(
+                        apiResponse(messageResponse.GET_PAYMENT_LINK_SUCCESS, true, {
+                            paymentUrl: data.checkoutUrl,
+                        })
+                    );
+                }
+            }
+        } catch (err) {
             Exception.handle(err, req, res);
         }
     }

@@ -77,6 +77,15 @@ paymentMethodRouter.delete(
     PaymentController.deletePaymentMethod
 );
 
+paymentMethodRouter.post(
+    "/create-payment-link",
+    // authentication,
+    // authorize(Module.PAYMENT, Action.CREATE),
+    // paymentMethodValidator.paymentLinkRequest,
+    // handleErrors,
+    PaymentController.createPaymentLink
+);
+
 paymentMethodRouter.post("/hook", PaymentController.payOSWebhook);
 
 export default paymentMethodRouter;
