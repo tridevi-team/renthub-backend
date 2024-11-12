@@ -75,6 +75,7 @@ class NotificationController {
         const user = req.user;
         const { filter = [], sort = [], pagination = {} } = req.query;
         try {
+            if (!user.id) throw new ApiException(messageResponse.NO_NOTIFICATIONS_FOUND, 404);
             const notifications = await NotificationService.getNotificationByUser(user.id, {
                 filter,
                 sort,
@@ -90,6 +91,7 @@ class NotificationController {
         const { id } = req.params;
         const user = req.user;
         try {
+            if (!user.id) throw new ApiException(messageResponse.NOTIFICATION_NOT_FOUND, 404);
             const notification = await NotificationService.getNotificationDetails(id, user.id);
             return res.json(apiResponse(messageResponse.GET_NOTIFICATION_DETAILS_SUCCESS, true, notification));
         } catch (err) {
@@ -101,7 +103,6 @@ class NotificationController {
         const user = req.user;
         try {
             if (!user.id) throw new ApiException(messageResponse.NO_NOTIFICATIONS_FOUND, 404);
-
             const count = await NotificationService.getNotificationCount(user.id);
             return res.json(apiResponse(messageResponse.GET_NOTIFICATION_COUNT_SUCCESS, true, count));
         } catch (err) {
@@ -113,6 +114,7 @@ class NotificationController {
         const user = req.user;
         const { ids, status } = req.body;
         try {
+            if (!ids.length) throw new ApiException(messageResponse.NO_NOTIFICATIONS_FOUND, 404);
             await NotificationService.updateStatus(ids, user.id, status);
             return res.json(apiResponse(messageResponse.UPDATE_NOTIFICATION_STATUS_SUCCESS, true));
         } catch (err) {
@@ -124,6 +126,7 @@ class NotificationController {
         const { ids } = req.body;
         const user = req.user;
         try {
+            if (!ids.length) throw new ApiException(messageResponse.NO_NOTIFICATIONS_FOUND, 404);
             await NotificationService.deleteNotifications(ids, user.id);
             return res.json(apiResponse(messageResponse.DELETE_NOTIFICATION_SUCCESS, true));
         } catch (err) {

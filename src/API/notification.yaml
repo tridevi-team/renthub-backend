@@ -457,6 +457,12 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: No notifications found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoNotificationsFound"
 
     /notifications/{id}/details:
         get:
@@ -589,6 +595,12 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: No notifications found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoNotificationsFound"
 
     /notifications/delete:
         delete:
@@ -630,3 +642,9 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: No notifications found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoNotificationsFound"
