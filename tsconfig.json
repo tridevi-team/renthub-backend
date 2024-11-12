@@ -43,6 +43,6 @@
         "noUnusedParameters": true, // Report errors on unused parameters
         "pretty": true // Stylize errors and messages using color and context
     },
-    "exclude": ["node_modules", "dist"], // Specifies an array of filenames or patterns that should be skipped when resolving include
+    "exclude": ["node_modules", "dist", "**/database/**"], // Specifies an array of filenames or patterns that should be skipped when resolving include
     "compileOnSave": false // Compile on save
 }
