@@ -138,7 +138,7 @@ class Rooms extends Model {
             },
 
             basic(builder) {
-                builder.select("id", "name", "max_renters", "room_area", "price", "description", "status");
+                builder.select("rooms.id", "name", "max_renters", "room_area", "price", "description", "status");
             },
 
             onlyName(builder) {

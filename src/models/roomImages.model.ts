@@ -57,6 +57,10 @@ class RoomImages extends Model {
             imageUrl(builder) {
                 builder.select("id", "image_url", "description");
             },
+            thumbnail(builder) {
+                // random modifier
+                builder.select("image_url as thumbnail").limit(1);
+            },
         };
     }
 }

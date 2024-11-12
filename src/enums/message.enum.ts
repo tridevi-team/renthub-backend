@@ -63,6 +63,7 @@ enum messageResponse {
     ASSIGN_ROLE_SUCCESS = "Role assigned successfully",
     CANNOT_DELETE_ROLE_ASSIGNED_TO_USER = "Cannot delete role because it is assigned to another user",
     GET_ROOMS_BY_HOUSE_SUCCESS = "Rooms by house retrieved successfully",
+    GET_ROOMS_BY_FLOOR_SUCCESS = "Rooms by floor retrieved successfully",
     GET_ROOM_DETAILS_SUCCESS = "Room details retrieved successfully",
     ROOM_ALREADY_EXISTS = "Room already exists",
     ROOM_NOT_FOUND = "Room not found",

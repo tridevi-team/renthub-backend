@@ -26,6 +26,14 @@ floorRouter.get(
 );
 
 floorRouter.get(
+    "/:floorId/rooms",
+    authentication,
+    floorValidator.floorIdValidator,
+    handleErrors,
+    FloorController.getRoomsByFloor
+);
+
+floorRouter.get(
     "/:floorId/details",
     authentication,
     houseValidator.houseIdValidator,

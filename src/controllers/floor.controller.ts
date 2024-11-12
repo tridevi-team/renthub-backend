@@ -1,5 +1,5 @@
 import { messageResponse } from "../enums";
-import { FloorService } from "../services";
+import { FloorService, RoomService } from "../services";
 import { apiResponse, Exception, RedisUtils } from "../utils";
 
 const prefix = "floors";
@@ -33,7 +33,7 @@ class FloorController {
         const { houseId } = req.params;
         const { filter = [], sort = [], pagination } = req.query;
         try {
-            const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix, {
+            const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + "search_by_house", {
                 filter,
                 sort,
                 pagination,
@@ -50,6 +50,38 @@ class FloorController {
             await RedisUtils.setAddMember(cacheKey, JSON.stringify(floors));
 
             return res.json(apiResponse(messageResponse.GET_FLOOR_BY_HOUSE_SUCCESS, true, floors));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async getRoomsByFloor(req, res) {
+        const { floorId } = req.params;
+        const { filter = [], sort = [], pagination } = req.query;
+        const redisKey = prefix + "get_rooms";
+        try {
+            const cacheKey = RedisUtils.generateCacheKeyWithFilter(redisKey, {
+                filter,
+                sort,
+                pagination,
+            });
+            const cache = await RedisUtils.isExists(cacheKey);
+            console.log("🚀 ~ FloorController ~ getRoomsByFloor ~ cache:", cache)
+
+            if (cache) {
+                const result = await RedisUtils.getSetMembers(cacheKey);
+                return res.json(apiResponse(messageResponse.GET_ROOMS_BY_FLOOR_SUCCESS, true, JSON.parse(result[0])));
+            }
+            const rooms = await RoomService.getRoomsByFloor(floorId, {
+                filter,
+                sort,
+                pagination,
+            });
+
+            // set cache
+            await RedisUtils.setAddMember(cacheKey, JSON.stringify(rooms));
+
+            return res.json(apiResponse(messageResponse.GET_ROOMS_BY_FLOOR_SUCCESS, true, rooms));
         } catch (err) {
             Exception.handle(err, req, res);
         }

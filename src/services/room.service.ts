@@ -1,8 +1,8 @@
 import { ForeignKeyViolationError } from "objection";
-import { messageResponse } from "../enums";
-import type { Room, RoomServiceInfo } from "../interfaces";
+import { EPagination, messageResponse } from "../enums";
+import type { Filter, Room, RoomServiceInfo } from "../interfaces";
 import { Renters, RoomImages, Rooms, RoomServices, Services } from "../models";
-import { ApiException, camelToSnake } from "../utils";
+import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 
 class RoomService {
     static async create(houseId: string, data: Room) {
@@ -86,6 +86,46 @@ class RoomService {
             createdAt: room.createdAt,
             updatedBy: room.updatedBy,
             updatedAt: room.updatedAt,
+        };
+    }
+
+    static async getRoomsByFloor(floorId: string, filterData?: Filter) {
+        const { filter = [], sort = [], pagination } = filterData || {};
+
+        const page = pagination?.page || EPagination.DEFAULT_PAGE;
+        const pageSize = pagination?.pageSize || EPagination.DEFAULT_LIMIT;
+
+        // Get list of rooms by floor
+        let query = Rooms.query().leftJoinRelated("images(thumbnail)").findOne("floor_id", floorId).modify("basic");
+
+        // filter
+        query = filterHandler(query, filter);
+
+        // sort
+        query = sortingHandler(query, sort);
+
+        const clone = query.clone();
+        const total = await clone.resultSize();
+        const totalPages = Math.ceil(total / pageSize);
+
+        if (total === 0) {
+            throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
+        }
+
+        if (page !== -1 && pageSize !== -1) {
+            query.page(page - 1, pageSize);
+        } else {
+            query.page(0, total);
+        }
+
+        const rooms = await query;
+
+        return {
+            ...rooms,
+            page,
+            pageCount: totalPages,
+            total,
+            pageSize,
         };
     }
 
