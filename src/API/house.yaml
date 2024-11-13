@@ -945,6 +945,8 @@ paths:
                 - House
             summary: Get rooms of a house
             description: Get all rooms of a house with the house ID. It is used for renter to view the rooms of a house
+            security:
+                - BearerAuth: []
             parameters:
                 - in: path
                   name: houseId

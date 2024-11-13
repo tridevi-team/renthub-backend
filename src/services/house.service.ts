@@ -142,7 +142,6 @@ class HouseService {
     }
 
     static async getHouseWithRooms(houseId: string, filterData?: Filter, isSelect: boolean = false) {
-        console.log("🚀 ~ HouseService ~ getHouseWithRooms ~ isSelect:", isSelect);
         const { filter = [], sort = [], pagination } = filterData || {};
         const { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = pagination || {};
 

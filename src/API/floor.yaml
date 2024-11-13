@@ -374,6 +374,11 @@ paths:
                       type: string
                       format: uuid
                 - in: query
+                  name: isSelect
+                  schema:
+                      type: boolean
+                      example: true
+                - in: query
                   name: filter[]
                   description: Filter criteria array with field, operator, and value
                   required: false

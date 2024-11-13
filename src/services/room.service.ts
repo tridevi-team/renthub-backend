@@ -89,14 +89,19 @@ class RoomService {
         };
     }
 
-    static async getRoomsByFloor(floorId: string, filterData?: Filter) {
+    static async getRoomsByFloor(floorId: string, filterData?: Filter, isSelect: boolean = false) {
         const { filter = [], sort = [], pagination } = filterData || {};
 
         const page = pagination?.page || EPagination.DEFAULT_PAGE;
         const pageSize = pagination?.pageSize || EPagination.DEFAULT_LIMIT;
 
         // Get list of rooms by floor
-        let query = Rooms.query().leftJoinRelated("images(thumbnail)").findOne("floor_id", floorId).modify("basic");
+        let query = Rooms.query().findOne("floor_id", floorId);
+
+        if (isSelect) {
+            query = query.select("id", "name").orderBy("name");
+        }
+        query = query.leftJoinRelated("images(thumbnail)").modify("basic");
 
         // filter
         query = filterHandler(query, filter);
