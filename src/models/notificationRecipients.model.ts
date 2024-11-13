@@ -48,6 +48,9 @@ class NotificationRecipients extends Model {
             recipientId(builder) {
                 builder.select("recipient_id");
             },
+            recipientIdAndStatus(builder) {
+                builder.select("recipient_id", "status");
+            },
         };
     }
 }
