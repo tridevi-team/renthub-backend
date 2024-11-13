@@ -31,9 +31,9 @@ class FloorController {
 
     static async getFloorsByHouse(req, res) {
         const { houseId } = req.params;
-        const { filter = [], sort = [], pagination } = req.query;
+        const { filter = [], sort = [], pagination, isSelect } = req.query;
         try {
-            const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + "search_by_house", {
+            const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + "search_by_house" + isSelect, {
                 filter,
                 sort,
                 pagination,

@@ -275,6 +275,12 @@ paths:
                       type: string
                       format: uuid
                 - in: query
+                  name: isSelect
+                  schema:
+                      type: boolean
+                      example: true
+                      description: For select dropdown
+                - in: query
                   name: filter[]
                   description: Filter criteria array with field, operator, and value
                   required: false

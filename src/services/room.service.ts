@@ -100,6 +100,8 @@ class RoomService {
 
         if (isSelect) {
             query = query.select("id", "name").orderBy("name");
+            const rooms = await query;
+            return rooms;
         }
         query = query.leftJoinRelated("images(thumbnail)").modify("basic");
 

@@ -34,13 +34,19 @@ class FloorService {
         return floor;
     }
 
-    static async listByHouse(houseId: string, filterData?: Filter) {
+    static async listByHouse(houseId: string, filterData?: Filter, isSelect: boolean = false) {
         const { filter = [], sort = [], pagination } = filterData || {};
 
         const page = pagination?.page || EPagination.DEFAULT_PAGE;
         const pageSize = pagination?.pageSize || EPagination.DEFAULT_LIMIT;
 
         let query = HouseFloors.query().where("house_id", houseId);
+
+        if (isSelect) {
+            query = query.select("id", "name");
+            const floors = await query;
+            return floors;
+        }
 
         // filter
         query = filterHandler(query, filter);
