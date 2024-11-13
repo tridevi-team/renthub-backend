@@ -8,6 +8,13 @@ const createService = [
     check("type", "Please enter a valid service type.").isIn(Object.values(ServiceTypes)),
 ];
 
+const addServiceToRooms = [
+    check("ids", "Please enter a valid room id list.").isArray().isLength({ min: 1 }),
+    check("ids.*", "Please enter a valid room id.").isUUID(),
+    check("services", "Please enter a valid service list.").isArray().isLength({ min: 1 }),
+    check("services.*", "Please enter a valid service id.").isUUID(),
+];
+
 const servicesListValidator = [check("services", "Please enter a valid service list.").isArray().isLength({ min: 1 })];
 
 const serviceIdValidator = [check("serviceId", "Please enter a valid service id.").isUUID()];
@@ -20,6 +27,7 @@ const updateService = [
 
 const serviceValidator = {
     createService,
+    addServiceToRooms,
     servicesListValidator,
     serviceIdValidator,
     updateService,

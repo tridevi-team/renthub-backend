@@ -2,7 +2,7 @@
 
 import { messageResponse } from "../enums";
 import { HouseService, RoomService } from "../services";
-import { apiResponse, Exception, RedisUtils } from "../utils";
+import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
 
 const prefix = "services";
 const cachePattern = `${prefix}:*`;
@@ -45,12 +45,48 @@ class ServiceController {
         }
     }
 
+    static async addServiceToRooms(req, res) {
+        const user = req.user;
+        const { houseId } = req.params;
+        const { ids, services } = req.body;
+        try {
+            const servicesInHouse = await HouseService.listServicesByHouse(houseId);
+            const serviceIds = servicesInHouse.map((service) => service.id);
+
+            const roomsInHouse = await HouseService.getHouseWithRooms(houseId);
+            const roomIds = roomsInHouse.map((room) => room.id);
+
+            for (const roomId of ids) {
+                if (!roomIds.includes(roomId)) {
+                    throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
+                }
+            }
+
+            for (const id of ids) {
+                if (!serviceIds.includes(id)) {
+                    throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
+                }
+            }
+
+            for (const roomId of ids) {
+                await RoomService.addServiceToRoom(roomId, services, user.id);
+            }
+
+            // delete cache
+            await RedisUtils.deletePattern(cachePattern);
+
+            return res.json(apiResponse(messageResponse.CREATE_ROOM_SERVICE_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
     static async removeServiceFromRoom(req, res) {
         const { roomId } = req.params;
         const user = req.user;
-        const { servicesId } = req.body;
+        const { serviceIds } = req.body;
         try {
-            await RoomService.removeServicesFromRoom(roomId, servicesId, user.id);
+            await RoomService.removeServicesFromRoom(roomId, serviceIds, user.id);
 
             // delete cache
             await RedisUtils.deletePattern(cachePattern);

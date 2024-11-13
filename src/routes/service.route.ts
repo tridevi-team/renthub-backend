@@ -49,6 +49,14 @@ serviceRouter.post(
     handleErrors,
     ServiceController.addServiceToRoom
 );
+serviceRouter.post(
+    "/:houseId/add-to-rooms",
+    authentication,
+    serviceValidator.addServiceToRooms,
+    handleErrors,
+    ServiceController.addServiceToRooms
+);
+
 serviceRouter.delete(
     "/:roomId/deleteRoomService",
     authentication,

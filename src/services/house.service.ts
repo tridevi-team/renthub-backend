@@ -141,7 +141,7 @@ class HouseService {
         return details;
     }
 
-    static async getHouseWithRooms(houseId: string, filterData) {
+    static async getHouseWithRooms(houseId: string, filterData?: Filter) {
         const { filter = [], sort = [], pagination } = filterData || {};
         const { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = pagination || {};
 

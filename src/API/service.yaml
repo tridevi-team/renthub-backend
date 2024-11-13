@@ -43,6 +43,7 @@ components:
                 updatedAt:
                     type: string
                     default: "2024-09-26T14:39:45.000Z"
+
         GetServicesByHouseSuccess:
             type: object
             properties:
@@ -206,6 +207,7 @@ components:
                 data:
                     type: object
                     example: {}
+
         AddServiceToRoomRequest:
             type: object
             properties:
@@ -228,6 +230,36 @@ components:
                                 example: "Description for service"
                         required:
                             - serviceId
+        AddServiceToRoomsRequest:
+            type: object
+            properties:
+                ids:
+                    type: array
+                    items:
+                        type: string
+                        example: "03fe3c83-4ce2-4e9b-9ebf-7f0264f184ea"
+                services:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            serviceId:
+                                type: string
+                                example: "03fe3c83-4ce2-4e9b-9ebf-7f0264f184ea"
+                            quantity:
+                                type: number
+                                example: 1
+                            startIndex:
+                                type: number
+                                example: 1
+                            description:
+                                type: string
+                                example: "Description for service"
+                        required:
+                            - serviceId
+            required:
+                - ids
+                - services
 
         AddServiceToRoomSuccess:
             type: object
@@ -572,7 +604,56 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/ServiceNotFound"
 
-    /services/{serviceId}/deleteRoomService:
+    /{houseId}/add-to-rooms:
+        post:
+            tags:
+                - Service
+            summary: Add service to rooms
+            description: This API allows to add a service to multiple rooms.
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  description: House ID
+                  schema:
+                      type: string
+                      example: "695668a2-d7cc-4443-a472-ae2713f0005b"
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AddServiceToRoomsRequest"
+            responses:
+                "200":
+                    description: Room service created successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AddServiceToRoomSuccess"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "404":
+                    description: Service not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ServiceNotFound"
+
+    /services/{roomId}/deleteRoomService:
         delete:
             tags:
                 - Service
@@ -582,12 +663,23 @@ paths:
                 - BearerAuth: []
             parameters:
                 - in: path
-                  name: serviceId
+                  name: roomId
                   required: true
-                  description: Service ID
+                  description: Room ID
                   schema:
                       type: string
                       example: "03fe3c83-4ce2-4e9b-9ebf-7f0264f184ea"
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                serviceIds:
+                                    type: array
+                                    items:
+                                        type: string
+                                        example: "03fe3c83-4ce2-4e9b-9ebf-7f0264f184ea"
             responses:
                 "200":
                     description: Room service deleted successfully
