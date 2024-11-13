@@ -74,10 +74,10 @@ class HouseController {
 
     static async getHouseWithRooms(req, res) {
         const { houseId } = req.params;
-        const { filter = [], sort = [], pagination = {} } = req.query;
+        const { filter = [], sort = [], pagination = {}, isSelect } = req.query;
         try {
             // cache
-            const roomCache = RedisUtils.generateCacheKeyWithFilter(prefix + `:getRooms:${houseId}`, {
+            const roomCache = RedisUtils.generateCacheKeyWithFilter(prefix + `:getRooms_${isSelect}:${houseId}`, {
                 filter,
                 sort,
                 pagination,
@@ -93,7 +93,7 @@ class HouseController {
                 filter,
                 sort,
                 pagination,
-            });
+            }, isSelect);
             await RedisUtils.setAddMember(roomCache, JSON.stringify(details));
 
             return res.json(apiResponse(messageResponse.GET_ROOMS_BY_HOUSE_SUCCESS, true, details));

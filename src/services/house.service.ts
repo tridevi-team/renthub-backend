@@ -141,16 +141,22 @@ class HouseService {
         return details;
     }
 
-    static async getHouseWithRooms(houseId: string, filterData?: Filter) {
+    static async getHouseWithRooms(houseId: string, filterData?: Filter, isSelect: boolean = false) {
+        console.log("🚀 ~ HouseService ~ getHouseWithRooms ~ isSelect:", isSelect);
         const { filter = [], sort = [], pagination } = filterData || {};
         const { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = pagination || {};
 
-        // let query = Rooms.query().joinRelated("floor.house").where("house_id", houseId).modify("basic");
-
         let query = Rooms.query()
             .join("house_floors as floors", "floors.id", "rooms.floor_id")
-            .where("floors.house_id", houseId)
-            .modify("basic");
+            .where("floors.house_id", houseId);
+
+        if (isSelect) {
+            query = query.select("rooms.id", "rooms.name").orderBy("rooms.name", "ASC");
+            const fetchData = await query;
+            return fetchData;
+        }
+
+        query = query.modify("basic");
 
         // Filter
         query = filterHandler(query, filter);

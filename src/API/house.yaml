@@ -955,6 +955,12 @@ paths:
                       format: uuid
                       example: 40ca663f-8dbe-4424-b52b-b949ace687ff
                 - in: query
+                  name: isSelect
+                  schema:
+                      type: boolean
+                      example: true
+                      description: Data for select input
+                - in: query
                   name: filter[]
                   description: Filter criteria array with field, operator, and value
                   required: false
