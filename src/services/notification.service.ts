@@ -79,10 +79,10 @@ class NotificationService {
             sort = [],
             pagination = { page: EPagination.DEFAULT_PAGE, pageSize: EPagination.DEFAULT_LIMIT },
         } = filterData || {};
-        
+
         let query = Notifications.query()
             .joinRelated("recipients(recipientIdAndStatus)")
-            .where("recipients.recipient_id", "1fa091e7-c977-44be-ae41-efa38958851f")
+            .where("recipients.recipient_id", userId)
             .select("notifications.*", "recipients.status")
             .orderBy("created_at", "desc")
             .orderBy("title", "desc");
