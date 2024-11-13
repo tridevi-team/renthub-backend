@@ -141,17 +141,36 @@ class HouseService {
         return details;
     }
 
-    static async getHouseWithRooms(houseId: string) {
-        const details = await Houses.query()
-            .withGraphJoined("floors(idAndName).rooms(basic).[services(basic), images(imageUrl)]")
-            .findById(houseId)
-            .select("houses.id", "houses.name", "houses.address", "houses.description", "houses.collection_cycle");
+    static async getHouseWithRooms(houseId: string, filterData) {
+        const { filter = [], sort = [], pagination } = filterData || {};
+        const { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = pagination || {};
 
-        if (!details) {
-            throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
-        }
+        // let query = Rooms.query().joinRelated("floor.house").where("house_id", houseId).modify("basic");
 
-        return details;
+        let query = Rooms.query()
+            .join("house_floors as floors", "floors.id", "rooms.floor_id")
+            .where("floors.house_id", houseId)
+            .modify("basic");
+
+        // Filter
+        query = filterHandler(query, filter);
+
+        // Sort
+        query = sortingHandler(query, sort);
+
+        const totalQuery = query.clone();
+        const total = await totalQuery.resultSize();
+
+        if (total === 0) throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
+
+        const totalPages = Math.ceil(total / pageSize);
+
+        if (page === -1 && pageSize === -1) await query.page(0, total);
+        else await query.page(page - 1, pageSize);
+
+        const fetchData = await query;
+
+        return { ...fetchData, total, page, pageCount: totalPages, pageSize };
     }
 
     static async create(data: HouseCreate) {

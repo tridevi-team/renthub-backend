@@ -74,19 +74,29 @@ class HouseController {
 
     static async getHouseWithRooms(req, res) {
         const { houseId } = req.params;
+        const { filter = [], sort = [], pagination = {} } = req.query;
         try {
             // cache
-            const roomCache = `${prefix}:${houseId}:rooms`;
+            const roomCache = RedisUtils.generateCacheKeyWithFilter(prefix + `:getRooms:${houseId}`, {
+                filter,
+                sort,
+                pagination,
+            });
+
             const isRedisExists = await RedisUtils.isExists(roomCache);
             if (isRedisExists) {
                 const result = await RedisUtils.getSetMembers(roomCache);
-                return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, JSON.parse(result[0])));
+                return res.json(apiResponse(messageResponse.GET_ROOMS_BY_HOUSE_SUCCESS, true, JSON.parse(result[0])));
             }
 
-            const details = await HouseService.getHouseWithRooms(houseId);
+            const details = await HouseService.getHouseWithRooms(houseId, {
+                filter,
+                sort,
+                pagination,
+            });
             await RedisUtils.setAddMember(roomCache, JSON.stringify(details));
 
-            return res.json(apiResponse(messageResponse.GET_HOUSE_DETAILS_SUCCESS, true, details));
+            return res.json(apiResponse(messageResponse.GET_ROOMS_BY_HOUSE_SUCCESS, true, details));
         } catch (err) {
             Exception.handle(err, req, res);
         }
