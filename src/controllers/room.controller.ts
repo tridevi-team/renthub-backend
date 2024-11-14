@@ -111,6 +111,26 @@ class RoomController {
             Exception.handle(err, req, res);
         }
     }
+
+    static async deleteRoomsByHouse(req, res) {
+        const { houseId } = req.params;
+        const { ids } = req.body;
+        const userId = req.user.id;
+        try {
+            const roomIds = await RoomService.roomIdsByHouse(houseId);
+
+            // valid room ids
+            const validIds = ids.filter((id) => roomIds.includes(id));
+            await RoomService.deleteRoomsByHouse(validIds, userId);
+
+            // delete cache
+            await RedisUtils.deletePattern(`${prefix}:*`);
+
+            return res.json(apiResponse(messageResponse.DELETE_ROOM_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 }
 
 export default RoomController;

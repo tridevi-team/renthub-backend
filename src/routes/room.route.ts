@@ -41,5 +41,13 @@ roomRouter.delete(
     handleErrors,
     RoomController.deleteRoom
 );
+roomRouter.delete(
+    "/:houseId/delete-rooms",
+    authentication,
+    authorize(Module.ROOM, Action.DELETE),
+    houseValidator.houseIdValidator,
+    handleErrors,
+    RoomController.deleteRoomsByHouse
+);
 
 export default roomRouter;

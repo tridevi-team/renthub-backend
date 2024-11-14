@@ -245,6 +245,27 @@ class RoomService {
         return deletedRoom;
     }
 
+    static async roomIdsByHouse(houseId: string) {
+        const rooms = await Rooms.query().select("id").joinRelated("floor").where("house_id", houseId);
+        if (rooms.length === 0) {
+            throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
+        }
+        return rooms.map((room) => room.id as string);
+    }
+
+    static async deleteRoomsByHouse(ids: string[], deletedBy: string) {
+        const rooms = await Rooms.query().findByIds(ids);
+        if (rooms.length === 0) {
+            throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
+        }
+        return await Rooms.query()
+            .findByIds(ids)
+            .patch({
+                updatedBy: deletedBy,
+            })
+            .delete();
+    }
+
     static async addServiceToRoom(roomId: string, services: RoomServiceInfo[], userId: string) {
         const room = await this.getRoomById(roomId);
 

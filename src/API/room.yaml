@@ -597,3 +597,65 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/RoomNotFound"
+
+    /rooms/{houseId}/delete-rooms:
+        delete:
+            tags:
+                - Room
+            summary: Delete rooms by house
+            description: Delete rooms in a house by house ID
+            operationId: deleteRooms
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  description: House ID
+                  schema:
+                      type: string
+                      format: uuid
+                      example: 123e4567-e89b-12d3-a456-426614174000
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                ids:
+                                    type: array
+                                    items:
+                                        type: string
+                                        format: uuid
+                                        description: Room ID
+                                        example: 123e4567-e89b-12d3-a456-426614174000
+                            required:
+                                - ids
+            responses:
+                "200":
+                    description: Room deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/DeleteRoomSuccess"
+                "400":
+                    description: Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/sschemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "404":
+                    description: Room not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RoomNotFound"
