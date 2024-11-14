@@ -13,8 +13,14 @@ const updateFloor = [
 
 const floorIdValidator = [check("floorId").isUUID().withMessage("Floor Id must be a UUID")];
 
+const deleteFloors = [
+    check("ids").isArray().withMessage("Ids must be an array"),
+    check("ids.*").isUUID().withMessage("Ids must be an array of UUID"),
+];
+
 export default {
     createFloor,
     updateFloor,
     floorIdValidator,
+    deleteFloors,
 };

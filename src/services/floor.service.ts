@@ -75,6 +75,11 @@ class FloorService {
         };
     }
 
+    static async floorIdsByHouse(houseId: string) {
+        const floors = await HouseFloors.query().where("house_id", houseId).select("id");
+        return floors.map((floor) => floor.id);
+    }
+
     static async updateFloor(floorId: string, data: Floor) {
         const floor = await this.getFloorById(floorId);
         const updatedFloor = await floor.$query().patchAndFetch(camelToSnake(data));
@@ -87,6 +92,16 @@ class FloorService {
         await floor.$query().patch(camelToSnake({ updatedBy: deletedBy }));
         const deletedFloor = await floor.$query().delete();
         return deletedFloor;
+    }
+
+    static async deleteFloorsByHouse(houseId: string, floorIds: string[], deletedBy: string) {
+        const deletedFloors = await HouseFloors.query()
+            .patch({ updatedBy: deletedBy })
+            .whereIn("id", floorIds)
+            .andWhere("house_id", houseId)
+            .delete();
+
+        return deletedFloors;
     }
 }
 

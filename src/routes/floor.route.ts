@@ -36,7 +36,6 @@ floorRouter.get(
 floorRouter.get(
     "/:floorId/details",
     authentication,
-    houseValidator.houseIdValidator,
     floorValidator.floorIdValidator,
     handleErrors,
     FloorController.getFloorDetails
@@ -45,8 +44,8 @@ floorRouter.get(
 floorRouter.put(
     "/:floorId/update",
     authentication,
-    houseValidator.houseIdValidator,
     floorValidator.floorIdValidator,
+    handleErrors,
     floorValidator.updateFloor,
     handleErrors,
     FloorController.updateFloor
@@ -55,10 +54,21 @@ floorRouter.put(
 floorRouter.delete(
     "/:floorId/delete",
     authentication,
-    houseValidator.houseIdValidator,
+    floorValidator.floorIdValidator,
+    handleErrors,
     floorValidator.floorIdValidator,
     handleErrors,
     FloorController.deleteFloor
+);
+
+floorRouter.delete(
+    "/:houseId/delete-floors",
+    authentication,
+    authorize(Module.FLOOR, Action.DELETE),
+    houseValidator.houseIdValidator,
+    floorValidator.deleteFloors,
+    handleErrors,
+    FloorController.deleteFloorsByHouse
 );
 
 export default floorRouter;

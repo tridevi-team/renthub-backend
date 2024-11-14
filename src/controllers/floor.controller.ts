@@ -1,6 +1,6 @@
 import { messageResponse } from "../enums";
 import { FloorService, RoomService } from "../services";
-import { apiResponse, Exception, RedisUtils } from "../utils";
+import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
 
 const prefix = "floors";
 
@@ -44,11 +44,15 @@ class FloorController {
                 const result = await RedisUtils.getSetMembers(cacheKey);
                 return res.json(apiResponse(messageResponse.GET_FLOOR_BY_HOUSE_SUCCESS, true, JSON.parse(result[0])));
             }
-            const floors = await FloorService.listByHouse(houseId, {
-                filter,
-                sort,
-                pagination,
-            }, isSelect);
+            const floors = await FloorService.listByHouse(
+                houseId,
+                {
+                    filter,
+                    sort,
+                    pagination,
+                },
+                isSelect
+            );
 
             // set cache
             await RedisUtils.setAddMember(cacheKey, JSON.stringify(floors));
@@ -133,6 +137,33 @@ class FloorController {
         const userId = req.user.id;
         try {
             await FloorService.deleteFloor(floorId, userId);
+
+            // delete cache
+            const cacheKey = `${prefix}:*`;
+            await RedisUtils.deletePattern(cacheKey);
+
+            return res.json(apiResponse(messageResponse.DELETE_FLOOR_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async deleteFloorsByHouse(req, res) {
+        const { houseId } = req.params;
+        const { ids } = req.body;
+        const userId = req.user.id;
+        try {
+            const floorIds = await FloorService.floorIdsByHouse(houseId);
+            if (floorIds.length === 0) {
+                throw new ApiException(messageResponse.FLOOR_NOT_FOUND, 404);
+            }
+
+            const validFloorIds = floorIds.filter((floorId) => ids.includes(floorId));
+            if (validFloorIds.length === 0) {
+                throw new ApiException(messageResponse.FLOOR_NOT_FOUND, 404);
+            }
+
+            await FloorService.deleteFloorsByHouse(houseId, validFloorIds, userId);
 
             // delete cache
             const cacheKey = `${prefix}:*`;

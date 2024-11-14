@@ -15,6 +15,7 @@ class HouseFloors extends Model {
     house: Houses;
     rooms: Rooms[];
     houseId: string;
+    updatedBy: string;
 
     static get tableName() {
         return "house_floors";
