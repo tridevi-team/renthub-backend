@@ -40,9 +40,9 @@ class FloorService {
         const page = pagination?.page || EPagination.DEFAULT_PAGE;
         const pageSize = pagination?.pageSize || EPagination.DEFAULT_LIMIT;
 
-        let query = HouseFloors.query().where("house_id", houseId);
+        let query = HouseFloors.query().alias("floors").where("house_id", houseId);
 
-        if (isSelect) {
+        if (isSelect === true) {
             query = query.select("id", "name");
             const floors = await query;
             return floors;

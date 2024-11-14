@@ -149,7 +149,7 @@ class HouseService {
             .join("house_floors as floors", "floors.id", "rooms.floor_id")
             .where("floors.house_id", houseId);
 
-        if (isSelect) {
+        if (isSelect === true) {
             query = query.select("rooms.id", "rooms.name").orderBy("rooms.name", "ASC");
             const fetchData = await query;
             return fetchData;

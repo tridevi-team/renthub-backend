@@ -33,7 +33,7 @@ class FloorController {
         const { houseId } = req.params;
         const { filter = [], sort = [], pagination, isSelect } = req.query;
         try {
-            const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + "search_by_house" + isSelect, {
+            const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + ":search_by_house_" + isSelect, {
                 filter,
                 sort,
                 pagination,
@@ -44,7 +44,11 @@ class FloorController {
                 const result = await RedisUtils.getSetMembers(cacheKey);
                 return res.json(apiResponse(messageResponse.GET_FLOOR_BY_HOUSE_SUCCESS, true, JSON.parse(result[0])));
             }
-            const floors = await FloorService.listByHouse(houseId);
+            const floors = await FloorService.listByHouse(houseId, {
+                filter,
+                sort,
+                pagination,
+            }, isSelect);
 
             // set cache
             await RedisUtils.setAddMember(cacheKey, JSON.stringify(floors));
