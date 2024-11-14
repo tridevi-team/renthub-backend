@@ -1143,63 +1143,63 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/NoHouseFound"
 
-    /houses/{houseId}/delete:
-        delete:
-            tags:
-                - House
-            summary: Delete a house
-            security:
-                - BearerAuth: []
-            parameters:
-                - in: path
-                  name: houseId
-                  required: true
-                  description: The ID of the house
-                  schema:
-                      type: string
-                      format: uuid
-            responses:
-                "200":
-                    description: House deleted successfully
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    success:
-                                        type: boolean
-                                        example: true
-                                    code:
-                                        default: DELETE_HOUSE_SUCCESS
-                                    message:
-                                        default: House deleted successfully
+    # /houses/{houseId}/delete:
+    #     delete:
+    #         tags:
+    #             - House
+    #         summary: Delete a house
+    #         security:
+    #             - BearerAuth: []
+    #         parameters:
+    #             - in: path
+    #               name: houseId
+    #               required: true
+    #               description: The ID of the house
+    #               schema:
+    #                   type: string
+    #                   format: uuid
+    #         responses:
+    #             "200":
+    #                 description: House deleted successfully
+    #                 content:
+    #                     application/json:
+    #                         schema:
+    #                             type: object
+    #                             properties:
+    #                                 success:
+    #                                     type: boolean
+    #                                     example: true
+    #                                 code:
+    #                                     default: DELETE_HOUSE_SUCCESS
+    #                                 message:
+    #                                     default: House deleted successfully
 
-                "401":
-                    description: Unauthorized
-                    content:
-                        applicationjson:
-                            schema:
-                                oneOf:
-                                    - $ref: "#/components/schemas/TokenInvalid"
-                                    - $ref: "#/components/schemas/TokenExpired"
+    #             "401":
+    #                 description: Unauthorized
+    #                 content:
+    #                     applicationjson:
+    #                         schema:
+    #                             oneOf:
+    #                                 - $ref: "#/components/schemas/TokenInvalid"
+    #                                 - $ref: "#/components/schemas/TokenExpired"
 
-                "404":
-                    description: House not found
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/NoHouseFound"
-                "500":
-                    description: Delete house failed
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    success:
-                                        type: boolean
-                                        example: false
-                                    code:
-                                        default: DELETE_HOUSE_FAIL
-                                    message:
-                                        default: Delete house failed
+    #             "404":
+    #                 description: House not found
+    #                 content:
+    #                     application/json:
+    #                         schema:
+    #                             $ref: "#/components/schemas/NoHouseFound"
+    #             "500":
+    #                 description: Delete house failed
+    #                 content:
+    #                     application/json:
+    #                         schema:
+    #                             type: object
+    #                             properties:
+    #                                 success:
+    #                                     type: boolean
+    #                                     example: false
+    #                                 code:
+    #                                     default: DELETE_HOUSE_FAIL
+    #                                 message:
+    #                                     default: Delete house failed
