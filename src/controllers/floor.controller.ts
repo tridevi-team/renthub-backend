@@ -33,7 +33,7 @@ class FloorController {
         const { houseId } = req.params;
         const { filter = [], sort = [], pagination, isSelect } = req.query;
         try {
-            const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + ":search_by_house_" + isSelect, {
+            const cacheKey = RedisUtils.generateCacheKeyWithFilter(`${prefix}:search_by_house_${isSelect}:${houseId}`, {
                 filter,
                 sort,
                 pagination,
