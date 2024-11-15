@@ -193,6 +193,21 @@ components:
                                                     delete:
                                                         type: boolean
                                                         example: true
+                                            floor:
+                                                type: object
+                                                properties:
+                                                    create:
+                                                        type: boolean
+                                                        example: true
+                                                    read:
+                                                        type: boolean
+                                                        example: true
+                                                    update:
+                                                        type: boolean
+                                                        example: true
+                                                    delete:
+                                                        type: boolean
+                                                        example: true
                                             role:
                                                 type: object
                                                 properties:

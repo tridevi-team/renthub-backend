@@ -41,6 +41,7 @@ export type CRUDPermissionType = keyof CRUDPermissions;
 
 export interface Permissions {
     house: CRUDPermissions;
+    floor: CRUDPermissions;
     role: CRUDPermissions;
     room: CRUDPermissions;
     service: CRUDPermissions;
@@ -57,14 +58,7 @@ export interface Role {
     id?: string;
     houseId?: string;
     name: string;
-    permissions: {
-        house: Permissions;
-        role: Permissions;
-        room: Permissions;
-        service: Permissions;
-        bill: Permissions;
-        equipment: Permissions;
-    };
+    permissions: Permissions;
     description?: string;
     status: boolean;
     createdBy?: string;

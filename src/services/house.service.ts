@@ -36,6 +36,7 @@ class HouseService {
             const fetchData = await list;
             const fullPermissions: Permissions = {
                 house: { create: true, read: true, update: true, delete: true },
+                floor: { create: true, read: true, update: true, delete: true },
                 role: { create: true, read: true, update: true, delete: true },
                 room: { create: true, read: true, update: true, delete: true },
                 renter: { create: true, read: true, update: true, delete: true },
