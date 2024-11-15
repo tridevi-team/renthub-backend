@@ -5,6 +5,7 @@ import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import { rateLimit } from "express-rate-limit";
+import useragent from "express-useragent";
 import path from "path";
 import { serve, setup } from "swagger-ui-express";
 import { swaggerSpec } from "./src/API/swagger";
@@ -50,6 +51,7 @@ app.use(
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+app.use(useragent.express());
 
 // config view engine
 app.set("view engine", "ejs");
