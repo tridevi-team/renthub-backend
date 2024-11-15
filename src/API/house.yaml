@@ -616,6 +616,93 @@ components:
                     type: integer
                     example: 3
 
+        HouseWithRoomsGroupByFloor:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    example: 40ca663f-8dbe-4424-b52b-b949ace687ff
+                name:
+                    type: string
+                    example: "House 5"
+                address:
+                    type: object
+                    $ref: "#/components/schemas/Address"
+                description:
+                    type: string
+                    example: "This is a beautiful house"
+                collectionCycle:
+                    type: integer
+                    example: 1
+                floors:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            id:
+                                type: string
+                                format: uuid
+                                example: 6e21fac3-6460-44cc-a93f-a16a62c59417
+                            name:
+                                type: string
+                                example: "Tầng 2"
+                            rooms:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        id:
+                                            type: string
+                                            format: uuid
+                                            example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
+                                        name:
+                                            type: string
+                                            example: "Phòng 3"
+                                        maxRenters:
+                                            type: integer
+                                            example: 6
+                                        roomArea:
+                                            type: number
+                                            example: 25
+                                        price:
+                                            type: number
+                                            example: 3500000
+                                        description:
+                                            type: string
+                                            nullable: true
+                                        status:
+                                            type: string
+                                            enum:
+                                                - AVAILABLE
+                                                - PENDING
+                                                - RENTED
+                                                - EXPIRED
+                                                - MAINTENANCE
+                                            example: "AVAILABLE"
+                                        services:
+                                            type: array
+                                            items:
+                                                type: object
+                                                properties:
+                                                    id:
+                                                        type: string
+                                                        format: uuid
+                                                        example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
+                                                    name:
+                                                        type: string
+                                                        example: "Electricity"
+                                                    unitPrice:
+                                                        type: number
+                                                        example: 4000
+                                                    description:
+                                                        type: string
+                                                        nullable: true
+                                                        example: "Electricity service"
+                                                    quantity:
+                                                        type: number
+                                                        example: 1
+
         HouseWithRoomsSuccess:
             type: object
             properties:
@@ -627,7 +714,9 @@ components:
                 message:
                     default: Rooms by house retrieved successfully
                 data:
-                    $ref: "#/components/schemas/HouseWithRooms"
+                    oneOf:
+                        - $ref: "#/components/schemas/HouseWithRooms"
+                        - $ref: "#/components/schemas/HouseWithRoomsGroupByFloor"
 
         HouseDetailsSuccess:
             type: object
