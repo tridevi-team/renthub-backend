@@ -51,7 +51,22 @@ app.use(
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-app.use(useragent.express());
+app.use(useragent.express(), (req: any, _res, next) => {
+    const userAgent = req.useragent;
+    const isApp =
+        userAgent.isMobile ||
+        userAgent.isMobileNative ||
+        userAgent.isTablet ||
+        userAgent.isiPad ||
+        userAgent.isiPod ||
+        userAgent.isiPhone ||
+        userAgent.isiPhoneNative ||
+        userAgent.isAndroid ||
+        userAgent.isAndroidNative ||
+        userAgent.isBlackberry;
+    req.isApp = isApp;
+    next();
+});
 
 // config view engine
 app.set("view engine", "ejs");
