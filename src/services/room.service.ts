@@ -258,12 +258,12 @@ class RoomService {
         if (rooms.length === 0) {
             throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
         }
-        return await Rooms.query()
-            .findByIds(ids)
-            .patch({
-                updatedBy: deletedBy,
-            })
-            .delete();
+
+        await Rooms.query().findByIds(ids).patch({
+            updatedBy: deletedBy,
+        });
+
+        await Rooms.query().delete().findByIds(ids);
     }
 
     static async addServiceToRoom(roomId: string, services: RoomServiceInfo[], userId: string) {
