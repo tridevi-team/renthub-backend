@@ -95,11 +95,9 @@ class FloorService {
     }
 
     static async deleteFloorsByHouse(houseId: string, floorIds: string[], deletedBy: string) {
-        const deletedFloors = await HouseFloors.query()
-            .patch({ updatedBy: deletedBy })
-            .whereIn("id", floorIds)
-            .andWhere("house_id", houseId)
-            .delete();
+        await HouseFloors.query().patch({ updatedBy: deletedBy }).whereIn("id", floorIds).andWhere("house_id", houseId);
+
+        const deletedFloors = await HouseFloors.query().delete().whereIn("id", floorIds).andWhere("house_id", houseId);
 
         return deletedFloors;
     }
