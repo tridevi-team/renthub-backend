@@ -13,7 +13,16 @@ houseRouter.get("/list", authentication, HouseController.getHouseList);
 
 houseRouter.get("/:houseId/details", houseValidator.houseIdValidator, handleErrors, HouseController.getHouseDetails);
 
-houseRouter.get("/:houseId/rooms", houseValidator.houseIdValidator, handleErrors, HouseController.getHouseWithRooms);
+houseRouter.get(
+    "/:houseId/rooms",
+    (req, res, next) => {
+        if (req.isApp) next();
+        else authentication(req, res, next);
+    },
+    houseValidator.houseIdValidator,
+    handleErrors,
+    HouseController.getHouseWithRooms
+);
 
 houseRouter.put(
     "/:houseId/update",
