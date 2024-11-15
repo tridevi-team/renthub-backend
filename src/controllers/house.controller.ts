@@ -95,11 +95,7 @@ class HouseController {
             }
 
             const details = isApp
-                ? await HouseService.getHouseWithRoomsGraph(houseId, {
-                      filter,
-                      sort,
-                      pagination,
-                  })
+                ? await HouseService.getHouseWithRoomsGraph(houseId)
                 : await HouseService.getHouseWithRooms(
                       houseId,
                       {

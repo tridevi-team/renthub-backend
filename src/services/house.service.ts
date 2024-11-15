@@ -179,34 +179,15 @@ class HouseService {
         return { ...fetchData, total, page, pageCount: totalPages, pageSize };
     }
 
-    static async getHouseWithRoomsGraph(houseId: string, filterData: Filter) {
-        const { filter = [], sort = [], pagination } = filterData || {};
-        const { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = pagination || {};
-
-        let query = Houses.query()
+    static async getHouseWithRoomsGraph(houseId: string) {
+        const query = await Houses.query()
             .withGraphJoined("floors(idAndName).rooms(basic).[services(basic), images(imageUrl)]")
             .findById(houseId)
             .select("houses.id", "houses.name", "houses.address", "houses.description", "houses.collection_cycle");
 
-        // Filter
-        query = filterHandler(query, filter);
+        if (!query) throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
 
-        // Sort
-        query = sortingHandler(query, sort);
-
-        const totalQuery = query.clone();
-        const total = await totalQuery.resultSize();
-
-        if (total === 0) throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
-
-        const totalPages = Math.ceil(total / pageSize);
-
-        if (page === -1 && pageSize === -1) await query.page(0, total);
-        else await query.page(page - 1, pageSize);
-
-        const fetchData = await query;
-
-        return { ...fetchData, total, page, pageCount: totalPages, pageSize };
+        return query;
     }
 
     static async create(data: HouseCreate) {
