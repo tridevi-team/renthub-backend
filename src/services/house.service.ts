@@ -45,6 +45,7 @@ class HouseService {
                 equipment: { create: true, read: true, update: true, delete: true },
                 payment: { create: true, read: true, update: true, delete: true },
                 notification: { create: true, read: true, update: true, delete: true },
+                issue: { create: true, read: true, update: true, delete: true },
             };
 
             const enhancedList = fetchData.map((house) => {
