@@ -63,7 +63,12 @@ app.use(useragent.express(), (req: any, _res, next) => {
         userAgent.isiPhoneNative ||
         userAgent.isAndroid ||
         userAgent.isAndroidNative ||
-        userAgent.isBlackberry;
+        userAgent.isBlackberry ||
+        userAgent.browser === "Dart" ||
+        userAgent.browser === "Flutter" ||
+        userAgent.source.includes("dart") ||
+        userAgent.source.includes("flutter");
+
     req.isApp = isApp;
     next();
 });
