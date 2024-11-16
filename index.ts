@@ -54,16 +54,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(useragent.express(), (req: any, _res, next) => {
     const userAgent = req.useragent;
     const isApp =
-        userAgent.isMobile ||
-        userAgent.isMobileNative ||
-        userAgent.isTablet ||
-        userAgent.isiPad ||
-        userAgent.isiPod ||
-        userAgent.isiPhone ||
-        userAgent.isiPhoneNative ||
-        userAgent.isAndroid ||
-        userAgent.isAndroidNative ||
-        userAgent.isBlackberry ||
+        // userAgent.isMobile ||
+        // userAgent.isMobileNative ||
+        // userAgent.isTablet ||
+        // userAgent.isiPad ||
+        // userAgent.isiPod ||
+        // userAgent.isiPhone ||
+        // userAgent.isiPhoneNative ||
+        // userAgent.isAndroid ||
+        // userAgent.isAndroidNative ||
+        // userAgent.isBlackberry ||
         userAgent.browser === "Dart" ||
         userAgent.browser === "Flutter" ||
         userAgent.source.includes("dart") ||
