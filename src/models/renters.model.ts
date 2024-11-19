@@ -89,6 +89,12 @@ class Renters extends Model {
             represent(builder) {
                 builder.where("represent", true);
             },
+            houseAndFloor(builder) {
+                builder
+                    .select("renters.*", "house_floors.house_id", "house_floors.id as floor_id")
+                    .join("rooms", "rooms.id", "renters.room_id")
+                    .join("house_floors", "house_floors.id", "rooms.floor_id");
+            },
         };
     }
 }

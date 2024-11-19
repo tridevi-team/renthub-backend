@@ -13,6 +13,16 @@ components:
                     format: uuid
                     description: Renter ID
                     example: 1fa091e7-c977-44be-ae41-efa38958851f
+                houseId:
+                    type: string
+                    format: uuid
+                    description: House ID
+                    example: 13251603-a1b5-488a-8a06-44c9bbed67e0
+                floorId:
+                    type: string
+                    format: uuid
+                    description: Floor ID
+                    example: 36f9a639-5cc7-437d-a228-1305521a4b06
                 roomId:
                     type: string
                     format: uuid
