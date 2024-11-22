@@ -17,6 +17,10 @@ class RenterService {
                 throw new ApiException(messageResponse.RENTER_ALREADY_EXISTS, 409);
             }
 
+            if (data.represent && data.roomId) {
+                await Renters.query().where("room_id", data.roomId).patch({ represent: false });
+            }
+
             // create renter
             const newRenter = await Renters.query().insert(camelToSnake(data));
             return newRenter;
@@ -67,18 +71,19 @@ class RenterService {
             const renter = await Renters.query()
                 .where("phone_number", internationalPhoneNumber)
                 .orWhere("phone_number", domesticPhoneNumber)
+                .modify("houseAndFloor")
                 .first();
             return renter;
         }
 
         // if key match email
         if (key.match(/.+@.+\..+/)) {
-            const renter = await Renters.query().where("email", key).first();
+            const renter = await Renters.query().findOne("email", key).modify("houseAndFloor");
             return renter;
         }
 
         // if key match id
-        const renter = await Renters.query().findById(key);
+        const renter = await Renters.query().findById(key).modify("houseAndFloor");
         return renter;
     }
 
@@ -219,6 +224,11 @@ class RenterService {
 
     static async update(id: string, data: Renter) {
         const renter = await this.getById(id);
+
+        if (data.represent && renter.roomId) {
+            await Renters.query().where("room_id", renter.roomId).patch({ represent: false });
+        }
+
         const updatedRenter = await renter.$query().patchAndFetch(camelToSnake(data));
         return updatedRenter;
     }
