@@ -8,4 +8,4 @@ yarn.lock
 dist/
 credentials.json
 firebaseConfig.json
-/dumps/
+/dumps/data/*.json
