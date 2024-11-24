@@ -18,20 +18,19 @@
         "moduleResolution": "node", // Pretty much always node for modern JS. Other option is "classic"
         "resolveJsonModule": true, // Include modules imported with .json extension
         "paths": {
+            "@/*": ["src/*"], // General catch-all for all src folders
+            "@config/*": ["src/config/*"], // Specific wildcard paths
+            "@database": ["src/database/index.ts"],
             "@enums": ["src/enums/index.ts"],
             "@interfaces": ["src/interfaces/index.ts"],
-            "@models": ["src/models/index.ts"],
-            "@services": ["src/services/index.ts"],
-            "@utils": ["src/utils/index.ts"],
-            "@config": ["src/config/index.ts"],
-            "@database": ["src/database/index.ts"],
             "@middlewares": ["src/middlewares/index.ts"],
+            "@models": ["src/models/index.ts"],
             "@routes": ["src/routes/index.ts"],
-            "@validator/*": ["src/middlewares/validator/*"],
             "@routes/*": ["src/routes/*"],
-            "@config/*": ["src/config/*"],
-            "@test/*": ["test/*"],
-            "@/*": ["src/*"]
+            "@services": ["src/services/index.ts"],
+            "@utils/*": ["src/utils/*"], // Single wildcard for utils
+            "@validator/*": ["src/middlewares/validator/*"], // Validator sub-path
+            "@test/*": ["test/*"] // Test files path
         },
         // "typeRoots": ["../node_modules/@types", "node_modules/@types", "src/types"],
         // Strict checks
