@@ -28,6 +28,7 @@
             "@routes": ["src/routes/index.ts"],
             "@routes/*": ["src/routes/*"],
             "@services": ["src/services/index.ts"],
+            "@utils": ["src/utils/index.ts"], // Single wildcard for utils
             "@utils/*": ["src/utils/*"], // Single wildcard for utils
             "@validator/*": ["src/middlewares/validator/*"], // Validator sub-path
             "@test/*": ["test/*"] // Test files path
