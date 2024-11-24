@@ -1,7 +1,8 @@
-import type { QueryContext } from "objection";
+import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { Equipment, HouseFloors, Houses, Rooms, Users } from "./";
+import { currentDateTime } from "@utils/currentTime";
 
 class Issues extends Model {
     id: string;
@@ -39,6 +40,14 @@ class Issues extends Model {
 
     $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
+    }
+
+    $beforeUpdate(_opt: ModelOptions, _queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
+    }
+
+    $beforeDelete(_queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
     }
 
     static get jsonSchema() {

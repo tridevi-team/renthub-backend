@@ -32,7 +32,7 @@ class ContractTemplate extends Model {
     }
 
     $beforeUpdate(_opt: ModelOptions, _queryContext: QueryContext): Promise<any> | void {
-        this.updated_at = new Date().toString();
+        this.updated_at = currentDateTime();
     }
 
     $beforeDelete(_queryContext: QueryContext): Promise<any> | void {
