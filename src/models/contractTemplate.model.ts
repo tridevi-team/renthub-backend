@@ -8,6 +8,7 @@ class ContractTemplate extends Model {
     house_id: string;
     name: string;
     content: string;
+    landlord: object;
     is_active: boolean;
     created_by: string;
     created_at: string;
@@ -48,6 +49,7 @@ class ContractTemplate extends Model {
                 house_id: { type: "string", format: "uuid" },
                 name: { type: "string", maxLength: 255 },
                 content: { type: "string" },
+                landlord: { type: "object" },
                 is_active: { type: "boolean" },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },

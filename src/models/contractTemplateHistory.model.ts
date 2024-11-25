@@ -27,6 +27,7 @@ class ContractTemplateHistory extends Model {
                 house_id: { type: "string", format: "uuid" },
                 name: { type: "string", maxLength: 255 },
                 content: { type: "string" },
+                landlord: { type: "object" },
                 is_active: { type: "boolean" },
                 action: { type: "string", maxLength: 10 },
                 created_by: { type: "string", format: "uuid" },
