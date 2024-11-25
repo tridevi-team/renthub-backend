@@ -18,7 +18,6 @@
         "moduleResolution": "node", // Pretty much always node for modern JS. Other option is "classic"
         "resolveJsonModule": true, // Include modules imported with .json extension
         "paths": {
-            "@/*": ["src/*"], // General catch-all for all src folders
             "@config/*": ["src/config/*"], // Specific wildcard paths
             "@database": ["src/database/index.ts"],
             "@enums": ["src/enums/index.ts"],
@@ -31,7 +30,8 @@
             "@utils": ["src/utils/index.ts"], // Single wildcard for utils
             "@utils/*": ["src/utils/*"], // Single wildcard for utils
             "@validator/*": ["src/middlewares/validator/*"], // Validator sub-path
-            "@test/*": ["test/*"] // Test files path
+            "@test/*": ["test/*"], // Test files path
+            "@/*": ["src/*"] // General catch-all for all src folders
         },
         // "typeRoots": ["../node_modules/@types", "node_modules/@types", "src/types"],
         // Strict checks
@@ -51,6 +51,6 @@
         "noUnusedParameters": true, // Report errors on unused parameters
         "pretty": true // Stylize errors and messages using color and context
     },
-    "exclude": ["node_modules", "dist", "**/database/**"], // Specifies an array of filenames or patterns that should be skipped when resolving include
+    "exclude": ["node_modules", "dist", "**/database/**", "dumps"], // Specifies an array of filenames or patterns that should be skipped when resolving include
     "compileOnSave": false // Compile on save
 }
