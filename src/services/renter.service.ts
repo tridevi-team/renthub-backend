@@ -258,7 +258,7 @@ class RenterService {
                     builder.orWhere("phone_number", data.phoneNumber);
                 }
 
-                builder.where("room_id", "<>", null);
+                // builder.andWhere("room_id", "", null);
             })
             .first();
         if (!renter) {
