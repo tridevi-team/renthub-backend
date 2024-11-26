@@ -1,6 +1,7 @@
 "use strict";
 
 export { default as billValidator } from "./bills.validator";
+export { default as contractValidator } from "./contract.validator";
 export { default as equipmentValidator } from "./equipment.validator";
 export { default as houseValidator } from "./houses.validator";
 export { default as issueValidator } from "./issues.validator";

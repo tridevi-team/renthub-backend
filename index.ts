@@ -14,6 +14,7 @@ import { authentication, queryParser, requestLogger } from "./src/middlewares";
 import {
     AuthRoute,
     BillRoute,
+    ContractRoute,
     EquipmentRoute,
     FloorRoute,
     HouseRoute,
@@ -98,6 +99,7 @@ app.use("/issues", IssueRoute);
 app.use("/bills", BillRoute);
 app.use("/notifications", NotificationRouter);
 app.use("/uploads", uploadRoute);
+app.use("/contracts", ContractRoute);
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);

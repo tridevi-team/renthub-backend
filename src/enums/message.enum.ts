@@ -155,6 +155,28 @@ enum messageResponse {
     GET_NOTIFICATION_DETAILS_SUCCESS = "Notification details retrieved successfully",
     GET_NOTIFICATION_COUNT_SUCCESS = "Notification count retrieved successfully",
     UPDATE_NOTIFICATION_STATUS_SUCCESS = "Notification status updated successfully",
+    // contract
+    TEMPLATE_NOT_FOUND = "Contract template not found",
+    NO_TEMPLATES_FOUND = "No contract templates found",
+    CREATE_TEMPLATE_SUCCESS = "Contract template created successfully",
+    UPDATE_TEMPLATE_SUCCESS = "Contract template updated successfully",
+    DELETE_TEMPLATE_SUCCESS = "Contract template deleted successfully",
+    GET_TEMPLATE_DETAILS_SUCCESS = "Contract template details retrieved successfully",
+    GET_TEMPLATE_LIST_SUCCESS = "Contract template list retrieved successfully",
+    TEMPLATE_ALREADY_EXISTS = "Contract template already exists",
+    CONTRACT_NOT_FOUND = "Contract not found",
+    NO_CONTRACTS_FOUND = "No contracts found",
+    CREATE_CONTRACT_SUCCESS = "Contract created successfully",
+    UPDATE_CONTRACT_SUCCESS = "Contract updated successfully",
+    DELETE_CONTRACT_SUCCESS = "Contract deleted successfully",
+    CONTRACT_STATUS_PENDING_OR_ACTIVE_ONLY = "Status can only be PENDING or ACTIVE to update or delete contract",
+    CONTRACT_STATUS_PENDING_ONLY = "Status can only be PENDING to delete or update contract",
+    RENTER_APPROVED_ONLY = "Renter must be approved before updating contract",
+    GET_CONTRACT_DETAILS_SUCCESS = "Contract details retrieved successfully",
+    CONTRACT_ALREADY_EXISTS = "Contract already exists",
+    GET_CONTRACT_LIST_SUCCESS = "Contract list retrieved successfully",
+    CONTRACT_STATUS_UPDATED_SUCCESS = "Contract status updated successfully",
+    CONTRACT_STATUS_UPDATED_FAILED = "Failed to update contract status",
 }
 
 export default messageResponse;

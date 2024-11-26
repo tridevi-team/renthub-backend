@@ -21,6 +21,7 @@ class Equipment extends Model {
     houseId: string;
     floorId: string;
     roomId: string;
+    sharedType: string;
 
     static get tableName() {
         return "equipment";

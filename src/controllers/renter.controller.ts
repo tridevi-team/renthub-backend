@@ -208,6 +208,7 @@ class RenterController {
 
     static async login(req, res) {
         const { email, phoneNumber } = req.body;
+        console.log("🚀 ~ RenterController ~ login ~ email:", email)
         try {
             if (!email && !phoneNumber) {
                 throw new ApiException(messageResponse.VALIDATION_ERROR, 400);

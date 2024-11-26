@@ -2,6 +2,7 @@
 
 export { default as AuthRoute } from "./auth.route";
 export { default as BillRoute } from "./bill.route";
+export { default as ContractRoute } from "./contract.route";
 export { default as EquipmentRoute } from "./equipment.route";
 export { default as FloorRoute } from "./floor.route";
 export { default as HouseRoute } from "./house.route";

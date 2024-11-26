@@ -1,6 +1,7 @@
 "use strict";
 
 export { default as BillService } from "./bill.service";
+export { default as ContractService } from "./contract.service";
 export { default as EquipmentService } from "./equipment.service";
 export { default as FirebaseService } from "./firebase.service";
 export { default as FloorService } from "./floor.service";

@@ -80,6 +80,51 @@ class EquipmentService {
         };
     }
 
+    static async listEquipmentByRoom(roomId: string, dataFilter?: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
+        } = dataFilter || {};
+
+        let query = Equipment.query().where((builder) => {
+            // get equipment by room id or (house id and floor id and room id is null)
+            builder.where("room_id", roomId).orWhere((builder) => {
+                builder.where("house_id", roomId).whereNull("floor_id").whereNull("room_id");
+            });
+        });
+
+        // filter
+        query = filterHandler(query, filter);
+
+        // sort
+        query = sortingHandler(query, sort);
+
+        // clone
+        const clone = query.clone();
+        const total = await clone.resultSize();
+
+        if (total === 0) throw new ApiException(messageResponse.EQUIPMENT_NOT_FOUND, 404);
+
+        const totalPages = Math.ceil(total / pageSize);
+
+        if (page === -1 && pageSize === -1) {
+            await query.page(0, total);
+        } else {
+            await query.page(page - 1, pageSize);
+        }
+
+        const fetchData = await query;
+
+        return {
+            ...fetchData,
+            total,
+            page,
+            pageCount: totalPages,
+            pageSize,
+        };
+    }
+
     static async update(actionBy: string, id: string, data: EquipmentInfo) {
         const equipment = await this.getById(id);
         assert(equipment);

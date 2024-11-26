@@ -9,7 +9,14 @@ export enum DepositStatus {
 export enum ContractStatus {
     PENDING = "PENDING",
     ACTIVE = "ACTIVE",
-    INACTIVE = "INACTIVE",
+    EXPIRED = "EXPIRED",
     CANCELLED = "CANCELLED",
     TERMINATED = "TERMINATED",
+    HOLD = "HOLD",
+}
+
+export enum ApprovalStatus {
+    PENDING = "PENDING",
+    APPROVED = "APPROVED",
+    REJECTED = "REJECTED",
 }

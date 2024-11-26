@@ -1,8 +1,9 @@
+import { Address } from "@interfaces";
+import { ContractTemplate } from "@models";
+import { currentDateTime } from "@utils";
 import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
-import { Address } from "../interfaces";
-import { currentDateTime } from "../utils/currentTime";
 
 class Users extends Model {
     id!: string;
@@ -66,6 +67,19 @@ class Users extends Model {
                 created_at: { type: "string", format: "date-time" },
                 updated_by: { type: "string", format: "uuid" },
                 updated_at: { type: "string", format: "date-time" },
+            },
+        };
+    }
+
+    static get relationMappings() {
+        return {
+            template: {
+                relation: Model.HasManyRelation,
+                modelClass: ContractTemplate,
+                join: {
+                    from: "users.id",
+                    to: "contract_templates.created_by",
+                },
             },
         };
     }

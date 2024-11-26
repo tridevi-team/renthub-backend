@@ -1,10 +1,9 @@
-import { Renters, Users } from "@models";
+import { Information } from "@interfaces";
 import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
-import { ContractStatus, DepositStatus } from "../enums";
+import { ApprovalStatus, ContractStatus, DepositStatus } from "../enums";
 import { currentDateTime } from "../utils/currentTime";
-import { Information } from "@interfaces";
 
 class RoomContracts extends Model {
     id: string;
@@ -20,9 +19,13 @@ class RoomContracts extends Model {
     deposit_refund_date: string;
     rental_start_date: string;
     rental_end_date: string;
-    services: object;
-    equipment: object;
+    services: Array<any>;
+    equipment: Array<any>;
     status: ContractStatus;
+    approval_status: ApprovalStatus;
+    approval_note: string;
+    approval_date: string;
+    approval_by: string;
     created_by: string;
     created_at: string;
     updated_by: string;
@@ -37,6 +40,10 @@ class RoomContracts extends Model {
     depositRefundDate: string;
     rentalStartDate: string;
     rentalEndDate: string;
+    approvalStatus: ApprovalStatus;
+    approvalNote: string;
+    approvalDate: string;
+    approvalBy: string;
     createdBy: string;
     createdAt: string;
     updatedBy: string;
@@ -89,32 +96,15 @@ class RoomContracts extends Model {
                 rental_start_date: { type: "string" },
                 rental_end_date: { type: "string" },
                 room: { type: "object" },
-                services: { type: "object" },
-                equipment: { type: "object" },
+                services: { type: "array" },
+                equipment: { type: "array" },
                 status: { type: "string", maxLength: 255 },
+                approval_status: { type: "string", maxLength: 40 },
+                approval_note: { type: "string" },
+                approval_date: { type: "string" },
+                approval_by: { type: "string", format: "uuid" },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
-            },
-        };
-    }
-
-    static get relationMappings() {
-        return {
-            landlord: {
-                relation: Model.BelongsToOneRelation,
-                modelClass: Users,
-                join: {
-                    from: "room_contracts.landlord_id",
-                    to: "users.id",
-                },
-            },
-            renter: {
-                relation: Model.BelongsToOneRelation,
-                modelClass: Renters,
-                join: {
-                    from: "room_contracts.renter_id",
-                    to: "renters.id",
-                },
             },
         };
     }

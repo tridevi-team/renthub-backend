@@ -19,6 +19,7 @@ class Rooms extends Model {
     updated_at: string;
     houseId: string;
     services: RoomServices[];
+    equipment: Equipment[];
     images: RoomImages[];
     floor: HouseFloors;
     maxRenters: number;

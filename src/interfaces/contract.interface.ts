@@ -39,6 +39,7 @@ export interface RoomContractRequest {
     landlord: Information;
     renter: Information;
     renterIds: string;
+    content?: string;
     depositAmount: number;
     depositStatus: DepositStatus;
     depositDate: string;
@@ -71,5 +72,5 @@ export interface RoomContractUpdateRequest {
     services?: ServiceContractInfo[];
     equipment?: EquipmentContractInfo[];
     status?: ContractStatus;
-    updatedBy?: string;
+    updatedBy: string;
 }
