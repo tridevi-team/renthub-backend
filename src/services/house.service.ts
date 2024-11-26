@@ -136,6 +136,16 @@ class HouseService {
         };
     }
 
+    static async getContactInfo(houseId: string) {
+        const house = await Houses.query()
+            .join("users", "houses.created_by", "users.id")
+            .findById(houseId)
+            .select("users.email", "users.phone_number", "users.full_name");
+        if (!house) throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
+
+        return house;
+    }
+
     static async getHouseById(houseId: string) {
         const details = await Houses.query().findById(houseId);
         if (!details) throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
@@ -189,6 +199,15 @@ class HouseService {
         if (!query) throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
 
         return query;
+    }
+
+    static async getRoomIds(houseId: string) {
+        const roomIds = await Rooms.query()
+            .join("house_floors as floors", "floors.id", "rooms.floor_id")
+            .where("floors.house_id", houseId)
+            .select("rooms.id");
+
+        return roomIds.map((room) => room.id);
     }
 
     static async create(data: HouseCreate) {

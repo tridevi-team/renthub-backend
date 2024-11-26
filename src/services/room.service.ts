@@ -3,6 +3,7 @@ import { EPagination, messageResponse } from "../enums";
 import type { Filter, Room, RoomServiceInfo } from "../interfaces";
 import { Renters, RoomImages, Rooms, RoomServices, Services } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
+import HouseService from "./house.service";
 
 class RoomService {
     static async create(houseId: string, data: Room) {
@@ -48,11 +49,18 @@ class RoomService {
         const room = await Rooms.query()
             .withGraphFetched("floor.house")
             .withGraphJoined("services.service")
+            .withGraphJoined("equipment")
             .withGraphJoined("images")
             .findById(id);
+
         if (!room) {
             throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
         }
+
+        const houseId = room.floor.house.id;
+        // get user created house
+        const contact = await HouseService.getContactInfo(houseId);
+
         return {
             id: room.id,
             name: room.name,
@@ -60,6 +68,7 @@ class RoomService {
             roomArea: room.roomArea,
             price: room.price,
             description: room.description,
+            contact: contact,
             house: {
                 id: room.floor.house.id,
                 name: room.floor.house.name,
@@ -70,16 +79,31 @@ class RoomService {
                     description: room.floor.description,
                 },
             },
-            services: room.services.map((service) => {
-                return {
-                    id: service.serviceId,
-                    name: service.service.name,
-                    quantity: service.quantity,
-                    unitPrice: service.service.unitPrice,
-                    type: service.service.type,
-                    description: service.description,
-                };
-            }),
+            services:
+                room.services.map((service) => {
+                    return {
+                        id: service.serviceId,
+                        name: service.service.name,
+                        quantity: service.quantity,
+                        unitPrice: service.service.unitPrice,
+                        type: service.service.type,
+                        description: service.description,
+                    };
+                }) || [],
+            equipment:
+                room.equipment.map((equipment) => {
+                    return {
+                        id: equipment.id,
+                        houseId: equipment.houseId,
+                        floorId: equipment.floorId,
+                        roomId: equipment.roomId,
+                        code: equipment.code,
+                        name: equipment.name,
+                        status: equipment.status,
+                        sharedType: equipment.sharedType,
+                        description: equipment.description,
+                    };
+                }) || [],
             images: room.images.map((image) => image.imageUrl),
             status: room.status,
             createdBy: room.createdBy,
