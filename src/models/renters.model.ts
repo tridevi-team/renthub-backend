@@ -1,9 +1,9 @@
+import { RoomContracts, Rooms } from "@models";
 import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { Address } from "../interfaces";
 import { currentDateTime } from "../utils/currentTime";
-import Rooms from "./rooms.model";
 
 class Renters extends Model {
     id: string;
@@ -85,6 +85,14 @@ class Renters extends Model {
                     to: "rooms.id",
                 },
             },
+            contract: {
+                relation: Model.HasManyRelation,
+                modelClass: RoomContracts,
+                join: {
+                    from: "renters.id",
+                    to: "room_contracts.renter_id",
+                },
+            },
         };
     }
 
@@ -98,6 +106,22 @@ class Renters extends Model {
                     .select("renters.*", "house_floors.house_id", "house_floors.id as floor_id")
                     .join("rooms", "rooms.id", "renters.room_id")
                     .join("house_floors", "house_floors.id", "rooms.floor_id");
+            },
+            basicInfo(builder) {
+                builder.select(
+                    "id",
+                    "name",
+                    "phone_number",
+                    "email",
+                    "citizen_id",
+                    "address",
+                    "birthday",
+                    "gender",
+                    "temp_reg",
+                    "move_in_date",
+                    "represent",
+                    "note"
+                );
             },
         };
     }

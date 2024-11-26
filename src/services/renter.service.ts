@@ -1,11 +1,11 @@
-import { ConstraintViolationError } from "objection";
+import { ConstraintViolationError, TransactionOrKnex } from "objection";
 import { EPagination, messageResponse } from "../enums";
 import type { Filter, Renter } from "../interfaces";
 import { Houses, Renters } from "../models";
 import { ApiException, camelToSnake, filterHandler, jwtToken, sortingHandler } from "../utils";
 
 class RenterService {
-    static async create(data: Renter) {
+    static async create(data: Renter, trx?: TransactionOrKnex) {
         try {
             // check if renter exists
             const renter = await Renters.query()
@@ -18,13 +18,14 @@ class RenterService {
             }
 
             if (data.represent && data.roomId) {
-                await Renters.query().where("room_id", data.roomId).patch({ represent: false });
+                await Renters.query(trx).where("room_id", data.roomId).patch({ represent: false });
             }
 
             // create renter
-            const newRenter = await Renters.query().insert(camelToSnake(data));
+            const newRenter = await Renters.query(trx).insert(camelToSnake(data));
             return newRenter;
         } catch (err) {
+            console.log("🚀 ~ RenterService ~ create ~ err:", err);
             if (err instanceof ConstraintViolationError) {
                 throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
             }
@@ -242,6 +243,11 @@ class RenterService {
         return deletedRenter;
     }
 
+    static async checkCitizenIdExists(citizenId: string) {
+        const renter = await Renters.query().findOne("citizen_id", citizenId);
+        return renter;
+    }
+
     static async checkExists(data: { email?: string; phoneNumber?: string }) {
         const renter = await Renters.query()
             .where((builder) => {
@@ -251,6 +257,8 @@ class RenterService {
                 if (data.phoneNumber) {
                     builder.orWhere("phone_number", data.phoneNumber);
                 }
+
+                builder.where("room_id", "<>", null);
             })
             .first();
         if (!renter) {

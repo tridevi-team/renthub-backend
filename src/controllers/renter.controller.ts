@@ -147,7 +147,7 @@ class RenterController {
 
     static async updateRenterDetails(req, res) {
         const { renterId } = req.params;
-        const user = req.user;
+        // const user = req.user;
         const { name, citizenId, birthday, gender, email, phoneNumber, address, tempReg, moveInDate, represent, note } =
             req.body;
         try {

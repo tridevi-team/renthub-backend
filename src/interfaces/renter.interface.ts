@@ -1,3 +1,5 @@
+import { Address } from "./address.interface";
+
 export interface Renter {
     roomId?: string;
     name: string;
@@ -6,7 +8,7 @@ export interface Renter {
     gender: string;
     email?: string;
     phoneNumber?: string;
-    address?: string;
+    address?: string | Address;
     tempReg?: boolean;
     moveInDate: string;
     represent: boolean;
