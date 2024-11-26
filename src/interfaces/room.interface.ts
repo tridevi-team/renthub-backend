@@ -11,3 +11,11 @@ export interface Room {
     createdBy?: string;
     updatedBy?: string;
 }
+
+export interface RoomContractInfo {
+    id: string;
+    name: string;
+    area: number;
+    price: number;
+    maxRenters: number;
+}

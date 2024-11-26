@@ -4,13 +4,14 @@ import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { ContractStatus, DepositStatus } from "../enums";
 import { currentDateTime } from "../utils/currentTime";
+import { Information } from "@interfaces";
 
 class RoomContracts extends Model {
     id: string;
     room_id: string;
     contract_id: string;
-    landlord: object;
-    renter: object;
+    landlord: Information;
+    renter: Information;
     renter_ids: string;
     deposit_amount: number;
     deposit_status: DepositStatus;
@@ -87,6 +88,7 @@ class RoomContracts extends Model {
                 deposit_refund_date: { type: "string" },
                 rental_start_date: { type: "string" },
                 rental_end_date: { type: "string" },
+                room: { type: "object" },
                 services: { type: "object" },
                 equipment: { type: "object" },
                 status: { type: "string", maxLength: 255 },
