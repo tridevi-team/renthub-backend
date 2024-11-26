@@ -8,10 +8,10 @@ export interface RoomServiceInfo {
 }
 
 export interface ServiceContractInfo {
-    serviceId: string;
+    id: string;
     name: string;
     quantity: number;
-    startIndex: number;
+    startIndex?: number;
     type: ServiceTypes;
     unitPrice: number;
 }

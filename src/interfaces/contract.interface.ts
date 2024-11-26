@@ -1,10 +1,10 @@
 import { ContractStatus, DepositStatus } from "@enums";
-import { EquipmentContractInfo, RoomContractInfo, ServiceContractInfo } from "@interfaces";
+import { Address, EquipmentContractInfo, RoomContractInfo, ServiceContractInfo } from "@interfaces";
 
 export interface Information {
     fullName: string;
     citizenId: string;
-    address: string;
+    address: Address;
     phoneNumber: string;
     email?: string;
     birthday: string;
@@ -38,7 +38,7 @@ export interface RoomContractRequest {
     contractId: string;
     landlord: Information;
     renter: Information;
-    renterIds: string[];
+    renterIds: string;
     depositAmount: number;
     depositStatus: DepositStatus;
     depositDate: string;

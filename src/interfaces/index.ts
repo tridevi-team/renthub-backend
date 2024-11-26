@@ -1,5 +1,6 @@
 export * from "./address.interface";
 export * from "./bill.interface";
+export * from "./contract.interface";
 export * from "./equipment.interface";
 export * from "./filter.interface";
 export * from "./firebase.interface";
