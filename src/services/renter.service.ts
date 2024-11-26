@@ -257,10 +257,10 @@ class RenterService {
                 if (data.phoneNumber) {
                     builder.orWhere("phone_number", data.phoneNumber);
                 }
-
-                // builder.andWhere("room_id", "", null);
             })
+            .andWhereNot("room_id", null)
             .first();
+        console.log("🚀 ~ RenterService ~ checkExists ~ renter:", renter);
         if (!renter) {
             throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
         }
