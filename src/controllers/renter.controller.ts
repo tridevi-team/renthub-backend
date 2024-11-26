@@ -163,7 +163,7 @@ class RenterController {
                 moveInDate,
                 represent,
                 note,
-                updatedBy: user.id,
+                // updatedBy: user.roomId ? ,
             };
 
             const updateRenter = await RenterService.update(renterId, data);

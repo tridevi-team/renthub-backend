@@ -35,7 +35,7 @@ const renterAuthorize = (module: Module, action: Action) => {
 
         const renterRoomId = user.roomId;
 
-        if (renterRoomId !== roomId) {
+        if (renterRoomId !== roomId && roomId) {
             throw new ApiException(messageResponse.UNAUTHORIZED, 403);
         } else if (![Module.RENTER, Module.ISSUE].includes(module) && action !== Action.READ) {
             throw new ApiException(messageResponse.UNAUTHORIZED, 403);
