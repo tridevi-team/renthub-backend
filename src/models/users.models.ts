@@ -83,6 +83,14 @@ class Users extends Model {
             },
         };
     }
+
+    static get modifiers() {
+        return {
+            contact: (builder) => {
+                builder.select("full_name", "phone_number", "email");
+            },
+        };
+    }
 }
 
 export default Users;

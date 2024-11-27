@@ -635,6 +635,17 @@ components:
                 collectionCycle:
                     type: integer
                     example: 1
+                contact:
+                    properties:
+                        fullName:
+                            type: string
+                            example: "John Doe"
+                        phoneNumber:
+                            type: string
+                            example: "0123456789"
+                        email:
+                            type: string
+                            example: landlord@renthub.com
                 floors:
                     type: array
                     items:
@@ -702,6 +713,40 @@ components:
                                                     quantity:
                                                         type: number
                                                         example: 1
+                                        equipment:
+                                            type: array
+                                            items:
+                                                properties:
+                                                    id:
+                                                        type: string
+                                                        format: uuid
+                                                        example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
+                                                    name:
+                                                        type: string
+                                                        example: "Air conditioner"
+                                                    quantity:
+                                                        type: number
+                                                        example: 1
+                                                    description:
+                                                        type: string
+                                                        nullable: true
+                                                        example: "Air conditioner"
+                                        images:
+                                            type: array
+                                            items:
+                                                type: object
+                                                properties:
+                                                    id:
+                                                        type: string
+                                                        format: uuid
+                                                        example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
+                                                    imageUrl:
+                                                        type: string
+                                                        example: "https://via.placeholder.com/150"
+                                                    description:
+                                                        type: string
+                                                        nullable: true
+                                                        example: "Room image"
 
         HouseWithRoomsSuccess:
             type: object

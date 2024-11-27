@@ -193,7 +193,8 @@ class HouseService {
 
     static async getHouseWithRoomsGraph(houseId: string) {
         const query = await Houses.query()
-            .withGraphJoined("floors(idAndName).rooms(basic).[services(basic), images(imageUrl)]")
+            .withGraphJoined("createdBy(contact) as contact")
+            .withGraphJoined("floors(idAndName).rooms(basic).[services(basic), equipment(details), images(imageUrl)]")
             .findById(houseId)
             .select("houses.id", "houses.name", "houses.address", "houses.description", "houses.collection_cycle");
 
