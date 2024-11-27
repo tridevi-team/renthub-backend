@@ -1,8 +1,8 @@
+import { currentDateTime } from "@utils/currentTime";
 import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { BillDetails, PaymentMethods, Rooms } from "./";
-import { currentDateTime } from "@utils/currentTime";
 
 class Bills extends Model {
     id: string;

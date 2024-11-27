@@ -61,6 +61,10 @@ class RoomImages extends Model {
                 // random modifier
                 builder.select("image_url as thumbnail").limit(1);
             },
+            imagesArray(builder) {
+                // Correct usage of Knex raw
+                builder.select("GROUP_CONCAT(image_url) as images");
+            },
         };
     }
 }

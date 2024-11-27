@@ -48,9 +48,15 @@ class RoomService {
         // Get room by id
         const room = await Rooms.query()
             .withGraphFetched("floor.house")
-            .withGraphJoined("services.service")
-            .withGraphJoined("equipment")
-            .withGraphJoined("images")
+            .withGraphJoined("services(basic)")
+            .withGraphJoined("equipment(details)")
+            .withGraphJoined("images(imgArray) as images")
+            .modify("roomInfo")
+            .modifiers({
+                imgArray(builder) {
+                    builder.select("image_url");
+                },
+            })
             .findById(id);
 
         if (!room) {
@@ -58,17 +64,10 @@ class RoomService {
         }
 
         const houseId = room.floor.house.id;
-        // get user created house
         const contact = await HouseService.getContactInfo(houseId);
-
-        return {
-            id: room.id,
-            name: room.name,
-            maxRenters: room.maxRenters,
-            roomArea: room.roomArea,
-            price: room.price,
-            description: room.description,
-            contact: contact,
+        const formattedRoom = {
+            ...room,
+            contact,
             house: {
                 id: room.floor.house.id,
                 name: room.floor.house.name,
@@ -79,38 +78,12 @@ class RoomService {
                     description: room.floor.description,
                 },
             },
-            services:
-                room.services.map((service) => {
-                    return {
-                        id: service.serviceId,
-                        name: service.service.name,
-                        quantity: service.quantity,
-                        unitPrice: service.service.unitPrice,
-                        type: service.service.type,
-                        description: service.description,
-                    };
-                }) || [],
-            equipment:
-                room.equipment.map((equipment) => {
-                    return {
-                        id: equipment.id,
-                        houseId: equipment.houseId,
-                        floorId: equipment.floorId,
-                        roomId: equipment.roomId,
-                        code: equipment.code,
-                        name: equipment.name,
-                        status: equipment.status,
-                        sharedType: equipment.sharedType,
-                        description: equipment.description,
-                    };
-                }) || [],
-            images: room.images.map((image) => image.imageUrl),
-            status: room.status,
-            createdBy: room.createdBy,
-            createdAt: room.createdAt,
-            updatedBy: room.updatedBy,
-            updatedAt: room.updatedAt,
         };
+
+        if (formattedRoom.floor) {
+            delete (formattedRoom as any).floor;
+        }
+        return formattedRoom;
     }
 
     static async getRoomsByFloor(floorId: string, filterData?: Filter, isSelect: boolean = false) {
