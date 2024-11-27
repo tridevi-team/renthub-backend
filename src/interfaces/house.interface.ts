@@ -51,6 +51,7 @@ export interface Permissions {
     renter: CRUDPermissions;
     notification: CRUDPermissions;
     issue: CRUDPermissions;
+    contract: CRUDPermissions;
 }
 
 export type PermissionType = keyof Permissions;

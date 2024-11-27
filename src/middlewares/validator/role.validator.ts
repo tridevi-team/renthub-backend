@@ -18,6 +18,7 @@ const createRoleValidator = [
                 "payment",
                 "notification",
                 "issue",
+                "contract",
             ];
             const permissions = Object.keys(value);
 

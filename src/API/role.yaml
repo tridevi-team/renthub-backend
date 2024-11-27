@@ -60,6 +60,8 @@ components:
                             $ref: "#/components/schemas/CRUDPermissions"
                         issue:
                             $ref: "#/components/schemas/CRUDPermissions"
+                        contract:
+                            $ref: "#/components/schemas/CRUDPermissions"
                 description:
                     type: string
                     description: Role description
