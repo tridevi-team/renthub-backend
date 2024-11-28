@@ -2,7 +2,7 @@ import { EPagination, EquipmentStatus, IssueStatus, messageResponse, Notificatio
 import { Filter, IssueRequest } from "../interfaces";
 import { Houses, Issues } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
-import { EquipmentService, NotificationService, UserService } from "./";
+import { EquipmentService, HouseService, NotificationService, UserService } from "./";
 
 class IssueService {
     static async getById(id: string) {
@@ -105,11 +105,15 @@ class IssueService {
 
     static async create(data: IssueRequest) {
         const issue = await Issues.query().insert(camelToSnake(data));
-
+        const house = await HouseService.getHouseById(data.houseId);
         // send notification to owner and issue manager
-        // houseId?: string;
-        // floorId?: string;
-        // roomId?: string;
+        await NotificationService.create({
+            title: "Yêu cầu mới",
+            content: `Yêu cầu mới ${issue.title} được tạo`,
+            type: NotificationType.SYSTEM,
+            data: { issueId: issue.id },
+            recipients: [issue.createdBy, house.createdBy],
+        });
 
         return issue;
     }
@@ -181,7 +185,7 @@ class IssueService {
         // send notification to assignee
         await NotificationService.create({
             title: "Yêu cầu được giao cho bạn",
-            content: `Bạn đã được giao yêu cầu ${issue.title}`,
+            content: `Bạn đã được giao yêu cầu ${issue.title}. Vui lòng kiểm tra và xử lý`,
             type: NotificationType.SYSTEM,
             data: { issueId: id },
             recipients: [assignTo],
