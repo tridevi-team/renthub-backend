@@ -78,6 +78,21 @@ class ContractService {
         return newContract;
     }
 
+    static async addRenterAccess(roomId: string, renterId: string) {
+        // add to latest contract of room
+        const room = await RoomContracts.query().findOne({ roomId }).orderBy("created_at", "desc");
+
+        if (!room) {
+            throw new ApiException(messageResponse.CONTRACT_NOT_FOUND, 404);
+        }
+
+        const renterIds = room.renterIds + "," + renterId;
+
+        await room.$query().patch({ renterIds });
+
+        return await this.findOneRoomContract(room.id);
+    }
+
     static async findOneContractTemplate(id: string) {
         const contract = await ContractTemplate.query().findById(id);
         if (!contract) {

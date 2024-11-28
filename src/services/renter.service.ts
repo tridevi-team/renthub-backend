@@ -25,7 +25,6 @@ class RenterService {
             const newRenter = await Renters.query(trx).insert(camelToSnake(data));
             return newRenter;
         } catch (err) {
-            console.log("🚀 ~ RenterService ~ create ~ err:", err);
             if (err instanceof ConstraintViolationError) {
                 throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
             }

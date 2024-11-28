@@ -3,7 +3,7 @@
 import redisConfig from "../config/redis.config";
 import { messageResponse } from "../enums";
 import { FirebaseToken } from "../interfaces";
-import { RenterService } from "../services";
+import { ContractService, RenterService } from "../services";
 import MailService from "../services/mail.service";
 import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
 
@@ -34,6 +34,9 @@ class RenterController {
                 createdBy: user.id,
             };
             const createRenter = await RenterService.create(data);
+
+            // add renter to contract
+            await ContractService.addRenterAccess(roomId, createRenter.id);
 
             // delete cache
             await RedisUtils.deletePattern(cachePattern);
@@ -208,7 +211,6 @@ class RenterController {
 
     static async login(req, res) {
         const { email, phoneNumber } = req.body;
-        console.log("🚀 ~ RenterController ~ login ~ email:", email)
         try {
             if (!email && !phoneNumber) {
                 throw new ApiException(messageResponse.VALIDATION_ERROR, 400);
