@@ -12,8 +12,10 @@ const storage = multer.diskStorage({
         cb(null, UPLOADS_DIR);
     },
     filename: (_req, file, cb) => {
+        console.log(file);
+
         const currentTimestamp = new Date().getTime();
-        file.originalname = `${currentTimestamp}-${file.originalname}`;
+        file.originalname = `${currentTimestamp}-${file.originalname.replace(/ /g, "_")}`;
         cb(null, file.originalname);
     },
 });
