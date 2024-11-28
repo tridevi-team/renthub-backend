@@ -150,7 +150,21 @@ class ContractController {
     static async getRoomContracts(req, res) {
         const { roomId } = req.params;
         const { filter = [], sort = [], pagination } = req.query;
+        const user = req.user;
+        const { isApp } = req;
         try {
+            if (isApp && user.role === "renter") {
+                // this is for renter
+                console.log("[RENTER]" + user.name + " is getting contract list");
+                const contracts = await ContractService.findAllRoomContractByRenter(user.id, {
+                    filter,
+                    sort,
+                    pagination,
+                });
+
+                return res.json(apiResponse(messageResponse.GET_CONTRACT_LIST_SUCCESS, true, snakeToCamel(contracts)));
+            }
+
             const contracts = await ContractService.findAllRoomContract(roomId, {
                 filter,
                 sort,

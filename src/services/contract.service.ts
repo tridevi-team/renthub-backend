@@ -167,6 +167,34 @@ class ContractService {
         return { ...fetchData, page, pageCount: totalPages, pageSize, total };
     }
 
+    static async findAllRoomContractByRenter(renterId: string, filterData: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page, pageSize },
+        } = filterData || {};
+
+        let list = RoomContracts.query().where("renter_ids", "like", `%${renterId}%`);
+
+        // filter
+        list = filterHandler(list, filter);
+
+        // sort
+        list = sortingHandler(list, sort);
+
+        const clone = list.clone();
+        const total = await clone.resultSize();
+        const totalPages = Math.ceil(total / pageSize);
+
+        // Pagination
+        if (page !== -1 && pageSize !== -1) await list.page(page - 1, pageSize);
+        else await list.page(0, total);
+
+        const fetchData = await list;
+
+        return { ...fetchData, page, pageCount: totalPages, pageSize, total };
+    }
+
     static async findAllRoomContractByHouse(houseId: string, filterData: Filter) {
         const {
             filter = [],
