@@ -143,7 +143,7 @@ components:
                     description: The content of the issue
                     example: The TV in the living room is not working
                 files:
-                    type: object
+                    type: array
                     description: The files of the issue
                     properties:
                         image:

@@ -1,8 +1,8 @@
-import { EPagination, messageResponse, NotificationType } from "../enums";
+import { EPagination, EquipmentStatus, IssueStatus, messageResponse, NotificationType } from "../enums";
 import { Filter, IssueRequest } from "../interfaces";
 import { Houses, Issues } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
-import { NotificationService, UserService } from "./";
+import { EquipmentService, NotificationService, UserService } from "./";
 
 class IssueService {
     static async getById(id: string) {
@@ -119,6 +119,22 @@ class IssueService {
 
         const updated = issue.$query().patchAndFetch(camelToSnake(data));
 
+        if (data.status && issue.equipmentId) {
+            const status = data.status;
+
+            if (status === IssueStatus.IN_PROGRESS) {
+                // update equipment status is REPAIRING
+                await EquipmentService.updateStatus(issue.createdBy, issue.equipmentId, {
+                    status: EquipmentStatus.REPAIRING,
+                });
+            } else if (status === IssueStatus.DONE) {
+                // update equipment status is NORMAL
+                await EquipmentService.updateStatus(issue.createdBy, issue.equipmentId, {
+                    status: EquipmentStatus.NORMAL,
+                });
+            }
+        }
+
         return updated;
     }
 
@@ -132,7 +148,23 @@ class IssueService {
 
     static async updateStatus(id: string, status: string) {
         const issue = await this.getById(id);
-
+        if (issue.equipmentId) {
+            const equipment = await EquipmentService.getById(issue.equipmentId);
+            if (!equipment) {
+                throw new ApiException(messageResponse.EQUIPMENT_NOT_FOUND, 404);
+            }
+            if (status === IssueStatus.IN_PROGRESS) {
+                // if issue status is IN_PROGRESS => update equipment status is REPAIRING
+                await EquipmentService.updateStatus(equipment.createdBy, equipment.id, {
+                    status: EquipmentStatus.REPAIRING,
+                });
+            } else if (status === IssueStatus.DONE) {
+                // if issue status is DONE => update equipment status is
+                await EquipmentService.updateStatus(equipment.createdBy, equipment.id, {
+                    status: EquipmentStatus.NORMAL,
+                });
+            }
+        }
         const updated = issue.$query().patchAndFetch({ status });
 
         return updated;

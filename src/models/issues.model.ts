@@ -1,8 +1,8 @@
+import { currentDateTime } from "@utils/currentTime";
 import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { Equipment, HouseFloors, Houses, Rooms, Users } from "./";
-import { currentDateTime } from "@utils/currentTime";
 
 class Issues extends Model {
     id: string;
@@ -29,6 +29,7 @@ class Issues extends Model {
     createdAt: string;
     updatedBy: string;
     updatedAt: string;
+    count: number;
 
     static get tableName() {
         return "issues";
