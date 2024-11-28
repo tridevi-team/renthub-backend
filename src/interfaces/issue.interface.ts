@@ -1,7 +1,7 @@
 import { IssueStatus } from "@enums";
 
 export interface IssueRequest {
-    houseId?: string;
+    houseId: string;
     floorId?: string;
     roomId?: string;
     equipmentId?: string;
