@@ -1,7 +1,7 @@
-import { ForeignKeyViolationError } from "objection";
-import { EPagination, messageResponse } from "../enums";
+import { ForeignKeyViolationError, TransactionOrKnex } from "objection";
+import { ContractStatus, EPagination, messageResponse, RoomStatus } from "../enums";
 import type { Filter, Room, RoomServiceInfo } from "../interfaces";
-import { Renters, RoomImages, Rooms, RoomServices, Services } from "../models";
+import { Renters, RoomContracts, RoomImages, Rooms, RoomServices, Services } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 import HouseService from "./house.service";
 
@@ -230,6 +230,37 @@ class RoomService {
             }
             throw err;
         }
+    }
+
+    static async updateStatusByContract(roomId: string, status: ContractStatus, updatedBy: string, trx?: TransactionOrKnex) {
+        const room = await Rooms.query().findById(roomId);
+        if (!room) {
+            throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
+        }
+        if ([ContractStatus.ACTIVE].includes(status)) {
+            await room.$query(trx).patch(camelToSnake({ status: RoomStatus.RENTED, updatedBy }));
+        } else if ([ContractStatus.CANCELLED, ContractStatus.TERMINATED].includes(status)) {
+            await room.$query(trx).patch(camelToSnake({ status: RoomStatus.AVAILABLE, updatedBy }));
+        } else if (status === ContractStatus.EXPIRED) {
+            // check latest contract of room, if it is expired, set room status to available
+            const latestContract = await RoomContracts.query()
+                .where("room_id", roomId)
+                .orderBy("created_at", "desc")
+                .first();
+
+            if (latestContract?.status === ContractStatus.EXPIRED) {
+                await room.$query(trx).patch(camelToSnake({ status: RoomStatus.AVAILABLE, updatedBy }));
+            }
+        }
+    }
+
+    static async updateRoomStatus(id: string, status: RoomStatus, updatedBy: string) {
+        const room = await Rooms.query().findById(id);
+        if (!room) {
+            throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
+        }
+        const updatedRoom = await room.$query().patchAndFetch(camelToSnake({ status, updatedBy }));
+        return updatedRoom;
     }
 
     static async deleteRoom(id: string, deletedBy: string) {

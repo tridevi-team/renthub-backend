@@ -2,7 +2,7 @@ import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { currentDateTime } from "../utils/currentTime";
-import { Bills, Equipment, HouseFloors, Issues, Renters, RoomImages, RoomServices } from "./";
+import { Bills, Equipment, HouseFloors, Issues, Renters, RoomContracts, RoomImages, RoomServices } from "./";
 
 class Rooms extends Model {
     id: string;
@@ -29,6 +29,7 @@ class Rooms extends Model {
     updatedBy: string;
     updatedAt: string;
     renters: Renters[];
+    count: number;
 
     static get tableName() {
         return "rooms";
@@ -127,6 +128,14 @@ class Rooms extends Model {
                 join: {
                     from: "rooms.id",
                     to: "bills.room_id",
+                },
+            },
+            contracts: {
+                relation: Model.HasManyRelation,
+                modelClass: RoomContracts,
+                join: {
+                    from: "rooms.id",
+                    to: "room_contracts.room_id",
                 },
             },
         };

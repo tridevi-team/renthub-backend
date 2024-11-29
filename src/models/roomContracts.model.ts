@@ -1,4 +1,5 @@
 import { Information } from "@interfaces";
+import { Rooms } from "@models";
 import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
@@ -48,6 +49,7 @@ class RoomContracts extends Model {
     createdAt: string;
     updatedBy: string;
     updatedAt: string;
+    count: number;
 
     static get tableName() {
         return "room_contracts";
@@ -105,6 +107,19 @@ class RoomContracts extends Model {
                 approval_by: { type: "string", format: "uuid" },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
+            },
+        };
+    }
+
+    static get relationMappings() {
+        return {
+            room: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Rooms,
+                join: {
+                    from: "room_contracts.room_id",
+                    to: "rooms.id",
+                },
             },
         };
     }

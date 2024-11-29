@@ -75,6 +75,9 @@ class ContractService {
             camelToSnake({ ...contract, content: templateDetails.content })
         );
 
+        // update room status
+        await RoomService.updateStatusByContract(newContract.roomId, newContract.status, newContract.createdBy, trx);
+
         return newContract;
     }
 
@@ -280,6 +283,13 @@ class ContractService {
 
         const updatedContract = await RoomContracts.query().patchAndFetchById(id, camelToSnake(filteredUpdates));
 
+        // update room status
+        await RoomService.updateStatusByContract(
+            updatedContract.roomId,
+            updatedContract.status,
+            updatedContract.updatedBy
+        );
+
         await updatedContract.$query().patch({
             status: ContractStatus.PENDING,
             approvalStatus: ApprovalStatus.PENDING,
@@ -302,10 +312,15 @@ class ContractService {
 
         // Check if the transition is allowed
         if (statusTransitions[currentStatus]?.includes(status)) {
-            return RoomContracts.query().patchAndFetchById(id, {
+            const updated = RoomContracts.query().patchAndFetchById(id, {
                 status,
                 updated_by: actionBy,
             });
+
+            // update room status if contract status is active => rented
+            await RoomService.updateStatusByContract(details.roomId, status, actionBy);
+
+            return updated;
         }
 
         throw new ApiException(messageResponse.CONTRACT_STATUS_UPDATED_FAILED, 423);
