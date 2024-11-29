@@ -33,7 +33,22 @@ class UserService {
             pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
         } = filterData || {};
 
-        let query = UserRoles.query().where(camelToSnake({ houseId }));
+        let query = UserRoles.query()
+            .where(camelToSnake({ houseId }))
+            .join("users", "user_roles.userId", "users.id")
+            .join("roles", "user_roles.roleId", "roles.id")
+            .select(
+                "users.id",
+                "users.full_name",
+                "users.gender",
+                "users.email",
+                "users.phone_number",
+                "users.address",
+                "users.birthday",
+                "users.verify",
+                "roles.id as roleId",
+                "roles.name as role"
+            );
 
         query = filterHandler(query, filter);
 
