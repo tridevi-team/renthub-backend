@@ -12,6 +12,9 @@ const issueRequest = [
     check("status").optional().isString().withMessage("Status must be a string").isIn(Object.values(IssueStatus)),
     check("description").optional().isString().withMessage("Description must be a string"),
     check("files").optional().isObject().withMessage("Files must be an array"),
+    check("files.image").optional().isArray().withMessage("Images must be an array"),
+    check("files.video").optional().isArray().withMessage("Videos must be an array"),
+    check("files.file").optional().isArray().withMessage("Files must be an array"),
     check("assignTo").optional().isUUID().withMessage("Assignee must be a valid UUID"),
 ];
 
