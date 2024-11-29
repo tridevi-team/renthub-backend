@@ -8,6 +8,7 @@ import { rateLimit } from "express-rate-limit";
 import useragent from "express-useragent";
 import path from "path";
 import { serve, setup } from "swagger-ui-express";
+import provinces from "./provinces.json";
 import { swaggerSpec } from "./src/API/swagger";
 import "./src/config/database.config";
 import { authentication, queryParser, requestLogger } from "./src/middlewares";
@@ -102,6 +103,9 @@ app.use("/notifications", NotificationRouter);
 app.use("/uploads", uploadRoute);
 app.use("/contracts", ContractRoute);
 app.use("/statistical", statisticalRoute);
+app.get("/provinces", async (_req, res) => {
+    return res.json(provinces);
+});
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
