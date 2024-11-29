@@ -40,7 +40,10 @@ class NotificationService {
         try {
             const collectionRef = collection(NotificationService.firebaseDb, "users", recipient, "devices");
             const getData = await getDocs(collectionRef);
-            const fcmTokens = getData.docs.map((doc) => doc.data().FCM);
+            const fcmTokens = getData.docs.map((doc) => doc.data().FCM).filter((token) => token !== null);
+
+            if (fcmTokens.length === 0) return;
+
             firebaseAdmin
                 .messaging()
                 .sendEachForMulticast({
