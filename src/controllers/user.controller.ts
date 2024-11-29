@@ -110,7 +110,7 @@ class UserController {
                 phoneNumber: phoneNumber?.trim(),
                 gender,
                 birthday: birthday || "1970-01-01",
-                address: address || "",
+                address: address || { city: "", district: "", ward: "", street: "" },
             };
 
             const user = await UserService.createUser(newUser);
