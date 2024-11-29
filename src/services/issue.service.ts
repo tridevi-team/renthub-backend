@@ -1,5 +1,5 @@
 import { EPagination, EquipmentStatus, IssueStatus, messageResponse, NotificationType } from "../enums";
-import { Filter, IssueRequest } from "../interfaces";
+import { Filter, IssueRequestCreate, IssueRequestUpdate } from "../interfaces";
 import { Houses, Issues } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 import { EquipmentService, HouseService, NotificationService, UserService } from "./";
@@ -103,7 +103,7 @@ class IssueService {
         };
     }
 
-    static async create(data: IssueRequest) {
+    static async create(data: IssueRequestCreate) {
         const issue = await Issues.query().insert(camelToSnake(data));
         const house = await HouseService.getHouseById(data.houseId);
         // send notification to owner and issue manager
@@ -112,13 +112,13 @@ class IssueService {
             content: `Yêu cầu mới ${issue.title} được tạo`,
             type: NotificationType.SYSTEM,
             data: { issueId: issue.id },
-            recipients: [issue.createdBy, house.createdBy],
+            recipients: [data.createdBy, house.createdBy],
         });
 
         return issue;
     }
 
-    static async update(id: string, data: IssueRequest) {
+    static async update(id: string, data: IssueRequestUpdate) {
         const issue = await this.getById(id);
 
         const updated = issue.$query().patchAndFetch(camelToSnake(data));

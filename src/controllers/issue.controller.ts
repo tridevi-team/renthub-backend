@@ -103,6 +103,7 @@ class IssueController {
                 description,
                 files,
                 assignTo,
+                updatedBy: req.user.id,
             });
 
             // delete cache
