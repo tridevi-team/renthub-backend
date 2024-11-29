@@ -177,6 +177,8 @@ enum messageResponse {
     GET_CONTRACT_LIST_SUCCESS = "Contract list retrieved successfully",
     CONTRACT_STATUS_UPDATED_SUCCESS = "Contract status updated successfully",
     CONTRACT_STATUS_UPDATED_FAILED = "Failed to update contract status",
+    // statistical
+    GET_STATISTICAL_SUCCESS = "Statistical data retrieved successfully",
 }
 
 export default messageResponse;

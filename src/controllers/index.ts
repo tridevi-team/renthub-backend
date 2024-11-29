@@ -9,4 +9,5 @@ export { default as PaymentController } from "./payment.controller";
 export { default as RenterController } from "./renter.controller";
 export { default as RoomController } from "./room.controller";
 export { default as ServiceController } from "./service.controller";
+export { default as StatisticalController } from "./statistical.controller";
 export { default as UserController } from "./user.controller";

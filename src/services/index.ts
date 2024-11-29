@@ -11,4 +11,5 @@ export { default as PaymentService } from "./payment.service";
 export { default as RenterService } from "./renter.service";
 export { default as RoleService } from "./role.service";
 export { default as RoomService } from "./room.service";
+export { default as StatisticalService } from "./statistical.service";
 export { default as UserService } from "./user.service";

@@ -14,4 +14,5 @@ export { default as RoleRoute } from "./role.route";
 export { default as RoomRoute } from "./room.route";
 export { default as ServiceRoute } from "./service.route";
 export { default as StaticRoute } from "./static.route";
+export { default as statisticalRoute } from "./statistical.route";
 export { default as UserRoute } from "./user.route";

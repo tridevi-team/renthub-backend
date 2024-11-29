@@ -1,5 +1,6 @@
 export * from "./authorize.enum";
 export * from "./bills.enum";
+export * from "./color.enum";
 export * from "./contract.enum";
 export * from "./equipment.enum";
 export * from "./issues.enum";

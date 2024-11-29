@@ -26,6 +26,7 @@ import {
     RoomRoute,
     ServiceRoute,
     StaticRoute,
+    statisticalRoute,
     UserRoute,
 } from "./src/routes";
 import uploadRoute from "./src/routes/upload.route";
@@ -100,6 +101,7 @@ app.use("/bills", BillRoute);
 app.use("/notifications", NotificationRouter);
 app.use("/uploads", uploadRoute);
 app.use("/contracts", ContractRoute);
+app.use("/statistical", statisticalRoute);
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);

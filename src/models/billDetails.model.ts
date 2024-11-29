@@ -30,6 +30,8 @@ class BillDetails extends Model {
     createdAt: string;
     updatedBy: string;
     updatedAt: string;
+    month: string;
+    year: string;
 
     static get tableName() {
         return "bill_details";

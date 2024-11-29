@@ -14,4 +14,5 @@ export * from "./payment.interface";
 export * from "./renter.interface";
 export * from "./room.interface";
 export * from "./service.interface";
+export * from "./statistical.interface";
 export * from "./user.interface";
