@@ -122,6 +122,16 @@ class RoleService {
         }
     }
 
+    static async removeAssignedRole(userId: string, houseId: string) {
+        const deletedRow = await UserRoles.query().delete().where(camelToSnake({ userId, houseId }));
+
+        const isDeleted = deletedRow > 0;
+
+        if (!isDeleted) throw new ApiException(messageResponse.REMOVE_ROLE_ERROR, 500);
+
+        return true;
+    }
+
     static async updateStatus(roleId: string, status: boolean) {
         const roleDetails = await this.getById(roleId);
 

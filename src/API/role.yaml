@@ -282,6 +282,8 @@ components:
                     type: string
                     format: uuid
                     example: 7f4f9dcb-7990-11ef-a1bc-6018953af69a
+            required:
+                - userId
 
         AssignRoleSuccess:
             type: object
@@ -318,6 +320,23 @@ components:
                             type: string
                             format: date-time
                             example: 2021-07-01T00:00:00Z
+
+        RemoveRoleSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    default: true
+                code:
+                    type: string
+                    default: REMOVE_ROLE_SUCCESS
+                message:
+                    type: string
+                    default: Role removed successfully
+                data:
+                    type: object
+                    example: {}
+
         RoleDeleteSuccess:
             type: object
             properties:
@@ -681,7 +700,9 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: "#/components/schemas/AssignRoleSuccess"
+                                oneOf:
+                                    - $ref: "#/components/schemas/AssignRoleSuccess"
+                                    - $ref: "#/components/schemas/RemoveRoleSuccess"
                 "400":
                     description: Invalid input
                     content:

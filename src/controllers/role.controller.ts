@@ -124,6 +124,11 @@ class RoleController {
             if (userId === houseDetails.createdBy)
                 throw new ApiException(messageResponse.CANNOT_ASSIGN_ROLE_TO_HOUSE_OWNER, 403);
 
+            if (!roleId) {
+                await RoleService.removeAssignedRole(userId, houseId);
+
+                return res.json(apiResponse(messageResponse.REMOVE_ROLE_SUCCESS, true));
+            }
             const data = await RoleService.assign(houseId, userId, roleId, user.id);
 
             return res.json(apiResponse(messageResponse.ASSIGN_ROLE_SUCCESS, true, data));

@@ -81,7 +81,7 @@ const roleIdValidator = [check("roleId").isUUID().withMessage("roleId is not in 
 const assignRoleValidator = [
     check("houseId").isUUID().withMessage("houseId is not in the correct format"),
     check("userId").isUUID().withMessage("userId is not in the correct format"),
-    check("roleId").isUUID().withMessage("roleId is not in the correct format"),
+    check("roleId").optional().isUUID().withMessage("roleId is not in the correct format"),
 ];
 
 const roleValidator = {
