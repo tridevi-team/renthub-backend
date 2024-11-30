@@ -51,7 +51,8 @@
         "swagger-ui-express": "^5.0.1",
         "ts-node": "^10.9.2",
         "typescript": "^5.4.5",
-        "uuid": "^10.0.0"
+        "uuid": "^10.0.0",
+        "vn-num2words": "^1.0.4"
     },
     "devDependencies": {
         "@eslint/compat": "^1.1.1",
