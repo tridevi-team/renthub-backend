@@ -1,5 +1,6 @@
 "use strict";
 
+import { Model } from "objection";
 import { messageResponse } from "../enums";
 import { EquipmentService } from "../services";
 import { apiResponse, Exception } from "../utils";
@@ -100,6 +101,23 @@ class EquipmentController {
             await EquipmentService.delete(user.id, equipmentId);
             return res.json(apiResponse(messageResponse.DELETE_EQUIPMENT_SUCCESS, true));
         } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async deleteEquipmentInHouse(req, res) {
+        const { houseId } = req.params;
+        const { ids } = req.body;
+        const trx = await Model.startTransaction();
+        try {
+            await EquipmentService.deleteMany(req.user.id, houseId, ids, trx);
+
+            // commit transaction
+            await trx.commit();
+            return res.json(apiResponse(messageResponse.DELETE_EQUIPMENT_SUCCESS, true));
+        } catch (err) {
+            // rollback transaction
+            await trx.rollback();
             Exception.handle(err, req, res);
         }
     }

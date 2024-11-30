@@ -1,4 +1,5 @@
 import assert from "assert";
+import { TransactionOrKnex } from "objection";
 import { EPagination, EquipmentStatus, EquipmentType, messageResponse } from "../enums";
 import { EquipmentInfo, Filter } from "../interfaces";
 import { Equipment, Houses } from "../models";
@@ -160,6 +161,17 @@ class EquipmentService {
         await equipment.$query().patch(camelToSnake({ updatedBy: actionBy }));
         await equipment.$query().delete();
         return equipment;
+    }
+
+    static async deleteMany(actionBy: string, houseId: string, ids: string[], trx?: TransactionOrKnex) {
+        const equipment = await Equipment.query().whereIn("id", ids).andWhere("houseId", houseId);
+        if (equipment.length === 0) {
+            throw new ApiException(messageResponse.EQUIPMENT_NOT_FOUND, 404);
+        }
+        for (const item of equipment) {
+            await item.$query(trx).patch(camelToSnake({ updatedBy: actionBy }));
+            await item.$query(trx).delete();
+        }
     }
 }
 
