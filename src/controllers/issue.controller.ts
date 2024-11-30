@@ -168,6 +168,23 @@ class IssueController {
             Exception.handle(err, req, res);
         }
     }
+
+    static async deleteIssues(req, res) {
+        const { ids } = req.body;
+        const { houseId } = req.params;
+        const { user } = req;
+        try {
+            await IssueService.deleteByIds(ids, houseId, user.id);
+
+            // delete cache
+            const cacheKey = `${prefix}:*`;
+            await RedisUtils.deletePattern(cacheKey);
+
+            return res.json(apiResponse(messageResponse.DELETE_ISSUE_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 }
 
 export default IssueController;

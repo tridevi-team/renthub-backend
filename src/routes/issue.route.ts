@@ -77,4 +77,13 @@ issueRouter.delete(
     IssueController.deleteIssue
 );
 
+issueRouter.delete(
+    "/houseId/delete-issues",
+    authentication,
+    authorize(Module.ISSUE, Action.DELETE),
+    houseValidator.houseIdValidator,
+    handleErrors,
+    IssueController.deleteIssues
+);
+
 export default issueRouter;

@@ -734,3 +734,67 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/IssueNotFound"
+
+    /issues/{houseId}/delete-issues:
+        delete:
+            tags:
+                - Issue
+            summary: Delete all issues
+            description: Delete all issues for a house
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: houseId
+                  in: path
+                  description: The unique identifier of the house
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 13251603-a1b5-488a-8a06-44c9bbed67e0
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                ids:
+                                    type: array
+                                    items:
+                                        type: string
+                                    description: The unique identifiers of the issues
+                                    example: ["236787f4-4639-444a-99cd-548ce74f1be9"]
+            responses:
+                "200":
+                    description: Deleted
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/DeleteIssueSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+                "404":
+                    description: House not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoHouseFound"

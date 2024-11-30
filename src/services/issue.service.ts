@@ -1,3 +1,4 @@
+import { TransactionOrKnex } from "objection";
 import { EPagination, EquipmentStatus, IssueStatus, messageResponse, NotificationType } from "../enums";
 import { Filter, IssueRequestCreate, IssueRequestUpdate } from "../interfaces";
 import { Houses, Issues } from "../models";
@@ -148,6 +149,20 @@ class IssueService {
         const deleted = await issue.$query().delete();
 
         return deleted;
+    }
+
+    static async deleteByIds(ids: string[], houseId: string, actionBy: string, trx?: TransactionOrKnex) {
+        // check houseId is valid
+        for (const id of ids) {
+            const issue = await this.getById(id);
+            if (issue.houseId !== houseId) {
+                throw new ApiException(messageResponse.ISSUE_NOT_FOUND, 404);
+            }
+
+            await issue.$query(trx).patch({ updated_by: actionBy });
+
+            await issue.$query(trx).delete();
+        }
     }
 
     static async updateStatus(id: string, status: string) {
