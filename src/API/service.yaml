@@ -653,7 +653,7 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/ServiceNotFound"
 
-    /services/{roomId}/deleteRoomService:
+    /services/{roomId}/delete-room-service:
         delete:
             tags:
                 - Service
