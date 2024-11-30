@@ -34,7 +34,7 @@ class UserService {
         } = filterData || {};
 
         let query = UserRoles.query()
-            .where(camelToSnake({ houseId }))
+            .where("roles.house_id", houseId)
             .join("users", "user_roles.userId", "users.id")
             .join("roles", "user_roles.roleId", "roles.id")
             .select(
