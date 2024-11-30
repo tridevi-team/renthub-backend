@@ -93,7 +93,7 @@ class RoomService {
         const pageSize = pagination?.pageSize || EPagination.DEFAULT_LIMIT;
 
         // Get list of rooms by floor
-        let query = Rooms.query().findOne("floor_id", floorId);
+        let query = Rooms.query().where("floor_id", floorId);
 
         if (isSelect) {
             query = query.select("id", "name").orderBy("name");
@@ -232,7 +232,12 @@ class RoomService {
         }
     }
 
-    static async updateStatusByContract(roomId: string, status: ContractStatus, updatedBy: string, trx?: TransactionOrKnex) {
+    static async updateStatusByContract(
+        roomId: string,
+        status: ContractStatus,
+        updatedBy: string,
+        trx?: TransactionOrKnex
+    ) {
         const room = await Rooms.query().findById(roomId);
         if (!room) {
             throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);

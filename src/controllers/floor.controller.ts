@@ -83,7 +83,7 @@ class FloorController {
                 filter,
                 sort,
                 pagination,
-            });
+            }, isSelect);
 
             // set cache
             await RedisUtils.setAddMember(cacheKey, JSON.stringify(rooms));
