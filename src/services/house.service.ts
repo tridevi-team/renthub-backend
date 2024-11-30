@@ -455,6 +455,32 @@ class HouseService {
         const isDeleted = deletedService > 0;
         return isDeleted;
     }
+
+    static async getHouseSettings(roomId: string) {
+        const query = await Houses.query()
+            .join("house_floors as floors", "floors.house_id", "houses.id")
+            .join("rooms", "rooms.floor_id", "floors.id")
+            .where("rooms.id", roomId)
+            .select(
+                "houses.name",
+                "houses.address",
+                "houses.collection_cycle",
+                "houses.invoice_date",
+                "houses.contract_default",
+                "houses.num_collect_days"
+            )
+            .first();
+
+        if (!query) throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
+
+        return {
+            houseName: query.name,
+            houseAddress: query.address,
+            collectionCycle: query.collectionCycle,
+            invoiceDate: query.invoiceDate,
+            numCollectDays: query.numCollectDays,
+        };
+    }
 }
 
 export default HouseService;
