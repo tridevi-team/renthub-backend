@@ -1,13 +1,22 @@
 import { ContractStatus, messageResponse } from "@enums";
 import { ContractRequest, RoomContractRequest } from "@interfaces";
 import { ContractService, RenterService } from "@services";
-import { apiResponse, Exception, RedisUtils, snakeToCamel } from "@utils";
+import { apiResponse, camelToSnake, Exception, RedisUtils, snakeToCamel } from "@utils";
 import { Model } from "objection";
 
 const TEMPLATE_PREFIX: string = "templates";
 const CONTRACT_PREFIX: string = "contracts";
 
 class ContractController {
+    static async getKeys(req, res) {
+        try {
+            const keys = await ContractService.getKeys();
+            return res.json(apiResponse(messageResponse.GET_KEY_REPLACEMENT_SUCCESS, true, keys));
+        } catch (e) {
+            Exception.handle(e, req, res);
+        }
+    }
+
     static async createContractTemplate(req, res) {
         const user = req.user;
         const { houseId } = req.params;
@@ -189,11 +198,16 @@ class ContractController {
             }
 
             const contract = await ContractService.findOneRoomContract(contractId);
-
+            const replaceKeys = await ContractService.findKeyData(contractId);
             // set cache
-            await RedisUtils.setAddMember(key, JSON.stringify(contract));
+            await RedisUtils.setAddMember(key, JSON.stringify({ contract, keys: replaceKeys }));
 
-            return res.json(apiResponse(messageResponse.GET_CONTRACT_DETAILS_SUCCESS, true, snakeToCamel(contract)));
+            return res.json(
+                apiResponse(messageResponse.GET_CONTRACT_DETAILS_SUCCESS, true, {
+                    contract: camelToSnake(contract),
+                    keys: replaceKeys,
+                })
+            );
         } catch (e) {
             Exception.handle(e, req, res);
         }

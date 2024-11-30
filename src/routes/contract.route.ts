@@ -5,6 +5,8 @@ import { contractValidator, houseValidator, roomsValidator } from "../middleware
 
 const contractRoute = express.Router();
 
+contractRoute.get("/key-replace", ContractController.getKeys);
+
 contractRoute.post(
     "/:houseId/create-contract-template",
     authentication,

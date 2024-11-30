@@ -6,13 +6,18 @@ import {
     RoomContractRequest,
     RoomContractUpdateRequest,
 } from "@interfaces";
-import { ContractTemplate, RoomContracts } from "@models";
+import { ContractKeyReplace, ContractTemplate, RoomContracts, Rooms } from "@models";
+import { HouseService, RoomService } from "@services";
 import { ApiException, camelToSnake, currentDateTime, filterHandler, sortingHandler } from "@utils";
 import { TransactionOrKnex } from "objection";
-import HouseService from "./house.service";
-import RoomService from "./room.service";
+import { default as VNnum2words } from "vn-num2words";
 
 class ContractService {
+    static async getKeys() {
+        const keys = await ContractKeyReplace.query();
+        return keys;
+    }
+
     static async isValidContract(roomId: string, contractId: string) {
         const houseId = RoomService.getHouseId(roomId);
         const contract = await ContractTemplate.query().findOne({
@@ -99,7 +104,7 @@ class ContractService {
     static async findOneContractTemplate(id: string) {
         const contract = await ContractTemplate.query().findById(id);
         if (!contract) {
-            throw new ApiException(messageResponse.GET_TEMPLATE_DETAILS_SUCCESS, 404);
+            throw new ApiException(messageResponse.GET_TEMPLATE_DETAILS_FAIL, 404);
         }
 
         return contract;
@@ -140,6 +145,147 @@ class ContractService {
         }
 
         return contract;
+    }
+
+    static async findKeyData(contractId: string) {
+        const keyData = {};
+        const room = await Rooms.query()
+            .join("room_contracts", "rooms.id", "room_contracts.room_id")
+            .where("room_contracts.id", contractId)
+            .select("rooms.*")
+            .first();
+
+        const contract = await RoomContracts.query().findById(contractId);
+        if (!contract) {
+            throw new ApiException(messageResponse.CONTRACT_NOT_FOUND, 404);
+        }
+
+        if (!room) {
+            throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
+        }
+
+        const houseConfigs = await HouseService.getHouseSettings(room.id);
+
+        // {{COLLECTION_CYCLE}}
+        keyData["COLLECTION_CYCLE"] = houseConfigs.invoiceDate;
+
+        //{{CONTRACT_START_DATE}}
+        keyData["CONTRACT_START_DATE"] = contract?.rentalStartDate;
+
+        // {{CONTRACT_END_DATE}}
+        keyData["CONTRACT_END_DATE"] = contract?.rentalEndDate;
+
+        // {{CONTRACT_MONTHS}}
+        // calculate months based on start date and end date
+        const startDate = new Date(contract?.rentalStartDate);
+        const endDate = new Date(contract?.rentalEndDate);
+        const months =
+            (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth());
+        keyData["CONTRACT_MONTHS"] = months;
+
+        // {{CURRENT_DATE}}
+        keyData["CURRENT_DATE"] = currentDateTime();
+
+        // {{DEPOSIT_AMOUNT}}
+        keyData["DEPOSIT_AMOUNT"] = contract?.depositAmount;
+
+        // {{DEPOSIT_AMOUNT_IN_WORDS}}
+        keyData["DEPOSIT_AMOUNT_IN_WORDS"] = VNnum2words(contract?.depositAmount);
+
+        // {{FEE_COLLECTION_DAY}}
+        keyData["FEE_COLLECTION_DAY"] = houseConfigs.invoiceDate;
+
+        // {{HOST_NAME}}
+        keyData["HOST_NAME"] = contract.landlord?.fullName || "Unknown";
+
+        // {{HOUSE_NAME}}
+        keyData["HOUSE_NAME"] = houseConfigs.houseName || "Unknown";
+
+        // {{OWNER_ADDRESS}}
+        keyData["OWNER_ADDRESS"] =
+            (contract.landlord?.address.street || null) +
+                ", " +
+                (contract.landlord?.address.ward || null) +
+                ", " +
+                (contract.landlord?.address.district || null) +
+                ", " +
+                (contract.landlord?.address.city || null) || "Unknown";
+
+        // {{OWNER_BANK_ACCOUNT_NUMBER}}
+
+        // {{OWNER_BANK_FULL_NAME}}
+
+        // {{OWNER_BIRTHDAY}}
+        keyData["OWNER_BIRTHDAY"] = contract.landlord?.birthday;
+
+        // {{OWNER_DATE_OF_ISSUANCE}}
+        keyData["OWNER_DATE_OF_ISSUANCE"] = contract.landlord?.dateOfIssue;
+
+        // {{OWNER_IDENTITY_NUMBER}}
+        keyData["OWNER_IDENTITY_NUMBER"] = contract.landlord?.citizenId;
+
+        // {{OWNER_PHONE}}
+        keyData["OWNER_PHONE"] = contract.landlord?.phoneNumber;
+
+        // {{OWNER_PLACE_OF_ISSUE}}
+        keyData["OWNER_PLACE_OF_ISSUE"] = contract.landlord?.placeOfIssue;
+
+        // {{RENTAL_HOUSE_ADDRESS}}
+        keyData["RENTAL_HOUSE_ADDRESS"] =
+            (houseConfigs?.houseAddress.street || null) +
+                ", " +
+                (houseConfigs?.houseAddress.ward || null) +
+                ", " +
+                (houseConfigs?.houseAddress.district || null) +
+                ", " +
+                (houseConfigs?.houseAddress.city || null) || "Unknown";
+
+        // {{RENTER_ADDRESS}}
+        keyData["RENTAL_HOUSE_ADDRESS"] =
+            (contract.renter?.address.street || null) +
+                ", " +
+                (contract.renter?.address.ward || null) +
+                ", " +
+                (contract.renter?.address.district || null) +
+                ", " +
+                (contract.renter?.address.city || null) || "Unknown";
+
+        // {{RENTER_BIRTHDAY}}
+        keyData["RENTER_BIRTHDAY"] = contract.renter?.birthday;
+
+        // {{RENTER_DATE_OF_ISSUANCE}}
+        keyData["RENTER_DATE_OF_ISSUANCE"] = contract.renter?.dateOfIssue;
+
+        // {{RENTER_IDENTITY_NUMBER}}
+        keyData["RENTER_IDENTITY_NUMBER"] = contract.renter?.citizenId;
+
+        // {{RENTER_NAME}}
+        keyData["RENTER_NAME"] = contract.renter?.fullName;
+
+        // {{RENTER_PHONE_NUMBER}}
+        keyData["RENTER_PHONE_NUMBER"] = contract.renter?.phoneNumber;
+
+        // {{RENTER_PLACE_OF_ISSUE}}
+        keyData["RENTER_PLACE_OF_ISSUE"] = contract.renter?.placeOfIssue;
+
+        // {{RENT_COST}}
+        keyData["RENT_COST"] = contract.room?.price;
+
+        // {{RENTAL_AMOUNT_IN_WORDS}}
+        keyData["RENTAL_AMOUNT_IN_WORDS"] = VNnum2words(contract.room?.price || 0);
+
+        // {{ROOM_NAME}}
+        keyData["ROOM_NAME"] = contract.room?.name;
+
+        // {{ROOM_VEHICLE_LIST}}
+
+        // {{SQUARE_METER}}
+        keyData["SQUARE_METER"] = contract.room?.roomArea;
+
+        // {{USE_SERVICES}}
+        keyData["USE_SERVICES"] = contract.services;
+
+        return keyData;
     }
 
     static async findAllRoomContract(roomId: string, filterData: Filter) {
