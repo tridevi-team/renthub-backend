@@ -61,6 +61,8 @@ enum messageResponse {
     CANNOT_ASSIGN_ROLE_TO_SELF = "You cannot assign roles to yourself",
     CANNOT_ASSIGN_ROLE_TO_HOUSE_OWNER = "You cannot assign a role to the house owner",
     ASSIGN_ROLE_SUCCESS = "Role assigned successfully",
+    REMOVE_ROLE_SUCCESS = "Role removed successfully",
+    REMOVE_ROLE_ERROR = "Error occurred while removing role",
     CANNOT_DELETE_ROLE_ASSIGNED_TO_USER = "Cannot delete role because it is assigned to another user",
     GET_ROOMS_BY_HOUSE_SUCCESS = "Rooms by house retrieved successfully",
     GET_ROOMS_BY_FLOOR_SUCCESS = "Rooms by floor retrieved successfully",
