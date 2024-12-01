@@ -1,0 +1,22 @@
+title Danh sách nhà
+
+actor Landlord
+entity Client
+entity Backend
+entity Database
+
+activate Landlord
+activate Client
+
+Landlord -> Client: Chọn màn hình danh sách nhà
+activate Backend
+
+Client -> Backend: Gửi yêu cầu lấy danh sách nhà (bao gồm bộ lọc)
+Backend -> Database: Truy vấn danh sách nhà (áp dụng bộ lọc)
+Database --> Backend: Trả về danh sách nhà đã lọc
+Backend --> Client: Gửi danh sách nhà đã lọc
+
+deactivate Backend
+Client --> Landlord: Hiển thị danh sách nhà theo bộ lọc
+deactivate Client
+deactivate Landlord

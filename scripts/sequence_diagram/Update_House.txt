@@ -1,0 +1,56 @@
+title Chỉnh sửa nhà
+
+bottomparticipants 
+
+actor Landlord
+entity Client
+entity Backend
+entity Database
+
+activate Landlord
+activate Client
+
+Landlord -> Client: Chọn nhà cần chỉnh sửa
+
+Client --> Landlord: Hiển thị form chỉnh sửa
+
+Landlord -> Client: Điền thông tin cần sửa
+
+Client -> Client: Validate thông tin
+
+alt Nhập không thiếu thông tin
+  Client --> Landlord: Gửi thông báo lỗi
+else Nhập đầy đủ
+  activate Backend
+  
+  Client -> Backend: Gửi request
+
+end
+
+activate Database
+  
+Backend -> Database: Gửi data
+
+Database -> Database: Kiểm tra trùng lặp tên
+
+alt Tên nhà không trùng lặp
+  Database --> Backend: Trả về dữ liệu null\n(chưa có tên nhà này)
+  
+  Backend -> Database: Yêu cầu lưu thông tin cập nhật cho nhà
+  
+  Database -> Database: Cập nhật thông tin
+  
+  Database --> Backend: Xác nhận thành công
+  
+  Backend --> Client: Xác nhận thành công
+    
+  Client --> Landlord: Gửi thông báo chỉnh sửa nhà thành công
+
+else Tên nhà trùng lặp
+  Database --> Backend: Trả về dữ liệu của nhà đã tìm kiếm được
+  
+  Backend --> Client: Thông báo tên nhà đã tồn tại
+  
+  Client --> Landlord: Thông báo tên nhà đã tồn tại
+
+end
