@@ -1,0 +1,35 @@
+title Xóa phòng
+
+bottomparticipants 
+
+actor Landlord
+entity Client
+entity Backend
+entity Database
+
+activate Landlord
+activate Client
+
+Landlord -> Client: Chọn phòng cần xóa
+
+Client --> Landlord: Hiển thị xác nhận xóa
+
+Landlord -> Client: Xác nhận xóa phòng
+
+activate Backend
+Client -> Backend: Gửi yêu cầu xóa phòng
+
+activate Database
+Backend -> Database: Kiểm tra ràng buộc dữ liệu liên quan
+
+alt Không có ràng buộc
+  Database --> Backend: Xác nhận không có ràng buộc
+  Backend -> Database: Xóa phòng
+  Database --> Backend: Xác nhận xóa thành công
+  Backend --> Client: Xác nhận xóa thành công
+  Client --> Landlord: Hiển thị thông báo xóa phòng thành công
+else Có ràng buộc
+  Database --> Backend: Trả về thông tin ràng buộc
+  Backend --> Client: Hiển thị thông báo không thể xóa phòng
+  Client --> Landlord: Hiển thị thông báo lỗi
+end

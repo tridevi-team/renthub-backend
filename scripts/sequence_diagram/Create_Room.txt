@@ -1,0 +1,41 @@
+title Tạo mới phòng
+
+bottomparticipants 
+
+actor Landlord
+entity Client
+entity Backend
+entity Database
+
+activate Landlord
+activate Client
+
+Landlord -> Client: Chọn tạo mới phòng
+
+Client --> Landlord: Hiển thị form tạo mới
+
+Landlord -> Client: Điền thông tin phòng
+
+Client -> Client: Validate thông tin
+
+alt Thông tin không hợp lệ
+  Client --> Landlord: Hiển thị thông báo lỗi
+else Thông tin hợp lệ
+  activate Backend
+  Client -> Backend: Gửi request tạo mới phòng
+end
+
+activate Database
+Backend -> Database: Kiểm tra trùng lặp thông tin phòng
+
+alt Không trùng lặp
+  Database --> Backend: Trả về dữ liệu null
+  Backend -> Database: Lưu thông tin phòng
+  Database --> Backend: Xác nhận thành công
+  Backend --> Client: Xác nhận thành công
+  Client --> Landlord: Hiển thị thông báo tạo phòng thành công
+else Trùng lặp
+  Database --> Backend: Trả về thông tin trùng lặp
+  Backend --> Client: Hiển thị thông báo phòng đã tồn tại
+  Client --> Landlord: Thông báo phòng đã tồn tại
+end
