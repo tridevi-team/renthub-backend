@@ -1,4 +1,4 @@
-title Xem danh sách phòng
+title Xem danh sách tầng
 
 bottomparticipants 
 
@@ -10,14 +10,16 @@ entity Database
 activate Landlord
 activate Client
 
-Landlord -> Client: Chọn xem danh sách phòng
+Landlord -> Client: Chọn xem danh sách tầng
 
 activate Backend
-Client -> Backend: Gửi yêu cầu lấy danh sách phòng
+Client -> Backend: Gửi yêu cầu lấy danh sách tầng
 
 activate Database
-Backend -> Database: Truy vấn danh sách phòng
-Database --> Backend: Trả về danh sách phòng
+Backend -> Database: Truy vấn danh sách tầng
+Database --> Backend: Trả về danh sách tầng
+
+deactivate Database
 
 alt Danh sách không trống
   Backend --> Client: Trả về danh sách tầng đã lọc
@@ -26,3 +28,7 @@ else Danh sách trống
   Backend --> Client: Trả về thông báo danh sách trống
   Client --> Landlord: Hiển thị thông báo "Không có tầng nào được tìm thấy"
 end
+
+deactivate Landlord
+deactivate Client
+deactivate Backend
