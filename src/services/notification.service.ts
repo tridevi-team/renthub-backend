@@ -1,17 +1,17 @@
+import { firebaseAdmin, firebaseApp } from "@config/firebase.config";
+import { EPagination, messageResponse, NotificationStatus } from "@enums";
+import { Filter, NotificationRequest } from "@interfaces";
+import { NotificationRecipients, Notifications } from "@models";
+import { UserService } from "@services";
+import { ApiException, filterHandler, sortingHandler } from "@utils";
 import { BatchResponse } from "firebase-admin/lib/messaging/messaging-api";
 import { collection, getDocs, getFirestore } from "firebase/firestore";
-import { raw, Transaction } from "objection";
-import { firebaseAdmin, firebaseApp } from "../config/firebase.config";
-import { EPagination, messageResponse, NotificationStatus } from "../enums";
-import { Filter, NotificationRequest } from "../interfaces";
-import { NotificationRecipients, Notifications } from "../models";
-import { ApiException, filterHandler, sortingHandler } from "../utils";
-import UserService from "./user.service";
+import { raw, TransactionOrKnex } from "objection";
 
 class NotificationService {
     private static firebaseDb = getFirestore(firebaseApp);
 
-    static async create(notification: NotificationRequest, trx?: Transaction) {
+    static async create(notification: NotificationRequest, trx?: TransactionOrKnex) {
         if (!notification.createdBy) {
             const systemUser = await UserService.getSystemUser();
             notification.createdBy = systemUser.id;
@@ -41,6 +41,7 @@ class NotificationService {
             const collectionRef = collection(NotificationService.firebaseDb, "users", recipient, "devices");
             const getData = await getDocs(collectionRef);
             const fcmTokens = getData.docs.map((doc) => doc.data().FCM).filter((token) => token !== null);
+            console.log("🚀 ~ NotificationService ~ sendNotificationToDevices ~ fcmTokens:", fcmTokens);
 
             if (fcmTokens.length === 0) return;
 
