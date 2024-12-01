@@ -17,21 +17,13 @@ class EquipmentService {
     }
 
     static async getById(id: string) {
-        const data = await Equipment.query().findById(id);
+        const data = await Equipment.query()
+            .findById(id)
+            .leftJoin("house_floors as floor", "equipment.floor_id", "floor.id")
+            .leftJoin("rooms", "equipment.room_id", "rooms.id")
+            .select("equipment.*", "floor.name as floorName", "rooms.name as roomName");
         if (!data) {
             throw new ApiException(messageResponse.EQUIPMENT_NOT_FOUND, 404);
-        } else if (data.floorId) {
-            const data = await Equipment.query()
-                .findById(id)
-                .joinRelated("floor")
-                .select("equipment.*", "floor.name as floorName");
-            return data;
-        } else if (data.roomId) {
-            const data = await Equipment.query()
-                .findById(id)
-                .joinRelated("room")
-                .select("equipment.*", "room.name as roomName");
-            return data;
         }
         return data;
     }
@@ -45,10 +37,10 @@ class EquipmentService {
 
         let query = Houses.query()
             .join("equipment", "houses.id", "equipment.houseId")
-            .leftJoin("house_floors", "equipment.floor_id", "house_floors.id")
+            .leftJoin("house_floors as floors", "equipment.floor_id", "floors.id")
             .leftJoin("rooms", "equipment.room_id", "rooms.id")
             .where("houses.id", houseId)
-            .select("equipment.*", "house_floors.name as floorName", "rooms.name as roomName");
+            .select("equipment.*", "floors.name as floorName", "rooms.name as roomName");
 
         // filter
         query = filterHandler(query, filter);
