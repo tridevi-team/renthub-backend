@@ -1,0 +1,28 @@
+title Xem danh sách phòng
+
+bottomparticipants 
+
+actor Landlord
+entity Client
+entity Backend
+entity Database
+
+activate Landlord
+activate Client
+
+Landlord -> Client: Chọn xem danh sách phòng
+
+activate Backend
+Client -> Backend: Gửi yêu cầu lấy danh sách phòng
+
+activate Database
+Backend -> Database: Truy vấn danh sách phòng
+Database --> Backend: Trả về danh sách phòng
+
+alt Danh sách không trống
+  Backend --> Client: Trả về danh sách tầng đã lọc
+  Client --> Landlord: Hiển thị danh sách tầng
+else Danh sách trống
+  Backend --> Client: Trả về thông báo danh sách trống
+  Client --> Landlord: Hiển thị thông báo "Không có tầng nào được tìm thấy"
+end
