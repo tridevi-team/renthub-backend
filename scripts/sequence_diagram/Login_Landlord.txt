@@ -1,0 +1,40 @@
+title Đăng nhập của người quản lý
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+activate Landlord
+activate Client
+
+Landlord -> Client: Truy cập vào trang web
+Client --> Landlord: Hiển thị form đăng nhập
+
+Landlord -> Client: Điền thông tin đăng nhập
+
+Client -> Client: Validate thông tin
+
+opt Missing required information
+  Client --> Landlord: Gửi thông báo lỗi
+end
+
+activate Backend
+Client -> Backend: Gửi request
+
+activate Database
+Backend -> Database: Gửi thông tin đăng nhập
+
+Database -> Database: Kiểm tra thông tin đăng nhập
+
+alt Không tìm thấy dữ liệu
+  Database -> Backend: Trả về null
+  Backend -> Client: Thông báo tài khoản không tồn tại (Status 404)
+  Client -> Landlord: Thông báo lỗi
+else Tìm thấy dữ liệu@
+  Database -> Backend: Trả về thông tin người dùng
+  Backend -> Client: Trả về token và thông tin tài khoản (Status 200)
+  Client -> Landlord: Đăng nhập thành công
+end
