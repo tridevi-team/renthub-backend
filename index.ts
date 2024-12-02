@@ -57,6 +57,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(useragent.express(), (req: any, _res, next) => {
     const userAgent = req.useragent;
+    console.log("User Agent: ", userAgent);
     const isApp =
         userAgent.isMobile ||
         userAgent.isMobileNative ||
