@@ -116,7 +116,7 @@ app.use(async (req, res, next) => {
             request_method: req.method,
             endpoint: req.originalUrl,
             request_payload: req.body,
-            response_payload: JSON.parse(body),
+            response_payload: typeof body === "string" ? JSON.parse(body) : body,
             client_ip: req.ip,
             status_code: res.statusCode,
             response_time_ms: responseTime,
