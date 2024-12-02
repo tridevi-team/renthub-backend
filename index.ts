@@ -102,16 +102,6 @@ app.use(async (req, res, next) => {
         const diff = process.hrtime(start); // End timer
         const responseTime: number = parseFloat((diff[0] * 1e3 + diff[1] / 1e6).toFixed(2)); // Convert to milliseconds
 
-        console.log({
-            method: req.method,
-            url: req.originalUrl,
-            requestBody: req.body,
-            responseBody: typeof body,
-            statusCode: res.statusCode,
-            responseTime: `${responseTime} ms`,
-            type: responseTime,
-        });
-
         await Logs.query().insert({
             request_method: req.method,
             endpoint: req.originalUrl,

@@ -4,6 +4,17 @@ import { v4 as uuidv4 } from "uuid";
 
 class Logs extends Model {
     id: string;
+    request_timestamp: Date;
+    client_ip: string;
+    endpoint: string;
+    request_method: string;
+    status_code: number;
+    user_agent: string;
+    response_time_ms: number;
+    referrer: string;
+    request_payload: object;
+    response_payload: object;
+    additional_info: any;
 
     static get tableName() {
         return "logs";
@@ -21,7 +32,6 @@ class Logs extends Model {
         return {
             type: "object",
             required: [
-                "request_timestamp",
                 "client_ip",
                 "endpoint",
                 "request_method",
@@ -40,10 +50,10 @@ class Logs extends Model {
                 },
                 status_code: { type: "integer" },
                 user_agent: { type: "string" },
-                response_time_ms: { type: "integer" },
+                response_time_ms: { type: "number" },
                 referrer: { type: "string", maxLength: 255 },
-                request_payload: { type: "string" },
-                response_payload: { type: "string" },
+                request_payload: { type: "object" },
+                response_payload: { type: "object" },
                 additional_info: { type: "object" },
             },
         };
