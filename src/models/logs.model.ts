@@ -43,7 +43,7 @@ class Logs extends Model {
                 id: { type: "string", format: "uuid" },
                 request_timestamp: { type: "string", format: "date-time" },
                 client_ip: { type: "string", maxLength: 45 },
-                endpoint: { type: "string", maxLength: 255 },
+                endpoint: { type: "string" },
                 request_method: {
                     type: "string",
                     enum: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"],
@@ -51,7 +51,7 @@ class Logs extends Model {
                 status_code: { type: "integer" },
                 user_agent: { type: "string" },
                 response_time_ms: { type: "number" },
-                referrer: { type: "string", maxLength: 255 },
+                referrer: { type: "string" },
                 request_payload: { type: "object" },
                 response_payload: { type: "object" },
                 additional_info: { type: "object" },
