@@ -458,7 +458,7 @@ class ContractService {
 
         // Check if the transition is allowed
         if (statusTransitions[currentStatus]?.includes(status)) {
-            const updated = RoomContracts.query().patchAndFetchById(id, {
+            await RoomContracts.query().patchAndFetchById(id, {
                 status,
                 updated_by: actionBy,
             });
@@ -466,7 +466,7 @@ class ContractService {
             // update room status if contract status is active => rented
             await RoomService.updateStatusByContract(details.roomId, status, actionBy);
 
-            return updated;
+            return await this.findOneRoomContract(id);
         }
 
         throw new ApiException(messageResponse.CONTRACT_STATUS_UPDATED_FAILED, 423);
@@ -479,7 +479,7 @@ class ContractService {
             throw new ApiException(messageResponse.CONTRACT_STATUS_PENDING_ONLY, 423);
         }
 
-        const updatedContract = await RoomContracts.query().patchAndFetchById(id, {
+        await RoomContracts.query().patchAndFetchById(id, {
             approval_status: status,
             approval_by: actionBy,
             approval_date: currentDateTime(),
@@ -487,7 +487,7 @@ class ContractService {
             status: status === ApprovalStatus.APPROVED ? ContractStatus.ACTIVE : details.status,
         });
 
-        return updatedContract;
+        return await this.findOneRoomContract(id);
     }
 
     static async deleteContractTemplate(id: string, deletedBy: string) {
