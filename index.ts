@@ -57,7 +57,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(useragent.express(), (req: any, _res, next) => {
     const userAgent = req.useragent;
-    console.log("User Agent: ", userAgent);
+    // console.log("User Agent: ", userAgent);
     const isApp =
         userAgent.isMobile ||
         userAgent.isMobileNative ||
@@ -75,6 +75,9 @@ app.use(useragent.express(), (req: any, _res, next) => {
         userAgent.source.includes("flutter");
 
     req.isApp = isApp;
+
+    console.log("Request is from app: ", isApp);
+
     next();
 });
 

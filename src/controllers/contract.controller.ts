@@ -358,8 +358,9 @@ class ContractController {
         const user = req.user;
         const { contractId } = req.params;
         const { status, note } = req.body;
+        const isApp = req.isApp;
         try {
-            if (user.role === "renter") {
+            if (user.role === "renter" || isApp) {
                 // this is for renter
                 console.log("[RENTER]" + user.name + " is updating contract status");
                 await ContractService.updateRoomContractStatusByRenter(contractId, status, note, user.id);
