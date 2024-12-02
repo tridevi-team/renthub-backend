@@ -1,4 +1,5 @@
 "use strict";
+import { Logs } from "@models";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -87,6 +88,49 @@ app.use(express.static(path.join(__dirname, "src/public")));
 app.use(queryParser);
 
 app.use(StaticRoute);
+
+app.use(async (req, res, next) => {
+    const start = process.hrtime(); // Start timer
+    const password = req.body.password;
+    if (req.body.password) {
+        req.body.password = "********";
+    }
+
+    // Overriding res.send to capture response body
+    const originalSend = res.send;
+    res.send = async function (body) {
+        const diff = process.hrtime(start); // End timer
+        const responseTime: number = parseFloat((diff[0] * 1e3 + diff[1] / 1e6).toFixed(2)); // Convert to milliseconds
+
+        console.log({
+            method: req.method,
+            url: req.originalUrl,
+            requestBody: req.body,
+            responseBody: typeof body,
+            statusCode: res.statusCode,
+            responseTime: `${responseTime} ms`,
+            type: responseTime,
+        });
+
+        await Logs.query().insert({
+            request_method: req.method,
+            endpoint: req.originalUrl,
+            request_payload: req.body,
+            response_payload: JSON.parse(body),
+            client_ip: req.ip,
+            status_code: res.statusCode,
+            response_time_ms: responseTime,
+            user_agent: req.useragent.source,
+            referrer: req.headers.referer,
+        });
+
+        return originalSend.call(this, body); // Send the response
+    };
+
+    if (req.body.password) req.body.password = password;
+    next();
+});
+
 app.use("/auth", AuthRoute);
 app.use("/users", authentication, UserRoute);
 app.use("/houses", HouseRoute);
