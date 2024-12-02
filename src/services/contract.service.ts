@@ -19,7 +19,7 @@ class ContractService {
     }
 
     static async isValidContract(roomId: string, contractId: string) {
-        const houseId = RoomService.getHouseId(roomId);
+        const houseId = await RoomService.getHouseId(roomId);
         const contract = await ContractTemplate.query().findOne({
             id: contractId,
             houseId,
@@ -81,7 +81,7 @@ class ContractService {
         );
 
         // update room status
-        await RoomService.updateStatusByContract(newContract.roomId, newContract.status, newContract.createdBy, trx);
+        await RoomService.updateStatusByContract(newContract.room.id, newContract.status, newContract.createdBy, trx);
 
         return newContract;
     }

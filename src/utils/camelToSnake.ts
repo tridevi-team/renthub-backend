@@ -1,5 +1,5 @@
 function camelToSnake(obj: object): object {
-    if (obj === null || obj === undefined || typeof obj !== "object") {
+    if (obj === null || obj === undefined || typeof obj !== "object" || obj instanceof Date) {
         return obj;
     }
 
