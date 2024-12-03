@@ -5,7 +5,7 @@ import "dotenv/config";
 import { BillStatus, messageResponse } from "../enums";
 import { Bills } from "../models";
 import { BillService, HouseService, PaymentService } from "../services";
-import { ApiException, apiResponse, Exception, isValidData, RedisUtils } from "../utils";
+import { ApiException, apiResponse, Exception, isValidData, RedisUtils, removeVietnameseTones } from "../utils";
 
 const HOOK_URL = process.env.WEBHOOK_URL || "";
 const { RETURN_URL, CANCEL_URL } = process.env;
@@ -246,18 +246,75 @@ class PaymentController {
         const { billId } = req.body;
 
         try {
-            const result = await Bills.query().findById(String(billId)).withGraphJoined("[details, payment]");
+            const result = await Bills.query().findById(String(billId)).withGraphJoined("[details, payment, room]");
+            if (!result) {
+                throw new ApiException(messageResponse.BILL_NOT_FOUND, 404);
+            }
 
+            const houseDetails = await HouseService.getHouseByRoomId(result.room.id);
             if (result && result.payment.payosClientId) {
                 const payos = new PayOS(
                     result.payment.payosClientId,
                     result.payment.payosApiKey,
                     result.payment.payosChecksum
                 );
-                const parsedRequest = JSON.parse(result.payosRequest);
+                let request: {
+                    order_code: string;
+                    amount: number;
+                    description: string;
+                    items: {
+                        name: string;
+                        quantity: number;
+                        price: number;
+                    }[];
+                    cancelUrl: string;
+                    returnUrl: string;
+                } = {
+                    order_code: "",
+                    amount: 0,
+                    description: "",
+                    items: [
+                        {
+                            name: "",
+                            quantity: 0,
+                            price: 0,
+                        },
+                    ],
+                    cancelUrl: "",
+                    returnUrl: "",
+                };
+
+                if (result.payosRequest) {
+                    request =
+                        typeof result.payosRequest === "string" ? JSON.parse(result.payosRequest) : result.payosRequest;
+                } else {
+                    const orderCode = (new Date().getTime() + Math.floor(Math.random() * 1000)).toString();
+
+                    const services = result.details.map((service) => {
+                        return {
+                            name: service.name,
+                            amount: service.amount,
+                            price: service.totalPrice,
+                        };
+                    });
+
+                    // create description less than 25 characters
+                    const subDescription = removeVietnameseTones(result.room.name + " " + houseDetails.name)
+                        .substring(0, 23)
+                        .replace("Phong", "");
+
+                    request = {
+                        order_code: orderCode,
+                        amount: 5000,
+                        description: subDescription,
+                        items: services,
+                        cancelUrl: CANCEL_URL || "",
+                        returnUrl: RETURN_URL || "",
+                    };
+                }
 
                 try {
-                    const payosResponse = await payos.getPaymentLinkInformation(parsedRequest.order_code);
+                    const payosResponse = await payos.getPaymentLinkInformation(request.order_code);
 
                     if (payosResponse.status === "CANCELLED")
                         throw new ApiException(messageResponse.PAYMENT_CANCELLED, 409);
@@ -268,23 +325,42 @@ class PaymentController {
                         })
                     );
                 } catch (error) {
-                    const orderCode = Math.floor(Math.random() * 1000000000);
-                    await BillService.updateInfo(String(billId), {
-                        payosRequest: {
-                            ...parsedRequest,
-                            order_code: orderCode,
-                        },
+                    const orderCode = (new Date().getTime() + Math.floor(Math.random() * 1000)).toString();
+
+                    const services = result.details.map((service) => {
+                        return {
+                            name: service.name,
+                            quantity: service.amount,
+                            price: service.totalPrice,
+                        };
                     });
 
-                    const checkoutRequest = {
-                        orderCode: orderCode,
+                    // create description less than 25 characters
+                    const subDescription = removeVietnameseTones(result.room.name + " " + houseDetails.name)
+                        .substring(0, 23)
+                        .replace("Phong", "");
+
+                    request = {
+                        order_code: orderCode,
                         amount: 5000,
-                        description: parsedRequest?.description || "Thanh toán hóa đơn",
-                        cancelUrl: parsedRequest.cancel_url || CANCEL_URL,
-                        returnUrl: parsedRequest.return_url || RETURN_URL,
+                        description: subDescription,
+                        items: services,
+                        cancelUrl: CANCEL_URL || "",
+                        returnUrl: RETURN_URL || "",
                     };
 
-                    const data = await payos.createPaymentLink(checkoutRequest);
+                    await BillService.updateInfo(String(billId), {
+                        payosRequest: request,
+                    });
+
+                    const data = await payos.createPaymentLink({
+                        orderCode: Number(request.order_code),
+                        amount: request.amount,
+                        description: request.description,
+                        items: request.items,
+                        cancelUrl: request.cancelUrl,
+                        returnUrl: request.returnUrl,
+                    });
 
                     return res.json(
                         apiResponse(messageResponse.GET_PAYMENT_LINK_SUCCESS, true, {

@@ -36,6 +36,7 @@ class Bills extends Model {
     payosChecksum: string;
     count: number;
     totalPrice: number;
+    details: any;
 
     static get tableName() {
         return "bills";

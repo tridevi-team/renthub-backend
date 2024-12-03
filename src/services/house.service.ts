@@ -154,6 +154,18 @@ class HouseService {
         return details;
     }
 
+    static async getHouseByRoomId(roomId: string) {
+        const details = await Houses.query()
+            .join("house_floors as floors", "floors.house_id", "houses.id")
+            .join("rooms", "rooms.floor_id", "floors.id")
+            .where("rooms.id", roomId)
+            .first();
+
+        if (!details) throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
+
+        return details;
+    }
+
     static async getHouseWithRooms(houseId: string, filterData?: Filter, isSelect: boolean = false) {
         const { filter = [], sort = [], pagination } = filterData || {};
         const { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = pagination || {};
