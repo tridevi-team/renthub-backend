@@ -10,12 +10,13 @@ const cachePattern = `${prefix}:*`;
 class ServiceController {
     static async createServiceForHouse(req, res) {
         const { houseId } = req.params;
-        const { name, unitPrice, type } = req.body;
+        const { name, unitPrice, description, type } = req.body;
         const user = req.user;
         try {
             const service = await HouseService.createService(houseId, {
                 name,
                 unitPrice,
+                description,
                 type,
                 createdBy: user.id,
             });

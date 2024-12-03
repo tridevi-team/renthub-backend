@@ -10,7 +10,6 @@ class Services extends Model {
     name: string;
     unit_price: number;
     type: string;
-    has_index: boolean;
     description: string;
     created_by: string;
     created_at: string;
@@ -42,14 +41,13 @@ class Services extends Model {
     static get jsonSchema() {
         return {
             type: "object",
-            required: ["house_id", "name", "unit_price", "type", "has_index", "created_by"],
+            required: ["house_id", "name", "unit_price", "type", "created_by"],
             properties: {
                 id: { type: "string", format: "uuid" },
                 house_id: { type: "string", format: "uuid" },
                 name: { type: "string", maxLength: 255 },
                 unit_price: { type: "integer" },
                 type: { type: "string", maxLength: 50 },
-                has_index: { type: "boolean" },
                 description: { type: "string" },
                 created_by: { type: "string", format: "uuid" },
                 created_at: { type: "string", format: "date-time" },
