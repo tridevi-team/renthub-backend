@@ -1,5 +1,5 @@
 import { messageResponse } from "@enums";
-import { StatisticalService } from "@services";
+import { ContractService, StatisticalService } from "@services";
 import { apiResponse, Exception } from "@utils";
 
 class StatisticalController {
@@ -78,6 +78,58 @@ class StatisticalController {
                 }),
                 {}
             );
+
+            return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, data));
+        } catch (error) {
+            Exception.handle(error, req, res);
+        }
+    }
+
+    static async getStatisticalChartByRoom(req, res) {
+        const { roomId } = req.params;
+        const { from, to } = req.query;
+        const { user, isApp } = req;
+        try {
+            if (isApp) {
+                let startDate, endDate;
+                // get renterId from user
+                const renterId = user.id;
+
+                // search contract by renterId and roomId
+                const { start, end } = await ContractService.findRangeRentDate(roomId, renterId);
+                if (!start || !end) {
+                    return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {}));
+                }
+                // validate start date and end date
+                if ((from > start && from < end) || (to > start && to < end)) {
+                    startDate = from;
+                    endDate = to;
+                } else if (!from && !to) {
+                    startDate = start;
+                    endDate = end;
+                } else if (!from) {
+                    startDate = start;
+                    endDate = to;
+                } else if (!to) {
+                    startDate = from;
+                    endDate = end;
+                }
+
+                // get data
+
+                const data = await StatisticalService.barChartTurnoverByRoom(roomId, {
+                    startDate,
+                    endDate,
+                });
+
+                return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, data));
+            }
+
+            const data = await StatisticalService.barChartTurnoverByRoom(roomId, {
+                startDate: from,
+                endDate: to,
+            });
+            console.log(data);
 
             return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, data));
         } catch (error) {

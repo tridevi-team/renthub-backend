@@ -1,6 +1,6 @@
 import { StatisticalController } from "@controllers";
 import { authentication, handleErrors } from "@middlewares";
-import { statisticalValidator } from "@validator";
+import { roomsValidator, statisticalValidator } from "@validator";
 import houseValidator from "@validator/houses.validator";
 import express from "express";
 
@@ -24,6 +24,14 @@ statisticalRoute.get(
     statisticalValidator.chartValidator,
     handleErrors,
     StatisticalController.getStatisticalChartByHouse
+);
+
+statisticalRoute.get(
+    "/:roomId/room-chart",
+    authentication,
+    roomsValidator.roomId,
+    handleErrors,
+    StatisticalController.getStatisticalChartByRoom
 );
 
 export default statisticalRoute;

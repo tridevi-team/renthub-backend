@@ -572,10 +572,11 @@ class StatisticalService {
     }
 
     static async barChartTurnoverByRoom(roomId: string, time: DateRange = {}) {
+        console.log("🚀 ~ StatisticalService ~ barChartTurnoverByRoom ~ time:", time)
         // it will return the total price of bills in each month
         const query = Bills.query()
             .where("bills.roomId", roomId)
-            .where("bills.status", BillStatus.PAID)
+            // .where("bills.status", BillStatus.PAID)
             .sum("bills.amount as totalPrice")
             .select(
                 "bills.title",
@@ -600,7 +601,7 @@ class StatisticalService {
         }
 
         const result = await query;
-
+        
         const months = new Set();
 
         result.forEach((item) => {

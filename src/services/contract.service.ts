@@ -101,6 +101,43 @@ class ContractService {
         return await this.findOneRoomContract(room.id);
     }
 
+    static async findRangeRentDate(roomId: string, renterId: string) {
+        const firstContract = await RoomContracts.query()
+            .where({
+                roomId,
+            })
+            .andWhereILike("renterIds", `%${renterId}%`)
+            .orderBy("rental_start_date", "asc")
+            .first();
+
+        const lastContract = await RoomContracts.query()
+            .where({
+                roomId,
+            })
+            .andWhereILike("renterIds", `%${renterId}%`)
+            .orderBy("rental_end_date", "desc")
+            .first();
+
+        return {
+            start: firstContract?.rentalStartDate,
+            end: lastContract?.rentalEndDate,
+        };
+    }
+
+    static async findCurrentContract(roomId: string, renterId: string) {
+        const contract = await RoomContracts.query()
+            .where({ roomId })
+            .where("renter_ids", "like", `%${renterId}%`)
+            .orderBy("created_at", "desc")
+            .first();
+
+        if (!contract) {
+            throw new ApiException(messageResponse.CONTRACT_NOT_FOUND, 404);
+        }
+
+        return contract;
+    }
+
     static async findOneContractTemplate(id: string) {
         const contract = await ContractTemplate.query().findById(id);
         if (!contract) {
