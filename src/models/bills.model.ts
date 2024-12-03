@@ -37,6 +37,8 @@ class Bills extends Model {
     count: number;
     totalPrice: number;
     details: any;
+    month: number;
+    year: number;
 
     static get tableName() {
         return "bills";

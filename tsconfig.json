@@ -23,6 +23,7 @@
             "@enums": ["src/enums/index"],
             "@interfaces": ["src/interfaces/index"],
             "@middlewares": ["src/middlewares/index"],
+            "@controllers": ["src/controllers/index"],
             "@models": ["src/models/index"],
             "@routes": ["src/routes/index"],
             "@routes/*": ["src/routes/*"],
@@ -30,6 +31,7 @@
             "@utils": ["src/utils/index"], // Single wildcard for utils
             "@utils/*": ["src/utils/*"], // Single wildcard for utils
             "@validator/*": ["src/middlewares/validator/*"], // Validator sub-path
+            "@validator": ["src/middlewares/validator/index"], // Validator sub-path
             "@test/*": ["test/*"], // Test files path
             "@/*": ["src/*"] // General catch-all for all src folders
         },

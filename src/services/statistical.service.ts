@@ -422,14 +422,14 @@ class StatisticalService {
         });
     }
 
-    static async lineChartServiceConsumption(houseId: string, time: DateRange = {}) {
+    static async barChartServiceConsumption(houseId: string, time: DateRange = {}) {
         // it will return the total price of each service in each month
         const query = BillDetails.query()
             .join("bills", "bill_details.bill_id", "bills.id")
             .join("rooms", "bills.roomId", "rooms.id")
             .join("house_floors", "rooms.floor_id", "house_floors.id")
             .where("house_floors.house_id", houseId)
-            .whereNot("bill_details.service_id", null)
+            // .whereNot("bill_details.service_id", null)
             .sum("bill_details.total_price as totalPrice")
             .select(
                 "bill_details.name",
@@ -499,6 +499,219 @@ class StatisticalService {
         });
 
         return { data, config };
+    }
+
+    static async barChartTurnover(houseId: string, time: DateRange = {}) {
+        // it will return the total price of bills in each month
+        const query = Bills.query()
+            .join("rooms", "bills.roomId", "rooms.id")
+            .join("house_floors", "rooms.floor_id", "house_floors.id")
+            .where("house_floors.house_id", houseId)
+            .where("bills.status", BillStatus.PAID)
+            .sum("bills.amount as totalPrice")
+            .select(
+                "bills.title",
+                BillDetails.raw(`SUBSTRING_INDEX(SUBSTRING_INDEX(bills.title, 'tháng ', -1), ' - ', 1) as month`),
+                BillDetails.raw(`SUBSTRING_INDEX(bills.title, ' - ', -1) as year`)
+            )
+            .groupBy("bills.title", "month", "year")
+            .orderBy("bills.title", "asc");
+
+        // Search based on title with time range
+        if (time.startDate || time.endDate) {
+            const currentYear = new Date().getFullYear();
+            query.whereRaw(
+                `STR_TO_DATE(
+            CONCAT(
+                SUBSTRING_INDEX(SUBSTRING_INDEX(bills.title, 'tháng ', -1), ' - ', 1), '-',
+                SUBSTRING_INDEX(bills.title, ' - ', -1), '-01'
+            ), '%m-%Y-%d'
+        ) BETWEEN ? AND ?`,
+                [time.startDate || currentYear + "-01-01", time.endDate || currentYear + "-12-31"]
+            );
+        }
+
+        const result = await query;
+
+        const months = new Set();
+
+        result.forEach((item) => {
+            months.add(item.month + "/" + item.year);
+        });
+
+        // sort set
+        const monthsArray = Array.from(months).sort((a: unknown, b: unknown) => {
+            const [monthA, yearA] = (a as string).split("/");
+            const [monthB, yearB] = (b as string).split("/");
+
+            if (yearA === yearB) {
+                return Number(monthA) - Number(monthB);
+            }
+
+            return Number(yearA) - Number(yearB);
+        });
+
+        const data = monthsArray.map((month) => {
+            const monthData = result.filter((item) => {
+                return item.month + "/" + item.year === month;
+            });
+
+            const obj = {
+                month,
+                totalPrice: 0,
+            };
+
+            monthData.forEach((item) => {
+                obj.totalPrice = Number(item.totalPrice);
+            });
+
+            return obj;
+        });
+
+        return data;
+    }
+
+    static async barChartTurnoverByRoom(roomId: string, time: DateRange = {}) {
+        // it will return the total price of bills in each month
+        const query = Bills.query()
+            .where("bills.roomId", roomId)
+            .where("bills.status", BillStatus.PAID)
+            .sum("bills.amount as totalPrice")
+            .select(
+                "bills.title",
+                BillDetails.raw(`SUBSTRING_INDEX(SUBSTRING_INDEX(bills.title, 'tháng ', -1), ' - ', 1) as month`),
+                BillDetails.raw(`SUBSTRING_INDEX(bills.title, ' - ', -1) as year`)
+            )
+            .groupBy("bills.title", "month", "year")
+            .orderBy("bills.title", "asc");
+
+        // Search based on title with time range
+        if (time.startDate || time.endDate) {
+            const currentYear = new Date().getFullYear();
+            query.whereRaw(
+                `STR_TO_DATE(
+            CONCAT(
+                SUBSTRING_INDEX(SUBSTRING_INDEX(bills.title, 'tháng ', -1), ' - ', 1), '-',
+                SUBSTRING_INDEX(bills.title, ' - ', -1), '-01'
+            ), '%m-%Y-%d'
+        ) BETWEEN ? AND ?`,
+                [time.startDate || currentYear + "-01-01", time.endDate || currentYear + "-12-31"]
+            );
+        }
+
+        const result = await query;
+
+        const months = new Set();
+
+        result.forEach((item) => {
+            months.add(item.month + "/" + item.year);
+        });
+
+        // sort set
+        const monthsArray = Array.from(months).sort((a: unknown, b: unknown) => {
+            const [monthA, yearA] = (a as string).split("/");
+            const [monthB, yearB] = (b as string).split("/");
+
+            if (yearA === yearB) {
+                return Number(monthA) - Number(monthB);
+            }
+
+            return Number(yearA) - Number(yearB);
+        });
+
+        const data = monthsArray.map((month) => {
+            const monthData = result.filter((item) => {
+                return item.month + "/" + item.year === month;
+            });
+
+            const obj = {
+                month,
+                totalPrice: 0,
+            };
+
+            monthData.forEach((item) => {
+                obj.totalPrice = Number(item.totalPrice);
+            });
+
+            return obj;
+        });
+
+        return data;
+    }
+
+    static async barChartByBillStatus(houseId: string, time: DateRange = {}) {
+        const query = Bills.query()
+            .join("rooms", "bills.roomId", "rooms.id")
+            .join("house_floors", "rooms.floor_id", "house_floors.id")
+            .where("house_floors.house_id", houseId)
+            .sum("bills.amount as totalPrice")
+            .select(
+                "bills.title",
+                "bills.status",
+                BillDetails.raw(`SUBSTRING_INDEX(SUBSTRING_INDEX(bills.title, 'tháng ', -1), ' - ', 1) as month`),
+                BillDetails.raw(`SUBSTRING_INDEX(bills.title, ' - ', -1) as year`)
+            )
+            .groupBy("bills.title", "bills.status", "month", "year")
+            .orderBy("bills.title", "asc");
+
+        // Search based on title with time range
+        if (time.startDate || time.endDate) {
+            const currentYear = new Date().getFullYear();
+            query.whereRaw(
+                `STR_TO_DATE(
+            CONCAT(
+                SUBSTRING_INDEX(SUBSTRING_INDEX(bills.title, 'tháng ', -1), ' - ', 1), '-',
+                SUBSTRING_INDEX(bills.title, ' - ', -1), '-01'
+            ), '%m-%Y-%d'
+        ) BETWEEN ? AND ?`,
+                [time.startDate || currentYear + "-01-01", time.endDate || currentYear + "-12-31"]
+            );
+        }
+
+        const result = await query;
+
+        const months = new Set();
+
+        result.forEach((item) => {
+            months.add(item.month + "/" + item.year);
+        });
+
+        // sort set
+        const monthsArray = Array.from(months).sort((a: unknown, b: unknown) => {
+            const [monthA, yearA] = (a as string).split("/");
+            const [monthB, yearB] = (b as string).split("/");
+
+            if (yearA === yearB) {
+                return Number(monthA) - Number(monthB);
+            }
+
+            return Number(yearA) - Number(yearB);
+        });
+
+        const config = {};
+
+        const chart = monthsArray.map((month) => {
+            const monthData = result.filter((item) => {
+                return item.month + "/" + item.year === month;
+            });
+
+            const obj = {};
+            obj["month"] = month;
+            monthData.forEach((item) => {
+                const key = createSlug(item.status.toLowerCase());
+                obj[key] = Number(item.totalPrice);
+                const color = colorPalette[monthData.indexOf(item) % colorPalette.length];
+
+                config[key] = {
+                    label: item.status,
+                    color: color,
+                };
+            });
+
+            return obj;
+        });
+
+        return { chart, config };
     }
 }
 

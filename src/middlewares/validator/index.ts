@@ -12,3 +12,4 @@ export { default as roleValidator } from "./role.validator";
 export { default as roomsValidator } from "./rooms.validator";
 export { default as serviceValidator } from "./services.validator";
 export { default as userValidator } from "./users.validator";
+export { default as statisticalValidator } from "./statistical.validator";
