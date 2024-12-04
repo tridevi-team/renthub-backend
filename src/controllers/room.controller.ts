@@ -85,7 +85,7 @@ class RoomController {
 
     static async updateRoom(req, res) {
         const { roomId } = req.params;
-        const { name, floor, maxRenters, price, services, images } = req.body;
+        const { name, floor, roomArea, maxRenters, price, services, images } = req.body;
         const userId = req.user.id;
         const trx = await Model.startTransaction();
         try {
@@ -95,6 +95,7 @@ class RoomController {
                     name,
                     floorId: floor,
                     maxRenters,
+                    roomArea,
                     price,
                     updatedBy: userId,
                 },
