@@ -116,6 +116,9 @@ class StatisticalController {
                 } else if (!to) {
                     startDate = from;
                     endDate = end;
+                } else {
+                    startDate = start;
+                    endDate = end;
                 }
 
                 // get data
