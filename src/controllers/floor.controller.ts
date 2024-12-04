@@ -79,11 +79,15 @@ class FloorController {
                 const result = await RedisUtils.getSetMembers(cacheKey);
                 return res.json(apiResponse(messageResponse.GET_ROOMS_BY_FLOOR_SUCCESS, true, JSON.parse(result[0])));
             }
-            const rooms = await RoomService.getRoomsByFloor(floorId, {
-                filter,
-                sort,
-                pagination,
-            }, isSelect);
+            const rooms = await RoomService.getRoomsByFloor(
+                floorId,
+                {
+                    filter,
+                    sort,
+                    pagination,
+                },
+                isSelect
+            );
 
             // set cache
             await RedisUtils.setAddMember(cacheKey, JSON.stringify(rooms));

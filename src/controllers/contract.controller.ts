@@ -1,7 +1,7 @@
 import { ContractStatus, messageResponse } from "@enums";
 import { ContractRequest, RoomContractRequest } from "@interfaces";
 import { ContractService, RenterService } from "@services";
-import { apiResponse, camelToSnake, Exception, RedisUtils, snakeToCamel } from "@utils";
+import { apiResponse, Exception, RedisUtils, snakeToCamel } from "@utils";
 import { Model } from "objection";
 
 const TEMPLATE_PREFIX: string = "templates";
@@ -204,7 +204,7 @@ class ContractController {
 
             return res.json(
                 apiResponse(messageResponse.GET_CONTRACT_DETAILS_SUCCESS, true, {
-                    contract: camelToSnake(contract),
+                    contract: snakeToCamel(contract),
                     keys: replaceKeys,
                 })
             );

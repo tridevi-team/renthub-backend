@@ -8,7 +8,7 @@ import {
 } from "@interfaces";
 import { ContractKeyReplace, ContractTemplate, RoomContracts, Rooms } from "@models";
 import { HouseService, RoomService } from "@services";
-import { ApiException, camelToSnake, currentDateTime, filterHandler, sortingHandler } from "@utils";
+import { ApiException, camelToSnake, currentDateTime, filterHandler, snakeToCamel, sortingHandler } from "@utils";
 import { TransactionOrKnex } from "objection";
 import { default as VNnum2words } from "vn-num2words";
 
@@ -312,15 +312,17 @@ class ContractService {
         keyData["RENTAL_AMOUNT_IN_WORDS"] = VNnum2words(contract.room?.price || 0);
 
         // {{ROOM_NAME}}
-        keyData["ROOM_NAME"] = contract.room?.name;
+        keyData["ROOM_NAME"] = contract.room?.name || "---";
 
         // {{ROOM_VEHICLE_LIST}}
 
         // {{SQUARE_METER}}
-        keyData["SQUARE_METER"] = contract.room?.roomArea;
+        keyData["SQUARE_METER"] = contract.room?.roomArea || 0;
 
         // {{USE_SERVICES}}
-        keyData["USE_SERVICES"] = contract.services;
+        keyData["USE_SERVICES"] = snakeToCamel(contract.services) || "Không";
+
+        keyData["EQUIPMENT_LIST"] = snakeToCamel(contract.equipment) || "Không";
 
         return keyData;
     }
