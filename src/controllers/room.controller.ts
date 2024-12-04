@@ -23,7 +23,7 @@ class RoomController {
 
     static async createRoom(req, res) {
         const { houseId } = req.params;
-        const { name, floor, maxRenters, price, services, images, description, status } = req.body;
+        const { name, floor, roomArea, maxRenters, price, services, images, description, status } = req.body;
         const userId = req.user.id;
         const trx = await Model.startTransaction();
         try {
@@ -34,6 +34,7 @@ class RoomController {
                     floorId: floor,
                     maxRenters,
                     price,
+                    roomArea,
                     description,
                     status: status || RoomStatus.AVAILABLE,
                     createdBy: userId,
