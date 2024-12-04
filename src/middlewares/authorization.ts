@@ -17,8 +17,10 @@ export const authorize = (module: Module, action: Action) => {
         const user = req.user;
         try {
             if (user.roomId) {
+                console.log("Authorized for renter");
                 await renterAuthorize(module, action)(req, res, next);
             } else {
+                console.log("Authorized for landlord");
                 await managerAuthorize(module, action)(req, res, next);
             }
         } catch (err) {

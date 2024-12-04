@@ -48,7 +48,7 @@ class IssueService {
             throw new ApiException(messageResponse.ISSUE_NOT_FOUND, 404);
         }
 
-        return issue.roomId;
+        return issue.id;
     }
 
     static async search(houseId: string, filterData?: Filter) {
