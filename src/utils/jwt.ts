@@ -12,13 +12,15 @@ import ApiException from "./Exceptions/ApiException";
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
 const JWT_SECRET_REFRESH = process.env.JWT_SECRET_REFRESH || "";
+const ACCESS_TOKEN_EXPIRE = process.env.ACCESS_TOKEN_EXPIRE || "1h";
+const REFRESH_TOKEN_EXPIRE = process.env.REFRESH_TOKEN_EXPIRE || "7d";
 
 const jwtToken = {
-    signAccessToken: (payload: AccessTokenPayload | AccessTokenRenterPayload, time = "1h") =>
+    signAccessToken: (payload: AccessTokenPayload | AccessTokenRenterPayload, time = ACCESS_TOKEN_EXPIRE) =>
         jwt.sign(payload, JWT_SECRET, {
             expiresIn: time,
         }),
-    signRefreshToken: (payload: RefreshTokenPayload | RefreshTokenRenterPayload, time = "7d") =>
+    signRefreshToken: (payload: RefreshTokenPayload | RefreshTokenRenterPayload, time = REFRESH_TOKEN_EXPIRE) =>
         jwt.sign(payload, JWT_SECRET_REFRESH, {
             expiresIn: time,
         }),
