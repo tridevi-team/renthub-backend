@@ -601,7 +601,7 @@ class StatisticalService {
         }
 
         const result = await query;
-        
+
         const months = new Set();
 
         result.forEach((item) => {

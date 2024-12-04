@@ -97,6 +97,9 @@ class StatisticalController {
 
                 // search contract by renterId and roomId
                 const { start, end } = await ContractService.findRangeRentDate(roomId, renterId);
+                console.log("Rental start date: ", start);
+                console.log("Rental end date: ", end);
+
                 if (!start || !end) {
                     return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {}));
                 }

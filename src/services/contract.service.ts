@@ -104,17 +104,17 @@ class ContractService {
     static async findRangeRentDate(roomId: string, renterId: string) {
         const firstContract = await RoomContracts.query()
             .where({
-                roomId,
+                room_id: roomId,
             })
-            .andWhereILike("renterIds", `%${renterId}%`)
+            .andWhereILike("renter_ids", `%${renterId}%`)
             .orderBy("rental_start_date", "asc")
             .first();
 
         const lastContract = await RoomContracts.query()
             .where({
-                roomId,
+                room_id: roomId,
             })
-            .andWhereILike("renterIds", `%${renterId}%`)
+            .andWhereILike("renter_ids", `%${renterId}%`)
             .orderBy("rental_end_date", "desc")
             .first();
 
