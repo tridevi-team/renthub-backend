@@ -91,6 +91,7 @@ class RoomServices extends Model {
                         "services.name",
                         "services.unit_price",
                         "services.type",
+                        "start_index",
                         "room_services.quantity",
                         "services.description"
                     );

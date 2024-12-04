@@ -101,6 +101,10 @@ components:
                                 type: integer
                                 description: Service quantity
                                 example: 1
+                            startIndex:
+                                type: integer
+                                description: Start index of the service
+                                example: 0
                             unitPrice:
                                 type: number
                                 description: Service unit price in VND

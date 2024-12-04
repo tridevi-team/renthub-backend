@@ -6,7 +6,7 @@ import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../ut
 import HouseService from "./house.service";
 
 class RoomService {
-    static async create(houseId: string, data: Room) {
+    static async create(houseId: string, data: Room, trx?: TransactionOrKnex) {
         try {
             // check if room exists
             const room = await Rooms.query().join("house_floors", "rooms.floor_id", "house_floors.id").findOne({
@@ -19,7 +19,7 @@ class RoomService {
             }
 
             // create room
-            const newRoom = await Rooms.query().insertAndFetch(camelToSnake(data));
+            const newRoom = await Rooms.query(trx).insertAndFetch(camelToSnake(data));
             return newRoom;
         } catch (err) {
             if (err instanceof ForeignKeyViolationError) {
@@ -78,6 +78,7 @@ class RoomService {
                     description: room.floor.description,
                 },
             },
+            images: room.images.map((image) => image.imageUrl),
         };
 
         if (formattedRoom.floor) {
@@ -216,13 +217,13 @@ class RoomService {
     //     };
     // }
 
-    static async updateRoom(id: string, data: Room) {
+    static async updateRoom(id: string, data: Room, trx?: TransactionOrKnex) {
         try {
             const room = await Rooms.query().findById(id);
             if (!room) {
                 throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
             }
-            const updatedRoom = await room.$query().patchAndFetch(camelToSnake(data));
+            const updatedRoom = await room.$query(trx).patchAndFetch(camelToSnake(data));
             return updatedRoom;
         } catch (err) {
             if (err instanceof ForeignKeyViolationError) {
@@ -299,7 +300,12 @@ class RoomService {
         await Rooms.query().delete().findByIds(ids);
     }
 
-    static async addServiceToRoom(roomId: string, services: RoomServiceInfo[], userId: string) {
+    static async addServiceToRoom(
+        roomId: string,
+        services: RoomServiceInfo[],
+        userId: string,
+        trx?: TransactionOrKnex
+    ) {
         const room = await this.getRoomById(roomId);
 
         // check if services exist
@@ -313,11 +319,11 @@ class RoomService {
         }
 
         // delete existing services
-        await RoomServices.query().delete().where("room_id", roomId);
+        await RoomServices.query(trx).delete().where("room_id", roomId);
 
         // add services to room
         for (const service of services) {
-            await RoomServices.query().insert(
+            await RoomServices.query(trx).insert(
                 camelToSnake({
                     roomId,
                     serviceId: service.serviceId,
@@ -330,6 +336,22 @@ class RoomService {
         }
 
         return room;
+    }
+
+    static async updateServicesInRoom(
+        roomId: string,
+        services: RoomServiceInfo[],
+        updatedBy: string,
+        trx?: TransactionOrKnex
+    ) {
+        for (const service of services) {
+            await RoomServices.query(trx)
+                .findOne({
+                    room_id: roomId,
+                    service_id: service.serviceId,
+                })
+                .patch({ ...service, updated_by: updatedBy });
+        }
     }
 
     static async removeServicesFromRoom(roomId: string, services: RoomServiceInfo[], userId: string) {
@@ -356,19 +378,19 @@ class RoomService {
         return room;
     }
 
-    static async addImagesToRoom(roomId: string, images: string[], userId: string) {
+    static async addImagesToRoom(roomId: string, images: string[], userId: string, trx?: TransactionOrKnex) {
         const room = await this.getRoomById(roomId);
 
         // remove existing images
-        await RoomImages.query().delete().where("room_id", roomId);
+        await RoomImages.query(trx).delete().where("room_id", roomId);
 
         for (const image of images) {
-            await RoomImages.query().insert(
+            await RoomImages.query(trx).insert(
                 camelToSnake({
                     room_id: roomId,
                     imageUrl: image,
                     createdBy: userId,
-                    updatedBy: userId,
+                    // updatedBy: userId,
                 })
             );
         }

@@ -1,9 +1,11 @@
+import { RoomServiceInfo } from "@interfaces";
+
 export interface Room {
     name: string;
     maxRenters?: number;
     roomArea?: number;
     floorId: string;
-    services?: string[];
+    services?: RoomServiceInfo[];
     images?: string[];
     price: number;
     description?: string;
