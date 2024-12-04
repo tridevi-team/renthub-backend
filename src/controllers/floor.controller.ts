@@ -66,7 +66,7 @@ class FloorController {
     static async getRoomsByFloor(req, res) {
         const { floorId } = req.params;
         const { filter = [], sort = [], pagination, isSelect } = req.query;
-        const redisKey = prefix + "get_rooms" + isSelect;
+        const redisKey = `${prefix}:${floorId}:rooms_${isSelect}`;
         try {
             const cacheKey = RedisUtils.generateCacheKeyWithFilter(redisKey, {
                 filter,
