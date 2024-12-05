@@ -312,7 +312,7 @@ class RoomService {
         const rooms = await Rooms.query()
             .select("rooms.id")
             .join("house_floors as floor", "rooms.floor_id", "floor.id")
-            .where("floors.house_id", houseId);
+            .where("floor.house_id", houseId);
 
         if (rooms.length === 0) {
             throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
