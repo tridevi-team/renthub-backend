@@ -148,6 +148,7 @@ class RoomController {
 
             // delete cache
             await RedisUtils.deletePattern(`${prefix}:*`);
+            await RedisUtils.deletePattern(`houses:getRooms_*`);
 
             return res.json(apiResponse(messageResponse.DELETE_ROOM_SUCCESS, true));
         } catch (err) {
