@@ -119,8 +119,8 @@ class ContractService {
             .first();
 
         return {
-            start: firstContract?.rentalStartDate,
-            end: lastContract?.rentalEndDate,
+            rentalStartDate: firstContract?.rentalStartDate,
+            rentalEndDate: lastContract?.rentalEndDate,
         };
     }
 

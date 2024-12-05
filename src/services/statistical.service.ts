@@ -640,6 +640,8 @@ class StatisticalService {
     }
 
     static async barChartServiceConsumptionEachMonthByRoom(roomId: string, time: DateRange = {}) {
+        console.log(time);
+
         const query = BillDetails.query()
             .join("bills", "bill_details.bill_id", "bills.id")
             .where("bills.roomId", roomId)

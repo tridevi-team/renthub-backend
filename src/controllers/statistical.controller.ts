@@ -90,34 +90,32 @@ class StatisticalController {
         const { user, isApp } = req;
         try {
             if (isApp) {
-                let startDate, endDate;
                 // get renterId from user
                 const renterId = user.id;
 
-                // search contract by renterId and roomId
-                const { start, end } = await ContractService.findRangeRentDate(roomId, renterId);
-                console.log("Rental start date: ", start);
-                console.log("Rental end date: ", end);
+                // Search contract by renterId and roomId
+                const { rentalStartDate, rentalEndDate } = await ContractService.findRangeRentDate(roomId, renterId);
+                let startDate = rentalStartDate;
+                let endDate = rentalEndDate;
 
-                if (!start || !end) {
+                console.log("Rental date: ", rentalStartDate, rentalEndDate);
+                console.log("Date range: ", from, to);
+
+                if (!rentalStartDate || !rentalEndDate) {
                     return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {}));
                 }
-                // validate start date and end date
-                if ((from > start && from < end) || (to > start && to < end)) {
+
+                if (new Date(from) > new Date(rentalStartDate)) {
                     startDate = from;
-                    endDate = to;
-                } else if (!from && !to) {
-                    startDate = start;
-                    endDate = end;
-                } else if (!from) {
-                    startDate = start;
-                    endDate = to;
-                } else if (!to) {
-                    startDate = from;
-                    endDate = end;
-                } else {
-                    startDate = start;
-                    endDate = end;
+                } else if (new Date(from) > new Date(rentalEndDate)) {
+                    return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {}));
+                }
+
+                if (new Date(to) > new Date(rentalEndDate)) {
+                    endDate = rentalEndDate;
+                    console.log("End date: ", endDate);
+                } else if (new Date(to) < new Date(rentalStartDate)) {
+                    return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {}));
                 }
 
                 // get data
@@ -127,8 +125,8 @@ class StatisticalController {
                 });
 
                 const serviceCompare = await StatisticalService.barChartServiceConsumptionEachMonthByRoom(roomId, {
-                    startDate: from,
-                    endDate: to,
+                    startDate,
+                    endDate,
                 });
 
                 const serviceConsumption = await StatisticalService.pieChartServiceConsumptionByRoom(roomId, {
