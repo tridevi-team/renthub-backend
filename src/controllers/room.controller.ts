@@ -51,7 +51,8 @@ class RoomController {
 
                 // delete cache
                 await RedisUtils.deletePattern(`${prefix}:*`);
-
+                await RedisUtils.deletePattern(`houses:getRooms_*`);
+                
                 await trx.commit();
 
                 const room = await RoomService.getRoomById(newRoom.id);
@@ -110,6 +111,7 @@ class RoomController {
 
             // delete cache
             await RedisUtils.deletePattern(`${prefix}`);
+            await RedisUtils.deletePattern(`houses:getRooms_*`);
 
             await trx.commit();
 
@@ -128,6 +130,7 @@ class RoomController {
 
             // delete cache
             await RedisUtils.deletePattern(`${prefix}:*`);
+            await RedisUtils.deletePattern(`houses:getRooms_*`);
 
             return res.json(apiResponse(messageResponse.DELETE_ROOM_SUCCESS, true));
         } catch (err) {
