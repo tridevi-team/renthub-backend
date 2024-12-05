@@ -126,6 +126,11 @@ class StatisticalController {
                     endDate,
                 });
 
+                const serviceCompare = await StatisticalService.barChartServiceConsumptionEachMonthByRoom(roomId, {
+                    startDate: from,
+                    endDate: to,
+                });
+
                 const serviceConsumption = await StatisticalService.pieChartServiceConsumptionByRoom(roomId, {
                     startDate,
                     endDate,
@@ -134,6 +139,7 @@ class StatisticalController {
                 return res.json(
                     apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {
                         turnover,
+                        serviceCompare,
                         serviceConsumption,
                     })
                 );
