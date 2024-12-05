@@ -310,7 +310,7 @@ class RoomService {
         userId: string,
         trx?: TransactionOrKnex
     ) {
-        const room = await this.getRoomById(roomId);
+        const room = await Rooms.query(trx).findById(roomId);
 
         // check if services exist
         const serviceIds = await Services.query().whereIn(
@@ -383,7 +383,7 @@ class RoomService {
     }
 
     static async addImagesToRoom(roomId: string, images: string[], userId: string, trx?: TransactionOrKnex) {
-        const room = await this.getRoomById(roomId);
+        const room = await Rooms.query(trx).findById(roomId);
 
         // remove existing images
         await RoomImages.query(trx).delete().where("room_id", roomId);
