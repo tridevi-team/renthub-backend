@@ -280,7 +280,11 @@ class RoomService {
     }
 
     static async roomIdsByHouse(houseId: string) {
-        const rooms = await Rooms.query().select("rooms.id").joinRelated("floor").where("house_id", houseId);
+        const rooms = await Rooms.query()
+            .select("rooms.id")
+            .join("house_floors as floor", "rooms.floor_id", "floor.id")
+            .where("house_floors.house_id", houseId);
+
         if (rooms.length === 0) {
             throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
         }
