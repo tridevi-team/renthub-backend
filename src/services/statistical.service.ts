@@ -572,7 +572,6 @@ class StatisticalService {
     }
 
     static async barChartTurnoverByRoom(roomId: string, time: DateRange = {}) {
-        console.log("🚀 ~ StatisticalService ~ barChartTurnoverByRoom ~ time:", time)
         // it will return the total price of bills in each month
         const query = Bills.query()
             .where("bills.roomId", roomId)
@@ -638,6 +637,113 @@ class StatisticalService {
         });
 
         return data;
+    }
+
+    static async barChartServiceConsumptionEachMonthByRoom(roomId: string, time: DateRange = {}) {
+        const query = BillDetails.query()
+            .join("bills", "bill_details.bill_id", "bills.id")
+            .where("bills.roomId", roomId)
+            .sum("bill_details.total_price as totalPrice")
+            .select(
+                "bill_details.name",
+                BillDetails.raw(`SUBSTRING_INDEX(SUBSTRING_INDEX(bills.title, 'tháng ', -1), ' - ', 1) as month`),
+                BillDetails.raw(`SUBSTRING_INDEX(bills.title, ' - ', -1) as year`)
+            )
+            .groupBy("bill_details.name", "month", "year")
+            .orderBy("month", "asc");
+
+        // Search based on title with time range
+        if (time.startDate || time.endDate) {
+            query.whereRaw(
+                `STR_TO_DATE(
+            CONCAT(
+                SUBSTRING_INDEX(SUBSTRING_INDEX(bills.title, 'tháng ', -1), ' - ', 1), '-',
+                SUBSTRING_INDEX(bills.title, ' - ', -1), '-01'
+            ), '%m-%Y-%d'
+        ) BETWEEN ? AND ?`,
+                [time.startDate || "1900-01-01", time.endDate || "2100-12-31"]
+            );
+        }
+
+        const result = await query;
+
+        const months = new Set();
+
+        result.forEach((item) => {
+            months.add(item.month + "/" + item.year);
+        });
+
+        // sort set
+        const monthsArray = Array.from(months).sort((a: unknown, b: unknown) => {
+            const [monthA, yearA] = (a as string).split("/");
+            const [monthB, yearB] = (b as string).split("/");
+
+            if (yearA === yearB) {
+                return Number(monthA) - Number(monthB);
+            }
+
+            return Number(yearA) - Number(yearB);
+        });
+
+        const config = {};
+
+        const data = monthsArray.map((month) => {
+            const monthData = result.filter((item) => {
+                return item.month + "/" + item.year === month;
+            });
+
+            const obj = {
+                month,
+            };
+
+            monthData.forEach((item) => {
+                const key = createSlug(item.name.toLowerCase());
+                obj[key] = Number(item.totalPrice);
+                const color = colorPalette[monthData.indexOf(item) % colorPalette.length];
+
+                config[key] = {
+                    label: item.name,
+                    color: color,
+                };
+
+                return obj;
+            });
+
+            return obj;
+        });
+
+        return { data, config };
+    }
+
+    static async pieChartServiceConsumptionByRoom(roomId: string, time: DateRange = {}) {
+        const query = BillDetails.query()
+            .join("bills", "bill_details.bill_id", "bills.id")
+            .where("bills.roomId", roomId)
+            .sum("bill_details.total_price as totalPrice")
+            .select("bill_details.name")
+            .groupBy("bill_details.name");
+
+        // search base on title
+        if (time.startDate || time.endDate) {
+            query.whereRaw(
+                `STR_TO_DATE(
+                CONCAT(
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(bills.title, 'tháng ', -1), ' - ', 1), '-',
+                    SUBSTRING_INDEX(bills.title, ' - ', -1), '-01'
+                ), '%m-%Y-%d'
+            ) BETWEEN ? AND ?`,
+                [time.startDate || "1900-01-01", time.endDate || "2100-12-31"]
+            );
+        }
+
+        const result = await query;
+
+        return result.map((item) => {
+            return {
+                name: item.name,
+                totalPrice: Number(item.totalPrice),
+            };
+        });
     }
 
     static async barChartByBillStatus(houseId: string, time: DateRange = {}) {

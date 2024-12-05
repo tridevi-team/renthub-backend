@@ -51,7 +51,6 @@ class StatisticalController {
     static async getStatisticalChartByHouse(req, res) {
         const { houseId } = req.params;
         const { from, to, modules = [] } = req.query;
-        console.log(modules);
 
         try {
             // pie chart consumption
@@ -122,22 +121,46 @@ class StatisticalController {
                 }
 
                 // get data
-
-                const data = await StatisticalService.barChartTurnoverByRoom(roomId, {
+                const turnover = await StatisticalService.barChartTurnoverByRoom(roomId, {
                     startDate,
                     endDate,
                 });
 
-                return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, data));
+                const serviceConsumption = await StatisticalService.pieChartServiceConsumptionByRoom(roomId, {
+                    startDate,
+                    endDate,
+                });
+
+                return res.json(
+                    apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {
+                        turnover,
+                        serviceConsumption,
+                    })
+                );
             }
 
-            const data = await StatisticalService.barChartTurnoverByRoom(roomId, {
+            const turnover = await StatisticalService.barChartTurnoverByRoom(roomId, {
                 startDate: from,
                 endDate: to,
             });
-            console.log(data);
 
-            return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, data));
+            const serviceCompare = await StatisticalService.barChartServiceConsumptionEachMonthByRoom(roomId, {
+                startDate: from,
+                endDate: to,
+            });
+
+            const serviceConsumption = await StatisticalService.pieChartServiceConsumptionByRoom(roomId, {
+                startDate: from,
+                endDate: to,
+            });
+
+            return res.json(
+                apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {
+                    turnover,
+                    serviceCompare,
+                    serviceConsumption,
+                })
+            );
         } catch (error) {
             Exception.handle(error, req, res);
         }
