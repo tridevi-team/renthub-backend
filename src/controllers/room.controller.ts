@@ -35,6 +35,8 @@ class RoomController {
                     maxRenters,
                     price,
                     roomArea,
+                    services,
+                    images,
                     description,
                     status: status || RoomStatus.AVAILABLE,
                     createdBy: userId,
@@ -44,15 +46,15 @@ class RoomController {
             );
 
             if (newRoom) {
-                await RoomService.addServiceToRoom(newRoom.id, services, userId, trx);
-                await RoomService.addImagesToRoom(newRoom.id, images, userId, trx);
-
-                const room = await RoomService.getRoomById(newRoom.id);
+                // await RoomService.addServiceToRoom(newRoom.id, services, userId, trx);
+                // await RoomService.addImagesToRoom(newRoom.id, images, userId, trx);
 
                 // delete cache
                 await RedisUtils.deletePattern(`${prefix}:*`);
 
                 await trx.commit();
+
+                const room = await RoomService.getRoomById(newRoom.id);
 
                 return res.json(apiResponse(messageResponse.CREATE_ROOM_SUCCESS, true, room));
             }

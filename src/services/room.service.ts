@@ -19,7 +19,36 @@ class RoomService {
             }
 
             // create room
-            const newRoom = await Rooms.query(trx).insertAndFetch(camelToSnake(data));
+            const newRoom = await Rooms.query(trx).insertGraphAndFetch(
+                {
+                    "#id": "room",
+                    floor_id: data.floorId,
+                    name: data.name,
+                    max_renters: data.maxRenters,
+                    room_area: data.roomArea,
+                    price: data.price,
+                    description: data.description,
+                    status: data.status || RoomStatus.AVAILABLE,
+                    created_by: data.createdBy,
+                    updated_by: data.updatedBy,
+                    services: data.services?.map((service) => ({
+                        room_id: "room",
+                        service_id: service.serviceId,
+                        quantity: service.quantity,
+                        start_index: service.startIndex,
+                        created_by: data.createdBy,
+                        updated_by: data.updatedBy,
+                    })),
+                    images: data.images?.map((image) => ({
+                        room_id: "room",
+                        image_url: image,
+                        created_by: data.createdBy,
+                    })),
+                },
+                {
+                    allowRefs: true,
+                }
+            );
             return newRoom;
         } catch (err) {
             if (err instanceof ForeignKeyViolationError) {
@@ -310,7 +339,7 @@ class RoomService {
         userId: string,
         trx?: TransactionOrKnex
     ) {
-        const room = await Rooms.query(trx).findById(roomId);
+        // const room = await Rooms.query(trx).findById(roomId);
 
         // check if services exist
         const serviceIds = await Services.query().whereIn(
@@ -339,7 +368,7 @@ class RoomService {
             );
         }
 
-        return room;
+        // return room;
     }
 
     static async updateServicesInRoom(
@@ -383,7 +412,7 @@ class RoomService {
     }
 
     static async addImagesToRoom(roomId: string, images: string[], userId: string, trx?: TransactionOrKnex) {
-        const room = await Rooms.query(trx).findById(roomId);
+        // const room = await Rooms.query(trx).findById(roomId);
 
         // remove existing images
         await RoomImages.query(trx).delete().where("room_id", roomId);
@@ -399,7 +428,7 @@ class RoomService {
             );
         }
 
-        return room;
+        // return room;
     }
 
     static async removeImagesFromRoom(roomId: string, images: string[]) {
