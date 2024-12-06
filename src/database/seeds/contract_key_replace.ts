@@ -40,7 +40,7 @@ export async function seed(knex: Knex): Promise<void> {
         { key: "{{CURRENT_DATE}}", label: "Ngày hiện tại" },
         { key: "{{RENTAL_HOUSE_ADDRESS}}", label: "Địa chỉ nhà cho thuê" },
         { key: "{{HOST_NAME}}", label: "Tên chủ nhà" },
-        { key: "{{OWNER_BIRTHDAY}}", label: "Ngày sinh khách thuê" },
+        { key: "{{OWNER_BIRTHDAY}}", label: "Ngày sinh chủ nhà" },
         { key: "{{OWNER_IDENTITY_NUMBER}}", label: "Số CCCD/CMND chủ nhà" },
         { key: "{{OWNER_DATE_OF_ISSUANCE}}", label: "Ngày cấp CCCD chủ nhà" },
         { key: "{{OWNER_PLACE_OF_ISSUE}}", label: "Nơi cấp CCCD chủ nhà" },
