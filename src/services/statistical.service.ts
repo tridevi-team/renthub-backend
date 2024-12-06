@@ -11,8 +11,8 @@ class StatisticalService {
         const data = status.map((item) => {
             const count = bills.filter((i) => i.status === item)[0]?.count || 0;
             const price = bills.filter((i) => i.status === item)[0]?.totalPrice || 0;
-            total += count;
-            totalPrice += price;
+            total += Number(count);
+            totalPrice += Number(price);
 
             return {
                 status: item,
@@ -22,7 +22,11 @@ class StatisticalService {
         });
 
         return [
-            ...data,
+            data.map((item) => ({
+                status: item.status,
+                count: Number(item.count),
+                totalPrice: Number(item.totalPrice),
+            })),
             {
                 status: "ALL",
                 count: total,
@@ -36,7 +40,7 @@ class StatisticalService {
         let total = 0;
         const data = status.map((item) => {
             const count = issues.filter((i) => i.status === item)[0]?.count || 0;
-            total += count;
+            total += Number(count);
 
             return {
                 status: item,
@@ -45,7 +49,10 @@ class StatisticalService {
         });
 
         return [
-            ...data,
+            data.map((item) => ({
+                status: item.status,
+                count: Number(item.count),
+            })),
             {
                 status: "ALL",
                 count: total,
@@ -58,7 +65,7 @@ class StatisticalService {
         let total = 0;
         const data = status.map((item) => {
             const count = rooms.filter((i) => i.status === item)[0]?.count || 0;
-            total += count;
+            total += Number(count);
 
             return {
                 status: item,
@@ -67,7 +74,10 @@ class StatisticalService {
         });
 
         return [
-            ...data,
+            data.map((item) => ({
+                status: item.status,
+                count: Number(item.count),
+            })),
             {
                 status: "ALL",
                 count: total,
@@ -80,7 +90,7 @@ class StatisticalService {
         let total = 0;
         const data = status.map((item) => {
             const count = contracts.filter((i) => i.status === item)[0]?.count || 0;
-            total += count;
+            total += Number(count);
 
             return {
                 status: item,
@@ -89,7 +99,10 @@ class StatisticalService {
         });
 
         return [
-            ...data,
+            data.map((item) => ({
+                status: item.status,
+                count: Number(item.count),
+            })),
             {
                 status: "ALL",
                 count: total,
@@ -102,7 +115,7 @@ class StatisticalService {
         let total = 0;
         const data = status.map((item) => {
             const count = equipment.filter((i) => i.status === item)[0]?.count || 0;
-            total += count;
+            total += Number(count);
 
             return {
                 status: item,
@@ -111,7 +124,10 @@ class StatisticalService {
         });
 
         return [
-            ...data,
+            data.map((item) => ({
+                status: item.status,
+                count: Number(item.count),
+            })),
             {
                 status: "ALL",
                 count: total,
