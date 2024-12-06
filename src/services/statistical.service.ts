@@ -22,7 +22,7 @@ class StatisticalService {
         });
 
         return [
-            data.map((item) => ({
+            ...data.map((item) => ({
                 status: item.status,
                 count: Number(item.count),
                 totalPrice: Number(item.totalPrice),
@@ -49,7 +49,7 @@ class StatisticalService {
         });
 
         return [
-            data.map((item) => ({
+            ...data.map((item) => ({
                 status: item.status,
                 count: Number(item.count),
             })),
@@ -74,7 +74,7 @@ class StatisticalService {
         });
 
         return [
-            data.map((item) => ({
+            ...data.map((item) => ({
                 status: item.status,
                 count: Number(item.count),
             })),
@@ -99,7 +99,7 @@ class StatisticalService {
         });
 
         return [
-            data.map((item) => ({
+            ...data.map((item) => ({
                 status: item.status,
                 count: Number(item.count),
             })),
@@ -124,7 +124,7 @@ class StatisticalService {
         });
 
         return [
-            data.map((item) => ({
+            ...data.map((item) => ({
                 status: item.status,
                 count: Number(item.count),
             })),
@@ -383,7 +383,9 @@ class StatisticalService {
         return StatisticalService.parseContractObject(result);
     }
 
-    static async countEquipment(data: { houseId?: string; floorId?: string; roomId?: string }) {
+    static async countEquipment({ houseId, floorId, roomId }: { houseId?: string; floorId?: string; roomId?: string }) {
+        const data = { houseId, floorId, roomId };
+
         const query = Equipment.query().where((builder) => {
             if (data.houseId) {
                 builder.where("house_id", data.houseId);
