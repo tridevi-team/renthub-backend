@@ -550,6 +550,16 @@ class ContractService {
 
         return isDeleted;
     }
+
+    static async getLatestContract(roomId: string) {
+        const contract = await RoomContracts.query().where({ room_id: roomId }).orderBy("created_at", "desc").first();
+
+        if (!contract) {
+            throw new ApiException(messageResponse.CONTRACT_NOT_FOUND, 404);
+        }
+
+        return contract;
+    }
 }
 
 export default ContractService;
