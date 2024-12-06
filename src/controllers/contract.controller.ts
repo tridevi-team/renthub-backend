@@ -142,10 +142,11 @@ class ContractController {
 
             const contract = await ContractService.findOneContractTemplate(templateId);
 
+            const convertContract = snakeToCamel(contract);
             // set cache
-            await RedisUtils.setAddMember(key, JSON.stringify(contract));
+            await RedisUtils.setAddMember(key, JSON.stringify(convertContract));
 
-            return res.json(apiResponse(messageResponse.GET_TEMPLATE_DETAILS_SUCCESS, true, snakeToCamel(contract)));
+            return res.json(apiResponse(messageResponse.GET_TEMPLATE_DETAILS_SUCCESS, true, convertContract));
         } catch (e) {
             Exception.handle(e, req, res);
         }
@@ -174,10 +175,12 @@ class ContractController {
                 pagination,
             });
 
-            // set cache
-            await RedisUtils.setAddMember(key, JSON.stringify(contracts));
+            const convertContracts = snakeToCamel(contracts);
 
-            return res.json(apiResponse(messageResponse.GET_TEMPLATE_LIST_SUCCESS, true, contracts));
+            // set cache
+            await RedisUtils.setAddMember(key, JSON.stringify(convertContracts));
+
+            return res.json(apiResponse(messageResponse.GET_TEMPLATE_LIST_SUCCESS, true, convertContracts));
         } catch (e) {
             Exception.handle(e, req, res);
         }
@@ -199,12 +202,13 @@ class ContractController {
 
             const contract = await ContractService.findOneRoomContract(contractId);
             const replaceKeys = await ContractService.findKeyData(contractId);
+            const convertContract = snakeToCamel(contract);
             // set cache
-            await RedisUtils.setAddMember(key, JSON.stringify({ contract, keys: replaceKeys }));
+            await RedisUtils.setAddMember(key, JSON.stringify({ contract: convertContract, keys: replaceKeys }));
 
             return res.json(
                 apiResponse(messageResponse.GET_CONTRACT_DETAILS_SUCCESS, true, {
-                    contract: snakeToCamel(contract),
+                    contract: convertContract,
                     keys: replaceKeys,
                 })
             );
@@ -240,10 +244,12 @@ class ContractController {
                     pagination,
                 });
 
-                // set cache
-                await RedisUtils.setAddMember(key, JSON.stringify(contracts));
+                const convertContracts = snakeToCamel(contracts);
 
-                return res.json(apiResponse(messageResponse.GET_CONTRACT_LIST_SUCCESS, true, snakeToCamel(contracts)));
+                // set cache
+                await RedisUtils.setAddMember(key, JSON.stringify(convertContracts));
+
+                return res.json(apiResponse(messageResponse.GET_CONTRACT_LIST_SUCCESS, true, convertContracts));
             }
 
             const contracts = await ContractService.findAllRoomContract(roomId, {
@@ -284,10 +290,12 @@ class ContractController {
                 pagination,
             });
 
-            // set cache
-            await RedisUtils.setAddMember(key, JSON.stringify(contracts));
+            const convertContracts = snakeToCamel(contracts);
 
-            return res.json(apiResponse(messageResponse.GET_CONTRACT_LIST_SUCCESS, true, snakeToCamel(contracts)));
+            // set cache
+            await RedisUtils.setAddMember(key, JSON.stringify(convertContracts));
+
+            return res.json(apiResponse(messageResponse.GET_CONTRACT_LIST_SUCCESS, true, convertContracts));
         } catch (e) {
             Exception.handle(e, req, res);
         }

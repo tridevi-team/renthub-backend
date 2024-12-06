@@ -235,6 +235,12 @@ class PaymentController {
                 await BillService.updatePayOS(webhookData.data.orderCode, BillStatus.UNPAID, webhookData, trx);
             }
             await trx.commit();
+
+            // delete cache
+            const cacheKey = `${prefix}:*`;
+            await RedisUtils.deletePattern(cacheKey);
+            await RedisUtils.deletePattern("bills:*");
+
             return res.json({ message: "success" });
         } catch (err) {
             await trx.rollback();
