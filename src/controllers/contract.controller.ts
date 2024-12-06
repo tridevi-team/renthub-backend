@@ -145,7 +145,7 @@ class ContractController {
             // set cache
             await RedisUtils.setAddMember(key, JSON.stringify(contract));
 
-            return res.json(apiResponse(messageResponse.GET_TEMPLATE_DETAILS_SUCCESS, true, contract));
+            return res.json(apiResponse(messageResponse.GET_TEMPLATE_DETAILS_SUCCESS, true, snakeToCamel(contract)));
         } catch (e) {
             Exception.handle(e, req, res);
         }
