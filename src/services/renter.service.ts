@@ -275,10 +275,14 @@ class RenterService {
                     builder.orWhere("phone_number", data.phoneNumber);
                 }
             })
+            .join("rooms", "renters.room_id", "rooms.id")
+            .join("house_floors", "rooms.floor_id", "house_floors.id")
             .select(
-                "id",
+                "renters.id as id",
+                "house_id",
+                "floor_id",
                 "room_id",
-                "name",
+                "renters.name",
                 "citizen_id",
                 "birthday",
                 "gender",
