@@ -25,7 +25,7 @@ class StatisticalController {
                         startDate: from,
                         endDate: to,
                     }),
-                equipment: () => StatisticalService.countEquipment(houseId),
+                equipment: () => StatisticalService.countEquipment({ houseId }),
             };
 
             const selectedModules = modules.length

@@ -1,0 +1,32 @@
+title Chỉnh sửa dịch vụ
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn dịch vụ cần chỉnh sửa và nhập thông tin mới
+activate Landlord
+activate Client
+
+Client -> Backend: Gửi ID dịch vụ và thông tin mới
+activate Backend
+
+Backend -> Backend: Kiểm tra quyền
+alt Quyền hợp lệ
+    Backend -> Database: Cập nhật thông tin dịch vụ
+    activate Database
+  Database --> Backend: Xác nhận cập nhật thành công
+    Backend --> Client: Thông báo chỉnh sửa thành công
+    Client --> Landlord: Hiển thị thông báo thành công
+else Quyền không hợp lệ
+    Backend --> Client: Thông báo lỗi quyền truy cập
+    Client --> Landlord: Hiển thị thông báo thất bại
+end
+
+deactivate Backend
+deactivate Client
+deactivate Landlord
+deactivate Database
