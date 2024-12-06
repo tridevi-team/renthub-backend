@@ -113,4 +113,12 @@ contractRoute.delete(
     ContractController.deleteRoomContract
 );
 
+contractRoute.get(
+    "/:roomId/latest-contract",
+    authentication,
+    roomsValidator.roomId,
+    handleErrors,
+    ContractController.getLatestRoomContract
+);
+
 export default contractRoute;

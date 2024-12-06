@@ -5,6 +5,18 @@ import { BillDetails, Bills, Houses } from "../models";
 import { ApiException, camelToSnake, currentDateTime, filterHandler, sortingHandler } from "../utils";
 
 class BillService {
+    static async getLatestBill(roomId: string) {
+        const bill = await Bills.query()
+            .where("room_id", roomId)
+            .withGraphJoined("details")
+            .orderBy("created_at", "desc")
+            .first();
+
+        if (!bill) throw new ApiException(messageResponse.BILL_NOT_FOUND, 404);
+
+        return bill;
+    }
+
     static async getById(id: string) {
         const bill = await Bills.query()
             .findById(id)

@@ -1,6 +1,6 @@
-import { ContractStatus, messageResponse } from "@enums";
+import { ContractStatus, messageResponse, ServiceTypes } from "@enums";
 import { ContractRequest, RoomContractRequest } from "@interfaces";
-import { ContractService, RenterService } from "@services";
+import { BillService, ContractService, RenterService } from "@services";
 import { apiResponse, Exception, RedisUtils, snakeToCamel } from "@utils";
 import { Model } from "objection";
 
@@ -414,6 +414,33 @@ class ContractController {
             return res.json(apiResponse(messageResponse.DELETE_CONTRACT_SUCCESS, true));
         } catch (e) {
             Exception.handle(e, req, res);
+        }
+    }
+
+    static async getLatestRoomContract(req, res) {
+        const { roomId } = req.params;
+        try {
+            const contract = await ContractService.getLatestContract(roomId);
+            const bill = await BillService.getLatestBill(roomId);
+            console.log("🚀 ~ ContractController ~ getLatestRoomContract ~ bill:", bill.details);
+
+            const data = contract.services.map((service) => {
+                console.log(service);
+
+                const serviceBill = bill.details.find((billService) => billService.serviceId === service.id);
+
+                if ([ServiceTypes.ELECTRICITY_CONSUMPTION, ServiceTypes.WATER_CONSUMPTION].includes(service.type)) {
+                    return {
+                        ...service,
+                        oldIndex: serviceBill ? serviceBill.newIndex : 0,
+                    };
+                }
+                return service;
+            });
+
+            return res.json(apiResponse(messageResponse.GET_SERVICES_LIST_SUCCESS, true, snakeToCamel(data)));
+        } catch (error) {
+            Exception.handle(error, req, res);
         }
     }
 }
