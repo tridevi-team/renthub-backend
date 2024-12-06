@@ -14,7 +14,10 @@ fi
 cd /home/renthouse/renthub/backend
 echo "Current directory: $(pwd)"
 
-git pull origin master
+git pull origin develop
+
+# current branch
+echo "Current branch: $(git branch --show-current)"
 
 yarn install
 
