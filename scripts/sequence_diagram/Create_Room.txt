@@ -1,11 +1,11 @@
 title Tạo mới phòng
 
-bottomparticipants 
+bottomparticipants
 
 actor Landlord
 entity Client
 entity Backend
-entity Database
+database Database
 
 activate Landlord
 activate Client

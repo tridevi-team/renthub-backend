@@ -1,11 +1,11 @@
 title Lấy danh sách phòng theo nhà/ tầng
 
-bottomparticipants 
+bottomparticipants
 
 actor Landlord
 entity Client
 entity Backend
-entity Database
+database Database
 
 activate Landlord
 activate Client

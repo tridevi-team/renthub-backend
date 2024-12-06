@@ -1,11 +1,11 @@
 title Xóa tầng
 
-bottomparticipants 
+bottomparticipants
 
 actor Landlord
 entity Client
 entity Backend
-entity Database
+database Database
 
 activate Landlord
 activate Client
@@ -34,7 +34,7 @@ else Có ràng buộc
   Database --> Backend: Trả về thông tin ràng buộc
   Backend --> Client: Thông báo lỗi (có ràng buộc, không thể xóa)
   Client --> Landlord: Hiển thị thông báo lỗi
-  
+
 end
 
 deactivate Database
