@@ -7,7 +7,7 @@ export async function up(knex: Knex): Promise<void> {
             table.jsonb("landlord").after("contract_id").notNullable();
             table.jsonb("renter").after("landlord").notNullable();
             table.text("renter_ids").after("renter").nullable();
-            table.text("content").after("renter_ids").notNullable();
+            table.text("content", "longtext").after("renter_ids").notNullable();
             table.jsonb("room").after("rental_end_date").notNullable();
             table.jsonb("services").after("room").notNullable();
             table.jsonb("equipment").after("services").notNullable();
@@ -21,7 +21,7 @@ export async function up(knex: Knex): Promise<void> {
             table.jsonb("landlord").after("contract_id").nullable();
             table.jsonb("renter").after("landlord").nullable();
             table.text("renter_ids").after("renter").nullable();
-            table.text("content").after("renter_ids").notNullable();
+            table.text("content", "longtext").after("renter_ids").notNullable();
             table.jsonb("room").after("rental_end_date").nullable();
             table.jsonb("services").after("room").nullable();
             table.jsonb("equipment").after("services").nullable();

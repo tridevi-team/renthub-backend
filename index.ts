@@ -52,9 +52,9 @@ app.use(
         credentials: true,
     })
 );
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "100mb" }));
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 app.use(useragent.express(), (req: any, _res, next) => {
     const userAgent = req.useragent;
     // console.log("User Agent: ", userAgent);
