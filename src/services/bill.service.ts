@@ -243,6 +243,8 @@ class BillService {
                 ? { status, payosResponse, paymentDate: currentDateTime() }
                 : { status, payosResponse };
 
+        console.log("🚀 ~ file: bill.service.ts ~ line 268 ~ BillService ~ updatePayOS ~ updateData", updateData);
+
         const updated = await bill.$query(trx).patch(camelToSnake(updateData));
         return updated;
     }
