@@ -2,7 +2,7 @@ import { raw, TransactionOrKnex } from "objection";
 import { BillStatus, EPagination, messageResponse } from "../enums";
 import { BillDetailRequest, BillInfo, BillUpdate, Filter } from "../interfaces";
 import { BillDetails, Bills, Houses } from "../models";
-import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
+import { ApiException, camelToSnake, currentDateTime, filterHandler, sortingHandler } from "../utils";
 
 class BillService {
     static async getById(id: string) {
@@ -238,7 +238,12 @@ class BillService {
             return null;
         }
 
-        const updated = await bill.$query(trx).patch(camelToSnake({ status, payosResponse }));
+        const updateData =
+            status === BillStatus.PAID
+                ? { status, payosResponse, paymentDate: currentDateTime() }
+                : { status, payosResponse };
+
+        const updated = await bill.$query(trx).patch(updateData);
         return updated;
     }
 
