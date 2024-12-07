@@ -422,7 +422,6 @@ class ContractController {
         try {
             const contract = await ContractService.getLatestContract(roomId);
             const bill = await BillService.getLatestBill(roomId);
-            console.log("🚀 ~ ContractController ~ getLatestRoomContract ~ bill:", bill.details);
 
             const data = contract.services.map((service) => {
                 console.log(service);

@@ -1,4 +1,4 @@
-import { ApprovalStatus, ContractStatus, messageResponse } from "@enums";
+import { ApprovalStatus, ContractStatus, messageResponse, NotificationType } from "@enums";
 import {
     ContractRequest,
     ContractUpdateRequest,
@@ -7,7 +7,7 @@ import {
     RoomContractUpdateRequest,
 } from "@interfaces";
 import { ContractKeyReplace, ContractTemplate, RoomContracts, Rooms } from "@models";
-import { HouseService, RoomService } from "@services";
+import { HouseService, NotificationService, RenterService, RoomService, UserService } from "@services";
 import { ApiException, camelToSnake, currentDateTime, filterHandler, snakeToCamel, sortingHandler } from "@utils";
 import { TransactionOrKnex } from "objection";
 import { default as VNnum2words } from "vn-num2words";
@@ -58,6 +58,8 @@ class ContractService {
             throw new ApiException(messageResponse.CONTRACT_NOT_FOUND, 404);
         }
 
+        const room = await RoomService.getRoomById(contract.roomId);
+
         // check contract is exists in range date
         const isExists = await RoomContracts.query()
             .where(camelToSnake({ roomId: contract.roomId }))
@@ -82,6 +84,25 @@ class ContractService {
 
         // update room status
         await RoomService.updateStatusByContract(newContract.room.id, newContract.status, newContract.createdBy, trx);
+
+        const user = await UserService.getUserById(newContract.createdBy);
+
+        // send notification to landlord and renters
+        await NotificationService.create({
+            title: "Hợp đồng cho phòng " + room.name + " của " + room.floor.house.name,
+            content: `Hợp đồng thuê phòng ${room.name} đã được tạo bởi ${user.fullName}. Vui lòng kiểm tra thông tin hợp đồng và xác nhận thông tin.`,
+            type: NotificationType.SYSTEM,
+            data: { contractId: newContract.id },
+            recipients: [...newContract.renterIds.split(",")],
+        });
+
+        await NotificationService.create({
+            title: "Bạn đã tạo thành công hợp đồng cho phòng " + room.name + " của " + room.floor.house.name,
+            content: `Hợp đồng thuê phòng ${room.name} đã được tạo bởi ${user.fullName}. Vui lòng chờ xác nhận từ phía người thuê.`,
+            type: NotificationType.SYSTEM,
+            data: { contractId: newContract.id },
+            recipients: [newContract.createdBy],
+        });
 
         return newContract;
     }
@@ -480,6 +501,17 @@ class ContractService {
             approvalStatus: ApprovalStatus.PENDING,
         });
 
+        const user = await UserService.getUserById(updatedContract.updatedBy);
+
+        // send noti to renters to approve
+        await NotificationService.create({
+            title: "Cập nhật hợp đồng thuê phòng " + updatedContract.room.name,
+            content: `Hợp đồng thuê phòng ${updatedContract.room.name} đã được cập nhật bởi ${user.fullName}. Vui lòng kiểm tra thông tin hợp đồng và xác nhận thông tin ngay.`,
+            type: NotificationType.SYSTEM,
+            data: { contractId: updatedContract.id },
+            recipients: [...updatedContract.renterIds.split(",")],
+        });
+
         return await this.findOneRoomContract(id);
     }
 
@@ -524,6 +556,19 @@ class ContractService {
             approval_date: currentDateTime(),
             approval_note: note,
             status: status === ApprovalStatus.APPROVED ? ContractStatus.ACTIVE : details.status,
+        });
+
+        const house = await HouseService.getHouseByRoomId(details.roomId);
+
+        // sent notification to landlord
+        const user = await RenterService.getById(actionBy);
+
+        await NotificationService.create({
+            title: "Hợp đồng thuê phòng " + details.room.name + " đã được xác nhận",
+            content: `Hợp đồng thuê phòng ${details.room.name} đã được xác nhận bởi ${user.name}.`,
+            type: NotificationType.SYSTEM,
+            data: { contractId: details.id },
+            recipients: [house.createdBy],
         });
 
         return await this.findOneRoomContract(id);
