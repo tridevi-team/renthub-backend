@@ -3,7 +3,7 @@ import { EPagination, EquipmentStatus, IssueStatus, messageResponse, Notificatio
 import { Filter, IssueRequestCreate, IssueRequestUpdate } from "../interfaces";
 import { Houses, Issues } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
-import { EquipmentService, HouseService, NotificationService, UserService } from "./";
+import { EquipmentService, HouseService, NotificationService, RenterService, UserService } from "./";
 
 class IssueService {
     static async getById(id: string) {
@@ -107,13 +107,22 @@ class IssueService {
     static async create(data: IssueRequestCreate) {
         const issue = await Issues.query().insert(camelToSnake(data));
         const house = await HouseService.getHouseById(data.houseId);
+        const renter = await RenterService.getById(data.createdBy);
         // send notification to owner and issue manager
         await NotificationService.create({
-            title: "Yêu cầu mới",
-            content: `Yêu cầu mới ${issue.title} được tạo`,
+            title: "Yêu cầu mới " + issue.title + " được tạo",
+            content: `Yêu cầu về ${issue.title} trong ${house.name} đã được tạo bởi ${renter.name}. Vui lòng kiểm tra ngay.`,
             type: NotificationType.SYSTEM,
             data: { issueId: issue.id },
-            recipients: [data.createdBy, house.createdBy],
+            recipients: [house.createdBy],
+        });
+
+        await NotificationService.create({
+            title: "Bạn đã tạo thành công yêu cầu " + issue.title,
+            content: `Yêu cầu ${issue.title} đã được tạo thành công. Vui lòng chờ phản hồi từ quản lý.`,
+            type: NotificationType.SYSTEM,
+            data: { issueId: issue.id },
+            recipients: [data.createdBy],
         });
 
         return issue;
@@ -126,7 +135,6 @@ class IssueService {
 
         if (data.status && issue.equipmentId) {
             const status = data.status;
-
             if (status === IssueStatus.IN_PROGRESS) {
                 // update equipment status is REPAIRING
                 await EquipmentService.updateStatus(issue.createdBy, issue.equipmentId, {
@@ -139,6 +147,17 @@ class IssueService {
                 });
             }
         }
+
+        const user = await UserService.getUserById(data.updatedBy || issue.updatedBy);
+
+        // send notification to owner and issue manager
+        await NotificationService.create({
+            title: "Yêu cầu về " + issue.title + " đã được cập nhật",
+            content: `Yêu cầu ${issue.title} đã được cập nhật bởi ${user.fullName}. Vui lòng kiểm tra ngay.`,
+            type: NotificationType.SYSTEM,
+            data: { issueId: id },
+            recipients: [issue.createdBy],
+        });
 
         return updated;
     }
@@ -191,6 +210,8 @@ class IssueService {
 
     static async updateAssignee(id: string, assignTo: string, updatedBy: string) {
         const issue = await this.getById(id);
+        const house = await HouseService.getHouseById(issue.houseId);
+        const user = await UserService.getUserById(updatedBy);
 
         // Check if assignTo is valid
         await UserService.getUserById(assignTo);
@@ -199,8 +220,8 @@ class IssueService {
 
         // send notification to assignee
         await NotificationService.create({
-            title: "Yêu cầu được giao cho bạn",
-            content: `Bạn đã được giao yêu cầu ${issue.title}. Vui lòng kiểm tra và xử lý`,
+            title: "Có vấn đề trong " + house.name + " được giao cho bạn.",
+            content: `Bạn đã được giao yêu cầu ${issue.title} từ ${user.fullName}. Vui lòng kiểm tra và xử lý`,
             type: NotificationType.SYSTEM,
             data: { issueId: id },
             recipients: [assignTo],
