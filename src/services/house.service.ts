@@ -245,17 +245,25 @@ class HouseService {
         };
 
         const addNewHouse = await Houses.query().insertAndFetch(camelToSnake(houseData));
-        for (let i = 0; i < data.numOfFloors; i++) {
+        for (let i = 1; i <= data.numOfFloors; i++) {
             const floorData = {
                 houseId: addNewHouse.id,
-                name: "Tầng " + (i + 1),
+                name: "Tầng " + i,
                 createdBy: data.createdBy,
             };
             const addNewFloor = await HouseFloors.query().insertAndFetch(camelToSnake(floorData));
-            for (let j = 0; j < data.numOfRoomsPerFloor; j++) {
+            for (let j = 1; j <= data.numOfRoomsPerFloor; j++) {
+                let roomName = "Phòng ";
+
+                if (i < 10) {
+                    roomName += i + "0";
+                }
+
+                roomName += j;
+
                 const roomData = {
                     floorId: addNewFloor.id,
-                    name: "Phòng " + (j + 1),
+                    name: roomName,
                     maxRenters: data.maxRenters,
                     roomArea: data.roomArea,
                     price: data.roomPrice,
