@@ -89,7 +89,7 @@ class ContractService {
 
         // send notification to landlord and renters
         await NotificationService.create({
-            title: "Hợp đồng cho phòng " + room.name + " của " + room.floor.house.name,
+            title: "Hợp đồng cho phòng " + room.name + " của " + room.house.name,
             content: `Hợp đồng thuê phòng ${room.name} đã được tạo bởi ${user.fullName}. Vui lòng kiểm tra thông tin hợp đồng và xác nhận thông tin.`,
             type: NotificationType.SYSTEM,
             data: { contractId: newContract.id },
@@ -97,7 +97,7 @@ class ContractService {
         });
 
         await NotificationService.create({
-            title: "Bạn đã tạo thành công hợp đồng cho phòng " + room.name + " của " + room.floor.house.name,
+            title: "Bạn đã tạo thành công hợp đồng cho phòng " + room.name + " của " + room.house.name,
             content: `Hợp đồng thuê phòng ${room.name} đã được tạo bởi ${user.fullName}. Vui lòng chờ xác nhận từ phía người thuê.`,
             type: NotificationType.SYSTEM,
             data: { contractId: newContract.id },
