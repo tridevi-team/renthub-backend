@@ -14,7 +14,11 @@ class Issues extends Model {
     content: string;
     status: string;
     description?: string;
-    files: any;
+    files: {
+        image: string[];
+        video: string[];
+        file: string[];
+    };
     assign_to: string;
     created_by: string;
     created_at: string;
