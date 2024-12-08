@@ -183,6 +183,15 @@ enum messageResponse {
     CONTRACT_STATUS_UPDATED_FAILED = "Failed to update contract status",
     // statistical
     GET_STATISTICAL_SUCCESS = "Statistical data retrieved successfully",
+
+    SIGNUP_RECEIVE_INFO_SUCCESS = "Signup receive info successfully",
+    GET_SIGNUP_RECEIVE_INFO_SUCCESS = "Signup receive info retrieved successfully",
+    UPDATE_SIGNUP_RECEIVE_INFO_SUCCESS = "Signup receive info updated successfully",
+    SIGNUP_RECORD_ALREADY_EXISTS = "Signup record already exists",
+    CREATE_SIGNUP_RECORD_SUCCESS = "Signup record created successfully",
+    UPDATE_SIGNUP_RECORD_SUCCESS = "Signup record updated successfully",
+    GET_SIGNUP_RECORD_SUCCESS = "Signup record retrieved successfully",
+    SIGNUP_RECORD_NOT_FOUND = "Signup record not found",
 }
 
 export default messageResponse;

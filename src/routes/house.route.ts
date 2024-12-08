@@ -52,4 +52,10 @@ houseRouter.patch(
 // api for renter
 houseRouter.get("/search", HouseController.searchHouse);
 
+houseRouter.post("/signup-receive-information", HouseController.signupReceiveInfo);
+
+houseRouter.get("/:houseId/receive-information", authentication, HouseController.getSignupReceiveInfo);
+
+houseRouter.patch("/:signupId/update-receive-information", authentication, HouseController.updateSignupReceiveInfo);
+
 export default houseRouter;

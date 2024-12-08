@@ -199,6 +199,52 @@ class HouseController {
             Exception.handle(err, req, res);
         }
     }
+
+    static async signupReceiveInfo(req, res) {
+        const { roomId, fullName, phoneNumber, email } = req.body;
+        try {
+            console.log(req.body);
+            
+            const signup = await HouseService.signupReceiveInformation({
+                roomId,
+                fullName,
+                phoneNumber,
+                email: email || null,
+            });
+
+            return res.json(apiResponse(messageResponse.SIGNUP_RECEIVE_INFO_SUCCESS, true, signup));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async getSignupReceiveInfo(req, res) {
+        const { houseId } = req.params;
+        const { filter = [], sort = [], pagination = {} } = req.query;
+        try {
+            const signup = await HouseService.getSignupReceiveInformation(houseId, {
+                filter,
+                sort,
+                pagination,
+            });
+
+            return res.json(apiResponse(messageResponse.GET_SIGNUP_RECEIVE_INFO_SUCCESS, true, signup));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async updateSignupReceiveInfo(req, res) {
+        const { signupId } = req.params;
+        const { status } = req.body;
+        try {
+            await HouseService.updateSignupReceiveInformation(signupId, status);
+
+            return res.json(apiResponse(messageResponse.UPDATE_SIGNUP_RECEIVE_INFO_SUCCESS, true, {}));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
 }
 
 export default HouseController;
