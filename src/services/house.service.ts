@@ -1,5 +1,7 @@
+import { firebaseApp } from "@config/firebase.config";
+import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
 import { raw } from "objection";
-import { Action, EPagination, messageResponse, Module } from "../enums";
+import { Action, EPagination, messageResponse, Module, NotificationType } from "../enums";
 import type {
     Filter,
     HouseCreate,
@@ -14,9 +16,13 @@ import BillService from "./bill.service";
 import EquipmentService from "./equipment.service";
 import FloorService from "./floor.service";
 import IssueService from "./issue.service";
+import NotificationService from "./notification.service";
 import PaymentService from "./payment.service";
 import RenterService from "./renter.service";
 import RoleService from "./role.service";
+import RoomService from "./room.service";
+
+const db = getFirestore(firebaseApp);
 
 class HouseService {
     static async getHouseByUser(userId: string, data?: Filter) {
@@ -500,6 +506,112 @@ class HouseService {
             invoiceDate: query.invoiceDate,
             numCollectDays: query.numCollectDays,
         };
+    }
+
+    static async signupReceiveInformation(data) {
+        console.log("🚀 ~ HouseService ~ data:", data);
+        const roomDetails = await RoomService.getRoomById(data.roomId);
+
+        // save to firestore
+        const docRefs = collection(db, "signup_receive_information");
+
+        const q = query(docRefs, where("roomId", "==", data.roomId), where("phoneNumber", "==", data.phoneNumber));
+
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            throw new ApiException(messageResponse.SIGNUP_RECORD_ALREADY_EXISTS, 409);
+        }
+
+        const created = await addDoc(collection(db, "signup_receive_information"), {
+            houseId: roomDetails.house.id,
+            roomId: data.roomId,
+            fullName: data.fullName,
+            email: data.email || "",
+            phoneNumber: data.phoneNumber,
+            createdAt: new Date(),
+            status: "WAITING_FOR_CONTACT",
+        });
+
+        const house = await this.getHouseById(roomDetails.house.id);
+
+        await NotificationService.create({
+            title: roomDetails.house.name + " vừa có người đăng ký nhận thông tin phòng ",
+            content: roomDetails.name + " vừa có người đăng ký nhận thông tin phòng. Liên hệ ngay!",
+            data: {
+                houseId: roomDetails.house.id,
+                roomId: data.roomId,
+                signupId: created.id,
+            },
+            type: NotificationType.ALERT,
+            recipients: [house.createdBy],
+        });
+
+        return (await getDoc(doc(db, "signup_receive_information", created.id))).data();
+    }
+
+    static async getSignupReceiveInformation(houseId: string, filterData?: Filter) {
+        const { filter, pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {} } =
+            filterData || {};
+
+        // Reference the sub-collection using the houseId
+        const docRefs = collection(db, "signup_receive_information");
+
+        let filterQuery = query(docRefs, where("houseId", "==", houseId));
+        if (filter) {
+            const c = filter.find((f) => f.field === "status");
+            if (c) {
+                filterQuery = query(docRefs, where("houseId", "==", houseId), where("status", "==", c.value));
+            }
+        }
+
+        const querySnapshot = await getDocs(filterQuery);
+
+        const results = await Promise.all(
+            querySnapshot.docs.map(async (doc) => {
+                const room = await RoomService.getRoomById(doc.data().roomId);
+                return {
+                    id: doc.id,
+                    houseId: doc.data().houseId,
+                    houseName: room.house.name,
+                    roomId: doc.data().roomId,
+                    roomName: room.name,
+                    fullName: doc.data().fullName,
+                    email: doc.data().email,
+                    phoneNumber: doc.data().phoneNumber,
+                    status: doc.data().status,
+                    createdAt: doc.data().createdAt,
+                };
+            })
+        );
+
+        // pagination
+        const total = results.length;
+
+        const totalPages = Math.ceil(total / pageSize);
+
+        const start = (page - 1) * pageSize;
+
+        const end = start + pageSize;
+
+        const data = results.slice(start, end);
+
+        return { results: data, total, page, pageCount: totalPages, pageSize };
+    }
+
+    static async updateSignupReceiveInformation(id: string, status: string) {
+        const docRef = doc(db, "signup_receive_information", id);
+
+        try {
+            await updateDoc(docRef, {
+                status,
+                updatedAt: new Date(),
+            });
+
+            return true;
+        } catch (error) {
+            throw new ApiException(messageResponse.SIGNUP_RECORD_NOT_FOUND, 404);
+        }
     }
 }
 
