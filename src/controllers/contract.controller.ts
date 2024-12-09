@@ -435,6 +435,9 @@ class ContractController {
 
             // delete all cache
             await RedisUtils.deletePattern(`${CONTRACT_PREFIX}:*`);
+            await RedisUtils.deletePattern(`houses:*`);
+            await RedisUtils.deletePattern(`rooms:*`);
+            await RedisUtils.deletePattern(`floors:*`);
 
             return res.json(apiResponse(messageResponse.DELETE_CONTRACT_SUCCESS, true));
         } catch (e) {

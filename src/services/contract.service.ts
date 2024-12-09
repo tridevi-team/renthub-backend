@@ -578,6 +578,9 @@ class ContractService {
             throw new ApiException(messageResponse.CONTRACT_STATUS_PENDING_ONLY, 423);
         }
 
+        // update room status
+        await RoomService.updateStatusByContract(contract.roomId, ContractStatus.CANCELLED, deletedBy);
+
         await contract.$query().patch({ updatedBy: deletedBy });
         const isDeleted = await contract.$query().delete();
 
