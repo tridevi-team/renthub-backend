@@ -380,6 +380,9 @@ class ContractController {
 
             // delete all cache
             await RedisUtils.deletePattern(`${CONTRACT_PREFIX}:*`);
+            await RedisUtils.deletePattern(`houses:*`);
+            await RedisUtils.deletePattern(`rooms:*`);
+            await RedisUtils.deletePattern(`floors:*`);
 
             return res.json(apiResponse(messageResponse.UPDATE_CONTRACT_SUCCESS, true, snakeToCamel(updatedContract)));
         } catch (e) {
@@ -405,6 +408,9 @@ class ContractController {
 
             // delete all cache
             await RedisUtils.deletePattern(`${CONTRACT_PREFIX}:*`);
+            await RedisUtils.deletePattern(`houses:*`);
+            await RedisUtils.deletePattern(`rooms:*`);
+            await RedisUtils.deletePattern(`floors:*`);
 
             res.json(apiResponse(messageResponse.CONTRACT_STATUS_UPDATED_SUCCESS, true));
         } catch (e) {
