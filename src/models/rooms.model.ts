@@ -30,6 +30,7 @@ class Rooms extends Model {
     updatedAt: string;
     renters: Renters[];
     count: number;
+    floorId: string;
 
     static get tableName() {
         return "rooms";
@@ -54,7 +55,7 @@ class Rooms extends Model {
     static get jsonSchema() {
         return {
             type: "object",
-            required: ["floor_id", "name", "created_by"],
+            required: ["name"],
             properties: {
                 id: { type: "string", format: "uuid" },
                 floor_id: { type: "string", format: "uuid" },

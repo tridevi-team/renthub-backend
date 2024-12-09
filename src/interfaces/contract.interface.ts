@@ -47,7 +47,7 @@ export interface RoomContractRequest {
     depositRefundDate: string;
     rentalStartDate: string;
     rentalEndDate: string;
-    room: RoomContractInfo;
+    room: any;
     services: ServiceContractInfo[];
     equipment: EquipmentContractInfo[];
     status: ContractStatus;

@@ -1,6 +1,6 @@
-import { ContractStatus, messageResponse, ServiceTypes } from "@enums";
+import { ContractStatus, messageResponse, NotificationType, ServiceTypes } from "@enums";
 import { ContractRequest, RoomContractRequest } from "@interfaces";
-import { BillService, ContractService, RenterService } from "@services";
+import { BillService, ContractService, NotificationService, RenterService } from "@services";
 import { apiResponse, Exception, RedisUtils, snakeToCamel } from "@utils";
 import { Model } from "objection";
 
@@ -118,6 +118,22 @@ class ContractController {
             );
             trx.commit();
 
+            // send notification to landlord and renters
+            await NotificationService.create({
+                title: "Hợp đồng cho phòng " + room.name + " của " + room.house.name,
+                content: `Hợp đồng thuê phòng ${room.name} đã được tạo bởi ${user.fullName}. Vui lòng kiểm tra thông tin hợp đồng và xác nhận thông tin.`,
+                type: NotificationType.SYSTEM,
+                data: { contractId: newContract.id },
+                recipients: [renterId],
+            });
+
+            await NotificationService.create({
+                title: "Bạn đã tạo thành công hợp đồng cho phòng " + room.name + " của " + room.house.name,
+                content: `Bạn đã tạo thành công hợp đồng thuê phòng ${room.name}. Vui lòng chờ xác nhận từ phía người thuê.`,
+                type: NotificationType.SYSTEM,
+                data: { contractId: newContract.id },
+                recipients: [user.id],
+            });
             // delete all cache
             await RedisUtils.deletePattern(`${CONTRACT_PREFIX}:*`);
 

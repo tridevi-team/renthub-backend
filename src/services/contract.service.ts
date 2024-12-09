@@ -53,12 +53,15 @@ class ContractService {
     }
 
     static async createRoomContract(contract: RoomContractRequest, trx?: TransactionOrKnex) {
+        console.log(
+            "🚀 ~ ContractService ~ createRoomContract ~ contract.roomId, contract.contractId:",
+            contract.roomId,
+            contract.contractId
+        );
         const isValidContract = await this.isValidContract(contract.roomId, contract.contractId);
         if (!isValidContract) {
             throw new ApiException(messageResponse.CONTRACT_NOT_FOUND, 404);
         }
-
-        const room = await RoomService.getRoomById(contract.roomId);
 
         // check contract is exists in range date
         const isExists = await RoomContracts.query()
@@ -84,25 +87,6 @@ class ContractService {
 
         // update room status
         await RoomService.updateStatusByContract(newContract.room.id, newContract.status, newContract.createdBy, trx);
-
-        const user = await UserService.getUserById(newContract.createdBy);
-
-        // send notification to landlord and renters
-        await NotificationService.create({
-            title: "Hợp đồng cho phòng " + room.name + " của " + room.house.name,
-            content: `Hợp đồng thuê phòng ${room.name} đã được tạo bởi ${user.fullName}. Vui lòng kiểm tra thông tin hợp đồng và xác nhận thông tin.`,
-            type: NotificationType.SYSTEM,
-            data: { contractId: newContract.id },
-            recipients: [...newContract.renterIds.split(",")],
-        });
-
-        await NotificationService.create({
-            title: "Bạn đã tạo thành công hợp đồng cho phòng " + room.name + " của " + room.house.name,
-            content: `Hợp đồng thuê phòng ${room.name} đã được tạo bởi ${user.fullName}. Vui lòng chờ xác nhận từ phía người thuê.`,
-            type: NotificationType.SYSTEM,
-            data: { contractId: newContract.id },
-            recipients: [newContract.createdBy],
-        });
 
         return newContract;
     }
@@ -160,6 +144,7 @@ class ContractService {
     }
 
     static async findOneContractTemplate(id: string) {
+        console.log("🚀 ~ ContractService ~ findOneContractTemplate ~ id:", id);
         const contract = await ContractTemplate.query().findById(id);
         if (!contract) {
             throw new ApiException(messageResponse.GET_TEMPLATE_DETAILS_FAIL, 404);
