@@ -59,11 +59,16 @@ class ContractService {
         }
 
         // check contract is exists in range date
-        const isExists = await RoomContracts.query()
-            .where(camelToSnake({ roomId: contract.roomId }))
-            .whereBetween("rental_start_date", [contract.rentalStartDate, contract.rentalEndDate])
-            .orWhereBetween("rental_end_date", [contract.rentalStartDate, contract.rentalEndDate])
-            .whereIn("status", [ContractStatus.ACTIVE, ContractStatus.PENDING]);
+        const isExists = await RoomContracts.query(trx)
+            .where({
+                room_id: contract.roomId,
+            })
+            .andWhere((builder) => {
+                builder
+                    .whereBetween("rental_start_date", [contract.rentalStartDate, contract.rentalEndDate])
+                    .orWhereBetween("rental_end_date", [contract.rentalStartDate, contract.rentalEndDate]);
+            })
+            .whereIn("status", [ContractStatus.ACTIVE, ContractStatus.PENDING, ContractStatus.HOLD]);
 
         const templateDetails = await this.findOneContractTemplate(contract.contractId);
 
