@@ -53,11 +53,6 @@ class ContractService {
     }
 
     static async createRoomContract(contract: RoomContractRequest, trx?: TransactionOrKnex) {
-        console.log(
-            "🚀 ~ ContractService ~ createRoomContract ~ contract.roomId, contract.contractId:",
-            contract.roomId,
-            contract.contractId
-        );
         const isValidContract = await this.isValidContract(contract.roomId, contract.contractId);
         if (!isValidContract) {
             throw new ApiException(messageResponse.CONTRACT_NOT_FOUND, 404);
@@ -82,7 +77,10 @@ class ContractService {
 
         // create room contract
         const newContract = await RoomContracts.query(trx).insert(
-            camelToSnake({ ...contract, content: templateDetails.content })
+            camelToSnake({
+                ...contract,
+                content: templateDetails.content,
+            })
         );
 
         // update room status

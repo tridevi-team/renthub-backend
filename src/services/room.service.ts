@@ -286,6 +286,8 @@ class RoomService {
             if (latestContract?.status === ContractStatus.EXPIRED) {
                 await room.$query(trx).patch(camelToSnake({ status: RoomStatus.AVAILABLE, updatedBy }));
             }
+        } else if ([ContractStatus.PENDING].includes(status)) {
+            await room.$query(trx).patch(camelToSnake({ status: RoomStatus.PENDING, updatedBy }));
         }
     }
 
