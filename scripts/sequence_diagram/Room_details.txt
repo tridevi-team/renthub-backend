@@ -1,0 +1,32 @@
+title Chi tiết phòng
+
+bottomparticipants 
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn phòng cần xem chi tiết
+activate Landlord
+activate Client
+
+Client -> Backend: Gửi ID phòng cần lấy chi tiết
+activate Backend
+
+activate Database
+Backend -> Database: Truy vấn lấy chi tiết phòng
+
+Database --> Backend: Trả về bản ghi chi tiết phòng
+deactivate Database
+
+alt Có dữ liệu
+    Backend --> Client: Trả về thông tin chi tiết phòng
+    Client --> Landlord: Hiển thị thông tin chi tiết phòng
+else Không có dữ liệu
+    Backend --> Client: Thông báo không tìm thấy dữ liệu
+end
+
+deactivate Backend
+deactivate Client
+deactivate Landlord

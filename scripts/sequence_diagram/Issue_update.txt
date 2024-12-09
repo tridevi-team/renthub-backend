@@ -1,0 +1,52 @@
+title Cập nhật trạng thái vấn đề
+
+bottomparticipants 
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Truy cập trang quản lý vấn đề
+
+activate Landlord
+activate Client
+
+Client -> Landlord: Hiển thị danh sách vấn đề
+
+Landlord -> Client: Chọn vấn đề cần cập nhật trạng thái
+
+Client -> Landlord: Hiển thị chi form chỉnh sửa trạng thái
+
+Landlord -> Client: Chọn trạng thái cần cập nhật và lưu
+
+Client -> Client: Validate thông tin
+
+alt Dữ liệu sai
+  Client -> Landlord: Thông báo dữ liệu không đúng
+else Dữ liệu đúng
+  Client -> Backend: Gửi dữ liệu cần cập nhật
+  
+  activate Backend
+  
+  Backend -> Database: Gửi thông tin cần cập nhật
+  
+  activate Database
+  
+  Database -> Database: Lưu lại trạng thái vào CSDL
+  
+  Database --> Backend: Xác nhận lưu thành công\nGửi thông tin đã cập nhật
+  
+  deactivate Database
+  
+  Backend -> Backend: Gửi thông báo tới người tạo vấn đề
+  
+  Backend --> Client: Gửi dữ liệu sau khi cập nhật
+  
+  Client --> Landlord: Thông báo cập nhật thành công
+
+end
+
+deactivate Landlord
+deactivate Client
+deactivate Backend

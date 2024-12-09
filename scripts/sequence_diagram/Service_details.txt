@@ -1,0 +1,33 @@
+title Xem chi tiết dịch vụ
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn dịch vụ cần xem chi tiết
+activate Landlord
+activate Client
+
+Client -> Backend: Gửi ID dịch vụ cần xem
+activate Backend
+
+Backend -> Backend: Kiểm tra quyền
+activate Database
+Backend -> Database: Truy vấn chi tiết dịch vụ
+Database --> Backend: Trả về thông tin chi tiết dịch vụ
+deactivate Database
+
+alt Có dữ liệu
+    Backend --> Client: Gửi thông tin chi tiết dịch vụ
+    Client --> Landlord: Hiển thị thông tin chi tiết dịch vụ
+else Không có dữ liệu
+    Backend --> Client: Thông báo không tìm thấy dịch vụ
+    Client --> Landlord: Hiển thị thông báo lỗi
+end
+
+deactivate Backend
+deactivate Client
+deactivate Landlord

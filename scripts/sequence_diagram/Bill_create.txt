@@ -1,0 +1,39 @@
+title Tạo hóa đơn
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn các phòng cần tạo hóa đơn\n(Ở trạng thái RENTED)
+activate Landlord
+activate Client
+
+Client --> Client: Hiển thị form nhập thông tin
+Landlord -> Client: Nhập các chỉ số của dịch vụ
+
+Client -> Client: Kiểm tra validate input
+alt Thông tin hợp lệ
+    Client -> Backend: Gửi thông tin hóa đơn mới
+    activate Backend
+
+    Backend -> Backend: Kiểm tra quyền
+    alt Quyền hợp lệ
+        activate Database
+        Backend -> Database: Thêm danh sách hóa đơn mới vào cơ sở dữ liệu
+        Database --> Backend: Xác nhận danh sách hóa đơn được tạo
+        Backend --> Client: Thông báo tạo danh sách hóa đơn thành công
+        Client --> Landlord: Hiển thị thông báo thành công
+    else Quyền không hợp lệ
+        Backend --> Client: Thông báo lỗi quyền truy cập
+        Client --> Landlord: Hiển thị thông báo thất bại
+    end
+    deactivate Backend
+    deactivate Database
+else Thông tin không hợp lệ
+    Client --> Landlord: Hiển thị thông báo lỗi validate
+end
+
+deactivate Client
+deactivate Landlord

@@ -39,3 +39,8 @@ else Trùng lặp
   Backend --> Client: Hiển thị thông báo phòng đã tồn tại
   Client --> Landlord: Thông báo phòng đã tồn tại
 end
+
+deactivate Landlord
+deactivate Client
+deactivate Backend
+deactivate Database

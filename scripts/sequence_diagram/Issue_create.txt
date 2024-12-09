@@ -1,0 +1,49 @@
+title Tạo vấn đề
+
+bottomparticipants 
+
+actor Renter
+entity Client
+entity Backend
+database Database
+
+Renter -> Client: Chọn thiết bị cần báo cáo vấn đề
+
+activate Renter
+activate Client
+
+Client --> Renter: Hiển thị form nhập vấn đề
+
+Renter -> Client: Nhập thông tin (tiêu đề, nội dung, ảnh, ...)
+
+Client -> Client: Validate thông tin
+
+alt Thông tin không hợp lệ
+  Client -> Renter: Thông báo tới người dùng
+else Thông tin hợp lệ
+  Client -> Backend: Thực hiện tải ảnh lên máy chủ
+  
+  activate Backend
+  
+  Backend -> Backend: Lưu trữ lại tệp đính kèm
+  
+  Backend -> Client: Trả về danh sách link tệp đính kèm
+  
+  Client -> Backend: Gửi thông tin về vấn đề (bao gồm ảnh, video, file,...)
+  
+  Backend -> Database: Lưu trữ vào CSDL
+  
+  activate Database
+  
+  Database --> Backend: Xác nhận lưu thành công
+  
+  deactivate Database
+  
+  Backend --> Client: Thông báo tới người dùng
+  
+  Client --> Renter: Thông báo tạo vấn đề thành công
+end
+
+deactivate Renter
+deactivate Client
+deactivate Backend

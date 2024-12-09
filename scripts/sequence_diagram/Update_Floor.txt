@@ -54,3 +54,8 @@ else Tên tầng trùng lặp
   Client --> Landlord: Thông báo tên tầng đã tồn tại
 
 end
+
+deactivate Landlord
+deactivate Client
+deactivate Backend
+deactivate Database

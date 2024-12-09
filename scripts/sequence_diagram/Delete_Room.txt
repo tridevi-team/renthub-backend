@@ -33,3 +33,8 @@ else Có ràng buộc
   Backend --> Client: Hiển thị thông báo không thể xóa phòng
   Client --> Landlord: Hiển thị thông báo lỗi
 end
+
+deactivate Landlord
+deactivate Client
+deactivate Backend
+deactivate Database

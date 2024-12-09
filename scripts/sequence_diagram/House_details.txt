@@ -1,0 +1,33 @@
+title Chi tiết nhà
+
+bottomparticipants 
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn nhà cần xem chi tiết
+activate Landlord
+activate Client
+
+Client -> Backend: Gửi ID nhà cần lấy chi tiết
+activate Backend
+
+Backend -> Backend: Kiểm tra quyền
+activate Database
+Backend -> Database: Truy vấn lấy chi tiết nhà
+
+Database --> Backend: Trả về bản ghi chi tiết nhà
+deactivate Database
+
+alt Có dữ liệu
+    Backend --> Client: Trả về thông tin chi tiết nhà
+    Client --> Landlord: Hiển thị thông tin chi tiết nhà
+else Không có dữ liệu
+    Backend --> Client: Thông báo không tìm thấy dữ liệu
+    deactivate Backend
+end
+
+deactivate Client
+deactivate Landlord

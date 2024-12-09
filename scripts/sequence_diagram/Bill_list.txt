@@ -1,0 +1,33 @@
+title Xem danh sách hóa đơn
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn màn hình danh sách hóa đơn
+activate Landlord
+activate Client
+
+Client -> Backend: Gửi yêu cầu lấy danh sách hóa đơn (kèm bộ lọc nếu có)
+activate Backend
+
+Backend -> Backend: Kiểm tra quyền
+activate Database
+Backend -> Database: Truy vấn danh sách hóa đơn (áp dụng bộ lọc)
+Database --> Backend: Trả về danh sách hóa đơn
+deactivate Database
+
+alt Có dữ liệu
+    Backend --> Client: Gửi danh sách hóa đơn
+    Client --> Landlord: Hiển thị danh sách hóa đơn
+else Không có dữ liệu
+    Backend --> Client: Thông báo danh sách rỗng
+    Client --> Landlord: Hiển thị bảng trống
+end
+
+deactivate Backend
+deactivate Client
+deactivate Landlord

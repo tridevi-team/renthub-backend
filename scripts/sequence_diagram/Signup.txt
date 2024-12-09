@@ -1,0 +1,55 @@
+title Đăng ký tài khoản
+
+bottomparticipants
+
+actor User
+entity Client
+entity Backend
+database Database
+
+User -> Client: Yêu cầu hiển thị form đăng ký
+activate User
+activate Client
+
+Client -> Client: Hiển thị form đăng ký
+User -> Client: Nhập thông tin đăng ký
+Client -> Client: Validate thông tin
+alt Thông tin hợp lệ
+    Client -> Backend: Gửi thông tin đăng ký
+    activate Backend
+    Backend -> Database: Kiểm tra tài khoản đã tồn tại
+    activate Database
+    Database --> Backend: Trả về kết quả kiểm tra
+    alt Tài khoản tồn tại
+        Backend --> Client: Thông báo tài khoản đã tồn tại
+        Client --> User: Hiển thị lỗi "Tài khoản đã tồn tại"
+    else Tài khoản không tồn tại
+        Backend -> Database: Tạo tài khoản mới
+        Database --> Backend: Xác nhận tạo tài khoản thành công
+        Backend --> Client: Gửi mã xác nhận đăng ký
+        Client --> User: Hiển thị thông báo "Đã gửi mã xác nhận"
+    end
+    deactivate Backend
+else Thông tin không hợp lệ
+    Client --> User: Hiển thị lỗi validate
+end
+
+User -> Client: Nhập mã xác nhận đăng ký
+Client -> Backend: Gửi mã xác nhận để kiểm tra
+activate Backend
+
+Backend -> Backend: Kiểm tra mã xác nhận
+alt Mã xác nhận đúng
+    Backend -> Database: Xác thực tài khoản
+    Database --> Backend: Xác nhận tài khoản đã được kích hoạt
+    deactivate Database
+    Backend --> Client: Thông báo xác thực thành công
+    Client --> User: Hiển thị thông báo "Đăng ký thành công"
+else Mã xác nhận sai
+    Backend --> Client: Thông báo lỗi mã xác nhận
+    Client --> User: Hiển thị lỗi "Mã xác nhận không đúng, yêu cầu nhập lại"
+end
+
+deactivate Backend
+deactivate Client
+deactivate User
