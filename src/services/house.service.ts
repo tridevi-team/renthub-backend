@@ -95,47 +95,56 @@ class HouseService {
             pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
         } = data || {};
 
-        let query = Houses.query()
-            .join("house_floors as floors", "floors.house_id", "houses.id")
-            .join("rooms", "floors.id", "rooms.floor_id");
+        console.time("search");
 
-        // Filter
+        let query = Houses.query()
+            .select(
+                "houses.id as id",
+                "houses.name as name",
+                "houses.address as address",
+                "houses.description as description",
+                "houses.collection_cycle as collection_cycle",
+                raw("COUNT(DISTINCT rooms.id) as num_of_rooms"),
+                raw("MIN(rooms.price) as min_price"),
+                raw("MAX(rooms.price) as max_price"),
+                raw("MIN(rooms.room_area) as min_room_area"),
+                raw("MAX(rooms.room_area) as max_room_area"),
+                // Subquery to get 1 image for each room
+                raw(`(
+                SELECT image_url
+                FROM room_images
+                WHERE room_images.room_id = rooms.id
+                ORDER BY room_images.created_at ASC
+                LIMIT 1
+            ) as thumbnail`)
+            )
+            .innerJoin("house_floors as floors", "floors.house_id", "houses.id")
+            .innerJoin("rooms", "floors.id", "rooms.floor_id")
+            .groupBy("houses.id");
+
+        // Apply filters
         query = filterHandler(query, filter);
 
-        // Sort
+        // Apply sorting
         query = sortingHandler(query, sort);
 
-        query
-            .select(
-                raw("houses.id as id"),
-                raw("houses.name as name"),
-                raw("houses.address as address"),
-                raw("houses.description as description"),
-                raw("houses.collection_cycle as collection_cycle"),
-                raw("MIN(max_renters) as min_renters"),
-                raw("MAX(max_renters) as max_renters"),
-                raw("MIN(price) as min_price"),
-                raw("MAX(price) as max_price"),
-                raw("COUNT(`rooms`.`id`) as num_of_rooms"),
-                raw("MIN(`rooms`.`room_area`) as min_room_area"),
-                raw("MAX(`rooms`.`room_area`) as max_room_area"),
-                raw(
-                    "(SELECT room_images.image_url FROM room_images WHERE room_images.room_id = `rooms`.id ORDER BY RAND() LIMIT 1) as thumbnail"
-                )
-            )
-            .groupBy("houses.id", "houses.name", "houses.address", "houses.description");
-
+        // Handle pagination
         const totalQuery = query.clone();
         const total = await totalQuery.resultSize();
         const totalPages = Math.ceil(total / pageSize);
 
-        if (page === -1 && pageSize === -1) await query.page(0, total);
-        else await query.page(page - 1, pageSize);
+        if (page !== -1 && pageSize !== -1) {
+            await query.page(page - 1, pageSize);
+        } else {
+            await query.page(0, total); // Fetch all records
+        }
 
         const fetchData = await query;
 
+        console.timeEnd("search");
+
         return {
-            ...fetchData,
+            data: fetchData,
             total,
             page,
             pageCount: totalPages,
