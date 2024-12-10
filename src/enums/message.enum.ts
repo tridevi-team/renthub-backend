@@ -192,6 +192,8 @@ enum messageResponse {
     UPDATE_SIGNUP_RECORD_SUCCESS = "Signup record updated successfully",
     GET_SIGNUP_RECORD_SUCCESS = "Signup record retrieved successfully",
     SIGNUP_RECORD_NOT_FOUND = "Signup record not found",
+    EXTEND_CONTRACT_SUCCESS = "Contract extended successfully",
+    CONTRACT_STATUS_EXPIRED_ONLY = "Status can only be EXPIRED to extend contract",
 }
 
 export default messageResponse;

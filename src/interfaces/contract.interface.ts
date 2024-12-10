@@ -43,8 +43,8 @@ export interface RoomContractRequest {
     depositAmount: number;
     depositStatus: DepositStatus;
     depositDate: string;
-    depositRefund: number;
-    depositRefundDate: string;
+    depositRefund?: number;
+    depositRefundDate?: string;
     rentalStartDate: string;
     rentalEndDate: string;
     room: any;
@@ -73,4 +73,15 @@ export interface RoomContractUpdateRequest {
     equipment?: EquipmentContractInfo[];
     status?: ContractStatus;
     updatedBy: string;
+}
+
+export interface RoomContractExtend {
+    contractId: string;
+    rentalStartDate: string;
+    rentalEndDate: string;
+    room?: any;
+    services?: any;
+    equipment?: any;
+    landlord?: Information;
+    renter?: Information;
 }

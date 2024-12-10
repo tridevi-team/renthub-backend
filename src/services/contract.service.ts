@@ -3,6 +3,7 @@ import {
     ContractRequest,
     ContractUpdateRequest,
     Filter,
+    RoomContractExtend,
     RoomContractRequest,
     RoomContractUpdateRequest,
 } from "@interfaces";
@@ -560,6 +561,38 @@ class ContractService {
         });
 
         return await this.findOneRoomContract(id);
+    }
+
+    static async extendContract(data: RoomContractExtend, actionBy: string, trx: TransactionOrKnex) {
+        const contract = await ContractService.findOneRoomContract(data.contractId);
+
+        if (contract.status !== ContractStatus.EXPIRED) {
+            throw new ApiException(messageResponse.CONTRACT_STATUS_EXPIRED_ONLY, 423);
+        }
+
+        const newData: RoomContractRequest = {
+            roomId: contract.roomId,
+            contractId: contract.contractId,
+            landlord: data.landlord ?? contract.landlord,
+            renter: data.renter ?? contract.renter,
+            renterIds: contract.renterIds,
+            content: contract.content,
+            rentalStartDate: data.rentalStartDate,
+            rentalEndDate: data.rentalEndDate,
+            depositAmount: contract.depositAmount,
+            depositStatus: contract.depositStatus,
+            depositDate: contract.depositDate,
+            room: data.room ?? contract.room,
+            services: data.services ?? contract.services,
+            equipment: data.equipment ?? contract.equipment,
+            createdBy: actionBy,
+            updatedBy: actionBy,
+            status: ContractStatus.PENDING,
+        };
+
+        const newContract = await this.createRoomContract(newData, trx);
+
+        return newContract;
     }
 
     static async deleteContractTemplate(id: string, deletedBy: string) {

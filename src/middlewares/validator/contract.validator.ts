@@ -241,6 +241,16 @@ const updateContractStatus = [
     check("note").optional().isString().withMessage("Note must be a string"),
 ];
 
+const extendContract = [
+    check("landlord").optional().isObject().withMessage("Landlord is required"),
+    check("renter").optional().isObject().withMessage("Renter is required"),
+    check("rentalStartDate").isDate().withMessage("Rental Start Date is required"),
+    check("rentalEndDate").isDate().withMessage("Rental End Date is required"),
+    check("room").optional().isObject().withMessage("Room is required"),
+    check("services").optional().isArray().withMessage("Services must be an array"),
+    check("equipment").optional().isArray().withMessage("Equipment must be an array"),
+];
+
 const contractId = [check("contractId").isString().withMessage("Contract ID is required")];
 
 const templateId = [check("templateId").isString().withMessage("Template ID is required")];
@@ -251,6 +261,7 @@ const contractValidator = {
     createRoomContract,
     updateRoomContract,
     updateContractStatus,
+    extendContract,
     contractId,
     templateId,
 };

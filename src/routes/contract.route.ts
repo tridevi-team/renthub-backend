@@ -121,4 +121,14 @@ contractRoute.get(
     ContractController.getLatestRoomContract
 );
 
+contractRoute.post(
+    "/:contractId/extend",
+    authentication,
+    contractValidator.contractId,
+    handleErrors,
+    contractValidator.extendContract,
+    handleErrors,
+    ContractController.extendContract
+);
+
 export default contractRoute;

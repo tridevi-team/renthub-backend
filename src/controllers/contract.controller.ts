@@ -418,6 +418,61 @@ class ContractController {
         }
     }
 
+    static async extendContract(req, res) {
+        const { contractId } = req.params;
+        const { room, rentalStartDate, rentalEndDate, services, equipment, landlord, renter } = req.body;
+        const user = req.user;
+
+        const trx = await Model.startTransaction();
+
+        try {
+            await ContractService.extendContract(
+                {
+                    contractId,
+                    rentalStartDate: rentalStartDate,
+                    rentalEndDate: rentalEndDate,
+                    room: room,
+                    services: services,
+                    equipment: equipment,
+                    landlord: landlord,
+                    renter: renter,
+                },
+                user.id,
+                trx
+            );
+
+            trx.commit();
+
+            // send notification to landlord and renters
+            await NotificationService.create({
+                title: "Gia hạn hợp đồng " + room.name + ", " + room.house.name,
+                content: `Hợp đồng thuê phòng ${room.name} đã được gia hạn bởi ${user.fullName}. Vui lòng kiểm tra thông tin hợp đồng và xác nhận thông lại tin.`,
+                type: NotificationType.SYSTEM,
+                data: { contractId: contractId },
+                recipients: [renter.id],
+            });
+
+            await NotificationService.create({
+                title: "Bạn đã gia hạn hợp đồng " + room.name + ", " + room.house.name,
+                content: `Bạn đã gia hạn hợp đồng thuê phòng ${room.name}. Vui lòng chờ xác nhận từ phía người thuê.`,
+                type: NotificationType.SYSTEM,
+                data: { contractId: contractId },
+                recipients: [user.id],
+            });
+
+            // delete all cache
+            await RedisUtils.deletePattern(`${CONTRACT_PREFIX}:*`);
+            await RedisUtils.deletePattern(`houses:*`);
+            await RedisUtils.deletePattern(`rooms:*`);
+            await RedisUtils.deletePattern(`floors:*`);
+
+            return res.json(apiResponse(messageResponse.EXTEND_CONTRACT_SUCCESS, true));
+        } catch (error) {
+            trx.rollback();
+            Exception.handle(error, req, res);
+        }
+    }
+
     static async deleteContractTemplate(req, res) {
         const user = req.user;
         const { templateId } = req.params;
