@@ -154,6 +154,13 @@ class UserController {
         try {
             const verifyCode = String(Math.floor(1000 + Math.random() * 9000));
             await MailService.sendVerificationMail(email, verifyCode);
+            console.log(verifyCode);
+
+            // set redis
+            const redis = await redisClient;
+            await redis.set(`verify-account:${email}`, verifyCode);
+            await redis.expire(`verify-account:${email}`, parseInt(process.env.REDIS_EXPIRE_TIME || "300"));
+
             return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_VERIFY_ACCOUNT, true, {}));
         } catch (err) {
             Exception.handle(err, req, res);

@@ -191,7 +191,7 @@ class UserService {
         } else if (user.verify) {
             throw new ApiException(messageResponse.ACCOUNT_PREVIOUSLY_VERIFIED, 409);
         } else if (code !== String(data.verifyCode)) {
-            throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 401);
+            throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 400);
         }
         await redis.del(`verify-account:${data.email}`);
         await user.$query().patch({ verify: true });

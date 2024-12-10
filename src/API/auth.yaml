@@ -529,18 +529,13 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/VerifyAccountSuccess"
                 "400":
-                    description: Input data is invalid
+                    description: Input data is invalid or verification code is incorrect
                     content:
                         application/json:
                             schema:
-                                $ref: "#/components/schemas/ValidationError"
-
-                "401":
-                    description: Verification code is incorrect
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/InvalidVerificationCode"
+                                oneOf:
+                                    - $ref: "#/components/schemas/ValidationError"
+                                    - $ref: "#/components/schemas/InvalidVerificationCode"
 
                 "404":
                     description: User not found
