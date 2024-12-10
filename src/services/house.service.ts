@@ -108,7 +108,8 @@ class HouseService {
                 raw("MAX(rooms.price) as max_price"),
                 raw("MIN(rooms.room_area) as min_room_area"),
                 raw("MAX(rooms.room_area) as max_room_area"),
-                // Subquery to get 1 image for each room
+                raw("MIN(rooms.max_renters) as min_renters"),
+                raw("MAX(rooms.max_renters) as max_renters"),
                 raw(`(
                 SELECT image_url
                 FROM room_images
