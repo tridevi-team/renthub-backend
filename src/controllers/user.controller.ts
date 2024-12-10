@@ -154,7 +154,6 @@ class UserController {
         try {
             const verifyCode = String(Math.floor(1000 + Math.random() * 9000));
             await MailService.sendVerificationMail(email, verifyCode);
-            console.log(verifyCode);
 
             // set redis
             const redis = await redisClient;
