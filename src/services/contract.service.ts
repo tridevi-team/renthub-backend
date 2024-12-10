@@ -10,7 +10,7 @@ import {
 import { ContractKeyReplace, ContractTemplate, RoomContracts, Rooms } from "@models";
 import { HouseService, NotificationService, RenterService, RoomService, UserService } from "@services";
 import { ApiException, camelToSnake, currentDateTime, filterHandler, snakeToCamel, sortingHandler } from "@utils";
-import { TransactionOrKnex } from "objection";
+import { Model, TransactionOrKnex } from "objection";
 import { default as VNnum2words } from "vn-num2words";
 
 class ContractService {
@@ -631,10 +631,19 @@ class ContractService {
     }
 
     static async updateExpiredContract() {
-        const contracts = await RoomContracts.query().where("rental_end_date", "<", currentDateTime());
+        const trx = await Model.startTransaction();
+        try {
+            const contracts = await RoomContracts.query().where("rental_end_date", "<", currentDateTime());
+            const systemUser = await UserService.getSystemUser();
+            for (const contract of contracts) {
+                await RoomContracts.query(trx).patchAndFetchById(contract.id, { status: ContractStatus.EXPIRED });
+                await RoomService.updateStatusByContract(contract.roomId, ContractStatus.EXPIRED, systemUser.id, trx);
+            }
 
-        for (const contract of contracts) {
-            await RoomContracts.query().patchAndFetchById(contract.id, { status: ContractStatus.EXPIRED });
+            await trx.commit();
+        } catch (error) {
+            await trx.rollback();
+            console.error("Error when update expired contract", error);
         }
     }
 }
