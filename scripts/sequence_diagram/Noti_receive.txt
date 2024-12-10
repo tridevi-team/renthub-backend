@@ -1,0 +1,54 @@
+title Nhận thông báo
+
+bottomparticipants
+
+actor Renter
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+note over Renter,Landlord: Người dùng tạo hành động gây ra thông báo
+
+Renter->Client: Truy cập trang tạo vấn đề
+
+activate Renter
+activate Client
+
+Client->Renter: Hiển thị form nhập vấn đề
+
+Renter->Client: Nhập thông tin
+
+Client->Client: Validate thông tin
+
+alt Thông tin không chính xác
+
+  Client->Renter:Thông báo lỗi
+
+else Thông tin chính xác
+ Client->Backend: Gửi thông tin
+ 
+ activate Backend
+ 
+ Backend->Database: Gửi thông tin
+ 
+ activate Database
+ 
+ Database->Database: Lưu thông tin
+ 
+ Database-->Backend: Thông báo đã được lưu
+ 
+ deactivate Database
+ 
+ Backend->Client: Gửi thông báo qua Firebase
+ 
+ deactivate Backend
+ 
+ Client->Landlord: Hiển thị thông báo
+ 
+ activate Landlord
+ 
+ deactivate Client
+end
+
+deactivate Landlord

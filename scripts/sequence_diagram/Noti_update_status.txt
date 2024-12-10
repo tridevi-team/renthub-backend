@@ -1,0 +1,60 @@
+title Cập nhật trạng thái thông báo
+
+bottomparticipants
+
+actor Renter
+entity Client
+entity Backend
+database Database
+
+note over Renter, Client: Người dùng tương tác với thông báo để cập nhật trạng thái
+
+Renter->Client: Truy cập trang thông báo
+
+activate Renter
+activate Client
+
+Client->Backend: Yêu cầu lấy danh sách thông báo
+
+activate Backend
+
+Backend->Database: Lấy danh sách thông báo
+
+activate Database
+
+Database->Database: Truy vấn thông báo và trạng thái hiện tại
+
+Database-->Backend: Trả về danh sách thông báo
+
+deactivate Database
+
+Backend-->Client: Trả về danh sách thông báo
+
+deactivate Backend
+
+Client->Renter: Hiển thị danh sách thông báo
+
+Renter->Client: Tương tác với thông báo (đọc/xác nhận)
+
+Client->Backend: Gửi yêu cầu cập nhật trạng thái thông báo
+
+activate Backend
+
+Backend->Database: Cập nhật trạng thái thông báo
+
+activate Database
+
+Database->Database: Lưu trạng thái mới
+
+Database-->Backend: Trạng thái đã được cập nhật
+
+deactivate Database
+
+Backend-->Client: Xác nhận trạng thái được cập nhật
+
+deactivate Backend
+
+Client->Renter: Hiển thị trạng thái cập nhật
+
+deactivate Client
+deactivate Renter

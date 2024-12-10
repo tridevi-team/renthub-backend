@@ -1,0 +1,44 @@
+title Xác nhận hợp đồng
+
+bottomparticipants 
+
+actor Renter
+entity Client
+entity Backend
+database Database
+
+[->Renter: Nhận thông báo\ntạo hợp đồng 
+
+activate Renter
+
+Renter -> Client: Truy cập màn hình quản lý hợp đồng
+
+activate Client
+
+Client --> Renter: Hiển thị chi tiết hợp đồng
+
+Renter -> Client: Xác nhận/ hủy hợp đồng
+
+Client -> Backend: Gửi thông tin xác nhận
+
+activate Backend
+
+Backend -> Database: Cập nhật trạng thái hợp đồng
+
+activate Database
+
+Database -> Database: Cập nhật trạng thái hợp đồng và phòng
+
+deactivate Database
+
+Database --> Backend: Trả về dữ liệu sau khi cập nhật
+
+Backend --> Client: Thông báo thành công
+
+deactivate Backend
+
+Client --> Renter: Thông báo thành công
+
+deactivate Client
+
+deactivate Renter

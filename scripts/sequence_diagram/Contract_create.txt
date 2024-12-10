@@ -1,0 +1,33 @@
+title Tạo mới hợp đồng
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn phòng cần tạo hợp đồng
+
+activate Landlord
+
+activate Client
+
+Client -> Landlord: Hiển thị form nhập thông tin hợp đồng
+
+Landlord -> Client: Chọn mẫu hợp đồng và điền các thông tin người thuê
+
+Client -> Backend: Xác thực thông tin
+
+activate Backend
+
+Backend -> Database:  Lưu trữ vào CSDL
+
+activate Database
+
+Database -> Backend: Trả về dữ liệu đã tạo
+
+deactivate Backend
+
+Backend -> Client: Thông báo tạo thành công
+
+Client -> Landlord: Thông báo tạo thành công, chờ người thuê xác nhận
+
