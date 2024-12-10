@@ -629,6 +629,14 @@ class ContractService {
 
         return contract;
     }
+
+    static async updateExpiredContract() {
+        const contracts = await RoomContracts.query().where("rental_end_date", "<", currentDateTime());
+
+        for (const contract of contracts) {
+            await RoomContracts.query().patchAndFetchById(contract.id, { status: ContractStatus.EXPIRED });
+        }
+    }
 }
 
 export default ContractService;
