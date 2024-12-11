@@ -1,11 +1,32 @@
+import { ContractStatus, EPagination, messageResponse, RoomStatus } from "@enums";
+import type { Filter, Room, RoomServiceInfo } from "@interfaces";
+import { Bills, Renters, RoomContracts, RoomImages, Rooms, RoomServices, Services } from "@models";
+import { ContractService, HouseService } from "@services";
+import { ApiException, camelToSnake, filterHandler, sortingHandler } from "@utils";
 import { ForeignKeyViolationError, TransactionOrKnex } from "objection";
-import { ContractStatus, EPagination, messageResponse, RoomStatus } from "../enums";
-import type { Filter, Room, RoomServiceInfo } from "../interfaces";
-import { Renters, RoomContracts, RoomImages, Rooms, RoomServices, Services } from "../models";
-import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
-import HouseService from "./house.service";
 
 class RoomService {
+    static async getServicesInContract(roomId: string) {
+        const latestContract = await ContractService.getLatestContract(roomId);
+        const latestBill = await Bills.query()
+            .where("room_id", roomId)
+            .withGraphJoined("details")
+            .orderBy("created_at", "desc")
+            .first();
+
+        return latestContract.services.map((service) => {
+            const serviceDetail = latestBill?.details.find((detail) => detail.serviceId === service.id);
+            return {
+                id: service.id,
+                name: service.name,
+                quantity: service.quantity,
+                unitPrice: service.unitPrice,
+                type: service.type,
+                oldValue: serviceDetail?.newValue || 0,
+            };
+        });
+    }
+
     static async create(houseId: string, data: Room, trx?: TransactionOrKnex) {
         try {
             // check if room exists

@@ -21,6 +21,16 @@ class RoomController {
     //     }
     // }
 
+    static async getServicesInContract(req, res) {
+        const { roomId } = req.params;
+        try {
+            const services = await RoomService.getServicesInContract(roomId);
+            return res.json(apiResponse(messageResponse.GET_SERVICES_LIST_SUCCESS, true, services));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
     static async createRoom(req, res) {
         const { houseId } = req.params;
         const { name, floor, roomArea, maxRenters, price, services, images, description, status } = req.body;
@@ -52,7 +62,7 @@ class RoomController {
                 // delete cache
                 await RedisUtils.deletePattern(`${prefix}:*`);
                 await RedisUtils.deletePattern(`houses:getRooms_*`);
-                
+
                 await trx.commit();
 
                 const room = await RoomService.getRoomById(newRoom.id);

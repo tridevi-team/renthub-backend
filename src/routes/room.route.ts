@@ -23,6 +23,9 @@ roomRouter.post(
 //     handleErrors,
 //     RoomController.getRoomsByHouse
 // );
+
+roomRouter.get("/:roomId/latest-services", roomsValidator.roomId, handleErrors, RoomController.getServicesInContract);
+
 roomRouter.get("/:roomId/details", roomsValidator.roomId, handleErrors, RoomController.getRoomDetails);
 
 roomRouter.put(
