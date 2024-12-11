@@ -103,7 +103,7 @@ class BillController {
                 if (!isRoomExists) throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
 
                 // check if services exist in room
-                const roomServices = await RoomService.getRoomServices(bill.roomId);
+                const roomServices = await RoomService.getServicesInContract(bill.roomId);
                 const serviceIds = roomServices.map((service) => service.id);
                 const isServicesExists = bill.services.every((service) => serviceIds.includes(service.id));
                 if (!isServicesExists) throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
@@ -296,7 +296,9 @@ class BillController {
                     const trx = await Bills.startTransaction(); // Start a new transaction
                     try {
                         if (service.serviceId) {
-                            const serviceDetails = await HouseService.getServiceDetails(service.serviceId);
+                            const services = await RoomService.getServicesInContract(billDetails.roomId);
+                            const serviceDetails = services.find((item) => item.id === service.serviceId);
+                            if (!serviceDetails) throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
 
                             switch (serviceDetails.type) {
                                 case ServiceTypes.WATER_CONSUMPTION:
