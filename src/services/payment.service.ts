@@ -12,6 +12,12 @@ class PaymentService {
         return details;
     }
 
+    static async getDefaultPaymentMethod(houseId: string) {
+        const payment = await PaymentMethods.query().where("house_id", houseId).orderBy("is_default", "desc").first();
+
+        return payment;
+    }
+
     static async getByHouse(houseId: string, filterData?: Filter) {
         const {
             filter = [],

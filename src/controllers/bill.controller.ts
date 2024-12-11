@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { Model } from "objection";
 import { BillStatus, messageResponse, NotificationType, ServiceTypes } from "../enums";
 import { BillInfo } from "../interfaces";
 import { Bills } from "../models";
@@ -90,10 +91,11 @@ class BillController {
         const { data } = req.body;
         const user = req.user;
 
-        const trx = await Bills.startTransaction(); // Start a new transaction
+        const trx = await Model.startTransaction(); // Start a new transaction
 
         try {
             const houseDetails = await HouseService.getHouseById(houseId);
+            const paymentMethod = await PaymentService.getDefaultPaymentMethod(houseId);
 
             for (const bill of data) {
                 // check if room exists in house
@@ -112,6 +114,7 @@ class BillController {
 
                 const bilLData: BillInfo = {
                     roomId: bill.roomId,
+                    paymentMethodId: paymentMethod?.id,
                     title: bill.title || defaultTitle,
                     date: {
                         from: bill.startDate,
@@ -225,7 +228,7 @@ class BillController {
                     })
                 );
 
-                if (data.paymentMethodId) {
+                if (paymentMethod) {
                     const orderCode = (new Date().getTime() + Math.floor(Math.random() * 1000)).toString();
                     const description = `${roomDetails.name} ${houseDetails.name}`;
                     const expiredDate = Math.floor(
@@ -240,7 +243,7 @@ class BillController {
                         cancelUrl: CANCEL_URL,
                         expiredAt: expiredDate,
                     };
-                    await PaymentService.createPaymentLink(data.paymentMethodId, payosRequest);
+                    await PaymentService.createPaymentLink(paymentMethod.id, payosRequest);
 
                     await newBill.$query(trx).patch(camelToSnake({ amount: total, payosRequest }));
                 }
