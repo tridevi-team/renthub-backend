@@ -17,7 +17,7 @@ const swaggerDefinition = {
             description: "Local server",
         },
         {
-            url: `https://sandbox.tmquang.com`,
+            url: `http://sandbox.tmquang.com`,
             description: "Sandbox server",
         },
         {
