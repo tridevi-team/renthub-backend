@@ -17,7 +17,7 @@ const paymentRequest = [
 ];
 
 const paymentId = [
-    check("paymentMethodId")
+    check("paymentId")
         .notEmpty()
         .withMessage("Payment method id is required")
         .isUUID()

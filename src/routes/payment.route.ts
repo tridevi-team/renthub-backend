@@ -27,7 +27,7 @@ paymentMethodRouter.get(
 );
 
 paymentMethodRouter.get(
-    "/:paymentMethodId/details",
+    "/:paymentId/details",
     authentication,
     authorize(Module.PAYMENT, Action.READ),
     paymentMethodValidator.paymentId,
@@ -36,7 +36,7 @@ paymentMethodRouter.get(
 );
 
 paymentMethodRouter.put(
-    "/:paymentMethodId/update",
+    "/:paymentId/update",
     authentication,
     authorize(Module.PAYMENT, Action.UPDATE),
     paymentMethodValidator.paymentId,
@@ -47,7 +47,7 @@ paymentMethodRouter.put(
 );
 
 paymentMethodRouter.patch(
-    "/:paymentMethodId/update-status",
+    "/:paymentId/update-status",
     authentication,
     authorize(Module.PAYMENT, Action.UPDATE),
     paymentMethodValidator.paymentId,
@@ -58,7 +58,7 @@ paymentMethodRouter.patch(
 );
 
 paymentMethodRouter.patch(
-    "/:paymentMethodId/change-default",
+    "/:paymentId/change-default",
     authentication,
     authorize(Module.PAYMENT, Action.UPDATE),
     paymentMethodValidator.paymentId,
@@ -69,7 +69,7 @@ paymentMethodRouter.patch(
 );
 
 paymentMethodRouter.delete(
-    "/:paymentMethodId/delete",
+    "/:paymentId/delete",
     authentication,
     authorize(Module.PAYMENT, Action.DELETE),
     paymentMethodValidator.paymentId,

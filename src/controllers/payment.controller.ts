@@ -91,8 +91,8 @@ class PaymentController {
     }
 
     static async getPaymentMethodDetails(req, res) {
-        const { paymentMethodId } = req.params;
-        const cacheKey = RedisUtils.generateCacheKeyWithId(prefix, paymentMethodId, "details");
+        const { paymentId } = req.params;
+        const cacheKey = RedisUtils.generateCacheKeyWithId(prefix, paymentId, "details");
         try {
             const isExistsCache = await RedisUtils.isExists(cacheKey);
             if (isExistsCache) {
@@ -102,7 +102,7 @@ class PaymentController {
                 );
             }
 
-            const paymentMethod = await PaymentService.getById(paymentMethodId);
+            const paymentMethod = await PaymentService.getById(paymentId);
 
             // set cache
             await RedisUtils.setAddMember(cacheKey, JSON.stringify(paymentMethod));
@@ -114,7 +114,7 @@ class PaymentController {
     }
 
     static async updatePaymentMethod(req, res) {
-        const { paymentMethodId } = req.params;
+        const { paymentId } = req.params;
         const {
             houseId,
             name,
@@ -128,7 +128,7 @@ class PaymentController {
             payosChecksum,
         } = req.body;
         try {
-            const paymentMethod = await PaymentService.updatePaymentMethod(paymentMethodId, {
+            const paymentMethod = await PaymentService.updatePaymentMethod(paymentId, {
                 houseId,
                 name,
                 accountNumber,
@@ -159,11 +159,11 @@ class PaymentController {
     }
 
     static async deletePaymentMethod(req, res) {
-        const { paymentMethodId } = req.params;
+        const { paymentId } = req.params;
         const user = req.user;
         const cacheKey = `${prefix}:*`;
         try {
-            await PaymentService.deletePaymentMethod(user.id, paymentMethodId);
+            await PaymentService.deletePaymentMethod(user.id, paymentId);
 
             // delete cache
             await RedisUtils.deletePattern(cacheKey);
@@ -175,13 +175,13 @@ class PaymentController {
     }
 
     static async updateStatus(req, res) {
-        const { paymentMethodId } = req.params;
+        const { paymentId } = req.params;
         const { status } = req.body;
         const user = req.user;
         const cacheKey = `${prefix}:*`;
 
         try {
-            const paymentMethod = await PaymentService.updateStatus(user.id, paymentMethodId, status);
+            const paymentMethod = await PaymentService.updateStatus(user.id, paymentId, status);
 
             // delete cache
             await RedisUtils.deletePattern(cacheKey);
@@ -193,13 +193,13 @@ class PaymentController {
     }
 
     static async updateDefault(req, res) {
-        const { paymentMethodId } = req.params;
+        const { paymentId } = req.params;
         const { isDefault } = req.body;
         const user = req.user;
         const cacheKey = `${prefix}:*`;
 
         try {
-            const paymentMethod = await PaymentService.updateDefault(user.id, paymentMethodId, isDefault);
+            const paymentMethod = await PaymentService.updateDefault(user.id, paymentId, isDefault);
 
             // delete cache
             await RedisUtils.deletePattern(cacheKey);
