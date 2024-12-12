@@ -11,7 +11,7 @@ import {
     RenterService,
     RoomService,
 } from "../services";
-import { ApiException, apiResponse, camelToSnake, Exception, RedisUtils } from "../utils";
+import { ApiException, apiResponse, camelToSnake, Exception, RedisUtils, removeVietnameseTones } from "../utils";
 
 const { RETURN_URL, CANCEL_URL } = process.env;
 const prefix = "bills";
@@ -230,7 +230,7 @@ class BillController {
 
                 if (paymentMethod) {
                     const orderCode = (new Date().getTime() + Math.floor(Math.random() * 1000)).toString();
-                    const description = `${roomDetails.name} ${houseDetails.name}`;
+                    const description = removeVietnameseTones(`${roomDetails.name} ${houseDetails.name}`).slice(0, 20);
                     const expiredDate = Math.floor(
                         (new Date().getTime() + houseDetails.numCollectDays * 24 * 60 * 60 * 1000) / 1000
                     );
