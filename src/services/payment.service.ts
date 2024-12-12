@@ -89,6 +89,13 @@ class PaymentService {
         if (checkPaymentMethod) throw new ApiException(messageResponse.PAYMENT_METHOD_ALREADY_EXISTS, 400);
 
         await paymentMethod.$query().patch(camelToSnake(data));
+
+        if (data.isDefault)
+            await PaymentMethods.query()
+                .where("house_id", paymentMethod.houseId)
+                .andWhere("id", "<>", id)
+                .patch({ is_default: false });
+
         return paymentMethod;
     }
 
