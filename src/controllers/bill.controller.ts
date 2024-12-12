@@ -236,7 +236,8 @@ class BillController {
                     );
                     const payosRequest = {
                         orderCode,
-                        amount: total,
+                        // amount: 5000 || total,
+                        amount: 5000,
                         description,
                         items,
                         returnUrl: RETURN_URL,
