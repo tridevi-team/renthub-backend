@@ -262,7 +262,7 @@ class UserController {
 
             const aToken = await RedisUtils.getString(redisKey);
 
-            if (aToken !== accessToken) throw new ApiException(messageResponse.TOKEN_INVALID, 401);
+            if (aToken !== accessToken) throw new ApiException(messageResponse.TOKEN_INVALID, 406);
 
             // sign new access token
             const user: Renters | Users = isRenter
