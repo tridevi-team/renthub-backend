@@ -84,6 +84,7 @@ class PaymentService {
             .where("house_id", paymentMethod.houseId)
             .where("name", data.name)
             .where("account_number", data.accountNumber)
+            .where("bank_name", data.bankName)
             .where("id", "<>", id)
             .first();
         if (checkPaymentMethod) throw new ApiException(messageResponse.PAYMENT_METHOD_ALREADY_EXISTS, 400);

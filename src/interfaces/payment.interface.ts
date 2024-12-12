@@ -2,7 +2,7 @@ export interface PaymentRequest {
     houseId: string;
     name: string;
     accountNumber: string;
-    bankName?: string;
+    bankName: string;
     status: string;
     description?: string;
     isDefault: boolean;
