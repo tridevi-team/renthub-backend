@@ -290,7 +290,7 @@ class ContractService {
                 (houseConfigs?.houseAddress.city || null) || "Unknown";
 
         // {{RENTER_ADDRESS}}
-        keyData["RENTAL_HOUSE_ADDRESS"] =
+        keyData["RENTER_ADDRESS"] =
             (contract.renter?.address.street || null) +
                 ", " +
                 (contract.renter?.address.ward || null) +
