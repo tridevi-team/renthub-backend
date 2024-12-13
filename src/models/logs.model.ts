@@ -31,14 +31,7 @@ class Logs extends Model {
     static get jsonSchema() {
         return {
             type: "object",
-            required: [
-                "client_ip",
-                "endpoint",
-                "request_method",
-                "status_code",
-                "user_agent",
-                "response_time_ms",
-            ],
+            required: [],
             properties: {
                 id: { type: "string", format: "uuid" },
                 request_timestamp: { type: "string", format: "date-time" },

@@ -202,10 +202,12 @@ class ContractService {
             .select("rooms.*")
             .first();
 
-        const contract = await RoomContracts.query().findById(contractId);
+        let contract = await RoomContracts.query().findById(contractId);
         if (!contract) {
             throw new ApiException(messageResponse.CONTRACT_NOT_FOUND, 404);
         }
+
+        contract = snakeToCamel(contract) as RoomContracts;
 
         if (!room) {
             throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
@@ -231,7 +233,7 @@ class ContractService {
         keyData["CONTRACT_MONTHS"] = months;
 
         // {{CURRENT_DATE}}
-        keyData["CURRENT_DATE"] = currentDateTime();
+        keyData["CURRENT_DATE"] = contract.createdAt;
 
         // {{DEPOSIT_AMOUNT}}
         keyData["DEPOSIT_AMOUNT"] = contract?.depositAmount;
@@ -332,6 +334,7 @@ class ContractService {
         // {{USE_SERVICES}}
         keyData["USE_SERVICES"] = snakeToCamel(contract.services) || "Không";
 
+        // {{EQUIPMENT_LIST}}
         keyData["EQUIPMENT_LIST"] = snakeToCamel(contract.equipment) || "Không";
 
         return keyData;

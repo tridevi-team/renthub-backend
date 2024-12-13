@@ -6,7 +6,6 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import "dotenv/config";
 import express from "express";
-import { rateLimit } from "express-rate-limit";
 import useragent from "express-useragent";
 import path from "path";
 import { serve, setup } from "swagger-ui-express";
@@ -40,11 +39,11 @@ const app = express();
 app.use("/api-docs", serve, setup(swaggerSpec));
 
 // rate limit config
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10000,
-    message: "Too many requests from this IP, please try again after 15 minutes",
-});
+// const limiter = rateLimit({
+//     windowMs: 15 * 60 * 1000,
+//     max: 10000,
+//     message: "Too many requests from this IP, please try again after 15 minutes",
+// });
 
 app.use(requestLogger);
 // app.use(limiter);
