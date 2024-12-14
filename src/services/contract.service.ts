@@ -95,9 +95,9 @@ class ContractService {
         return newContract;
     }
 
-    static async addRenterAccess(roomId: string, renterId: string) {
+    static async addRenterAccess(roomId: string, renterId: string, trx?: TransactionOrKnex) {
         // add to latest contract of room
-        const room = await RoomContracts.query().findOne({ roomId }).orderBy("created_at", "desc");
+        const room = await RoomContracts.query(trx).findOne({ roomId }).orderBy("created_at", "desc");
 
         if (!room) {
             throw new ApiException(messageResponse.CONTRACT_NOT_FOUND, 404);
@@ -105,7 +105,7 @@ class ContractService {
 
         const renterIds = room.renterIds + "," + renterId;
 
-        await room.$query().patch({ renterIds });
+        await room.$query(trx).patch({ renterIds });
 
         return await this.findOneRoomContract(room.id);
     }

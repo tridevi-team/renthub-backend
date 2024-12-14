@@ -3,6 +3,7 @@ import { EPagination, messageResponse } from "../enums";
 import type { Filter, Renter } from "../interfaces";
 import { Houses, Renters } from "../models";
 import { ApiException, camelToSnake, filterHandler, jwtToken, sortingHandler } from "../utils";
+import ContractService from "./contract.service";
 
 class RenterService {
     static async create(data: Renter, trx?: TransactionOrKnex) {
@@ -23,6 +24,12 @@ class RenterService {
 
             // create renter
             const newRenter = await Renters.query(trx).insert(camelToSnake(data));
+
+            // add to latest contract
+            const latestContract = data.roomId ? await ContractService.getLatestContract(newRenter.roomId) : null;
+            if (latestContract) {
+                await ContractService.addRenterAccess(newRenter.roomId, newRenter.id, trx);
+            }
             return newRenter;
         } catch (err) {
             if (err instanceof ConstraintViolationError) {
