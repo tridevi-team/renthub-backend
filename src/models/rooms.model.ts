@@ -164,6 +164,22 @@ class Rooms extends Model {
                 );
             },
 
+            basicWithRenterCount(builder) {
+                builder
+                    .select(
+                        "rooms.id",
+                        "rooms.name",
+                        "max_renters",
+                        "room_area",
+                        "price",
+                        "rooms.description",
+                        "rooms.status"
+                    )
+                    .count("renters.id as countRenters")
+                    .leftJoin("renters", "rooms.id", "renters.room_id")
+                    .groupBy("rooms.id");
+            },
+
             onlyName(builder) {
                 builder.select("name");
             },

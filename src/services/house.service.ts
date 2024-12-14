@@ -191,7 +191,7 @@ class HouseService {
             return fetchData;
         }
 
-        query = query.modify("basic");
+        query = query.modify("basicWithRenterCount");
 
         // Filter
         query = filterHandler(query, filter);

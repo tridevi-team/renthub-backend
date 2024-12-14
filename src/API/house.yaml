@@ -585,6 +585,9 @@ components:
                             maxRenters:
                                 type: integer
                                 example: 6
+                            countRenters:
+                                type: integer
+                                example: 2
                             roomArea:
                                 type: number
                                 example: 25
