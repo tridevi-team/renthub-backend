@@ -177,7 +177,7 @@ class HouseService {
         return details;
     }
 
-    static async getHouseWithRooms(houseId: string, filterData?: Filter, isSelect: boolean = false) {
+    static async getHouseWithRooms(houseId: string, filterData?: Filter, isSelect?: boolean) {
         const { filter = [], sort = [], pagination } = filterData || {};
         const { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = pagination || {};
 
@@ -185,7 +185,7 @@ class HouseService {
             .join("house_floors as floors", "floors.id", "rooms.floor_id")
             .where("floors.house_id", houseId);
 
-        if (isSelect === true) {
+        if (isSelect == true) {
             query = query.select("rooms.id", "rooms.name").orderBy("rooms.name", "ASC");
             const fetchData = await query;
             return fetchData;
