@@ -2,20 +2,22 @@ import { ContractStatus, EPagination, messageResponse, RoomStatus } from "@enums
 import type { Filter, Room, RoomServiceInfo } from "@interfaces";
 import { Bills, Renters, RoomContracts, RoomImages, Rooms, RoomServices, Services } from "@models";
 import { HouseService } from "@services";
-import { ApiException, camelToSnake, filterHandler, sortingHandler } from "@utils";
+import { ApiException, camelToSnake, filterHandler, snakeToCamel, sortingHandler } from "@utils";
 import { ForeignKeyViolationError, TransactionOrKnex } from "objection";
 
 class RoomService {
     static async getServicesInContract(roomId: string) {
-        const latestContract = await await RoomContracts.query()
+        let latestContract = await RoomContracts.query()
             .where({ room_id: roomId })
             .orderBy("created_at", "desc")
             .first();
-        const latestBill = await Bills.query()
+        latestContract = snakeToCamel(latestContract as RoomContracts) as RoomContracts;
+        let latestBill = await Bills.query()
             .where("room_id", roomId)
             .withGraphJoined("details")
             .orderBy("created_at", "desc")
             .first();
+        latestBill = snakeToCamel(latestBill as Bills) as Bills;
 
         return latestContract
             ? latestContract.services.map((service) => {
