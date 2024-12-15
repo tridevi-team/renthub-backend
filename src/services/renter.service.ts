@@ -205,9 +205,9 @@ class RenterService {
         // Clone the query to get the total count
         const total = await query.clone().resultSize();
 
-        if (total === 0) {
-            throw new ApiException(messageResponse.NO_RENTERS_FOUND, 404);
-        }
+        // if (total === 0) {
+        //     throw new ApiException(messageResponse.NO_RENTERS_FOUND, 404);
+        // }
 
         const totalPages = Math.ceil(total / pageSize);
         let renters;

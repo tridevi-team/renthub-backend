@@ -104,9 +104,10 @@ class BillController {
 
                 // check if services exist in room
                 const roomServices = await RoomService.getServicesInContract(bill.roomId);
-                const serviceIds = roomServices.map((service) => service.id);
-                const isServicesExists = bill.services.every((service) => serviceIds.includes(service.id));
-                if (!isServicesExists) throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
+                // console.log("🚀 ~ BillController ~ createBill ~ roomServices:", roomServices)
+                // const serviceIds = roomServices.map((service) => service.id);
+                // const isServicesExists = bill.services.every((service) => serviceIds.includes(service.id));
+                // if (!isServicesExists) throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
 
                 const billMonth = new Date(bill.endDate).getMonth() + 1;
                 const billYear = new Date(bill.endDate).getFullYear();
@@ -136,13 +137,15 @@ class BillController {
                 const items: {
                     name: string;
                     unitPrice: number;
-                    amount: number;
-                    totalPrice: number;
+                    quantity: number;
+                    price: number;
                 }[] = [];
 
                 const detailsData = {
                     billId: newBill.id,
                     name: "Tiền phòng",
+                    oldValue: 0,
+                    newValue: 0,
                     amount: 1,
                     unitPrice: roomPrice,
                     totalPrice: roomPrice,
@@ -159,8 +162,8 @@ class BillController {
                 items.push({
                     name: "Tiền phòng",
                     unitPrice: roomPrice,
-                    amount: 1,
-                    totalPrice: roomPrice,
+                    quantity: 1,
+                    price: roomPrice,
                 });
                 const detailsList: {
                     billId: string;
@@ -217,19 +220,28 @@ class BillController {
                         items.push({
                             name: service.name,
                             unitPrice: service.unitPrice,
-                            amount,
-                            totalPrice,
+                            quantity: amount,
+                            price: totalPrice,
                         });
 
                         detailsList.push(detailsData);
 
                         total += detailsData.totalPrice;
+                        console.log(detailsData);
+
                         await BillService.createDetails(newBill.id, detailsData, trx);
                     })
                 );
 
                 if (paymentMethod) {
-                    const orderCode = (new Date().getTime() + Math.floor(Math.random() * 1000)).toString();
+                    // Generate orderCode
+                    let orderCode: number | string = Date.now() * 1000 + Math.floor(Math.random() * 1000);
+
+                    // Ensure orderCode does not exceed the maximum safe integer
+                    if (orderCode > 9007199254740991) {
+                        orderCode = 9007199254740991;
+                    }
+
                     const description = removeVietnameseTones(`${roomDetails.name} ${houseDetails.name}`).slice(0, 20);
                     const expiredDate = Math.floor(
                         (new Date().getTime() + houseDetails.numCollectDays * 24 * 60 * 60 * 1000) / 1000
