@@ -1,7 +1,7 @@
 import { ConstraintViolationError, TransactionOrKnex } from "objection";
 import { EPagination, messageResponse } from "../enums";
 import type { Filter, Renter } from "../interfaces";
-import { Houses, Renters } from "../models";
+import { Houses, Renters, RoomContracts } from "../models";
 import { ApiException, camelToSnake, filterHandler, jwtToken, sortingHandler } from "../utils";
 import ContractService from "./contract.service";
 
@@ -14,6 +14,7 @@ class RenterService {
                 .orWhere("email", "=", data.email || "")
                 .orWhere("phone_number", "=", data.phoneNumber || "")
                 .first();
+
             if (renter) {
                 throw new ApiException(messageResponse.RENTER_ALREADY_EXISTS, 409);
             }
@@ -26,7 +27,12 @@ class RenterService {
             const newRenter = await Renters.query(trx).insert(camelToSnake(data));
 
             // add to latest contract
-            const latestContract = data.roomId ? await ContractService.getLatestContract(newRenter.roomId) : null;
+            const latestContract = data.roomId
+                ? await RoomContracts.query()
+                      .where({ room_id: newRenter.room_id })
+                      .orderBy("created_at", "desc")
+                      .first()
+                : null;
             if (latestContract) {
                 await ContractService.addRenterAccess(newRenter.roomId, newRenter.id, trx);
             }

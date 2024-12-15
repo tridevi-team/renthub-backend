@@ -92,6 +92,7 @@ class ContractController {
                 );
                 renterId = newRenter.id;
             }
+
             // create room contract
             const newContract = await ContractService.createRoomContract(
                 {
@@ -107,7 +108,7 @@ class ContractController {
                     depositRefundDate,
                     rentalStartDate,
                     rentalEndDate,
-                    room,
+                    room: { ...room, description: "." },
                     services,
                     equipment,
                     status: status || ContractStatus.PENDING,
