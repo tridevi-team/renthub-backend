@@ -1,5 +1,6 @@
-import { mkdirSync } from "fs";
+import { mkdirSync, renameSync } from "fs";
 import multer from "multer";
+import sharp from "sharp";
 
 const FILE_SIZE_LIMIT = 25 * 1024 * 1024; // 25MB
 
@@ -27,4 +28,30 @@ const uploadMiddleware = multer({
     },
 }).array("files");
 
-export default uploadMiddleware;
+const compressImage = async (filePath: string) => {
+    const tempPath = `${filePath}-temp`; // Temporary path for the compressed image
+    await sharp(filePath)
+        .resize(1024, 1024, { fit: "inside" }) // Resize for optimization
+        .jpeg({ quality: 80 }) // Compress with JPEG quality
+        .toFile(tempPath); // Save to the temporary file
+    renameSync(tempPath, filePath); // Replace the original file with the compressed file
+};
+
+const compressMiddleware = async (req, _res, next) => {
+    try {
+        if (req.files) {
+            for (const file of req.files) {
+                const ext = file.mimetype.split("/")[1];
+                if (["jpeg", "jpg", "png", "webp"].includes(ext)) {
+                    await compressImage(file.path);
+                }
+            }
+        }
+        next();
+    } catch (error) {
+        console.error("Image compression failed:", error);
+        next(error);
+    }
+};
+
+export { compressMiddleware, uploadMiddleware };
