@@ -394,7 +394,7 @@ class ContractController {
     static async updateRoomContractStatus(req, res) {
         const user = req.user;
         const { contractId } = req.params;
-        const { status, note } = req.body;
+        const { status, depositStatus, depositDate, note } = req.body;
         const isApp = req.isApp;
         try {
             if (user.role === "renter" || isApp) {
@@ -404,7 +404,15 @@ class ContractController {
             } else {
                 // this is for landlord
                 console.log("[LANDLORD]" + user.fullName + " is updating contract status");
-                await ContractService.updateRoomContractStatusByLandlord(contractId, status, user.id);
+                if (depositStatus) {
+                    await ContractService.updateDepositStatus(
+                        contractId,
+                        { depositStatus: depositStatus, depositDate: depositDate },
+                        user.id
+                    );
+                } else {
+                    await ContractService.updateRoomContractStatusByLandlord(contractId, status, user.id);
+                }
             }
 
             // delete all cache

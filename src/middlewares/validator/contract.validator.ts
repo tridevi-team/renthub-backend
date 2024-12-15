@@ -234,10 +234,16 @@ const updateRoomContract = [
 
 const updateContractStatus = [
     check("status")
+        .optional()
         .isString()
-        .withMessage("Status is required")
+        .withMessage("Status must be a string")
         .isIn([...Object.values(ApprovalStatus), ...Object.values(ContractStatus)])
         .withMessage("Status is invalid"),
+    check("depositStatus")
+        .optional()
+        .isString()
+        .withMessage("Deposit Status must be a string")
+        .isIn(Object.values(DepositStatus)),
     check("note").optional().isString().withMessage("Note must be a string"),
 ];
 

@@ -1,4 +1,4 @@
-import { ApprovalStatus, ContractStatus, messageResponse, NotificationType } from "@enums";
+import { ApprovalStatus, ContractStatus, DepositStatus, messageResponse, NotificationType } from "@enums";
 import {
     ContractRequest,
     ContractUpdateRequest,
@@ -512,6 +512,23 @@ class ContractService {
             type: NotificationType.SYSTEM,
             data: { contractId: updatedContract.id },
             recipients: [...updatedContract.renterIds.split(",")],
+        });
+
+        return await this.findOneRoomContract(id);
+    }
+    static async updateDepositStatus(
+        id: string,
+        data: { depositStatus: DepositStatus; depositDate: string },
+        actionBy: string
+    ) {
+        // if (details.status !== ContractStatus.ACTIVE) {
+        //     throw new ApiException(messageResponse.CONTRACT_STATUS_ACTIVE_ONLY, 423);
+        // }
+
+        await RoomContracts.query().patchAndFetchById(id, {
+            depositStatus: data.depositStatus,
+            depositDate: data.depositDate || currentDateTime(),
+            updatedBy: actionBy,
         });
 
         return await this.findOneRoomContract(id);
