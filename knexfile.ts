@@ -17,7 +17,7 @@ const config: { [key: string]: Knex.Config } = {
             database: process.env.MYSQL_DATABASE_DEV,
         },
         pool: {
-            min: 2,
+            min: 0,
             max: 10,
         },
         migrations: {

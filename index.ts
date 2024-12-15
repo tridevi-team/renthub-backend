@@ -1,5 +1,5 @@
 "use strict";
-import { Logs } from "@models";
+// import { Logs } from "@models";
 import { contractCronJob } from "@utils";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
@@ -101,37 +101,37 @@ app.use(queryParser);
 
 app.use(StaticRoute);
 
-app.use(async (req, res, next) => {
-    const start = process.hrtime(); // Start timer
-    const password = req.body.password;
-    if (req.body.password) {
-        req.body.password = "********";
-    }
+// app.use(async (req, res, next) => {
+//     const start = process.hrtime(); // Start timer
+//     const password = req.body.password;
+//     if (req.body.password) {
+//         req.body.password = "********";
+//     }
 
-    // Overriding res.send to capture response body
-    const originalSend = res.send;
-    res.send = async function (body) {
-        const diff = process.hrtime(start); // End timer
-        const responseTime: number = parseFloat((diff[0] * 1e3 + diff[1] / 1e6).toFixed(2)); // Convert to milliseconds
+//     // Overriding res.send to capture response body
+//     const originalSend = res.send;
+//     res.send = async function (body) {
+//         const diff = process.hrtime(start); // End timer
+//         const responseTime: number = parseFloat((diff[0] * 1e3 + diff[1] / 1e6).toFixed(2)); // Convert to milliseconds
 
-        await Logs.query().insert({
-            request_method: req.method,
-            endpoint: req.originalUrl,
-            request_payload: req.body,
-            response_payload: typeof body === "string" ? JSON.parse(body) : body,
-            client_ip: req.ip,
-            status_code: res.statusCode,
-            response_time_ms: responseTime,
-            user_agent: req.useragent.source,
-            referrer: req.headers.referer,
-        });
+// await Logs.query().insert({
+//     request_method: req.method,
+//     endpoint: req.originalUrl,
+//     request_payload: req.body,
+//     response_payload: typeof body === "string" ? JSON.parse(body) : body,
+//     client_ip: req.ip,
+//     status_code: res.statusCode,
+//     response_time_ms: responseTime,
+//     user_agent: req.useragent.source,
+//     referrer: req.headers.referer,
+// });
 
-        return originalSend.call(this, body); // Send the response
-    };
+//         return originalSend.call(this, body); // Send the response
+//     };
 
-    if (req.body.password) req.body.password = password;
-    next();
-});
+//     if (req.body.password) req.body.password = password;
+//     next();
+// });
 
 app.use("/auth", AuthRoute);
 app.use("/users", authentication, UserRoute);
