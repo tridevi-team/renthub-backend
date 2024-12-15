@@ -19,19 +19,60 @@ class RoomService {
             .first();
         latestBill = snakeToCamel(latestBill as Bills) as Bills;
 
-        return latestContract
-            ? latestContract.services.map((service) => {
-                  const serviceDetail = latestBill?.details.find((detail) => detail.serviceId === service.id);
-                  return {
-                      id: service.id,
-                      name: service.name,
-                      quantity: service.quantity,
-                      unitPrice: service.unitPrice,
-                      type: service.type,
-                      oldValue: serviceDetail?.newValue || 0,
-                  };
-              })
-            : [];
+        // return latestContract
+        //     ? latestContract.services.map((service) => {
+        //           const serviceDetail = latestBill?.details.find((detail) => detail.serviceId === service.id);
+        //           return {
+        //               id: service.id,
+        //               name: service.name,
+        //               quantity: service.quantity,
+        //               unitPrice: service.unitPrice,
+        //               type: service.type,
+        //               oldValue: serviceDetail?.newValue || 0,
+        //           };
+        //       })
+        //     : ;
+        const services: {
+            id: string;
+            name: string;
+            quantity: number;
+            unitPrice: number;
+            type: string;
+            oldValue: number;
+        }[] = [];
+
+        if (latestContract.services) {
+            latestContract.services.map((service) => {
+                const serviceDetail = latestBill?.details.find((detail) => detail.serviceId === service.id);
+                services.push({
+                    id: service.id,
+                    name: service.name,
+                    quantity: service.quantity,
+                    unitPrice: service.unitPrice,
+                    type: service.type,
+                    oldValue: serviceDetail?.newValue || 0,
+                });
+            });
+        } else {
+            const data = await RoomServices.query()
+                .where({
+                    room_id: roomId,
+                })
+                .modify("basic");
+
+            data.map((service) => {
+                services.push({
+                    id: service.serviceId,
+                    name: service.service.name,
+                    quantity: service.quantity,
+                    unitPrice: service.service.unitPrice,
+                    type: service.service.type,
+                    oldValue: 0,
+                });
+            });
+        }
+
+        return services;
     }
 
     static async create(houseId: string, data: Room, trx?: TransactionOrKnex) {

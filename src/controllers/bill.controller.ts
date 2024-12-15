@@ -227,7 +227,6 @@ class BillController {
                         detailsList.push(detailsData);
 
                         total += detailsData.totalPrice;
-                        console.log(detailsData);
 
                         await BillService.createDetails(newBill.id, detailsData, trx);
                     })
