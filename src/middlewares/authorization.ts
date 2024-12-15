@@ -38,12 +38,11 @@ const renterAuthorize = (module: Module, action: Action) => {
     return async (req, _res, next) => {
         const user = req.user;
         const { roomId, houseId, equipmentId, paymentId, issueId, renterId, serviceId, floorId, billId } = req.params;
-        console.log("🚀 ~ return ~ issueId:", issueId);
         // get renter location (houseId, floorId, roomId)
 
         const renterRoomId = user.roomId;
 
-        if (renterRoomId !== roomId && roomId) {
+        if (roomId && renterRoomId !== roomId) {
             throw new ApiException(messageResponse.UNAUTHORIZED, 403);
         } else if (![Module.RENTER, Module.ISSUE].includes(module) && action !== Action.READ) {
             throw new ApiException(messageResponse.UNAUTHORIZED, 403);
