@@ -99,7 +99,7 @@ class UserService {
         const user = await Users.query().findOne({ email: username }).orWhere({ phone_number: username });
 
         if (!user) {
-            throw new ApiException(messageResponse.INVALID_USER, 401);
+            throw new ApiException(messageResponse.INVALID_USER, 400);
         } else if (!user.verify) {
             throw new ApiException(messageResponse.VERIFY_ACCOUNT_FIRST, 403);
         } else if (!user.status) {
@@ -107,7 +107,7 @@ class UserService {
         } else {
             const checkPassword = await bcrypt.compare(password, user.password);
             if (!checkPassword) {
-                throw new ApiException(messageResponse.INVALID_USER, 401);
+                throw new ApiException(messageResponse.INVALID_USER, 400);
             }
         }
 
