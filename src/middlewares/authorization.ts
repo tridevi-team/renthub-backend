@@ -14,9 +14,14 @@ import { ApiException, Exception } from "../utils";
 
 export const authorize = (module: Module, action: Action) => {
     return async (req, res, next) => {
-        const user = req.user;
+        const { user, isApp } = req;
+        let userDetails = user;
         try {
-            if (user.roomId) {
+            if (isApp) {
+                const userData = await RenterService.getByEmail(user.email);
+                userDetails = userData;
+            }
+            if (userDetails.roomId) {
                 console.log("Authorized for renter");
                 await renterAuthorize(module, action)(req, res, next);
             } else {
@@ -33,6 +38,7 @@ const renterAuthorize = (module: Module, action: Action) => {
     return async (req, _res, next) => {
         const user = req.user;
         const { roomId, houseId, equipmentId, paymentId, issueId, renterId, serviceId, floorId, billId } = req.params;
+        console.log("🚀 ~ return ~ issueId:", issueId);
         // get renter location (houseId, floorId, roomId)
 
         const renterRoomId = user.roomId;
