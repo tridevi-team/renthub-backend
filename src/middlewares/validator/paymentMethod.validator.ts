@@ -10,7 +10,7 @@ const paymentRequest = [
     check("bankName").optional().isString().withMessage("Bank name must be a string"),
     check("status").optional().isBoolean().withMessage("Status must be a boolean"),
     check("isDefault").optional().isBoolean().withMessage("Is default must be a boolean"),
-    check("description").optional().isString().withMessage("Description must be a string"),
+    // check("description").optional().isString().withMessage("Description must be a string"),
     check("payosClientId").optional().isString().withMessage("Payos client id must be a string"),
     check("payosApiKey").optional().isString().withMessage("Payos api key must be a string"),
     check("payosChecksum").optional().isString().withMessage("Payos checksum must be a string"),

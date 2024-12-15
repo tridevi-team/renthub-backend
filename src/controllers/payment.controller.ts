@@ -258,7 +258,11 @@ class PaymentController {
             }
 
             const houseDetails = await HouseService.getHouseByRoomId(result.room.id);
-            if (result && result.payment.payosClientId) {
+
+            if (result && result.payment) {
+                if (!result.payment.payosClientId || !result.payment.payosApiKey || !result.payment.payosChecksum) {
+                    return res.json(apiResponse(messageResponse.CREATE_PAYMENT_LINK_SUCCESS, true, { paymentUrl: "" }));
+                }
                 const payos = new PayOS(
                     result.payment.payosClientId,
                     result.payment.payosApiKey,
@@ -375,6 +379,8 @@ class PaymentController {
                     );
                 }
             }
+
+            return res.json(apiResponse(messageResponse.CREATE_PAYMENT_LINK_SUCCESS, true, { paymentUrl: "" }));
         } catch (err) {
             Exception.handle(err, req, res);
         }
