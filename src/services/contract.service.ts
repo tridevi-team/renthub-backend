@@ -219,10 +219,14 @@ class ContractService {
         keyData["COLLECTION_CYCLE"] = houseConfigs.invoiceDate;
 
         //{{CONTRACT_START_DATE}}
-        keyData["CONTRACT_START_DATE"] = contract?.rentalStartDate;
+        keyData["CONTRACT_START_DATE"] = Intl.DateTimeFormat("vi-VN", {
+            dateStyle: "medium",
+        }).format(new Date(contract?.rentalStartDate));
+
+        console.log(Intl.DateTimeFormat("vi-VN").format(new Date(contract?.rentalStartDate)));
 
         // {{CONTRACT_END_DATE}}
-        keyData["CONTRACT_END_DATE"] = contract?.rentalEndDate;
+        keyData["CONTRACT_END_DATE"] = Intl.DateTimeFormat("vi-VN").format(new Date(contract?.rentalEndDate));
 
         // {{CONTRACT_MONTHS}}
         // calculate months based on start date and end date
@@ -233,10 +237,13 @@ class ContractService {
         keyData["CONTRACT_MONTHS"] = months;
 
         // {{CURRENT_DATE}}
-        keyData["CURRENT_DATE"] = contract.createdAt;
+        keyData["CURRENT_DATE"] = Intl.DateTimeFormat("vi-VN").format(new Date(contract.createdAt));
 
         // {{DEPOSIT_AMOUNT}}
-        keyData["DEPOSIT_AMOUNT"] = contract?.depositAmount;
+        keyData["DEPOSIT_AMOUNT"] = Intl.NumberFormat("vi-VN", {
+            style: "currency",
+            currency: "VND",
+        }).format(contract?.depositAmount || 0);
 
         // {{DEPOSIT_AMOUNT_IN_WORDS}}
         keyData["DEPOSIT_AMOUNT_IN_WORDS"] = VNnum2words(contract?.depositAmount);
@@ -287,7 +294,7 @@ class ContractService {
                 ", " +
                 (houseConfigs?.houseAddress.district || null) +
                 ", " +
-                (houseConfigs?.houseAddress.city || null) || "Unknown";
+                (houseConfigs?.houseAddress.city || null) || "...";
 
         // {{RENTER_ADDRESS}}
         keyData["RENTER_ADDRESS"] =
@@ -297,7 +304,7 @@ class ContractService {
                 ", " +
                 (contract.renter?.address.district || null) +
                 ", " +
-                (contract.renter?.address.city || null) || "Unknown";
+                (contract.renter?.address.city || null) || "...";
 
         // {{RENTER_BIRTHDAY}}
         keyData["RENTER_BIRTHDAY"] = contract.renter?.birthday;
@@ -318,7 +325,10 @@ class ContractService {
         keyData["RENTER_PLACE_OF_ISSUE"] = contract.renter?.placeOfIssue;
 
         // {{RENT_COST}}
-        keyData["RENT_COST"] = contract.room?.price;
+        keyData["RENT_COST"] = Intl.NumberFormat("vi-VN", {
+            style: "currency",
+            currency: "VND",
+        }).format(contract.room?.price || 0);
 
         // {{RENTAL_AMOUNT_IN_WORDS}}
         keyData["RENTAL_AMOUNT_IN_WORDS"] = VNnum2words(contract.room?.price || 0);
@@ -332,10 +342,10 @@ class ContractService {
         keyData["SQUARE_METER"] = contract.room?.roomArea || 0;
 
         // {{USE_SERVICES}}
-        keyData["USE_SERVICES"] = snakeToCamel(contract.services) || "Không";
+        keyData["USE_SERVICES"] = snakeToCamel(contract.services) || [];
 
         // {{EQUIPMENT_LIST}}
-        keyData["EQUIPMENT_LIST"] = snakeToCamel(contract.equipment) || "Không";
+        keyData["EQUIPMENT_LIST"] = snakeToCamel(contract.equipment) || [];
 
         return keyData;
     }
