@@ -28,7 +28,7 @@ class RoomService {
             oldValue: number;
         }[] = [];
 
-        if (latestContract.services) {
+        if (latestContract && latestContract.services) {
             services.push({
                 id: "",
                 name: "Tiền phòng",
@@ -69,10 +69,10 @@ class RoomService {
             data.map((service) => {
                 services.push({
                     id: service.serviceId,
-                    name: service.service.name,
+                    name: service.name,
                     quantity: service.quantity,
-                    unitPrice: service.service.unitPrice,
-                    type: service.service.type,
+                    unitPrice: service.unitPrice,
+                    type: service.type,
                     oldValue: 0,
                 });
             });
