@@ -95,8 +95,8 @@ class StatisticalController {
 
                 // Search contract by renterId and roomId
                 const { rentalStartDate, rentalEndDate } = await ContractService.findRangeRentDate(roomId, renterId);
-                let startDate = rentalStartDate;
-                let endDate = rentalEndDate;
+                let startDate: Date | string = rentalStartDate ?? from;
+                let endDate: Date | string = rentalEndDate ?? to;
 
                 console.log("Rental date: ", rentalStartDate, rentalEndDate);
                 console.log("Date range: ", from, to);
@@ -113,10 +113,19 @@ class StatisticalController {
 
                 if (new Date(to) > new Date(rentalEndDate)) {
                     endDate = rentalEndDate;
-                    console.log("End date: ", endDate);
                 } else if (new Date(to) < new Date(rentalStartDate)) {
                     return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {}));
                 }
+
+                // set start date to first day of month and end date to last day of month
+                startDate = new Date(startDate);
+                startDate.setDate(1);
+                startDate = startDate.toISOString().split("T")[0];
+
+                endDate = new Date(endDate);
+                endDate.setMonth(endDate.getMonth() + 1);
+                endDate.setDate(0);
+                endDate = endDate.toISOString().split("T")[0];
 
                 // get data
                 const turnover = await StatisticalService.barChartTurnoverByRoom(roomId, {
