@@ -1,4 +1,4 @@
-import { ContractStatus, EPagination, messageResponse, RoomStatus } from "@enums";
+import { ContractStatus, EPagination, messageResponse, RoomStatus, ServiceTypes } from "@enums";
 import type { Filter, Room, RoomServiceInfo } from "@interfaces";
 import { Bills, Renters, RoomContracts, RoomImages, Rooms, RoomServices, Services } from "@models";
 import { HouseService } from "@services";
@@ -19,21 +19,8 @@ class RoomService {
             .first();
         latestBill = snakeToCamel(latestBill as Bills) as Bills;
 
-        // return latestContract
-        //     ? latestContract.services.map((service) => {
-        //           const serviceDetail = latestBill?.details.find((detail) => detail.serviceId === service.id);
-        //           return {
-        //               id: service.id,
-        //               name: service.name,
-        //               quantity: service.quantity,
-        //               unitPrice: service.unitPrice,
-        //               type: service.type,
-        //               oldValue: serviceDetail?.newValue || 0,
-        //           };
-        //       })
-        //     : ;
         const services: {
-            id: string;
+            id?: string;
             name: string;
             quantity: number;
             unitPrice: number;
@@ -42,6 +29,15 @@ class RoomService {
         }[] = [];
 
         if (latestContract.services) {
+            services.push({
+                id: "",
+                name: "Tiền phòng",
+                quantity: 1,
+                unitPrice: latestContract.room.price,
+                type: ServiceTypes.ROOM,
+                oldValue: 0,
+            });
+
             latestContract.services.map((service) => {
                 const serviceDetail = latestBill?.details.find((detail) => detail.serviceId === service.id);
                 services.push({
@@ -59,6 +55,16 @@ class RoomService {
                     room_id: roomId,
                 })
                 .modify("basic");
+            const roomDetails = await RoomService.getRoomById(roomId);
+
+            services.push({
+                id: "",
+                name: "Tiền phòng",
+                quantity: 1,
+                unitPrice: roomDetails.price,
+                type: ServiceTypes.ROOM,
+                oldValue: 0,
+            });
 
             data.map((service) => {
                 services.push({
