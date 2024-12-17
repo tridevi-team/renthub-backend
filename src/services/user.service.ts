@@ -111,7 +111,7 @@ class UserService {
             }
         }
 
-        const housePermissions = await HouseService.getHouseByUser(user.id);
+        const housePermissions = await HouseService.getHousePermissions(user.id);
         const { accessToken, refreshToken } = await this.generateToken({
             id: user.id,
             email: user.email,

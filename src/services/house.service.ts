@@ -25,6 +25,49 @@ import RoomService from "./room.service";
 const db = getFirestore(firebaseApp);
 
 class HouseService {
+    static async getHousePermissions(userId: string) {
+        const list = Houses.query()
+            .leftJoin("user_roles", "houses.id", "user_roles.house_id")
+            .leftJoin("roles", "user_roles.role_id", "roles.id")
+            .where((builder) => {
+                builder.where("houses.created_by", userId).orWhere("user_roles.user_id", userId);
+            })
+            .select("houses.id", "houses.name", "houses.address", "houses.created_by", "roles.permissions")
+            .groupBy("houses.id", "houses.name", "houses.address", "houses.created_by", "roles.permissions");
+
+        const fetchData = await list;
+
+        const fullPermissions: Permissions = {
+            house: { create: false, read: true, update: true, delete: true },
+            floor: { create: true, read: true, update: true, delete: true },
+            role: { create: true, read: true, update: true, delete: true },
+            room: { create: true, read: true, update: true, delete: true },
+            renter: { create: true, read: true, update: true, delete: true },
+            service: { create: true, read: true, update: true, delete: true },
+            bill: { create: true, read: true, update: true, delete: true },
+            equipment: { create: true, read: true, update: true, delete: true },
+            payment: { create: true, read: true, update: true, delete: true },
+            notification: { create: true, read: true, update: true, delete: true },
+            issue: { create: true, read: true, update: true, delete: true },
+            contract: { create: true, read: true, update: true, delete: true },
+        };
+
+        const uniqueHouses = Array.from(new Set(fetchData.map((house) => house.id))).map((id) => {
+            return fetchData.find((house) => house.id === id);
+        });
+
+        const enhancedList = (uniqueHouses as Houses[]).map((house) => {
+            if (house.created_by === userId) {
+                house.permissions = fullPermissions;
+            }
+            house.permissions =
+                typeof house.permissions === "string" ? JSON.parse(house.permissions) : house.permissions;
+            return house;
+        });
+
+        return enhancedList;
+    }
+
     static async getHouseByUser(userId: string, data?: Filter) {
         const { filter = [], sort = [], pagination } = data || {};
 
@@ -37,32 +80,6 @@ class HouseService {
                 builder.where("houses.created_by", userId).orWhere("user_roles.user_id", userId);
             })
             .select("houses.*", "roles.permissions");
-
-        if (!data) {
-            const fetchData = await list;
-            const fullPermissions: Permissions = {
-                house: { create: false, read: true, update: true, delete: true },
-                floor: { create: true, read: true, update: true, delete: true },
-                role: { create: true, read: true, update: true, delete: true },
-                room: { create: true, read: true, update: true, delete: true },
-                renter: { create: true, read: true, update: true, delete: true },
-                service: { create: true, read: true, update: true, delete: true },
-                bill: { create: true, read: true, update: true, delete: true },
-                equipment: { create: true, read: true, update: true, delete: true },
-                payment: { create: true, read: true, update: true, delete: true },
-                notification: { create: true, read: true, update: true, delete: true },
-                issue: { create: true, read: true, update: true, delete: true },
-                contract: { create: true, read: true, update: true, delete: true },
-            };
-
-            const enhancedList = fetchData.map((house) => {
-                if (house.createdBy === userId) {
-                    house.permissions = fullPermissions;
-                }
-                return house;
-            });
-            return enhancedList;
-        }
 
         // Filter
         list = filterHandler(list, filter);
