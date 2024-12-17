@@ -1,6 +1,6 @@
 import { IssueStatus, messageResponse } from "../enums";
 import IssueService from "../services/issue.service";
-import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
+import { apiResponse, Exception, RedisUtils } from "../utils";
 
 const prefix = "issues";
 
@@ -119,13 +119,13 @@ class IssueController {
     static async updateIssueStatus(req, res) {
         const { issueId } = req.params;
         const { status } = req.body;
-        const { user, isApp } = req;
+        const { user } = req;
         try {
-            if (user.role !== "renter" && !isApp && status === IssueStatus.IN_PROGRESS) {
-                throw new ApiException(messageResponse.PERMISSION_DENIED, 403);
-            }
+            // if (user.role === "renter" && !isApp && status === IssueStatus.IN_PROGRESS) {
+            //     throw new ApiException(messageResponse.PERMISSION_DENIED, 403);
+            // }
 
-            const issue = await IssueService.updateStatus(issueId, status);
+            const issue = await IssueService.updateStatus(issueId, status, user.id);
 
             // delete cache
             const cacheKey = `${prefix}:*`;

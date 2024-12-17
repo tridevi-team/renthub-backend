@@ -184,7 +184,7 @@ class IssueService {
         }
     }
 
-    static async updateStatus(id: string, status: string) {
+    static async updateStatus(id: string, status: string, actionBy: string) {
         const issue = await this.getById(id);
         if (issue.equipmentId) {
             const equipment = await EquipmentService.getById(issue.equipmentId);
@@ -193,17 +193,17 @@ class IssueService {
             }
             if (status === IssueStatus.IN_PROGRESS) {
                 // if issue status is IN_PROGRESS => update equipment status is REPAIRING
-                await EquipmentService.updateStatus(equipment.createdBy, equipment.id, {
+                await EquipmentService.updateStatus(actionBy, equipment.id, {
                     status: EquipmentStatus.REPAIRING,
                 });
             } else if (status === IssueStatus.DONE) {
                 // if issue status is DONE => update equipment status is
-                await EquipmentService.updateStatus(equipment.createdBy, equipment.id, {
+                await EquipmentService.updateStatus(actionBy, equipment.id, {
                     status: EquipmentStatus.NORMAL,
                 });
             }
         }
-        const updated = issue.$query().patchAndFetch({ status });
+        const updated = issue.$query().patchAndFetch({ status, updated_by: actionBy });
 
         return updated;
     }
