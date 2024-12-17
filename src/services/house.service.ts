@@ -57,7 +57,7 @@ class HouseService {
         });
 
         const enhancedList = (uniqueHouses as Houses[]).map((house) => {
-            if (house.created_by === userId) {
+            if (house.createdBy === userId) {
                 house.permissions = fullPermissions;
             }
             house.permissions =
