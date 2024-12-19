@@ -1,5 +1,6 @@
 "use strict";
 
+import "dotenv/config";
 import { JwtPayload } from "jsonwebtoken";
 import redisClient from "../config/redis.config";
 import { messageResponse } from "../enums";
@@ -9,7 +10,7 @@ import { RenterService, UserService } from "../services";
 import MailService from "../services/mail.service";
 import { ApiException, apiResponse, bcrypt, Exception, jwtToken, RedisUtils } from "../utils";
 
-const REDIS_EXPIRE_REFRESH_TOKEN = 604800; // 7 days
+const REDIS_EXPIRE_REFRESH_TOKEN = process.env.REDIS_EXPIRE_REFRESH_TOKEN || 604800; // 7 days
 
 class UserController {
     static async getAllUsers(req, res) {
@@ -88,7 +89,7 @@ class UserController {
             };
 
             const redisKey = `users:${userInfo.id}:${userData.token.refreshToken}`;
-            await RedisUtils.setString(redisKey, userData.token.accessToken, REDIS_EXPIRE_REFRESH_TOKEN);
+            await RedisUtils.setString(redisKey, userData.token.accessToken, Number(REDIS_EXPIRE_REFRESH_TOKEN));
 
             return res.status(200).json(apiResponse(messageResponse.LOGIN_SUCCESS, true, userInfo));
         } catch (err) {
@@ -312,7 +313,7 @@ class UserController {
             jwtToken.verifyRefreshToken(refreshToken);
 
             // check in redis
-            const redisKey = `${isApp ? `renters` : `users`}:${user.id}:${refreshToken}`;
+            const redisKey = `${isApp || user.roomId ? `renters` : `users`}:${user.id}:${refreshToken}`;
             const aToken = await RedisUtils.getString(redisKey);
 
             if (aToken !== accessToken) {

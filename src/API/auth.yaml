@@ -384,8 +384,8 @@ paths:
         post:
             tags: [Auth]
             summary: Refresh token to get new token
-            security:
-                - BearerAuth: []
+            # security:
+            #     - BearerAuth: []
             requestBody:
                 required: true
                 content:

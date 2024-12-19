@@ -1,5 +1,6 @@
 "use strict";
 
+import "dotenv/config";
 import redisConfig from "../config/redis.config";
 import { messageResponse } from "../enums";
 import { FirebaseToken } from "../interfaces";
@@ -9,6 +10,7 @@ import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
 
 const prefix = "renters";
 const cachePattern = `${prefix}:*`;
+const REDIS_EXPIRE_REFRESH_TOKEN = process.env.REDIS_EXPIRE_REFRESH_TOKEN || 86400;
 class RenterController {
     static async addNewRenter(req, res) {
         const { roomId } = req.params;
@@ -272,6 +274,11 @@ class RenterController {
                 email,
                 phoneNumber,
             });
+
+            // save token to redis
+            const redisKey = `renters:${renter.id}:${renter.refreshToken}`;
+            await RedisUtils.setString(redisKey, renter.accessToken, Number(REDIS_EXPIRE_REFRESH_TOKEN));
+
             return res.json(apiResponse(messageResponse.LOGIN_SUCCESS, true, renter));
         } catch (err) {
             Exception.handle(err, req, res);
