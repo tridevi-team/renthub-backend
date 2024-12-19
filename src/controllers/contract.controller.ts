@@ -1,6 +1,7 @@
+import MailService from "@/services/mail.service";
 import { ContractStatus, messageResponse, NotificationType, ServiceTypes } from "@enums";
 import { ContractRequest, RoomContractRequest } from "@interfaces";
-import { BillService, ContractService, NotificationService, RenterService } from "@services";
+import { BillService, ContractService, HouseService, NotificationService, RenterService, RoomService } from "@services";
 import { apiResponse, Exception, RedisUtils, snakeToCamel } from "@utils";
 import { Model } from "objection";
 
@@ -65,6 +66,10 @@ class ContractController {
         const trx = await Model.startTransaction();
 
         try {
+            // get houseId
+            const houseId = await RoomService.getHouseId(roomId);
+            const house = await HouseService.getHouseById(houseId);
+
             let renterId: string | null = null;
             // create renter if not exists
             const isRenterExists = await RenterService.checkCitizenIdExists(renter.citizenId);
@@ -141,6 +146,9 @@ class ContractController {
                 data: { contractId: newContract.id },
                 recipients: [user.id],
             });
+
+            // send mail
+            if (renter.email) await MailService.sendContractCreatedMail(renter.email, house.name, newContract.id);
             // delete all cache
             await RedisUtils.deletePattern(`${CONTRACT_PREFIX}:*`);
             await RedisUtils.deletePattern(`houses:*`);

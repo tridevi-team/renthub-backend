@@ -135,3 +135,34 @@ export const resetPasswordTemplate = (code: string) => `<!DOCTYPE html>
     </table>
 </body>
 </html>`;
+
+export const rentalContractTemplate = (houseName: string) => `<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hợp Đồng Thuê Phòng</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 0; width: 100%; height: 100%; text-align: center;">
+    <table cellpadding="0" cellspacing="0" border="0" align="center" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); margin: 20px auto;">
+        <tr>
+            <td style="background-color: #4e54c8; color: #ffffff; text-align: center; padding: 20px; border-radius: 10px 10px 0 0;">
+                <h1 style="font-size: 24px; margin: 0;">Hợp Đồng Thuê Phòng</h1>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 30px; text-align: center;">
+                <h2 style="font-size: 22px; margin-bottom: 20px;">Thông Báo Tạo Hợp Đồng</h2>
+                <p style="font-size: 16px; margin-bottom: 20px;">Hợp đồng thuê phòng tại nhà <strong>${houseName}</strong> đã được tạo thành công.</p>
+                <p style="font-size: 16px; margin-bottom: 20px;">Vui lòng tải ứng dụng <strong>"Trọ ơi"</strong> và đăng nhập vào hệ thống để xác nhận hợp đồng của bạn.</p>
+                <a href="#" style="display: inline-block; background-color: #4e54c8; color: #ffffff; padding: 12px 30px; font-size: 16px; border-radius: 50px; text-decoration: none;">Tải Ứng Dụng Ngay</a>
+            </td>
+        </tr>
+        <tr>
+            <td style="background-color: #f1f1f1; padding: 15px; text-align: center; border-radius: 0 0 10px 10px;">
+                <p style="font-size: 14px; margin: 0;">Cần hỗ trợ? <a href="#" style="color: #4e54c8; text-decoration: none;">Liên hệ hỗ trợ</a></p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
