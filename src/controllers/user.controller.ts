@@ -246,7 +246,7 @@ class UserController {
     }
 
     static async refreshToken(req, res) {
-        const { refreshToken } = req.body;
+        const { userId, refreshToken } = req.body;
         const { authorization } = req.headers;
 
         const accessToken = authorization?.split(" ")[1];
@@ -261,8 +261,13 @@ class UserController {
                 : `users:${(payload as RefreshTokenPayload).id}:${refreshToken}`;
 
             const aToken = await RedisUtils.getString(redisKey);
+            if (accessToken && aToken !== accessToken) {
+                throw new ApiException(messageResponse.TOKEN_INVALID, 406);
+            }
 
-            if (aToken !== accessToken) throw new ApiException(messageResponse.TOKEN_INVALID, 406);
+            if (userId && userId !== (payload as RefreshTokenPayload).id) {
+                throw new ApiException(messageResponse.TOKEN_INVALID, 406);
+            }
 
             // sign new access token
             const user: Renters | Users = isRenter
@@ -298,7 +303,7 @@ class UserController {
     static async logout(req, res) {
         const { refreshToken } = req.body;
         const { authorization } = req.headers;
-        const user = req.user;
+        const { user, isApp } = req;
 
         const accessToken = authorization?.split(" ")[1];
 
@@ -307,7 +312,7 @@ class UserController {
             jwtToken.verifyRefreshToken(refreshToken);
 
             // check in redis
-            const redisKey = `users:${user.id}:${refreshToken}`;
+            const redisKey = `${isApp ? `renters` : `users`}:${user.id}:${refreshToken}`;
             const aToken = await RedisUtils.getString(redisKey);
 
             if (aToken !== accessToken) {
