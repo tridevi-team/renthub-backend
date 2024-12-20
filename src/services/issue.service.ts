@@ -210,7 +210,7 @@ class IssueService {
         // send notification
         await NotificationService.create({
             title: "Phản ánh " + issue.title + " đã được cập nhật trạng thái",
-            content: `Phản ánh ${issue.title} đã được cập nhật trạng thái thành ${data.status}. Vui lòng kiểm tra ngay.`,
+            content: `Phản ánh ${issue.title} đã được cập nhật trạng thái mới. Vui lòng kiểm tra và phản hồi lại thông tin.`,
             type: NotificationType.REMINDER,
             data: { issueId: id },
             recipients: [issue.createdBy],
