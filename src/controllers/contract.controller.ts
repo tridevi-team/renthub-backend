@@ -462,8 +462,17 @@ class ContractController {
             );
 
             trx.commit();
+            const contract = await ContractService.findOneRoomContract(contractId);
+            await Model.knex().raw(
+                `
+                UPDATE room_contracts
+                SET room = ?
+                WHERE id = ?
+                `,
+                [JSON.stringify(contract.room), newContract.id]
+            );
 
-            console.log(newContract);
+            // `UPDATE room_contracts SET room = '${JSON.stringify(contract.room)}' WHERE id = '${newContract.id}'`;
 
             if (!newContract) return res.json(apiResponse(messageResponse.EXTEND_CONTRACT_SUCCESS, true));
 

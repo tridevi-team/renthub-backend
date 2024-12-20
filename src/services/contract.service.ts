@@ -632,11 +632,6 @@ class ContractService {
 
         const newContract = await this.createRoomContract(newData, trx);
 
-        if (trx)
-            await trx?.raw(
-                `UPDATE room_contracts SET room = '${JSON.stringify(contract.room)}' WHERE id = '${newContract.id}'`
-            );
-
         return newContract;
     }
 
