@@ -67,7 +67,7 @@ class Issues extends Model {
                 equipment_id: { type: "string", format: "uuid" },
                 title: { type: "string", maxLength: 255 },
                 content: { type: "string" },
-                status: { type: "string", maxLength: 10 },
+                status: { type: "string", maxLength: 20 },
                 description: { type: "string" },
                 files: { type: "object" },
                 assign_to: { type: "string", format: "uuid" },
