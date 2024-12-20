@@ -110,16 +110,16 @@ class IssueService {
         const renter = await RenterService.getById(data.createdBy);
         // send notification to owner and issue manager
         await NotificationService.create({
-            title: "Yêu cầu mới " + issue.title + " được tạo",
-            content: `Yêu cầu về ${issue.title} trong ${house.name} đã được tạo bởi ${renter.name}. Vui lòng kiểm tra ngay.`,
+            title: "Phản ánh mới " + issue.title + " được tạo",
+            content: `Phản ánh về ${issue.title} trong ${house.name} đã được tạo bởi ${renter.name}. Vui lòng kiểm tra ngay.`,
             type: NotificationType.SYSTEM,
             data: { issueId: issue.id },
             recipients: [house.createdBy],
         });
 
         await NotificationService.create({
-            title: "Bạn đã tạo thành công yêu cầu " + issue.title,
-            content: `Yêu cầu ${issue.title} đã được tạo thành công. Vui lòng chờ phản hồi từ quản lý.`,
+            title: "Bạn đã tạo thành công phản ánh " + issue.title,
+            content: `Phản ánh ${issue.title} đã được tạo thành công. Vui lòng chờ phản hồi từ quản lý.`,
             type: NotificationType.SYSTEM,
             data: { issueId: issue.id },
             recipients: [data.createdBy],
@@ -152,8 +152,8 @@ class IssueService {
 
         // send notification to owner and issue manager
         await NotificationService.create({
-            title: "Yêu cầu về " + issue.title + " đã được cập nhật",
-            content: `Yêu cầu ${issue.title} đã được cập nhật bởi ${user.fullName}. Vui lòng kiểm tra ngay.`,
+            title: "Phản ánh về " + issue.title + " đã được cập nhật",
+            content: `Phản ánh ${issue.title} đã được cập nhật bởi ${user.fullName}. Vui lòng kiểm tra ngay.`,
             type: NotificationType.SYSTEM,
             data: { issueId: id },
             recipients: [issue.createdBy],
@@ -207,6 +207,15 @@ class IssueService {
             .$query()
             .patchAndFetch({ status: data.status, description: data.description, updated_by: actionBy });
 
+        // send notification
+        await NotificationService.create({
+            title: "Phản ánh " + issue.title + " đã được cập nhật trạng thái",
+            content: `Phản ánh ${issue.title} đã được cập nhật trạng thái thành ${data.status}. Vui lòng kiểm tra ngay.`,
+            type: NotificationType.REMINDER,
+            data: { issueId: id },
+            recipients: [issue.createdBy],
+        });
+
         return updated;
     }
 
@@ -223,7 +232,7 @@ class IssueService {
         // send notification to assignee
         await NotificationService.create({
             title: "Có vấn đề trong " + house.name + " được giao cho bạn.",
-            content: `Bạn đã được giao yêu cầu ${issue.title} từ ${user.fullName}. Vui lòng kiểm tra và xử lý`,
+            content: `Bạn đã được giao xử lý phản ánh ${issue.title} từ ${user.fullName}. Vui lòng kiểm tra và xử lý.`,
             type: NotificationType.SYSTEM,
             data: { issueId: id },
             recipients: [assignTo],
