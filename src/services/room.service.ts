@@ -40,7 +40,6 @@ class RoomService {
 
             latestContract.services.map((service) => {
                 const serviceDetail = latestBill?.details.find((detail) => detail.serviceId === service.id);
-                console.log("🚀 ~ RoomService ~ latestContract.services.map ~ serviceDetail:", serviceDetail);
                 services.push({
                     id: service.id,
                     name: service.name,
@@ -79,7 +78,6 @@ class RoomService {
             });
         }
 
-        console.log("🚀 ~ RoomService ~ getServicesInContract ~ services:", services);
         return services;
     }
 
