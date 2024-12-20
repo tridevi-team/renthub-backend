@@ -201,8 +201,7 @@ class BillService {
     }
 
     static async createDetails(billId: string, details: BillDetailRequest, trx) {
-        console.log("details", details);
-
+        console.log("🚀 ~ BillService ~ createDetails ~ details:", details);
         // Fetch the bill within the transaction to ensure it exists
         const bill = await Bills.query(trx).findById(billId);
 

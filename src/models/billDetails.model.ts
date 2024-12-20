@@ -60,7 +60,7 @@ class BillDetails extends Model {
             properties: {
                 id: { type: "string", format: "uuid" },
                 bill_id: { type: "string", format: "uuid" },
-                service_id: { type: "string", format: "uuid" },
+                service_id: { type: "string" },
                 name: { type: "string" },
                 old_value: { type: "integer" },
                 new_value: { type: "integer" },
