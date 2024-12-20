@@ -1,4 +1,5 @@
-import { IssueStatus, messageResponse } from "../enums";
+import { NotificationService } from "@services";
+import { IssueStatus, messageResponse, NotificationType } from "../enums";
 import IssueService from "../services/issue.service";
 import { apiResponse, Exception, RedisUtils } from "../utils";
 
@@ -125,11 +126,20 @@ class IssueController {
             //     throw new ApiException(messageResponse.PERMISSION_DENIED, 403);
             // }
 
-            const issue = await IssueService.updateStatus(issueId, {status, description}, user.id);
+            const issue = await IssueService.updateStatus(issueId, { status, description }, user.id);
 
             // delete cache
             const cacheKey = `${prefix}:*`;
             await RedisUtils.deletePattern(cacheKey);
+
+            // send notification
+            await NotificationService.create({
+                title: "Phản ánh " + issue.title + " đã được cập nhật trạng thái",
+                content: `Phản ánh ${issue.title} đã được cập nhật trạng thái thành ${status}. Vui lòng kiểm tra ngay.`,
+                type: NotificationType.REMINDER,
+                data: { issueId },
+                recipients: [issue.createdBy],
+            });
 
             return res.json(apiResponse(messageResponse.UPDATE_ISSUE_SUCCESS, true, issue));
         } catch (err) {
