@@ -15,12 +15,12 @@ class RoomContracts extends Model {
     renter_ids: string;
     deposit_amount: number;
     deposit_status: DepositStatus;
-    deposit_date: string;
+    deposit_date: string | Date;
     deposit_refund: number;
     deposit_refund_date: string;
     rental_start_date: string;
     rental_end_date: string;
-    content:string;
+    content: string;
     room: any;
     services: Array<any>;
     equipment: Array<any>;

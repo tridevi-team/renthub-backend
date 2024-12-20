@@ -42,7 +42,7 @@ export interface RoomContractRequest {
     content?: string;
     depositAmount: number;
     depositStatus: DepositStatus;
-    depositDate: string;
+    depositDate: Date | string;
     depositRefund?: number;
     depositRefundDate?: string;
     rentalStartDate: string;

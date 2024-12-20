@@ -89,6 +89,11 @@ class ContractService {
             })
         );
 
+        if (trx)
+            await trx?.raw(
+                `UPDATE room_contracts SET room = '${JSON.stringify(contract.room)}' WHERE id = '${newContract.id}'`
+            );
+
         // update room status
         await RoomService.updateStatusByContract(newContract.room.id, newContract.status, newContract.createdBy, trx);
 
@@ -540,10 +545,20 @@ class ContractService {
 
         // Define allowed status transitions
         const statusTransitions = {
-            [ContractStatus.HOLD]: [ContractStatus.PENDING],
-            [ContractStatus.ACTIVE]: [ContractStatus.HOLD, ContractStatus.TERMINATED, ContractStatus.CANCELLED],
-            [ContractStatus.TERMINATED]: [ContractStatus.PENDING],
-            [ContractStatus.PENDING]: [ContractStatus.HOLD, ContractStatus.TERMINATED, ContractStatus.CANCELLED],
+            [ContractStatus.HOLD]: [ContractStatus.PENDING, ContractStatus.EXPIRED],
+            [ContractStatus.ACTIVE]: [
+                ContractStatus.HOLD,
+                ContractStatus.TERMINATED,
+                ContractStatus.CANCELLED,
+                ContractStatus.EXPIRED,
+            ],
+            [ContractStatus.TERMINATED]: [ContractStatus.PENDING, ContractStatus.EXPIRED],
+            [ContractStatus.PENDING]: [
+                ContractStatus.HOLD,
+                ContractStatus.TERMINATED,
+                ContractStatus.CANCELLED,
+                ContractStatus.EXPIRED,
+            ],
         };
 
         // Check if the transition is allowed
@@ -611,10 +626,10 @@ class ContractService {
             rentalEndDate: data.rentalEndDate,
             depositAmount: contract.depositAmount,
             depositStatus: contract.depositStatus,
-            depositDate: contract.depositDate,
-            room: data.room ?? contract.room,
-            services: data.services ?? contract.services,
-            equipment: data.equipment ?? contract.equipment,
+            depositDate: currentDateTime(),
+            room: data.room ? { ...data.room, description: "." } : { ...contract.room, description: "." },
+            services: data.services ? { ...data.services, description: "." } : contract.services,
+            equipment: data.equipment ? { ...data.equipment, description: "." } : contract.equipment,
             createdBy: actionBy,
             updatedBy: actionBy,
             status: ContractStatus.PENDING,

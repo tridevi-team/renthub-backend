@@ -403,6 +403,7 @@ class ContractController {
         const user = req.user;
         const { contractId } = req.params;
         const { status, depositStatus, depositDate, note } = req.body;
+        console.log("🚀 ~ ContractController ~ updateRoomContractStatus ~ req.body:", req.body);
         const isApp = req.isApp;
         try {
             if (user.role === "renter" || isApp) {
@@ -418,9 +419,8 @@ class ContractController {
                         { depositStatus: depositStatus, depositDate: depositDate },
                         user.id
                     );
-                } else {
-                    await ContractService.updateRoomContractStatusByLandlord(contractId, status, user.id);
                 }
+                await ContractService.updateRoomContractStatusByLandlord(contractId, status, user.id);
             }
 
             // delete all cache
@@ -443,7 +443,7 @@ class ContractController {
         const trx = await Model.startTransaction();
 
         try {
-            await ContractService.extendContract(
+            const newContract = await ContractService.extendContract(
                 {
                     contractId,
                     rentalStartDate: rentalStartDate,
@@ -460,18 +460,24 @@ class ContractController {
 
             trx.commit();
 
+            console.log(newContract);
+
+            if (!newContract) return res.json(apiResponse(messageResponse.EXTEND_CONTRACT_SUCCESS, true));
+
+            const roomDetails = await RoomService.getRoomById(newContract.roomId ?? newContract.room_id);
+
             // send notification to landlord and renters
             await NotificationService.create({
-                title: "Gia hạn hợp đồng " + room.name + ", " + room.house.name,
-                content: `Hợp đồng thuê phòng ${room.name} đã được gia hạn bởi ${user.fullName}. Vui lòng kiểm tra thông tin hợp đồng và xác nhận thông lại tin.`,
+                title: "Gia hạn hợp đồng " + roomDetails.name + ", " + roomDetails.house.name,
+                content: `Hợp đồng thuê phòng ${roomDetails.name} đã được gia hạn bởi ${user.fullName}. Vui lòng kiểm tra thông tin hợp đồng và xác nhận thông lại tin.`,
                 type: NotificationType.SYSTEM,
                 data: { contractId: contractId },
-                recipients: [renter.id],
+                recipients: [...newContract.renter_ids.split(",")],
             });
 
             await NotificationService.create({
-                title: "Bạn đã gia hạn hợp đồng " + room.name + ", " + room.house.name,
-                content: `Bạn đã gia hạn hợp đồng thuê phòng ${room.name}. Vui lòng chờ xác nhận từ phía người thuê.`,
+                title: "Bạn đã gia hạn hợp đồng " + roomDetails.name + ", " + roomDetails.house.name,
+                content: `Bạn đã gia hạn hợp đồng thuê phòng ${roomDetails.name}. Vui lòng chờ xác nhận từ phía người thuê.`,
                 type: NotificationType.SYSTEM,
                 data: { contractId: contractId },
                 recipients: [user.id],
