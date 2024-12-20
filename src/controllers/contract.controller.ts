@@ -124,11 +124,14 @@ class ContractController {
             );
             trx.commit();
 
-            await Model.knex().raw(`
+            await Model.knex().raw(
+                `
                 UPDATE room_contracts
-                SET room = '${JSON.stringify(room)}'
-                WHERE id = '${newContract.id}'
-                `);
+                SET room = ?
+                WHERE id = ?
+                `,
+                [JSON.stringify(room), newContract.id]
+            );
 
             // send notification to landlord and renters
             await NotificationService.create({

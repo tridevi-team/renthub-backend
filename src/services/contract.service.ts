@@ -89,11 +89,6 @@ class ContractService {
             })
         );
 
-        if (trx)
-            await trx?.raw(
-                `UPDATE room_contracts SET room = '${JSON.stringify(contract.room)}' WHERE id = '${newContract.id}'`
-            );
-
         // update room status
         await RoomService.updateStatusByContract(newContract.room.id, newContract.status, newContract.createdBy, trx);
 
@@ -636,6 +631,11 @@ class ContractService {
         };
 
         const newContract = await this.createRoomContract(newData, trx);
+
+        if (trx)
+            await trx?.raw(
+                `UPDATE room_contracts SET room = '${JSON.stringify(contract.room)}' WHERE id = '${newContract.id}'`
+            );
 
         return newContract;
     }
