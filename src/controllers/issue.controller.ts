@@ -118,14 +118,14 @@ class IssueController {
 
     static async updateIssueStatus(req, res) {
         const { issueId } = req.params;
-        const { status } = req.body;
+        const { status, description } = req.body;
         const { user } = req;
         try {
             // if (user.role === "renter" && !isApp && status === IssueStatus.IN_PROGRESS) {
             //     throw new ApiException(messageResponse.PERMISSION_DENIED, 403);
             // }
 
-            const issue = await IssueService.updateStatus(issueId, status, user.id);
+            const issue = await IssueService.updateStatus(issueId, {status, description}, user.id);
 
             // delete cache
             const cacheKey = `${prefix}:*`;

@@ -184,26 +184,28 @@ class IssueService {
         }
     }
 
-    static async updateStatus(id: string, status: string, actionBy: string) {
+    static async updateStatus(id: string, data: { status: IssueStatus; description?: string }, actionBy: string) {
         const issue = await this.getById(id);
         if (issue.equipmentId) {
             const equipment = await EquipmentService.getById(issue.equipmentId);
             if (!equipment) {
                 throw new ApiException(messageResponse.EQUIPMENT_NOT_FOUND, 404);
             }
-            if (status === IssueStatus.IN_PROGRESS) {
+            if (data.status === IssueStatus.IN_PROGRESS) {
                 // if issue status is IN_PROGRESS => update equipment status is REPAIRING
                 await EquipmentService.updateStatus(actionBy, equipment.id, {
                     status: EquipmentStatus.REPAIRING,
                 });
-            } else if (status === IssueStatus.DONE) {
+            } else if (data.status === IssueStatus.DONE) {
                 // if issue status is DONE => update equipment status is
                 await EquipmentService.updateStatus(actionBy, equipment.id, {
                     status: EquipmentStatus.NORMAL,
                 });
             }
         }
-        const updated = issue.$query().patchAndFetch({ status, updated_by: actionBy });
+        const updated = issue
+            .$query()
+            .patchAndFetch({ status: data.status, description: data.description, updated_by: actionBy });
 
         return updated;
     }
