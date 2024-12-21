@@ -109,6 +109,11 @@ class EquipmentController {
         const user = req.user;
         try {
             await EquipmentService.delete(user.id, equipmentId);
+
+            await RedisUtils.deletePattern("rooms:*");
+            await RedisUtils.deletePattern("floors:*");
+            await RedisUtils.deletePattern("houses:*");
+
             return res.json(apiResponse(messageResponse.DELETE_EQUIPMENT_SUCCESS, true));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -124,6 +129,11 @@ class EquipmentController {
 
             // commit transaction
             await trx.commit();
+
+            await RedisUtils.deletePattern("rooms:*");
+            await RedisUtils.deletePattern("floors:*");
+            await RedisUtils.deletePattern("houses:*");
+
             return res.json(apiResponse(messageResponse.DELETE_EQUIPMENT_SUCCESS, true));
         } catch (err) {
             // rollback transaction
