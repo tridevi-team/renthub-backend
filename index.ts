@@ -166,6 +166,7 @@ app.get("/generate-pdf", async (req, res) => {
         const browser = await puppeteer.launch({
             executablePath: "/snap/bin/chromium",
             headless: true,
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
         });
         const page = await browser.newPage();
         const contractDetails = await ContractService.findOneRoomContract(contractId as string);
