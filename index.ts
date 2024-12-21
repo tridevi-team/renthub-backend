@@ -1,6 +1,6 @@
 "use strict";
 // import { Logs } from "@models";
-import { contractCronJob } from "@utils";
+import { ApiException, contractCronJob } from "@utils";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -8,7 +8,11 @@ import "dotenv/config";
 import express from "express";
 import { rateLimit } from "express-rate-limit";
 import useragent from "express-useragent";
+
+import { messageResponse } from "@enums";
+import { ContractService, RoomService } from "@services";
 import path from "path";
+import puppeteer from "puppeteer";
 import { serve, setup } from "swagger-ui-express";
 import provinces from "./provinces.json";
 import { swaggerSpec } from "./src/API/swagger";
@@ -151,6 +155,86 @@ app.use("/contracts", ContractRoute);
 app.use("/statistical", statisticalRoute);
 app.get("/provinces", async (_req, res) => {
     return res.json(provinces);
+});
+
+app.get("/generate-pdf", async (req, res) => {
+    const { contractId } = req.query;
+    try {
+        if (!contractId) throw new ApiException(messageResponse.UNKNOWN_ERROR, 500, false);
+        const pdfName = "puppeteer-example.pdf";
+        // Launch the browser and open a new blank page
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        const contractDetails = await ContractService.findOneRoomContract(contractId as string);
+        const roomDetails = await RoomService.getRoomById(contractDetails.roomId);
+
+        let html = contractDetails.content;
+
+        const replaceKeyData = await ContractService.findKeyData(contractId as string);
+
+        // Replace placeholders with dynamic content
+        for (const key in replaceKeyData) {
+            if (key === "EQUIPMENT_LIST") {
+                const vi = {
+                    NORMAL: "Bình thường",
+                    BROKEN: "Hỏng",
+                    REPAIRING: "Đang sửa chữa",
+                    DISPOSED: "Đã thanh lý",
+                };
+                let equipmentList = `<table style="width: 100%; border-collapse: collapse; border: 1px solid black;">
+                    <tr><th>Mã thiết bị</th><th style="border: 1px solid black;">Tên thiết bị</th><th style="border: 1px solid black;">Trạng thái</th></tr>`;
+                replaceKeyData[key].forEach((item: any) => {
+                    equipmentList += `<tr>
+                        <td style="border: 1px solid black;">${item.code}</td>
+                        <td style="border: 1px solid black;">${item.name}</td>
+                        <td style="border: 1px solid black;">${vi[item.status]}</td></tr>`;
+                });
+                equipmentList += `</table>`;
+                html = html.replace(new RegExp(`{{${key}}}`, "g"), equipmentList);
+            } else if (key === "USE_SERVICES") {
+                const vi = {
+                    PEOPLE: "Người",
+                    ROOM: "Phòng",
+                    WATER_CONSUMPTION: "m3",
+                    ELECTRICITY_CONSUMPTION: "kWh",
+                };
+                let servicesList = `<table style="width: 100%; border-collapse: collapse; border: 1px solid black;">
+                    <tr><th>Tên dịch vụ</th><th style="border: 1px solid black;">Đơn giá</th><th style="border: 1px solid black;">Loại</th>
+                    <th>Chỉ số đầu</th></tr>`;
+                replaceKeyData[key].forEach((item: any) => {
+                    servicesList += `<tr>
+                        <td style="border: 1px solid black;">${item.name}</td>
+                        <td style="border: 1px solid black;">${item.unitPrice}</td>
+                        <td style="border: 1px solid black;">${vi[item.type]}</td>
+                        <td style="border: 1px solid black;">${item.startIndex}</td></tr>`;
+                });
+                servicesList += `</table>`;
+                html = html.replace(new RegExp(`{{${key}}}`, "g"), servicesList);
+            } else {
+                html = html.replace(new RegExp(`{{${key}}}`, "g"), replaceKeyData[key]);
+            }
+        }
+
+        // Set the HTML of this page
+        await page.setContent(html, { waitUntil: "load" });
+
+        // Pass roomDetails to the browser context for setting the document title
+        await page.evaluate((roomDetails) => {
+            document.title = `Hợp đồng thuê phòng ${roomDetails.name} - ${roomDetails.house.name}`;
+        }, roomDetails);
+
+        // Save the page into a PDF and call it 'puppeteer-example.pdf'
+        await page.pdf({ path: `./${pdfName}` });
+
+        // When everything's done, close the browser instance
+        await browser.close();
+
+        // Send the PDF as a response
+        return res.sendFile(pdfName, { root: __dirname });
+    } catch (error) {
+        console.error("Error generating PDF:", error);
+        res.status(500).send("Error generating PDF");
+    }
 });
 
 app.listen(PORT, () => {
