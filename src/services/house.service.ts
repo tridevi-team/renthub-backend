@@ -217,6 +217,7 @@ class HouseService {
         query = sortingHandler(query, sort);
 
         const totalQuery = query.clone();
+
         const total = await totalQuery.resultSize();
 
         if (total === 0) throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
@@ -255,14 +256,15 @@ class HouseService {
         });
 
         // get room has not bill
-        const roomId: string[] = [];
+        const roomIds: string[] = [];
         roomHasContractInMonth.forEach(async (room) => {
             const bill = await Bills.query().findOne({
                 room_id: room.id,
                 title: `Hóa đơn tháng ${month} - ${year}`,
             });
+
             if (!bill) {
-                roomId.push(room.id);
+                roomIds.push(room.id);
             }
         });
 
@@ -270,7 +272,7 @@ class HouseService {
         let query = Rooms.query()
             .join("house_floors as floors", "floors.id", "rooms.floor_id")
             .where("floors.house_id", houseId)
-            .whereIn("rooms.id", roomId)
+            .whereIn("rooms.id", roomIds)
             .modify("basicWithRenterCount");
 
         // Filter
@@ -280,6 +282,8 @@ class HouseService {
         query = sortingHandler(query, sort);
 
         const totalQuery = query.clone();
+
+        await totalQuery;
 
         const total = await totalQuery.resultSize();
 
