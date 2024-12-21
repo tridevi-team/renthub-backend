@@ -590,7 +590,7 @@ class ContractService {
         const contractDetails = await this.findOneRoomContract(id);
 
         // update room status if contract status is active => rented
-        await RoomService.updateStatusByContract(details.roomId, contractDetails.status, actionBy);
+        await RoomService.updateStatusByContract(details.roomId, contractDetails.status, contractDetails.createdBy);
 
         const house = await HouseService.getHouseByRoomId(details.roomId);
 
