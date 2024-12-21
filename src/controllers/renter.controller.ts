@@ -1,10 +1,11 @@
 "use strict";
 
 import "dotenv/config";
+import { Model } from "objection";
 import redisConfig from "../config/redis.config";
 import { messageResponse } from "../enums";
 import { FirebaseToken } from "../interfaces";
-import { ContractService, RenterService } from "../services";
+import { RenterService } from "../services";
 import MailService from "../services/mail.service";
 import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
 
@@ -14,10 +15,11 @@ const REDIS_EXPIRE_REFRESH_TOKEN = process.env.REDIS_EXPIRE_REFRESH_TOKEN || 864
 class RenterController {
     static async addNewRenter(req, res) {
         const { roomId } = req.params;
+        console.log("🚀 ~ RenterController ~ addNewRenter ~ roomId:", roomId);
         const user = req.user;
         const { name, citizenId, birthday, gender, email, phoneNumber, address, tempReg, moveInDate, represent, note } =
             req.body;
-
+        const trx = await Model.startTransaction();
         try {
             // check max renter
             const data = {
@@ -35,16 +37,16 @@ class RenterController {
                 note: note,
                 createdBy: user.id,
             };
-            const createRenter = await RenterService.create(data);
+            const createRenter = await RenterService.create(data, trx);
 
-            // add renter to contract
-            await ContractService.addRenterAccess(roomId, createRenter.id);
+            await trx.commit();
 
             // delete cache
             await RedisUtils.deletePattern(cachePattern);
 
             return res.json(apiResponse(messageResponse.CREATE_RENTER_SUCCESS, true, createRenter));
         } catch (err) {
+            await trx.rollback();
             Exception.handle(err, req, res);
         }
     }

@@ -33,8 +33,8 @@ class RenterService {
                       .orderBy("created_at", "desc")
                       .first()
                 : null;
-            if (latestContract) {
-                await ContractService.addRenterAccess(newRenter.roomId, newRenter.id, trx);
+            if (latestContract && data.roomId) {
+                await ContractService.addRenterAccess(data.roomId, newRenter.id, trx);
             }
             return newRenter;
         } catch (err) {
