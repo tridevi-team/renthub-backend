@@ -105,17 +105,17 @@ class StatisticalController {
                     return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {}));
                 }
 
-                if (new Date(from) > new Date(rentalStartDate)) {
-                    startDate = from;
-                } else if (new Date(from) > new Date(rentalEndDate)) {
-                    return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {}));
-                }
+                // if (new Date(from) > new Date(rentalStartDate)) {
+                //     startDate = from;
+                // } else if (new Date(from) > new Date(rentalEndDate)) {
+                //     return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {}));
+                // }
 
-                if (new Date(to) > new Date(rentalEndDate)) {
-                    endDate = rentalEndDate;
-                } else if (new Date(to) < new Date(rentalStartDate)) {
-                    return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {}));
-                }
+                // if (new Date(to) > new Date(rentalEndDate)) {
+                //     endDate = rentalEndDate;
+                // } else if (new Date(to) < new Date(rentalStartDate)) {
+                //     return res.json(apiResponse(messageResponse.GET_STATISTICAL_SUCCESS, true, {}));
+                // }
 
                 // set start date to first day of month and end date to last day of month
                 startDate = new Date(startDate);
