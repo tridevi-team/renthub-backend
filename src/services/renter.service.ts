@@ -152,7 +152,8 @@ class RenterService {
                 "renters.temp_reg",
                 "renters.represent",
                 "renters.move_in_date",
-                "renters.note"
+                "renters.note",
+                "renters.id as id"
             );
 
         // Filter
