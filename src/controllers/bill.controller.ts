@@ -154,8 +154,6 @@ class BillController {
                     updatedBy: user.id,
                 };
 
-                total += detailsData.totalPrice;
-
                 // Create bill details within the transaction
                 const findRoomPrice = roomServices.find(
                     (service) =>
@@ -163,6 +161,7 @@ class BillController {
                 );
                 if (!findRoomPrice) {
                     await BillService.createDetails(newBill.id, detailsData, trx);
+                    total += detailsData.totalPrice;
                 }
 
                 items.push({
