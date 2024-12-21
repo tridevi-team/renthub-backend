@@ -163,7 +163,10 @@ app.get("/generate-pdf", async (req, res) => {
         if (!contractId) throw new ApiException(messageResponse.UNKNOWN_ERROR, 500, false);
         const pdfName = "puppeteer-example.pdf";
         // Launch the browser and open a new blank page
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({
+            executablePath: "/snap/bin/chromium",
+            headless: true,
+        });
         const page = await browser.newPage();
         const contractDetails = await ContractService.findOneRoomContract(contractId as string);
         const roomDetails = await RoomService.getRoomById(contractDetails.roomId);
