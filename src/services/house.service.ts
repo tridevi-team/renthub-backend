@@ -244,16 +244,26 @@ class HouseService {
             // .whereIn("rooms.status", ["RENTED"])
             .select("rooms.id", "rental_start_date", "rental_end_date");
 
+        console.log("🚀 ~ HouseService ~ getRoomCreateBill ~ roomHasContract:", roomHasContract);
         // check month and year in rental range
         const roomHasContractInMonth = roomHasContract.filter((room) => {
             const start = new Date(room.rentalStartDate);
             const end = new Date(room.rentalEndDate);
-            return (
-                start.getMonth() <= parseInt(month) &&
-                parseInt(month) <= end.getMonth() &&
-                end.getFullYear() === parseInt(year)
-            );
+
+            // Parse the provided month and year
+            const targetYear = parseInt(year, 10);
+            const targetMonth = parseInt(month, 10);
+
+            // Check if the target month and year fall within the rental range
+            const isInRentalPeriod =
+                (start.getFullYear() < targetYear ||
+                    (start.getFullYear() === targetYear && start.getMonth() + 1 <= targetMonth)) &&
+                (end.getFullYear() > targetYear ||
+                    (end.getFullYear() === targetYear && end.getMonth() + 1 >= targetMonth));
+
+            return isInRentalPeriod;
         });
+        console.log("🚀 ~ HouseService ~ roomHasContractInMonth ~ roomHasContractInMonth:", roomHasContractInMonth);
 
         // get room has not bill
         const roomIds: string[] = [];
@@ -263,11 +273,13 @@ class HouseService {
                 title: `Hóa đơn tháng ${month} - ${year}`,
             });
 
+            console.log("🚀 ~ HouseService ~ bill ~ bill:", bill);
             if (!bill) {
                 roomIds.push(room.id);
             }
         });
 
+        console.log("🚀 ~ HouseService ~ getRoomCreateBill ~ roomIds:", roomIds);
         // get room details
         let query = Rooms.query()
             .join("house_floors as floors", "floors.id", "rooms.floor_id")
