@@ -157,18 +157,20 @@ class BillController {
                 total += detailsData.totalPrice;
 
                 // Create bill details within the transaction
-                await BillService.createDetails(newBill.id, detailsData, trx);
                 const findRoomPrice = roomServices.find(
                     (service) =>
                         service.name === "Tiền phòng" && service.type === ServiceTypes.ROOM && service.id === ""
                 );
-                if (!findRoomPrice)
-                    items.push({
-                        name: "Tiền phòng",
-                        unitPrice: roomPrice,
-                        quantity: 1,
-                        price: roomPrice,
-                    });
+                if (!findRoomPrice) {
+                    await BillService.createDetails(newBill.id, detailsData, trx);
+                }
+
+                items.push({
+                    name: "Tiền phòng",
+                    unitPrice: roomPrice,
+                    quantity: 1,
+                    price: roomPrice,
+                });
                 const detailsList: {
                     billId: string;
                     serviceId?: string;
