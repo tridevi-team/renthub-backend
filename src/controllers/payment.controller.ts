@@ -309,7 +309,9 @@ class PaymentController {
                     });
 
                     // create description less than 25 characters
-                    const subDescription = removeVietnameseTones(result.room.name + " " + houseDetails.name)
+                    const subDescription = removeVietnameseTones(
+                        result.room.name.replace("Phòng ", "") + " " + houseDetails.name
+                    )
                         .substring(0, 23)
                         .replace("Phong", "");
 

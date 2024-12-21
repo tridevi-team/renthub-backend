@@ -241,10 +241,16 @@ class BillController {
                         orderCode = 9007199254740991;
                     }
 
-                    const description = removeVietnameseTones(`${roomDetails.name} ${houseDetails.name}`).slice(0, 20);
+                    const description = removeVietnameseTones(
+                        roomDetails.name.replace("Phòng ", "") + " " + houseDetails.name
+                    )
+                        .substring(0, 23)
+                        .replace("Phong", "");
+
                     const expiredDate = Math.floor(
                         (new Date().getTime() + houseDetails.numCollectDays * 24 * 60 * 60 * 1000) / 1000
                     );
+
                     const payosRequest = {
                         orderCode,
                         // amount: 5000 || total,
