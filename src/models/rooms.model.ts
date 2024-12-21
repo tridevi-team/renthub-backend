@@ -31,6 +31,8 @@ class Rooms extends Model {
     renters: Renters[];
     count: number;
     floorId: string;
+    rentalStartDate: string | number | Date;
+    rentalEndDate: string | number | Date;
 
     static get tableName() {
         return "rooms";

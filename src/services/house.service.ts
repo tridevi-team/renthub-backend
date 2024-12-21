@@ -10,7 +10,7 @@ import type {
     Permissions,
     ResourceIdentifier,
 } from "../interfaces";
-import { HouseFloors, Houses, Rooms, Services } from "../models";
+import { Bills, HouseFloors, Houses, Rooms, Services } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 import BillService from "./bill.service";
 import EquipmentService from "./equipment.service";
@@ -220,6 +220,70 @@ class HouseService {
         const total = await totalQuery.resultSize();
 
         if (total === 0) throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
+
+        const totalPages = Math.ceil(total / pageSize);
+
+        if (page === -1 && pageSize === -1) await query.page(0, total);
+        else await query.page(page - 1, pageSize);
+
+        const fetchData = await query;
+
+        return { ...fetchData, total, page, pageCount: totalPages, pageSize };
+    }
+
+    static async getRoomCreateBill(houseId: string, month: string, year: string, filterData?: Filter) {
+        const { filter = [], sort = [], pagination } = filterData || {};
+        const { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = pagination || {};
+
+        // get room has contract
+        const roomHasContract = await Rooms.query()
+            .join("house_floors as floors", "floors.id", "rooms.floor_id")
+            .join("room_contracts as contracts", "contracts.room_id", "rooms.id")
+            .where("floors.house_id", houseId)
+            // .whereIn("rooms.status", ["RENTED"])
+            .select("rooms.id", "rental_start_date", "rental_end_date");
+
+        // check month and year in rental range
+        const roomHasContractInMonth = roomHasContract.filter((room) => {
+            const start = new Date(room.rentalStartDate);
+            const end = new Date(room.rentalEndDate);
+            return (
+                start.getMonth() <= parseInt(month) &&
+                parseInt(month) <= end.getMonth() &&
+                end.getFullYear() === parseInt(year)
+            );
+        });
+
+        // get room has not bill
+        const roomId: string[] = [];
+        roomHasContractInMonth.forEach(async (room) => {
+            const bill = await Bills.query().findOne({
+                room_id: room.id,
+                title: `Hóa đơn tháng ${month} - ${year}`,
+            });
+            if (!bill) {
+                roomId.push(room.id);
+            }
+        });
+
+        // get room details
+        let query = Rooms.query()
+            .join("house_floors as floors", "floors.id", "rooms.floor_id")
+            .where("floors.house_id", houseId)
+            .whereIn("rooms.id", roomId)
+            .modify("basicWithRenterCount");
+
+        // Filter
+        query = filterHandler(query, filter);
+
+        // Sort
+        query = sortingHandler(query, sort);
+
+        const totalQuery = query.clone();
+
+        const total = await totalQuery.resultSize();
+
+        // if (total === 0) throw new ApiException(messageResponse.NO_ROOMS_FOUND, 404);
 
         const totalPages = Math.ceil(total / pageSize);
 

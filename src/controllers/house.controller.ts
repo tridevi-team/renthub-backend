@@ -113,6 +113,22 @@ class HouseController {
         }
     }
 
+    static async getRoomCreateBill(req, res) {
+        const { houseId } = req.params;
+        const { filter = [], sort = [], pagination = {}, month, year } = req.query;
+        try {
+            const details = await HouseService.getRoomCreateBill(houseId, month, year, {
+                filter,
+                sort,
+                pagination,
+            });
+
+            return res.json(apiResponse(messageResponse.GET_ROOMS_BY_HOUSE_SUCCESS, true, details));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
     static async updateHouseDetails(req, res) {
         const { houseId } = req.params;
         const { user } = req;
@@ -204,7 +220,7 @@ class HouseController {
         const { roomId, fullName, phoneNumber, email } = req.body;
         try {
             console.log(req.body);
-            
+
             const signup = await HouseService.signupReceiveInformation({
                 roomId,
                 fullName,

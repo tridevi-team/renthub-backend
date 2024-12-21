@@ -58,4 +58,6 @@ houseRouter.get("/:houseId/receive-information", authentication, HouseController
 
 houseRouter.patch("/:signupId/update-receive-information", authentication, HouseController.updateSignupReceiveInfo);
 
+houseRouter.get("/:houseId/room-create-bill", authentication, HouseController.getRoomCreateBill);
+
 export default houseRouter;
