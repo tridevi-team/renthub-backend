@@ -37,7 +37,7 @@ class IssueController {
     static async getIssues(req, res) {
         const { houseId } = req.params;
         const { filter = [], sort = [], pagination } = req.query;
-        const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + ":search", {
+        const cacheKey = RedisUtils.generateCacheKeyWithFilter(`${prefix}:house_${houseId}:search`, {
             filter,
             sort,
             pagination,
