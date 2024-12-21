@@ -579,7 +579,7 @@ class ContractService {
             throw new ApiException(messageResponse.CONTRACT_STATUS_PENDING_ONLY, 423);
         }
 
-        const updated = await RoomContracts.query().patchAndFetchById(id, {
+        await RoomContracts.query().patchAndFetchById(id, {
             approval_status: status,
             approval_by: actionBy,
             approval_date: currentDateTime(),
@@ -587,8 +587,10 @@ class ContractService {
             status: status === ApprovalStatus.APPROVED ? ContractStatus.ACTIVE : details.status,
         });
 
+        const contractDetails = await this.findOneRoomContract(id);
+
         // update room status if contract status is active => rented
-        await RoomService.updateStatusByContract(details.roomId, updated.status, actionBy);
+        await RoomService.updateStatusByContract(details.roomId, contractDetails.status, actionBy);
 
         const house = await HouseService.getHouseByRoomId(details.roomId);
 
