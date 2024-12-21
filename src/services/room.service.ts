@@ -46,7 +46,7 @@ class RoomService {
                     quantity: service.quantity,
                     unitPrice: service.unitPrice,
                     type: service.type,
-                    oldValue: serviceDetail?.newValue || 0,
+                    oldValue: serviceDetail?.newValue || service.start_index || service.startIndex || 0,
                 });
             });
         } else {
