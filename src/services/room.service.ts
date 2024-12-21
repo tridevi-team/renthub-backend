@@ -230,9 +230,6 @@ class RoomService {
         const rooms = await query;
         const roomsData: any[] = [];
 
-        console.log(rooms);
-
-
         for (const room of rooms.results) {
             const services = await RoomServices.query().where("room_id", room.id).modify("basic");
             roomsData.push({

@@ -39,7 +39,7 @@ class BillController {
     static async getBills(req, res) {
         const { houseId } = req.params;
         const { filter = [], sort = [], pagination } = req.query;
-        const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix, {
+        const cacheKey = RedisUtils.generateCacheKeyWithFilter(`${prefix}:house_${houseId}`, {
             filter,
             sort,
             pagination,
