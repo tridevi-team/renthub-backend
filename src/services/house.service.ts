@@ -599,7 +599,6 @@ class HouseService {
     }
 
     static async signupReceiveInformation(data) {
-        console.log("🚀 ~ HouseService ~ data:", data);
         const roomDetails = await RoomService.getRoomById(data.roomId);
 
         // save to firestore
