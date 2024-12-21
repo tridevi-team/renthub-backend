@@ -1,0 +1,34 @@
+title Tạo thiết bị
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Nhập thông tin thiết bị mới
+activate Landlord
+activate Client
+
+Client -> Backend: Gửi thông tin thiết bị
+activate Backend
+
+Backend -> Backend: Kiểm tra quyền
+
+
+alt Quyền hợp lệ
+activate Database
+Backend -> Database: Thêm thiết bị mới vào cơ sở dữ liệu
+    Database --> Backend: Xác nhận thiết bị được tạo
+    Backend --> Client: Thông báo tạo thành công
+    Client --> Landlord: Hiển thị thông báo thành công
+else Quyền không hợp lệ
+    Backend --> Client: Thông báo lỗi quyền truy cập
+    Client --> Landlord: Hiển thị thông báo thất bại
+end
+
+deactivate Backend
+deactivate Client
+deactivate Landlord
+deactivate Database

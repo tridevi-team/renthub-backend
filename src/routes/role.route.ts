@@ -63,4 +63,5 @@ roleRoute.delete(
     RoleController.deleteRole
 );
 
+
 export default roleRoute;

@@ -1,6 +1,9 @@
 import { Model } from "objection";
 
 class ContractKeyReplace extends Model {
+    key: string;
+    label: string;
+
     static get tableName() {
         return "contract_key_replace";
     }

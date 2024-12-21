@@ -1,7 +1,8 @@
-import type { QueryContext } from "objection";
+import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { Equipment, Houses, Issues, Rooms } from "./";
+import { currentDateTime } from "@utils/currentTime";
 
 class HouseFloors extends Model {
     id: string;
@@ -14,6 +15,8 @@ class HouseFloors extends Model {
     updated_at: string;
     house: Houses;
     rooms: Rooms[];
+    houseId: string;
+    updatedBy: string;
 
     static get tableName() {
         return "house_floors";
@@ -25,6 +28,14 @@ class HouseFloors extends Model {
 
     $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
+    }
+
+    $beforeUpdate(_opt: ModelOptions, _queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
+    }
+
+    $beforeDelete(_queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
     }
 
     static get jsonSchema() {

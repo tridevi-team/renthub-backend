@@ -1,0 +1,12 @@
+{
+    "apps": [
+        {
+            "name": "renthub-backend",
+            "script": "./dist/index.js",
+            "node_args": "-r tsconfig-paths/register",
+            "env": {
+                "TS_NODE_BASEURL": "./dist"
+            }
+        }
+    ]
+}

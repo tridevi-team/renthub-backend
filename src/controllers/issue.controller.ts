@@ -1,4 +1,4 @@
-import { messageResponse } from "../enums";
+import { IssueStatus, messageResponse } from "../enums";
 import IssueService from "../services/issue.service";
 import { apiResponse, Exception, RedisUtils } from "../utils";
 
@@ -17,9 +17,9 @@ class IssueController {
                 equipmentId,
                 title,
                 content,
-                status,
-                description,
-                files,
+                status: status || IssueStatus.OPEN,
+                description: description || "",
+                files: files || { image: [], video: [], file: [] },
                 assignTo,
                 createdBy: user.id,
             });
@@ -37,7 +37,7 @@ class IssueController {
     static async getIssues(req, res) {
         const { houseId } = req.params;
         const { filter = [], sort = [], pagination } = req.query;
-        const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix + ":search", {
+        const cacheKey = RedisUtils.generateCacheKeyWithFilter(`${prefix}:house_${houseId}:search`, {
             filter,
             sort,
             pagination,
@@ -103,6 +103,7 @@ class IssueController {
                 description,
                 files,
                 assignTo,
+                updatedBy: req.user.id,
             });
 
             // delete cache
@@ -117,10 +118,14 @@ class IssueController {
 
     static async updateIssueStatus(req, res) {
         const { issueId } = req.params;
-        const { status } = req.body;
-
+        const { status, description } = req.body;
+        const { user } = req;
         try {
-            const issue = await IssueService.updateStatus(issueId, status);
+            // if (user.role === "renter" && !isApp && status === IssueStatus.IN_PROGRESS) {
+            //     throw new ApiException(messageResponse.PERMISSION_DENIED, 403);
+            // }
+
+            const issue = await IssueService.updateStatus(issueId, { status, description }, user.id);
 
             // delete cache
             const cacheKey = `${prefix}:*`;
@@ -135,8 +140,9 @@ class IssueController {
     static async updateAssignee(req, res) {
         const { issueId } = req.params;
         const { assignee } = req.body;
+        const { user } = req;
         try {
-            const issue = await IssueService.updateAssignee(issueId, assignee);
+            const issue = await IssueService.updateAssignee(issueId, assignee, user.id);
 
             // delete cache
             const cacheKey = `${prefix}:*`;
@@ -152,6 +158,23 @@ class IssueController {
         const { issueId } = req.params;
         try {
             await IssueService.delete(issueId);
+
+            // delete cache
+            const cacheKey = `${prefix}:*`;
+            await RedisUtils.deletePattern(cacheKey);
+
+            return res.json(apiResponse(messageResponse.DELETE_ISSUE_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async deleteIssues(req, res) {
+        const { ids } = req.body;
+        const { houseId } = req.params;
+        const { user } = req;
+        try {
+            await IssueService.deleteByIds(ids, houseId, user.id);
 
             // delete cache
             const cacheKey = `${prefix}:*`;

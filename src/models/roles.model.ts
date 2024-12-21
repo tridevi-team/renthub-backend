@@ -35,6 +35,9 @@ class Roles extends Model {
         this.updated_at = currentDateTime();
     }
 
+    $beforeDelete(_queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
+    }
     static get jsonSchema() {
         return {
             type: "object",

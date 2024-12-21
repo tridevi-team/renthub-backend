@@ -1,0 +1,33 @@
+title Xem chi tiết hóa đơn
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn hóa đơn cần xem chi tiết
+activate Landlord
+activate Client
+
+Client -> Backend: Gửi ID hóa đơn cần xem
+activate Backend
+
+Backend -> Backend: Kiểm tra quyền
+activate Database
+Backend -> Database: Truy vấn chi tiết hóa đơn
+Database --> Backend: Trả về chi tiết hóa đơn
+deactivate Database
+
+alt Có dữ liệu
+    Backend --> Client: Gửi thông tin chi tiết hóa đơn
+    Client --> Landlord: Hiển thị chi tiết hóa đơn
+else Không có dữ liệu
+    Backend --> Client: Thông báo không tìm thấy hóa đơn
+    Client --> Landlord: Hiển thị thông báo lỗi
+end
+
+deactivate Backend
+deactivate Client
+deactivate Landlord

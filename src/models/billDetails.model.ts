@@ -1,4 +1,5 @@
-import type { QueryContext } from "objection";
+import { currentDateTime } from "@utils/currentTime";
+import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import Bills from "./bills.model";
@@ -29,6 +30,8 @@ class BillDetails extends Model {
     createdAt: string;
     updatedBy: string;
     updatedAt: string;
+    month: string;
+    year: string;
 
     static get tableName() {
         return "bill_details";
@@ -42,6 +45,14 @@ class BillDetails extends Model {
         this.id = this.id || uuidv4();
     }
 
+    $beforeUpdate(_opt: ModelOptions, _queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
+    }
+
+    $beforeDelete(_queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
+    }
+
     static get jsonSchema() {
         return {
             type: "object",
@@ -49,7 +60,7 @@ class BillDetails extends Model {
             properties: {
                 id: { type: "string", format: "uuid" },
                 bill_id: { type: "string", format: "uuid" },
-                service_id: { type: "string", format: "uuid" },
+                service_id: { type: "string" },
                 name: { type: "string" },
                 old_value: { type: "integer" },
                 new_value: { type: "integer" },

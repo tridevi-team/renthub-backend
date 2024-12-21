@@ -1,8 +1,8 @@
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { currentTime } from "../config/time.config";
 
 const requestLogger = (req: Request, _res: Response, next: NextFunction) => {
-    console.log(`[${currentTime}] ${req.method} ${req.originalUrl}`);
+    console.log(`[${currentTime}] ${req.method} ${decodeURIComponent(req.originalUrl)}`);
     next();
 };
 

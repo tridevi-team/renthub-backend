@@ -1,4 +1,5 @@
 import { check } from "express-validator";
+import { CRUDPermissionType, PermissionType } from "../../interfaces";
 
 const createRoleValidator = [
     check("name").isString().withMessage("name must be a string"),
@@ -6,7 +7,19 @@ const createRoleValidator = [
         .isObject()
         .withMessage("permissions must be an object")
         .custom((value: object) => {
-            const keys = ["house", "role", "room", "renter", "service", "bill", "equipment", "payment"];
+            const keys: PermissionType[] = [
+                "house",
+                "role",
+                "room",
+                "renter",
+                "service",
+                "bill",
+                "equipment",
+                "payment",
+                "notification",
+                "issue",
+                "contract",
+            ];
             const permissions = Object.keys(value);
 
             // throw key missing error
@@ -17,7 +30,7 @@ const createRoleValidator = [
             }
 
             // check CRUD
-            const crud = ["create", "read", "update", "delete"];
+            const crud: CRUDPermissionType[] = ["create", "read", "update", "delete"];
             for (const key of permissions) {
                 const permission = Object.keys(value[key]);
                 const isValid = crud.every((c) => permission.includes(c));
@@ -68,7 +81,7 @@ const roleIdValidator = [check("roleId").isUUID().withMessage("roleId is not in 
 const assignRoleValidator = [
     check("houseId").isUUID().withMessage("houseId is not in the correct format"),
     check("userId").isUUID().withMessage("userId is not in the correct format"),
-    check("roleId").isUUID().withMessage("roleId is not in the correct format"),
+    check("roleId").optional().isUUID().withMessage("roleId is not in the correct format"),
 ];
 
 const roleValidator = {

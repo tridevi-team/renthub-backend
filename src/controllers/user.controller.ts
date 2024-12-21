@@ -1,21 +1,51 @@
 "use strict";
 
+import "dotenv/config";
+import { JwtPayload } from "jsonwebtoken";
 import redisClient from "../config/redis.config";
-import { AccountRoles, messageResponse } from "../enums";
-import { UserService } from "../services";
+import { messageResponse } from "../enums";
+import { RefreshTokenPayload, RefreshTokenRenterPayload } from "../interfaces";
+import { Renters, Users } from "../models";
+import { RenterService, UserService } from "../services";
 import MailService from "../services/mail.service";
 import { ApiException, apiResponse, bcrypt, Exception, jwtToken, RedisUtils } from "../utils";
 
-const REDIS_EXPIRE_REFRESH_TOKEN = 3600;
+const REDIS_EXPIRE_REFRESH_TOKEN = process.env.REDIS_EXPIRE_REFRESH_TOKEN || 604800; // 7 days
 
 class UserController {
     static async getAllUsers(req, res) {
-        const user = req.user;
+        // const user = req.user;
         try {
-            if (user.role !== AccountRoles.ADMIN) {
-                throw new ApiException(messageResponse.PERMISSION_DENIED, 403);
-            }
+            // if (user.role !== AccountRoles.ADMIN) {
+            //     throw new ApiException(messageResponse.PERMISSION_DENIED, 403);
+            // }
             const users = await UserService.getUsers();
+            return res.status(200).json(apiResponse(messageResponse.GET_USERS_LIST_SUCCESS, true, users));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async search(req, res) {
+        const { q } = req.query;
+        try {
+            const users = await UserService.search(q);
+            return res.status(200).json(apiResponse(messageResponse.GET_USERS_LIST_SUCCESS, true, users));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async getUserByHouseId(req, res) {
+        const { houseId } = req.params;
+        const { filter = [], sort = [], pagination = {} } = req.query;
+
+        try {
+            const users = await UserService.getUserInHouse(houseId, {
+                filter,
+                sort,
+                pagination,
+            });
             return res.status(200).json(apiResponse(messageResponse.GET_USERS_LIST_SUCCESS, true, users));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -43,7 +73,7 @@ class UserController {
             const userInfo = {
                 id: userData.user.id,
                 email: userData.user.email,
-                fullName: userData.user.email,
+                fullName: userData.user.fullName,
                 gender: userData.user.gender,
                 phoneNumber: userData.user.phoneNumber,
                 address: userData.user.address,
@@ -59,7 +89,7 @@ class UserController {
             };
 
             const redisKey = `users:${userInfo.id}:${userData.token.refreshToken}`;
-            await RedisUtils.setString(redisKey, userData.token.accessToken, REDIS_EXPIRE_REFRESH_TOKEN);
+            await RedisUtils.setString(redisKey, userData.token.accessToken, Number(REDIS_EXPIRE_REFRESH_TOKEN));
 
             return res.status(200).json(apiResponse(messageResponse.LOGIN_SUCCESS, true, userInfo));
         } catch (err) {
@@ -81,7 +111,7 @@ class UserController {
                 phoneNumber: phoneNumber?.trim(),
                 gender,
                 birthday: birthday || "1970-01-01",
-                address: address || "",
+                address: address || { city: "", district: "", ward: "", street: "" },
             };
 
             const user = await UserService.createUser(newUser);
@@ -125,6 +155,12 @@ class UserController {
         try {
             const verifyCode = String(Math.floor(1000 + Math.random() * 9000));
             await MailService.sendVerificationMail(email, verifyCode);
+
+            // set redis
+            const redis = await redisClient;
+            await redis.set(`verify-account:${email}`, verifyCode);
+            await redis.expire(`verify-account:${email}`, parseInt(process.env.REDIS_EXPIRE_TIME || "300"));
+
             return res.status(200).json(apiResponse(messageResponse.CHECK_EMAIL_VERIFY_ACCOUNT, true, {}));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -184,13 +220,15 @@ class UserController {
     }
 
     static async updateProfile(req, res) {
-        const { fullName, phoneNumber, birthday } = req.body;
+        const { fullName, phoneNumber, birthday, address, gender } = req.body;
         const user = req.user;
         try {
             const updateInfo = await UserService.updateProfile(user.id, {
                 fullName,
                 phoneNumber,
                 birthday,
+                address,
+                gender,
             });
             return res.status(200).json(apiResponse(messageResponse.PROFILE_UPDATE_SUCCESS, true, updateInfo));
         } catch (err) {
@@ -209,35 +247,53 @@ class UserController {
     }
 
     static async refreshToken(req, res) {
-        const { refreshToken } = req.body;
+        const { userId, refreshToken } = req.body;
         const { authorization } = req.headers;
-        const user = req.user;
 
         const accessToken = authorization?.split(" ")[1];
 
         try {
             // verify refresh token
-            jwtToken.verifyRefreshToken(refreshToken);
+            const payload = jwtToken.verifyRefreshToken(refreshToken);
 
-            // check in redis
-            const redisKey = `users:${user.id}:${refreshToken}`;
+            const isRenter = (payload as JwtPayload).role === "renter";
+            const redisKey = isRenter
+                ? `renters:${(payload as RefreshTokenRenterPayload).id}:${refreshToken}`
+                : `users:${(payload as RefreshTokenPayload).id}:${refreshToken}`;
+
             const aToken = await RedisUtils.getString(redisKey);
+            if (accessToken && aToken !== accessToken) {
+                throw new ApiException(messageResponse.TOKEN_INVALID, 406);
+            }
 
-            if (aToken !== accessToken) {
-                throw new ApiException(messageResponse.TOKEN_INVALID, 401);
+            if (userId && userId !== (payload as RefreshTokenPayload).id) {
+                throw new ApiException(messageResponse.TOKEN_INVALID, 406);
             }
 
             // sign new access token
-            const userData = await UserService.getUserById(user.id);
+            const user: Renters | Users = isRenter
+                ? await RenterService.getById((payload as RefreshTokenRenterPayload).id)
+                : await UserService.getUserById((payload as RefreshTokenPayload).id);
 
-            const newAccessToken = await UserService.generateAccessToken({
-                id: userData.id,
-                email: userData.email,
-                fullName: userData.fullName,
-                phoneNumber: userData.phoneNumber,
-                role: userData.role,
-                status: userData.status,
-            });
+            const newAccessToken = isRenter
+                ? await RenterService.generateAccessToken({
+                      id: user.id,
+                      email: user.email,
+                      phoneNumber: user.phoneNumber,
+                      roomId: (user as Renters).roomId,
+                  })
+                : await UserService.generateAccessToken({
+                      id: user.id,
+                      email: user.email,
+                      fullName: (user as Users).fullName,
+                      phoneNumber: user.phoneNumber,
+                      role: (user as Users).role,
+                      status: (user as Users).status,
+                  });
+
+            // set new access token in redis
+            const getTTL = await RedisUtils.getTTL(redisKey);
+            await RedisUtils.setString(redisKey, newAccessToken, getTTL);
 
             return res.send(apiResponse(messageResponse.REFRESH_TOKEN_SUCCESS, true, { accessToken: newAccessToken }));
         } catch (err) {
@@ -248,7 +304,7 @@ class UserController {
     static async logout(req, res) {
         const { refreshToken } = req.body;
         const { authorization } = req.headers;
-        const user = req.user;
+        const { user, isApp } = req;
 
         const accessToken = authorization?.split(" ")[1];
 
@@ -257,7 +313,7 @@ class UserController {
             jwtToken.verifyRefreshToken(refreshToken);
 
             // check in redis
-            const redisKey = `users:${user.id}:${refreshToken}`;
+            const redisKey = `${isApp || user.roomId ? `renters` : `users`}:${user.id}:${refreshToken}`;
             const aToken = await RedisUtils.getString(redisKey);
 
             if (aToken !== accessToken) {

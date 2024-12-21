@@ -15,6 +15,7 @@ renterRouter.post("/auth", (req, res) => {
 renterRouter.post("/login", renterValidator.login, handleErrors, RenterController.login);
 renterRouter.post("/verify", renterValidator.verify, handleErrors, RenterController.verifyLogin);
 renterRouter.post("/resend", renterValidator.login, handleErrors, RenterController.resendCode);
+renterRouter.get("/info", authentication, RenterController.getRenterInfo);
 renterRouter.post(
     "/:roomId/add",
     authentication,

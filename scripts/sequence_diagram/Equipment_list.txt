@@ -1,0 +1,33 @@
+title Xem danh sách thiết bị
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn màn hình danh sách thiết bị
+activate Landlord
+activate Client
+
+Client -> Backend: Gửi yêu cầu lấy danh sách thiết bị (bao gồm bộ lọc, nếu có)
+activate Backend
+
+Backend -> Backend: Kiểm tra quyền
+activate Database
+Backend -> Database: Truy vấn danh sách thiết bị (áp dụng bộ lọc)
+Database --> Backend: Trả về danh sách thiết bị
+deactivate Database
+
+alt Có dữ liệu
+    Backend --> Client: Gửi danh sách thiết bị
+    Client --> Landlord: Hiển thị danh sách thiết bị
+else Không có dữ liệu
+    Backend --> Client: Thông báo danh sách rỗng
+    Client --> Landlord: Hiển thị bảng trống
+end
+
+deactivate Backend
+deactivate Client
+deactivate Landlord

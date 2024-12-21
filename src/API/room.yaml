@@ -6,49 +6,6 @@ info:
 tags:
     - name: Room
       description: Room API. This API is used to manage rooms.
-# {
-#     "success": true,
-#     "code": "GET_ROOM_DETAILS_SUCCESS",
-#     "message": "Room details retrieved successfully",
-#     "data": {
-#         "id": "145404e9-e5bd-4ee0-8cc3-91fcfee703ed",
-#         "name": "Phòng test image 2",
-#         "maxRenters": -1,
-#         "roomArea": 0,
-#         "price": 2800000,
-#         "description": null,
-#         "house": {
-#             "id": "695668a2-d7cc-4443-a472-ae2713f0005b",
-#             "name": "House 1",
-#             "description": "This is a beautiful house",
-#             "floor": {
-#                 "id": "1e8c2789-f05c-4849-ae5a-bf34b40b2e6e",
-#                 "name": "Tầng 1",
-#                 "description": null
-#             }
-#         },
-#         "services": [
-#             {
-#                 "id": "b41ebae4-9021-4d0f-8cdb-54fa6f9d3edd",
-#                 "name": "Thang máy",
-#                 "quantity": 1,
-#                 "unitPrice": 50000,
-#                 "type": "PEOPLE",
-#                 "description": null
-#             }
-#         ],
-#         "images": [
-#             "https://picsum.photos/200/300",
-#             "https://picsum.photos/200/300",
-#             "https://picsum.photos/200/300"
-#         ],
-#         "status": "AVAILABLE",
-#         "createdBy": "108640a5-2929-44af-9ee7-7515089580dc",
-#         "createdAt": "2024-09-26T15:09:58.000Z",
-#         "updatedBy": "108640a5-2929-44af-9ee7-7515089580dc",
-#         "updatedAt": "2024-09-26T15:09:58.000Z"
-#     }
-# }
 components:
     schemas:
         RoomInfo:
@@ -79,6 +36,21 @@ components:
                     type: string
                     description: Room description
                     example: This is a beautiful room
+                contact:
+                    type: object
+                    properties:
+                        fullName:
+                            type: string
+                            description: Contact name
+                            example: John Doe
+                        phone_number:
+                            type: string
+                            description: Contact phone number
+                            example: 0987654321
+                        email:
+                            type: string
+                            description: Contact email
+                            example:
                 house:
                     type: object
                     properties:
@@ -129,6 +101,10 @@ components:
                                 type: integer
                                 description: Service quantity
                                 example: 1
+                            startIndex:
+                                type: integer
+                                description: Start index of the service
+                                example: 0
                             unitPrice:
                                 type: number
                                 description: Service unit price in VND
@@ -141,6 +117,59 @@ components:
                                 type: string
                                 description: Service description
                                 example: This is an elevator
+                equipment:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            id:
+                                type: string
+                                format: uuid
+                                description: Equipment ID
+                                example: 123e4567-e89b-12d3-a456-426614174000
+                            houseId:
+                                type: string
+                                format: uuid
+                                description: House ID
+                                example: 123e4567-e89b-12d3-a456-426614174000
+                            floorId:
+                                type: string
+                                format: uuid
+                                description: Floor ID
+                                example: 123e4567-e89b-12d3-a456-426614174000
+                            roomId:
+                                type: string
+                                format: uuid
+                                description: Room ID
+                                example: 123e4567-e89b-12d3-a456-426614174000
+                            code:
+                                type: string
+                                description: Equipment code
+                                example: EQ0001
+                            name:
+                                type: string
+                                description: Equipment name
+                                example: Air conditioner
+                            status:
+                                type: string
+                                enum:
+                                    - NORMAL
+                                    - REPAIRING
+                                    - BROKEN
+                                    - DISPOSED
+                                description: Equipment status
+                                example: NORMAL
+                            sharedType:
+                                type: string
+                                enum:
+                                    - ROOM
+                                    - HOUSE
+                                description: Equipment shared type
+                                example: ROOM
+                            description:
+                                type: string
+                                description: Equipment description
+                                example: This is an air conditioner
                 images:
                     type: array
                     items:
@@ -178,6 +207,50 @@ components:
                     format: date-time
                     description: Room updated date
                     example: 2024-09-26T15:09:58.000Z
+
+        RoomBasicInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    description: Room ID
+                    example: 123e4567-e89b-12d3-a456-426614174000
+                thumbnail:
+                    type: string
+                    format: uri
+                    description: Room thumbnail URL
+                    example: https://picsum.photos/200/300
+                name:
+                    type: string
+                    description: Room name
+                    example: Room 1
+                maxRenters:
+                    type: integer
+                    description: Maximum number of renters
+                    example: 4
+                roomArea:
+                    type: number
+                    description: Room area in square meters
+                    example: 25.5
+                price:
+                    type: number
+                    description: Room price in VND
+                    example: 2500000
+                status:
+                    type: string
+                    enum:
+                        - AVAILABLE
+                        - RENTED
+                        - PENDING
+                        - EXPIRED
+                        - MAINTENANCE
+                    description: Room status
+                    example: AVAILABLE
+                description:
+                    type: string
+                    description: Room description
+                    example: This is a beautiful room
 
         RoomDetailsSuccess:
             type: object
@@ -569,6 +642,68 @@ paths:
                       type: string
                       format: uuid
                       example: 123e4567-e89b-12d3-a456-426614174000
+            responses:
+                "200":
+                    description: Room deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/DeleteRoomSuccess"
+                "400":
+                    description: Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/sschemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "404":
+                    description: Room not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RoomNotFound"
+
+    /rooms/{houseId}/delete-rooms:
+        delete:
+            tags:
+                - Room
+            summary: Delete rooms by house
+            description: Delete rooms in a house by house ID
+            operationId: deleteRooms
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  description: House ID
+                  schema:
+                      type: string
+                      format: uuid
+                      example: 123e4567-e89b-12d3-a456-426614174000
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                ids:
+                                    type: array
+                                    items:
+                                        type: string
+                                        format: uuid
+                                        description: Room ID
+                                        example: 123e4567-e89b-12d3-a456-426614174000
+                            required:
+                                - ids
             responses:
                 "200":
                     description: Room deleted successfully

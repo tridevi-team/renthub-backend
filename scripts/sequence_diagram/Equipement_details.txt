@@ -1,0 +1,33 @@
+title Xem chi tiết thiết bị
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn thiết bị cần xem chi tiết
+activate Landlord
+activate Client
+
+Client -> Backend: Gửi ID thiết bị cần xem
+activate Backend
+
+Backend -> Backend: Kiểm tra quyền
+activate Database
+Backend -> Database: Truy vấn thông tin thiết bị
+Database --> Backend: Trả về chi tiết thiết bị
+deactivate Database
+
+alt Có dữ liệu
+    Backend --> Client: Trả về thông tin chi tiết thiết bị
+    Client --> Landlord: Hiển thị chi tiết thiết bị
+else Không có dữ liệu
+    Backend --> Client: Thông báo không tìm thấy thiết bị
+    Client --> Landlord: Hiển thị thông báo lỗi
+end
+
+deactivate Backend
+deactivate Client
+deactivate Landlord

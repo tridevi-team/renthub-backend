@@ -1,0 +1,37 @@
+title Chỉnh sửa hóa đơn (Kiểm tra validate thông tin)
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn hóa đơn cần chỉnh sửa và nhập thông tin mới
+activate Landlord
+activate Client
+
+Client -> Client: Kiểm tra validate thông tin
+alt Thông tin hợp lệ
+    Client -> Backend: Gửi ID hóa đơn và thông tin mới
+    activate Backend
+
+    Backend -> Backend: Kiểm tra quyền
+    alt Quyền hợp lệ
+        activate Database
+        Backend -> Database: Cập nhật thông tin hóa đơn
+        Database --> Backend: Xác nhận cập nhật thành công
+        Backend --> Client: Thông báo chỉnh sửa thành công
+        Client --> Landlord: Hiển thị thông báo thành công
+    else Quyền không hợp lệ
+        Backend --> Client: Thông báo lỗi quyền truy cập
+        Client --> Landlord: Hiển thị thông báo thất bại
+    end
+    deactivate Backend
+    deactivate Database
+else Thông tin không hợp lệ
+    Client --> Landlord: Hiển thị thông báo lỗi validate
+end
+
+deactivate Client
+deactivate Landlord

@@ -1,20 +1,25 @@
 "use strict";
 
+import "dotenv/config";
+import { Model } from "objection";
 import redisConfig from "../config/redis.config";
 import { messageResponse } from "../enums";
+import { FirebaseToken } from "../interfaces";
 import { RenterService } from "../services";
 import MailService from "../services/mail.service";
 import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
 
 const prefix = "renters";
 const cachePattern = `${prefix}:*`;
+const REDIS_EXPIRE_REFRESH_TOKEN = process.env.REDIS_EXPIRE_REFRESH_TOKEN || 86400;
 class RenterController {
     static async addNewRenter(req, res) {
         const { roomId } = req.params;
+        console.log("🚀 ~ RenterController ~ addNewRenter ~ roomId:", roomId);
         const user = req.user;
         const { name, citizenId, birthday, gender, email, phoneNumber, address, tempReg, moveInDate, represent, note } =
             req.body;
-
+        const trx = await Model.startTransaction();
         try {
             // check max renter
             const data = {
@@ -27,18 +32,21 @@ class RenterController {
                 phoneNumber: phoneNumber || null,
                 address: address || null,
                 tempReg: tempReg || false,
-                moveInDate: moveInDate || null,
+                moveInDate: moveInDate || "2000-01-01",
                 represent: represent || false,
                 note: note,
                 createdBy: user.id,
             };
-            const createRenter = await RenterService.create(data);
+            const createRenter = await RenterService.create(data, trx);
+
+            await trx.commit();
 
             // delete cache
             await RedisUtils.deletePattern(cachePattern);
 
             return res.json(apiResponse(messageResponse.CREATE_RENTER_SUCCESS, true, createRenter));
         } catch (err) {
+            await trx.rollback();
             Exception.handle(err, req, res);
         }
     }
@@ -68,6 +76,23 @@ class RenterController {
             await RedisUtils.setAddMember(cacheKey, JSON.stringify(renters));
 
             return res.json(apiResponse(messageResponse.GET_RENTERS_BY_ROOM_SUCCESS, true, renters));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async getRenterInfo(req, res) {
+        const user: FirebaseToken = req.user;
+
+        try {
+            const key = user.phone_number || user.email || user.uid;
+            const renter = await RenterService.findOne(key);
+
+            if (!renter) {
+                throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
+            }
+
+            return res.json(apiResponse(messageResponse.GET_RENTER_DETAILS_SUCCESS, true, renter));
         } catch (err) {
             Exception.handle(err, req, res);
         }
@@ -116,7 +141,7 @@ class RenterController {
                 return res.json(apiResponse(messageResponse.GET_RENTER_DETAILS_SUCCESS, true, renter));
             }
 
-            const renter = await RenterService.get(renterId);
+            const renter = await RenterService.getById(renterId);
 
             // set cache
             await RedisUtils.setAddMember(cacheKey, JSON.stringify(renter));
@@ -129,7 +154,7 @@ class RenterController {
 
     static async updateRenterDetails(req, res) {
         const { renterId } = req.params;
-        const user = req.user;
+        // const user = req.user;
         const { name, citizenId, birthday, gender, email, phoneNumber, address, tempReg, moveInDate, represent, note } =
             req.body;
         try {
@@ -145,7 +170,7 @@ class RenterController {
                 moveInDate,
                 represent,
                 note,
-                updatedBy: user.id,
+                // updatedBy: user.roomId ? ,
             };
 
             const updateRenter = await RenterService.update(renterId, data);
@@ -199,7 +224,7 @@ class RenterController {
                 phoneNumber,
             });
             const redis = await redisConfig;
-            const code = Math.floor(1000 + Math.random() * 9000);
+            const code = Math.floor(100000 + Math.random() * 900000);
             const username = email || phoneNumber;
             if (email) {
                 await MailService.sendLoginMail(email, renterDetails.name, String(code));
@@ -219,7 +244,7 @@ class RenterController {
         const { email, phoneNumber } = req.body;
         try {
             const redis = await redisConfig;
-            const code = Math.floor(1000 + Math.random() * 9000);
+            const code = Math.floor(100000 + Math.random() * 900000);
             const username = email || phoneNumber;
             const renterDetails = await RenterService.checkExists({
                 email,
@@ -251,6 +276,11 @@ class RenterController {
                 email,
                 phoneNumber,
             });
+
+            // save token to redis
+            const redisKey = `renters:${renter.id}:${renter.refreshToken}`;
+            await RedisUtils.setString(redisKey, renter.accessToken, Number(REDIS_EXPIRE_REFRESH_TOKEN));
+
             return res.json(apiResponse(messageResponse.LOGIN_SUCCESS, true, renter));
         } catch (err) {
             Exception.handle(err, req, res);

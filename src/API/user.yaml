@@ -8,6 +8,23 @@ tags:
       description: User API
 components:
     schemas:
+        GetUsersListSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    default: true
+                code:
+                    type: string
+                    example: GET_USERS_LIST_SUCCESS
+                message:
+                    type: string
+                    example: Users list retrieved successfully
+                data:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/UserInfo"
+
         GetUserSuccess:
             type: object
             properties:
@@ -35,6 +52,32 @@ components:
                 birthday:
                     type: string
                     example: 1999-01-01
+                gender:
+                    type: string
+                    enum:
+                        - male
+                        - female
+                        - other
+                    example: male
+                address:
+                    type: object
+                    properties:
+                        city:
+                            type: string
+                            example: Ho Chi Minh
+                        district:
+                            type: string
+                            example: District 1
+                        ward:
+                            type: string
+                            example: Ward 1
+                        street:
+                            type: string
+                            example: 123 Street
+            required:
+                - fullName
+                - phoneNumber
+                - birthday
 
         UserChangePassword:
             type: object
@@ -106,6 +149,181 @@ components:
                     type: object
                     nullable: true
 paths:
+    /users/search:
+        get:
+            tags:
+                - User
+            summary: Search users
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: query
+                  name: q
+                  schema:
+                      type: string
+                      example: mail.demo@gmail.com
+                  description: You mush provide correct email or phone number
+                  required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetUsersListSuccess"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid or expired
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
+    /users/get-all-users:
+        get:
+            tags:
+                - User
+            summary: Get all users
+            security:
+                - BearerAuth: []
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetUsersListSuccess"
+                "401":
+                    description: Token is invalid or expired
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
+    /users/get-users-by-house/{houseId}:
+        get:
+            tags:
+                - User
+            summary: Get all users by house
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: houseId
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  example: 04fcd726-cc8a-4d77-ae8b-3a36edb482a4
+                  description: House ID
+                - in: query
+                  name: filter[]
+                  description: Filter criteria array with field, operator, and value
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the filter on, e.g. houses.name"
+                              operator:
+                                  type: string
+                                  example: "ew"
+                                  description: "The operator to apply (e.g., 'ew' for endsWith, 'eq' for equals, etc.)"
+                              value:
+                                  type: string
+                                  example: "qui"
+                                  description: "The value to filter by, e.g. 'qui'"
+                - in: query
+                  name: sort[]
+                  description: Sort criteria array with field and order
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the sort on, e.g. houses.name"
+                              direction:
+                                  type: string
+                                  enum:
+                                      - "asc"
+                                      - "desc"
+                                  example: "asc"
+                                  description: "The order to sort by (asc or desc)"
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      example: 1
+                  description: Current page number
+                  required: false
+                - in: query
+                  name: pageSize
+                  schema:
+                      type: integer
+                      example: 10
+                  description: Number of items per page
+                  required: false
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetUserSuccess"
+                "400":
+                    description: Validation error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid or expired
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "403":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"
+
     /users/get-info:
         get:
             tags:
@@ -177,7 +395,7 @@ paths:
                                 $ref: "#/components/schemas/GetUserNotFound"
 
     /users/change-password:
-        put:
+        patch:
             tags:
                 - User
             summary: Change user password

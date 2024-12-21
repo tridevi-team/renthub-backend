@@ -1,11 +1,12 @@
-import { ConstraintViolationError } from "objection";
+import { ConstraintViolationError, TransactionOrKnex } from "objection";
 import { EPagination, messageResponse } from "../enums";
 import type { Filter, Renter } from "../interfaces";
-import { Houses, Renters, Roles } from "../models";
+import { Houses, Renters, RoomContracts } from "../models";
 import { ApiException, camelToSnake, filterHandler, jwtToken, sortingHandler } from "../utils";
+import ContractService from "./contract.service";
 
 class RenterService {
-    static async create(data: Renter) {
+    static async create(data: Renter, trx?: TransactionOrKnex) {
         try {
             // check if renter exists
             const renter = await Renters.query()
@@ -13,12 +14,28 @@ class RenterService {
                 .orWhere("email", "=", data.email || "")
                 .orWhere("phone_number", "=", data.phoneNumber || "")
                 .first();
+
             if (renter) {
                 throw new ApiException(messageResponse.RENTER_ALREADY_EXISTS, 409);
             }
 
+            if (data.represent && data.roomId) {
+                await Renters.query(trx).where("room_id", data.roomId).patch({ represent: false });
+            }
+
             // create renter
-            const newRenter = await Renters.query().insert(camelToSnake(data));
+            const newRenter = await Renters.query(trx).insert(camelToSnake(data));
+
+            // add to latest contract
+            const latestContract = data.roomId
+                ? await RoomContracts.query()
+                      .where({ room_id: newRenter.room_id })
+                      .orderBy("created_at", "desc")
+                      .first()
+                : null;
+            if (latestContract && data.roomId) {
+                await ContractService.addRenterAccess(data.roomId, newRenter.id, trx);
+            }
             return newRenter;
         } catch (err) {
             if (err instanceof ConstraintViolationError) {
@@ -28,9 +45,79 @@ class RenterService {
         }
     }
 
-    static async get(id: string) {
+    static async getHouseId(renterId: string) {
+        const house = await Renters.query()
+            .join("rooms", "renters.room_id", "rooms.id")
+            .join("house_floors", "rooms.floor_id", "house_floors.id")
+            .join("houses", "house_floors.house_id", "houses.id")
+            .where("renters.id", renterId)
+            .select("houses.id")
+            .first();
+        if (!house) {
+            throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
+        }
+        return house.id;
+    }
+
+    static async getRoomId(renterId: string) {
+        const room = await Renters.query().findById(renterId).select("room_id");
+        if (!room) {
+            throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
+        }
+        return room.roomId;
+    }
+
+    static async getById(id: string) {
         // Get renter by id
         const renter = await Renters.query().findById(id);
+        if (!renter) {
+            throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
+        }
+        return renter;
+    }
+
+    static async findOne(key: string) {
+        // if key match phone number
+        if (key.match(/^\+84\d{9,10}$/) || key.match(/^0\d{9,10}$/)) {
+            const internationalPhoneNumber = key.startsWith("+84") ? key : key.replace(/^0/, "+84");
+            const domesticPhoneNumber = key.startsWith("0") ? key : key.replace(/^\+84/, "0");
+            const renter = await Renters.query()
+                .where("phone_number", internationalPhoneNumber)
+                .orWhere("phone_number", domesticPhoneNumber)
+                .modify("houseAndFloor")
+                .first();
+            return renter;
+        }
+
+        // if key match email
+        if (key.match(/.+@.+\..+/)) {
+            const renter = await Renters.query().findOne("email", key).modify("houseAndFloor");
+            return renter;
+        }
+
+        // if key match id
+        const renter = await Renters.query().findById(key).modify("houseAndFloor");
+        return renter;
+    }
+
+    static async getByEmail(email: string) {
+        // Get renter by email
+        const renter = await Renters.query().where("email", email).first();
+        if (!renter) {
+            throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
+        }
+        return renter;
+    }
+
+    static async getByPhoneNumber(phoneNumber: string) {
+        const internationalPhoneNumber = phoneNumber.startsWith("+84") ? phoneNumber : phoneNumber.replace(/^0/, "+84");
+        const domesticPhoneNumber = phoneNumber.startsWith("0") ? phoneNumber : phoneNumber.replace(/^\+84/, "0");
+
+        // Get renter by phone number
+        const renter = await Renters.query()
+            .where("phone_number", internationalPhoneNumber)
+            .orWhere("phone_number", domesticPhoneNumber)
+            .first();
         if (!renter) {
             throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
         }
@@ -65,7 +152,8 @@ class RenterService {
                 "renters.temp_reg",
                 "renters.represent",
                 "renters.move_in_date",
-                "renters.note"
+                "renters.note",
+                "renters.id as id"
             );
 
         // Filter
@@ -97,7 +185,16 @@ class RenterService {
         };
     }
 
-    static async listByRoom(roomId: string, filterData?: Filter) {
+    static async listByRoom(
+        roomId: string,
+        filterData?: Filter
+    ): Promise<{
+        total: number;
+        page: number;
+        pageCount: number;
+        pageSize: number;
+        results: Renters[];
+    }> {
         const {
             filter = [],
             sort = [],
@@ -106,27 +203,32 @@ class RenterService {
 
         let query = Renters.query().where("room_id", roomId);
 
-        // Filter
+        // Apply Filters
         query = filterHandler(query, filter);
 
-        // Sort
+        // Apply Sorting
         query = sortingHandler(query, sort);
 
-        const clone = query.clone();
-        const total = await clone.resultSize();
-        if (total === 0) {
-            throw new ApiException(messageResponse.NO_RENTERS_FOUND, 404);
-        }
+        // Clone the query to get the total count
+        const total = await query.clone().resultSize();
+
+        // if (total === 0) {
+        //     throw new ApiException(messageResponse.NO_RENTERS_FOUND, 404);
+        // }
 
         const totalPages = Math.ceil(total / pageSize);
+        let renters;
 
-        if (page === -1 && pageSize === -1) await query.page(0, total);
-        else await query.page(page - 1, pageSize);
-
-        const renters = await query;
+        // If page and pageSize are not default, use pagination; otherwise, fetch all records
+        if (page === -1 && pageSize === -1) {
+            renters = await query;
+        } else {
+            const paginatedResults = await query.page(page - 1, pageSize);
+            renters = paginatedResults.results;
+        }
 
         return {
-            ...renters,
+            results: renters,
             total,
             page,
             pageCount: totalPages,
@@ -135,18 +237,28 @@ class RenterService {
     }
 
     static async update(id: string, data: Renter) {
-        const renter = await this.get(id);
+        const renter = await this.getById(id);
+
+        if (data.represent && renter.roomId) {
+            await Renters.query().where("room_id", renter.roomId).patch({ represent: false });
+        }
+
         const updatedRenter = await renter.$query().patchAndFetch(camelToSnake(data));
         return updatedRenter;
     }
 
     static async delete(id: string) {
-        const renter = await this.get(id);
+        const renter = await this.getById(id);
         if (renter.represent) {
             throw new ApiException(messageResponse.CHANGE_REPRESENT_BEFORE_DELETE, 409);
         }
         const deletedRenter = await Renters.query().deleteById(id);
         return deletedRenter;
+    }
+
+    static async checkCitizenIdExists(citizenId: string) {
+        const renter = await Renters.query().findOne("citizen_id", citizenId);
+        return renter;
     }
 
     static async checkExists(data: { email?: string; phoneNumber?: string }) {
@@ -159,6 +271,7 @@ class RenterService {
                     builder.orWhere("phone_number", data.phoneNumber);
                 }
             })
+            .andWhereNot("room_id", null)
             .first();
         if (!renter) {
             throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
@@ -176,33 +289,61 @@ class RenterService {
                     builder.orWhere("phone_number", data.phoneNumber);
                 }
             })
+            .join("rooms", "renters.room_id", "rooms.id")
+            .join("house_floors", "rooms.floor_id", "house_floors.id")
+            .select(
+                "renters.id as id",
+                "house_id",
+                "floor_id",
+                "room_id",
+                "renters.name",
+                "citizen_id",
+                "birthday",
+                "gender",
+                "email",
+                "phone_number",
+                "address",
+                "temp_reg",
+                "move_in_date",
+                "represent"
+            )
             .first();
         if (!renter) {
             throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
         }
 
         // sign token
-        const accessToken = await jwtToken.signAccessToken({
-            id: renter.id,
-            email: renter.email,
-            phoneNumber: renter.phoneNumber,
-            room_id: renter.roomId,
-            type: "renter",
-        });
+        const accessToken = await this.generateAccessToken(renter);
 
-        const refreshToken = await jwtToken.signRefreshToken({
-            id: renter.id,
-            name: renter.name,
-            room_id: renter.roomId,
-            type: "renter",
-        });
+        const refreshToken = await this.generateRefreshToken(renter);
 
         return { ...renter, accessToken, refreshToken };
     }
 
+    static async generateAccessToken(renter: { id: string; email: string; phoneNumber: string; roomId: string }) {
+        const accessToken = jwtToken.signAccessToken({
+            id: renter.id,
+            email: renter.email,
+            phoneNumber: renter.phoneNumber,
+            roomId: renter.roomId,
+            role: "renter",
+        });
+        return accessToken;
+    }
+
+    static async generateRefreshToken(renter: { id: string; name: string; roomId: string }) {
+        const refreshToken = jwtToken.signRefreshToken({
+            id: renter.id,
+            name: renter.name,
+            roomId: renter.roomId,
+            role: "renter",
+        });
+        return refreshToken;
+    }
+
     static async changeRepresent(renterId: string, roomId: string) {
         // Change representative
-        const renter = await this.get(renterId);
+        const renter = await this.getById(renterId);
         const roomRenters = await Renters.query().where("room_id", roomId);
 
         const representRenter = roomRenters.find((r) => r.represent);
@@ -234,46 +375,6 @@ class RenterService {
             .first();
         if (room) {
             return true;
-        }
-
-        return false;
-    }
-
-    static async isRenterAccessible(userId: string, renterId: string, action: string) {
-        const renter = await Renters.query().findById(renterId);
-        if (!renter) {
-            throw new ApiException(messageResponse.RENTER_NOT_FOUND, 404);
-        }
-
-        const houseDetails = await Renters.query()
-            .join("rooms", "renters.room_id", "rooms.id")
-            .join("house_floors", "rooms.floor_id", "house_floors.id")
-            .join("houses", "house_floors.house_id", "houses.id")
-            .where("renters.id", renterId)
-            .select("houses.created_by", "houses.id")
-            .first();
-        if (houseDetails && houseDetails.createdBy === userId) return true;
-
-        const housePermissions = await Roles.query()
-            .leftJoin("user_roles", "roles.id", "user_roles.role_id")
-            .findOne(
-                camelToSnake({
-                    "roles.house_id": houseDetails?.id,
-                    "user_roles.user_id": userId,
-                })
-            );
-
-        if (!housePermissions?.permissions) return false;
-        else if (action === "read") {
-            return (
-                housePermissions.permissions.role.read ||
-                housePermissions.permissions.role.update ||
-                housePermissions.permissions.role.delete
-            );
-        } else if (action === "update") {
-            return housePermissions.permissions.role.update;
-        } else if (action === "delete") {
-            return housePermissions.permissions.role.delete;
         }
 
         return false;

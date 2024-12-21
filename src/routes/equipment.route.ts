@@ -2,7 +2,7 @@ import express from "express";
 import EquipmentController from "../controllers/equipment.controller";
 import { Action, Module } from "../enums";
 import { authentication, authorize, handleErrors } from "../middlewares";
-import { equipmentValidator } from "../middlewares/validator";
+import { equipmentValidator, houseValidator } from "../middlewares/validator";
 
 const equipmentRouter = express.Router();
 
@@ -64,6 +64,15 @@ equipmentRouter.delete(
     equipmentValidator.equipmentId,
     handleErrors,
     EquipmentController.deleteEquipment
+);
+
+equipmentRouter.delete(
+    "/:houseId/delete-in-house",
+    authentication,
+    authorize(Module.EQUIPMENT, Action.DELETE),
+    houseValidator.houseIdValidator,
+    handleErrors,
+    EquipmentController.deleteEquipmentInHouse
 );
 
 export default equipmentRouter;

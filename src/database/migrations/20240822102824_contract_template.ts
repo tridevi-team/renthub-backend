@@ -5,7 +5,7 @@ export async function up(knex: Knex): Promise<void> {
         table.uuid("id").primary().defaultTo(knex.raw("(uuid())"));
         table.uuid("house_id").references("id").inTable("houses").onDelete("CASCADE").onUpdate("CASCADE");
         table.string("name").notNullable();
-        table.specificType("content", "text").nullable();
+        table.specificType("content", "longtext").nullable();
         table.boolean("is_active").defaultTo(true);
         table.uuid("created_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
         table.datetime("created_at").defaultTo(knex.fn.now());

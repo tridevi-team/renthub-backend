@@ -10,19 +10,31 @@
         "sourceMap": true, // Enables the generation of sourcemap files
         "target": "es2019", // Target environment
 
+        "skipLibCheck": true, // Skip type checking of all declaration files (*.d.ts)
+
         // Module resolution
         "baseUrl": "./", // Sets a base directory to resolve non-absolute module names
         "esModuleInterop": true, // fixes some issues TS originally had with the ES6 spec where TypeScript treats CommonJS/AMD/UMD modules similar to ES6 module
         "moduleResolution": "node", // Pretty much always node for modern JS. Other option is "classic"
         "resolveJsonModule": true, // Include modules imported with .json extension
         "paths": {
-            "@application/*": ["src/application/*"],
-            "@domain/*": ["src/domain/*"],
-            "@infrastructure/*": ["src/infrastructure/*"],
-            "@presentation/*": ["src/presentation/*"],
-            "@test/*": ["test/*"],
-            "@/*": ["*"]
-        }, // A series of entries which re-map imports to lookup locations relative to the baseUrl
+            "@config/*": ["src/config/*"], // Specific wildcard paths
+            "@database": ["src/database/index"],
+            "@enums": ["src/enums/index"],
+            "@interfaces": ["src/interfaces/index"],
+            "@middlewares": ["src/middlewares/index"],
+            "@controllers": ["src/controllers/index"],
+            "@models": ["src/models/index"],
+            "@routes": ["src/routes/index"],
+            "@routes/*": ["src/routes/*"],
+            "@services": ["src/services/index"],
+            "@utils": ["src/utils/index"], // Single wildcard for utils
+            "@utils/*": ["src/utils/*"], // Single wildcard for utils
+            "@validator/*": ["src/middlewares/validator/*"], // Validator sub-path
+            "@validator": ["src/middlewares/validator/index"], // Validator sub-path
+            "@test/*": ["test/*"], // Test files path
+            "@/*": ["src/*"] // General catch-all for all src folders
+        },
         // "typeRoots": ["../node_modules/@types", "node_modules/@types", "src/types"],
         // Strict checks
         "strict": true, // Enable all strict type-checking options
@@ -41,6 +53,6 @@
         "noUnusedParameters": true, // Report errors on unused parameters
         "pretty": true // Stylize errors and messages using color and context
     },
-    "exclude": ["node_modules", "dist"], // Specifies an array of filenames or patterns that should be skipped when resolving include
+    "exclude": ["node_modules", "dist", "**/database/**", "dumps", "scripts"], // Specifies an array of filenames or patterns that should be skipped when resolving include
     "compileOnSave": false // Compile on save
 }

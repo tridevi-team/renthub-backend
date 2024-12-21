@@ -1,7 +1,8 @@
 import assert from "assert";
-import { Action, EPagination, EquipmentStatus, EquipmentType, messageResponse } from "../enums";
+import { TransactionOrKnex } from "objection";
+import { EPagination, EquipmentStatus, EquipmentType, messageResponse } from "../enums";
 import { EquipmentInfo, Filter } from "../interfaces";
-import { Equipment, Houses, Renters, Roles, Rooms, Users } from "../models";
+import { Equipment, Houses } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
 
 class EquipmentService {
@@ -16,21 +17,13 @@ class EquipmentService {
     }
 
     static async getById(id: string) {
-        const data = await Equipment.query().findById(id);
+        const data = await Equipment.query()
+            .findById(id)
+            .leftJoin("house_floors as floor", "equipment.floor_id", "floor.id")
+            .leftJoin("rooms", "equipment.room_id", "rooms.id")
+            .select("equipment.*", "floor.name as floorName", "rooms.name as roomName");
         if (!data) {
             throw new ApiException(messageResponse.EQUIPMENT_NOT_FOUND, 404);
-        } else if (data.floorId) {
-            const data = await Equipment.query()
-                .findById(id)
-                .joinRelated("floor")
-                .select("equipment.*", "floor.name as floorName");
-            return data;
-        } else if (data.roomId) {
-            const data = await Equipment.query()
-                .findById(id)
-                .joinRelated("room")
-                .select("equipment.*", "room.name as roomName");
-            return data;
         }
         return data;
     }
@@ -44,10 +37,55 @@ class EquipmentService {
 
         let query = Houses.query()
             .join("equipment", "houses.id", "equipment.houseId")
-            .leftJoin("house_floors", "equipment.floor_id", "house_floors.id")
+            .leftJoin("house_floors as floors", "equipment.floor_id", "floors.id")
             .leftJoin("rooms", "equipment.room_id", "rooms.id")
             .where("houses.id", houseId)
-            .select("equipment.*", "house_floors.name as floorName", "rooms.name as roomName");
+            .select("equipment.*", "floors.name as floorName", "rooms.name as roomName");
+
+        // filter
+        query = filterHandler(query, filter);
+
+        // sort
+        query = sortingHandler(query, sort);
+
+        // clone
+        const clone = query.clone();
+        const total = await clone.resultSize();
+
+        if (total === 0) throw new ApiException(messageResponse.EQUIPMENT_NOT_FOUND, 404);
+
+        const totalPages = Math.ceil(total / pageSize);
+
+        if (page === -1 && pageSize === -1) {
+            await query.page(0, total);
+        } else {
+            await query.page(page - 1, pageSize);
+        }
+
+        const fetchData = await query;
+
+        return {
+            ...fetchData,
+            total,
+            page,
+            pageCount: totalPages,
+            pageSize,
+        };
+    }
+
+    static async listEquipmentByRoom(roomId: string, dataFilter?: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
+        } = dataFilter || {};
+
+        let query = Equipment.query().where((builder) => {
+            // get equipment by room id or (house id and floor id and room id is null)
+            builder.where("room_id", roomId).orWhere((builder) => {
+                builder.where("house_id", roomId).whereNull("floor_id").whereNull("room_id");
+            });
+        });
 
         // filter
         query = filterHandler(query, filter);
@@ -117,63 +155,15 @@ class EquipmentService {
         return equipment;
     }
 
-    static async isAccessible(userId: string, equipmentId: string, action: string) {
-        const userData = (await Users.query().findById(userId)) || (await Renters.query().findById(userId));
-        if (userData instanceof Users) {
-            // owner check
-            const isOwner = await Equipment.query().findById(equipmentId).joinRelated("house").findOne({
-                "house.createdBy": userId,
-                "equipment.id": equipmentId,
-            });
-            if (isOwner) return true;
-            else {
-                // access check
-                const equipment = await Equipment.query().findById(equipmentId);
-                if (!equipment) return false;
-
-                const isAccess = await Roles.query()
-                    .joinRelated("userRoles")
-                    .findOne(
-                        camelToSnake({
-                            "userRoles.userId": userId,
-                            "userRoles.houseId": equipment.houseId,
-                        })
-                    );
-
-                if (!isAccess) return false;
-
-                if (action === Action.READ) {
-                    return (
-                        isAccess.permissions.equipment.create ||
-                        isAccess.permissions.equipment.read ||
-                        isAccess.permissions.equipment.update ||
-                        isAccess.permissions.equipment.delete
-                    );
-                } else if (action === Action.UPDATE) {
-                    return isAccess.permissions.equipment.update;
-                } else if (action === Action.DELETE) {
-                    return isAccess.permissions.equipment.delete;
-                } else if (action === Action.CREATE) {
-                    return isAccess.permissions.equipment.create;
-                }
-            }
-        } else if (userData instanceof Renters) {
-            if (!userData.represent) return false;
-
-            const houseData = await Rooms.query().joinRelated("floor").joinRelated("house").findOne({
-                "rooms.id": userData.roomId,
-            });
-            if (!houseData) return false;
-
-            const equipment = await Equipment.query().findOne({
-                "equipment.id": equipmentId,
-                "equipment.houseId": houseData.houseId,
-            });
-
-            if (!equipment) return false;
-            return true;
+    static async deleteMany(actionBy: string, houseId: string, ids: string[], trx?: TransactionOrKnex) {
+        const equipment = await Equipment.query().whereIn("id", ids).andWhere("houseId", houseId);
+        if (equipment.length === 0) {
+            throw new ApiException(messageResponse.EQUIPMENT_NOT_FOUND, 404);
         }
-        return false;
+        for (const item of equipment) {
+            await item.$query(trx).patch(camelToSnake({ updatedBy: actionBy }));
+            await item.$query(trx).delete();
+        }
     }
 }
 

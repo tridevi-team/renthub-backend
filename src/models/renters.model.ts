@@ -1,8 +1,9 @@
+import { RoomContracts, Rooms } from "@models";
 import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
+import { Address } from "../interfaces";
 import { currentDateTime } from "../utils/currentTime";
-import Rooms from "./rooms.model";
 
 class Renters extends Model {
     id: string;
@@ -13,7 +14,7 @@ class Renters extends Model {
     gender: "male" | "female" | "other";
     email: string;
     phone_number: string;
-    address: string;
+    address: Address;
     temp_reg: boolean;
     move_in_date: string;
     represent: boolean;
@@ -26,6 +27,7 @@ class Renters extends Model {
     roomId: string;
     createdBy: string;
     count: number;
+    results: Renters[];
 
     static get tableName() {
         return "renters";
@@ -43,6 +45,10 @@ class Renters extends Model {
         this.updated_at = currentDateTime();
     }
 
+    $beforeDelete(_queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
+    }
+
     static get jsonSchema() {
         return {
             type: "object",
@@ -56,7 +62,7 @@ class Renters extends Model {
                 gender: { type: "string", maxLength: 6 },
                 email: { type: "string", maxLength: 255 },
                 phone_number: { type: "string", maxLength: 255 },
-                address: { type: "string", maxLength: 255 },
+                address: { type: "object" },
                 temp_reg: { type: "boolean" },
                 move_in_date: { type: "string", format: "date" },
                 represent: { type: "boolean" },
@@ -79,6 +85,14 @@ class Renters extends Model {
                     to: "rooms.id",
                 },
             },
+            contract: {
+                relation: Model.HasManyRelation,
+                modelClass: RoomContracts,
+                join: {
+                    from: "renters.id",
+                    to: "room_contracts.renter_id",
+                },
+            },
         };
     }
 
@@ -86,6 +100,28 @@ class Renters extends Model {
         return {
             represent(builder) {
                 builder.where("represent", true);
+            },
+            houseAndFloor(builder) {
+                builder
+                    .select("renters.*", "house_floors.house_id", "house_floors.id as floor_id")
+                    .join("rooms", "rooms.id", "renters.room_id")
+                    .join("house_floors", "house_floors.id", "rooms.floor_id");
+            },
+            basicInfo(builder) {
+                builder.select(
+                    "id",
+                    "name",
+                    "phone_number",
+                    "email",
+                    "citizen_id",
+                    "address",
+                    "birthday",
+                    "gender",
+                    "temp_reg",
+                    "move_in_date",
+                    "represent",
+                    "note"
+                );
             },
         };
     }

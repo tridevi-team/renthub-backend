@@ -1,7 +1,9 @@
+import { Address } from "@interfaces";
+import { ContractTemplate } from "@models";
+import { currentDateTime } from "@utils";
 import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
-import { currentDateTime } from "../utils/currentTime";
 
 class Users extends Model {
     id!: string;
@@ -10,7 +12,7 @@ class Users extends Model {
     full_name!: string;
     gender!: string;
     phone_number!: string;
-    address!: string;
+    address!: Address;
     birthday!: string;
     role!: string;
     type!: string;
@@ -40,6 +42,10 @@ class Users extends Model {
         this.updated_at = currentDateTime();
     }
 
+    $beforeDelete(_queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
+    }
+
     static get jsonSchema() {
         return {
             type: "object",
@@ -51,7 +57,7 @@ class Users extends Model {
                 full_name: { type: "string", maxLength: 50 },
                 gender: { type: "string", maxLength: 6 },
                 phone_number: { type: "string", maxLength: 11 },
-                address: { type: "string", maxLength: 255 },
+                address: { type: "object" },
                 birthday: { type: "string", format: "date" },
                 role: { type: "string", maxLength: 10 },
                 type: { type: "string", maxLength: 10 },
@@ -61,6 +67,27 @@ class Users extends Model {
                 created_at: { type: "string", format: "date-time" },
                 updated_by: { type: "string", format: "uuid" },
                 updated_at: { type: "string", format: "date-time" },
+            },
+        };
+    }
+
+    static get relationMappings() {
+        return {
+            template: {
+                relation: Model.HasManyRelation,
+                modelClass: ContractTemplate,
+                join: {
+                    from: "users.id",
+                    to: "contract_templates.created_by",
+                },
+            },
+        };
+    }
+
+    static get modifiers() {
+        return {
+            contact: (builder) => {
+                builder.select("full_name", "phone_number", "email");
             },
         };
     }

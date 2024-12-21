@@ -1,16 +1,21 @@
 import PayOS from "@payos/node";
 import { raw } from "objection";
-import { Action, EPagination, messageResponse } from "../enums";
+import { EPagination, messageResponse } from "../enums";
 import { Filter, PaymentRequest } from "../interfaces";
-import { PaymentMethods, Roles } from "../models";
+import { PaymentMethods } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
-import { HouseService } from "./";
 
 class PaymentService {
     static async getById(id: string) {
         const details = await PaymentMethods.query().findById(id);
         if (!details) throw new ApiException(messageResponse.PAYMENT_METHOD_NOT_FOUND, 404);
         return details;
+    }
+
+    static async getDefaultPaymentMethod(houseId: string) {
+        const payment = await PaymentMethods.query().where("house_id", houseId).orderBy("is_default", "desc").first();
+
+        return payment;
     }
 
     static async getByHouse(houseId: string, filterData?: Filter) {
@@ -79,11 +84,19 @@ class PaymentService {
             .where("house_id", paymentMethod.houseId)
             .where("name", data.name)
             .where("account_number", data.accountNumber)
+            .where("bank_name", data.bankName)
             .where("id", "<>", id)
             .first();
         if (checkPaymentMethod) throw new ApiException(messageResponse.PAYMENT_METHOD_ALREADY_EXISTS, 400);
 
         await paymentMethod.$query().patch(camelToSnake(data));
+
+        if (data.isDefault)
+            await PaymentMethods.query()
+                .where("house_id", paymentMethod.houseId)
+                .andWhere("id", "<>", id)
+                .patch({ is_default: false });
+
         return paymentMethod;
     }
 
@@ -142,33 +155,6 @@ class PaymentService {
             apiKey: info.payosApiKey,
             checksum: info.payosChecksum,
         };
-    }
-
-    static async isAccessible(userId: string, paymentMethodId: string, action: string) {
-        const paymentMethod = await PaymentMethods.query().findById(paymentMethodId);
-        if (!paymentMethod) return false;
-
-        const houseDetails = await HouseService.getHouseById(paymentMethod.houseId);
-
-        if (houseDetails.createdBy === userId) return true;
-
-        const roleDetails = await Roles.query()
-            .joinRelated("user")
-            .findOne(camelToSnake({ userId, houseId: houseDetails.id }));
-        if (!roleDetails) return false;
-
-        if (action === Action.READ)
-            return (
-                roleDetails.permissions.payment.create ||
-                roleDetails.permissions.payment.read ||
-                roleDetails.permissions.payment.update ||
-                roleDetails.permissions.payment.delete
-            );
-        else if (action === Action.UPDATE) return roleDetails.permissions.payment.update;
-        else if (action === Action.DELETE) return roleDetails.permissions.payment.delete;
-        else if (action === Action.CREATE) return roleDetails.permissions.payment.create;
-
-        return false;
     }
 }
 

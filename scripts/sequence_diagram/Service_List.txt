@@ -1,0 +1,39 @@
+title Lấy danh sách dịch vụ theo nhà
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+activate Landlord
+activate Client
+
+Landlord -> Client: Chọn nhà để xem danh sách dịch vụ
+
+Client --> Landlord: Hiển thị bộ lọc
+
+Landlord -> Client: Nhập thông tin bộ lọc
+
+activate Backend
+Client -> Backend: Gửi yêu cầu lấy danh sách dịch vụ theo nhà
+
+activate Database
+Backend -> Database: Truy vấn danh sách dịch vụ theo nhà
+
+Database --> Backend: Trả về danh sách dịch vụ
+
+deactivate Database
+
+alt Danh sách không trống
+  Backend --> Client: Trả về danh sách dịch vụ đã lọc
+  Client --> Landlord: Hiển thị danh sách dịch vụ theo nhà
+else Danh sách trống
+  Backend --> Client: Trả về thông báo danh sách trống
+  Client --> Landlord: Hiển thị thông báo "Không có dịch vụ cho nhà này"
+end
+
+deactivate Backend
+deactivate Client
+deactivate Landlord

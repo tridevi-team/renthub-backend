@@ -21,6 +21,9 @@ class Equipment extends Model {
     houseId: string;
     floorId: string;
     roomId: string;
+    sharedType: string;
+    count: number;
+    createdBy: string;
 
     static get tableName() {
         return "equipment";
@@ -97,6 +100,24 @@ class Equipment extends Model {
                     from: "equipment.id",
                     to: "issues.equipment_id",
                 },
+            },
+        };
+    }
+
+    static get modifiers() {
+        return {
+            details: (builder) => {
+                builder.select(
+                    "id",
+                    "house_id",
+                    "floor_id",
+                    "room_id",
+                    "code",
+                    "name",
+                    "status",
+                    "shared_type",
+                    "description"
+                );
             },
         };
     }

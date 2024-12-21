@@ -1,0 +1,33 @@
+title Chi tiết tầng
+
+bottomparticipants 
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn tầng cần xem chi tiết
+activate Landlord
+activate Client
+
+Client -> Backend: Gửi ID tầng cần lấy chi tiết
+activate Backend
+
+Backend -> Backend: Kiểm tra quyền
+activate Database
+Backend -> Database: Truy vấn lấy chi tiết tầng
+
+Database --> Backend: Trả về bản ghi chi tiết tầng
+deactivate Database
+
+alt Có dữ liệu
+    Backend --> Client: Trả về thông tin chi tiết tầng
+    Client --> Landlord: Hiển thị thông tin chi tiết tầng
+else Không có dữ liệu
+    Backend --> Client: Thông báo không tìm thấy dữ liệu
+    deactivate Backend
+end
+
+deactivate Client
+deactivate Landlord

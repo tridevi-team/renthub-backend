@@ -661,3 +661,60 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Unauthorized"
+
+    /equipment/{houseId}/delete-in-house:
+        delete:
+            tags:
+                - Equipment
+            summary: Delete multiple equipment in house. User need to login to use this endpoint. In order to delete equipment, user must have permission to the house. HouseId is required in the path
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: houseId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The unique identifier of the house
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                ids:
+                                    type: array
+                                    items:
+                                        type: string
+                                        format: uuid
+                                    description: The unique identifier of the equipment
+                                    example: ["dc6f90bc-43aa-4dd8-975e-3a75117c38a5"]
+            responses:
+                "200":
+                    description: Equipment deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/EquipmentDeleteSuccess"
+                "400":
+                    description: Validation Error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "401":
+                    description: Token is invalid
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "403":
+                    description: User is not authorized
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Unauthorized"

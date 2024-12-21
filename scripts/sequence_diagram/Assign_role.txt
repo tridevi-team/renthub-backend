@@ -1,0 +1,42 @@
+title Phân quyền người dùng vào nhà
+
+bottomparticipants 
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Truy cập vào trang phân quyền
+
+activate Landlord
+activate Client
+
+Client --> Landlord: Hiển thị form phân quyền người dùng
+
+Landlord -> Client: Chọn người dùng và quyền
+
+Client -> Backend: Gửi thông tin phân quyền
+
+activate Backend
+
+Backend -> Backend: Xác thực thông tin
+
+Backend -> Database: Gửi thông tin
+
+activate Database
+
+Database -> Database: Lưu trữ dữ liệu
+
+Database -> Backend: Gửi dữ liệu đã tạo
+
+deactivate Database
+
+Backend -> Client: Thông báo phân quyền thành công
+
+deactivate Backend
+
+Client -> Landlord: Thông báo phân quyền thành công
+
+deactivate Landlord
+deactivate Client

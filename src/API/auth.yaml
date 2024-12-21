@@ -111,7 +111,10 @@ components:
                         firstLogin:
                             type: integer
                             example: 1
-                        token:
+                        accessToken:
+                            type: string
+                            example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMzFjNjY1Yy1kYzUzLTQyYzYtODhjYy1lMzY0OTBjYjUyYTgiLCJpYXQiOjE2MjYwNjYwNzYsImV4cCI6MTYyNjA2NjA3N30.7qkjhwkhjweyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIzMWM2NjVjLWRjNTMtNDJjNi04OGNjLWUzNjQ5MGNiNTJhOCIsImVtYWlsIjoidG1xdWFuZzAyMDlAZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkRlEyenA1TjJpeDFyWWxBanVRTWtZLnpiWFFFQ1VtZU1wMHgzRDVsRnJtNnZUOVFtb0lmdnkiLCJyb2xlIjoidXNlciIsInN0YXR1cyI6MSwiaWF0IjoxNzI2OTI4MjUzLCJleHAiOjE3MjY5MzE4NTN9.bC3TooxQsvvdBucF_QR2I14c1OKBBAUrUlEKHx0jbvc
+                        refreshToken:
                             type: string
                             example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMzFjNjY1Yy1kYzUzLTQyYzYtODhjYy1lMzY0OTBjYjUyYTgiLCJpYXQiOjE2MjYwNjYwNzYsImV4cCI6MTYyNjA2NjA3N30.7qkjhwkhjweyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIzMWM2NjVjLWRjNTMtNDJjNi04OGNjLWUzNjQ5MGNiNTJhOCIsImVtYWlsIjoidG1xdWFuZzAyMDlAZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkRlEyenA1TjJpeDFyWWxBanVRTWtZLnpiWFFFQ1VtZU1wMHgzRDVsRnJtNnZUOVFtb0lmdnkiLCJyb2xlIjoidXNlciIsInN0YXR1cyI6MSwiaWF0IjoxNzI2OTI4MjUzLCJleHAiOjE3MjY5MzE4NTN9.bC3TooxQsvvdBucF_QR2I14c1OKBBAUrUlEKHx0jbvc
                         houses:
@@ -176,125 +179,25 @@ components:
                                         type: object
                                         properties:
                                             house:
-                                                type: object
-                                                properties:
-                                                    create:
-                                                        type: boolean
-                                                        example: false
-                                                    read:
-                                                        type: boolean
-                                                        example: true
-                                                    update:
-                                                        type: boolean
-                                                        example: true
-                                                    delete:
-                                                        type: boolean
-                                                        example: true
-                                            role:
-                                                type: object
-                                                properties:
-                                                    create:
-                                                        type: boolean
-                                                        example: true
-                                                    read:
-                                                        type: boolean
-                                                        example: true
-                                                    update:
-                                                        type: boolean
-                                                        example: true
-                                                    delete:
-                                                        type: boolean
-                                                        example: true
+                                                $ref: "#/components/schemas/CRUDPermissions"
+                                            floor:
+                                                $ref: "#/components/schemas/CRUDPermissions"
                                             room:
-                                                type: object
-                                                properties:
-                                                    create:
-                                                        type: boolean
-                                                        example: true
-                                                    read:
-                                                        type: boolean
-                                                        example: true
-                                                    update:
-                                                        type: boolean
-                                                        example: true
-                                                    delete:
-                                                        type: boolean
-                                                        example: true
+                                                $ref: "#/components/schemas/CRUDPermissions"
+                                            role:
+                                                $ref: "#/components/schemas/CRUDPermissions"
                                             renter:
-                                                type: object
-                                                properties:
-                                                    create:
-                                                        type: boolean
-                                                        example: true
-                                                    read:
-                                                        type: boolean
-                                                        example: true
-                                                    update:
-                                                        type: boolean
-                                                        example: true
-                                                    delete:
-                                                        type: boolean
-                                                        example: true
+                                                $ref: "#/components/schemas/CRUDPermissions"
                                             service:
-                                                type: object
-                                                properties:
-                                                    create:
-                                                        type: boolean
-                                                        example: true
-                                                    read:
-                                                        type: boolean
-                                                        example: true
-                                                    update:
-                                                        type: boolean
-                                                        example: true
-                                                    delete:
-                                                        type: boolean
-                                                        example: true
+                                                $ref: "#/components/schemas/CRUDPermissions"
                                             bill:
-                                                type: object
-                                                properties:
-                                                    create:
-                                                        type: boolean
-                                                        example: true
-                                                    read:
-                                                        type: boolean
-                                                        example: true
-                                                    update:
-                                                        type: boolean
-                                                        example: true
-                                                    delete:
-                                                        type: boolean
-                                                        example: true
+                                                $ref: "#/components/schemas/CRUDPermissions"
                                             equipment:
-                                                type: object
-                                                properties:
-                                                    create:
-                                                        type: boolean
-                                                        example: true
-                                                    read:
-                                                        type: boolean
-                                                        example: true
-                                                    update:
-                                                        type: boolean
-                                                        example: true
-                                                    delete:
-                                                        type: boolean
-                                                        example: true
+                                                $ref: "#/components/schemas/CRUDPermissions"
                                             payment:
-                                                type: object
-                                                properties:
-                                                    create:
-                                                        type: boolean
-                                                        example: true
-                                                    read:
-                                                        type: boolean
-                                                        example: true
-                                                    update:
-                                                        type: boolean
-                                                        example: true
-                                                    delete:
-                                                        type: boolean
-                                                        example: true
+                                                $ref: "#/components/schemas/CRUDPermissions"
+                                            issue:
+                                                $ref: "#/components/schemas/CRUDPermissions"
 
         InvalidUser:
             type: object
@@ -481,8 +384,8 @@ paths:
         post:
             tags: [Auth]
             summary: Refresh token to get new token
-            security:
-                - BearerAuth: []
+            # security:
+            #     - BearerAuth: []
             requestBody:
                 required: true
                 content:
@@ -501,9 +404,21 @@ paths:
                             schema:
                                 type: object
                                 properties:
-                                    accessToken:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    code:
                                         type: string
-                                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMzFjNjY1Yy1kYzUzLTQyYzYtODhjYy1lMzY0OTBjYjUyYTgiLCJpYXQiOjE2MjYwNjYwNzYsImV4cCI6MTYyNjA2NjA3N30.7qkjhwkhjweyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIzMWM2NjVjLWRjNTMtNDJjNi04OGNjLWUzNjQ5MGNiNTJhOCIsImVtYWlsIjoidG1xdWFuZzAyMDlAZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkRlEyenA1TjJpeDFyWWxBanVRTWtZLnpiWFFFQ1VtZU1wMHgzRDVsRnJtNnZUOVFtb0lmdnkiLCJyb2xlIjoidXNlciIsInN0YXR1cyI6MSwiaWF0IjoxNzI2OTI4MjUzLCJleHAiOjE3MjY5MzE4NTN9.bC3TooxQsvvdBucF_QR2I14c1OKBBAUrUlEKHx0jbvc
+                                        example: REFRESH_TOKEN_SUCCESS
+                                    message:
+                                        type: string
+                                        example: Refresh token successfully
+                                    data:
+                                        type: object
+                                        properties:
+                                            accessToken:
+                                                type: string
+                                                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMzFjNjY1Yy1kYzUzLTQyYzYtODhjYy1lMzY0OTBjYjUyYTgiLCJpYXQiOjE2MjYwNjYwNzYsImV4cCI6MTYyNjA2NjA3N30.7qkjhwkhjweyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIzMWM2NjVjLWRjNTMtNDJjNi04OGNjLWUzNjQ5MGNiNTJhOCIsImVtYWlsIjoidG1xdWFuZzAyMDlAZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkRlEyenA1TjJpeDFyWWxBanVRTWtZLnpiWFFFQ1VtZU1wMHgzRDVsRnJtNnZUOVFtb0lmdnkiLCJyb2xlIjoidXNlciIsInN0YXR1cyI6MSwiaWF0IjoxNzI2OTI4MjUzLCJleHAiOjE3MjY5MzE4NTN9.bC3TooxQsvvdBucF_QR2I14c1OKBBAUrUlEKHx0jbvc
                 "400":
                     description: Input data is invalid
                     content:
@@ -614,18 +529,13 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/VerifyAccountSuccess"
                 "400":
-                    description: Input data is invalid
+                    description: Input data is invalid or verification code is incorrect
                     content:
                         application/json:
                             schema:
-                                $ref: "#/components/schemas/ValidationError"
-
-                "401":
-                    description: Verification code is incorrect
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/InvalidVerificationCode"
+                                oneOf:
+                                    - $ref: "#/components/schemas/ValidationError"
+                                    - $ref: "#/components/schemas/InvalidVerificationCode"
 
                 "404":
                     description: User not found

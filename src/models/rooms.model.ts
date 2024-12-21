@@ -2,7 +2,7 @@ import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { currentDateTime } from "../utils/currentTime";
-import { Bills, Equipment, HouseFloors, Issues, Renters, RoomImages, RoomServices } from "./";
+import { Bills, Equipment, HouseFloors, Issues, Renters, RoomContracts, RoomImages, RoomServices } from "./";
 
 class Rooms extends Model {
     id: string;
@@ -19,6 +19,7 @@ class Rooms extends Model {
     updated_at: string;
     houseId: string;
     services: RoomServices[];
+    equipment: Equipment[];
     images: RoomImages[];
     floor: HouseFloors;
     maxRenters: number;
@@ -28,6 +29,10 @@ class Rooms extends Model {
     updatedBy: string;
     updatedAt: string;
     renters: Renters[];
+    count: number;
+    floorId: string;
+    rentalStartDate: string | number | Date;
+    rentalEndDate: string | number | Date;
 
     static get tableName() {
         return "rooms";
@@ -52,7 +57,7 @@ class Rooms extends Model {
     static get jsonSchema() {
         return {
             type: "object",
-            required: ["floor_id", "name", "created_by"],
+            required: ["name"],
             properties: {
                 id: { type: "string", format: "uuid" },
                 floor_id: { type: "string", format: "uuid" },
@@ -128,6 +133,14 @@ class Rooms extends Model {
                     to: "bills.room_id",
                 },
             },
+            contracts: {
+                relation: Model.HasManyRelation,
+                modelClass: RoomContracts,
+                join: {
+                    from: "rooms.id",
+                    to: "room_contracts.room_id",
+                },
+            },
         };
     }
 
@@ -137,8 +150,36 @@ class Rooms extends Model {
                 builder.select("id", "floor_id", "name", "max_renters", "room_area", "price", "description", "status");
             },
 
+            roomInfo(builder) {
+                builder.select("rooms.id", "rooms.name", "max_renters", "room_area", "price", "rooms.description");
+            },
+
             basic(builder) {
-                builder.select("id", "name", "max_renters", "room_area", "price", "description", "status");
+                builder.select(
+                    "rooms.id",
+                    "rooms.name",
+                    "max_renters",
+                    "room_area",
+                    "price",
+                    "rooms.description",
+                    "rooms.status"
+                );
+            },
+
+            basicWithRenterCount(builder) {
+                builder
+                    .select(
+                        "rooms.id",
+                        "rooms.name",
+                        "max_renters",
+                        "room_area",
+                        "price",
+                        "rooms.description",
+                        "rooms.status"
+                    )
+                    .count("renters.id as countRenters")
+                    .leftJoin("renters", "rooms.id", "renters.room_id")
+                    .groupBy("rooms.id");
             },
 
             onlyName(builder) {

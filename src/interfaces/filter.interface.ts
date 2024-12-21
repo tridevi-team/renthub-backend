@@ -5,7 +5,7 @@ export interface Filter {
     filter?: {
         field: string;
         operator: Operator;
-        value: string;
+        value: string | number;
     }[];
     sort?: {
         field: string;

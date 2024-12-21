@@ -1,0 +1,30 @@
+title Xóa hóa đơn
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn hóa đơn cần xóa
+activate Landlord
+activate Client
+
+Client -> Backend: Gửi ID hóa đơn cần xóa
+activate Backend
+
+Backend -> Backend: Kiểm tra quyền
+alt Quyền hợp lệ
+    Backend -> Database: Xóa hóa đơn khỏi cơ sở dữ liệu
+    Database --> Backend: Xác nhận hóa đơn đã xóa
+    Backend --> Client: Thông báo xóa thành công
+    Client --> Landlord: Hiển thị thông báo thành công
+else Quyền không hợp lệ
+    Backend --> Client: Thông báo lỗi quyền truy cập
+    Client --> Landlord: Hiển thị thông báo thất bại
+end
+
+deactivate Backend
+deactivate Client
+deactivate Landlord

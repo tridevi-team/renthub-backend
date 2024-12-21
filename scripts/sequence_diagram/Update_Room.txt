@@ -1,0 +1,46 @@
+title Cập nhật phòng
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+activate Landlord
+Landlord -> Client: Chọn phòng cần cập nhật
+
+activate Client
+Client --> Landlord: Hiển thị form cập nhật
+
+Landlord -> Client: Điền thông tin cần sửa
+
+Client -> Client: Validate thông tin
+
+alt Thông tin không hợp lệ
+  Client --> Landlord: Hiển thị thông báo lỗi
+else Thông tin hợp lệ
+  Client -> Backend: Gửi yêu cầu cập nhật phòng
+  activate Backend
+end
+
+
+Backend -> Database: Kiểm tra trùng lặp tên phòng
+activate Database
+
+alt Không trùng lặp
+  Database --> Backend: Trả về dữ liệu null
+  Backend -> Database: Cập nhật thông tin phòng
+  Database --> Backend: Xác nhận thành công
+  Backend --> Client: Xác nhận thành công
+  Client --> Landlord: Hiển thị thông báo cập nhật thành công
+else Trùng lặp
+  Database --> Backend: Trả về thông tin phòng trùng lặp
+  Backend --> Client: Hiển thị thông báo phòng đã tồn tại
+  Client --> Landlord: Thông báo phòng đã tồn tại
+end
+
+deactivate Landlord
+deactivate Client
+deactivate Backend
+deactivate Database

@@ -691,3 +691,59 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/PaymentDefaultStatus"
+
+    /payment/create-payment-link:
+        post:
+            tags:
+                - Payment
+            summary: Create a payment link.
+            description: If PayOS key is exists in the payment method, it will create a payment link.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                billId:
+                                    type: string
+                                    format: uuid
+                                    description: The bill ID to create a payment link.
+                                    example: 5b4335ba-3170-4df0-9f33-e777ed07bd82
+            responses:
+                "200":
+                    description: Payment link created successfully.
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    paymentUrl:
+                                        type: string
+                                        description: The payment URL.
+                                        example: https://payos.com/payment/5b4335ba-3170-4df0-9f33-e777ed07bd82
+                "400":
+                    description: Validation Error.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ValidationError"
+                "409":
+                    description: Payment cancelled.
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        description: The status of the payment cancellation.
+                                        example: false
+                                    code:
+                                        type: string
+                                        description: The code of the payment cancellation.
+                                        default: PAYMENT_CANCELLED
+                                    message:
+                                        type: string
+                                        description: The message of the payment cancellation.
+                                        example: Payment cancelled.

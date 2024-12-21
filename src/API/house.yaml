@@ -570,6 +570,58 @@ components:
         HouseWithRooms:
             type: object
             properties:
+                results:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            id:
+                                type: string
+                                format: uuid
+                                example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
+                            name:
+                                type: string
+                                example: "Phòng 3"
+                            maxRenters:
+                                type: integer
+                                example: 6
+                            countRenters:
+                                type: integer
+                                example: 2
+                            roomArea:
+                                type: number
+                                example: 25
+                            price:
+                                type: number
+                                example: 3500000
+                            description:
+                                type: string
+                                nullable: true
+                            status:
+                                type: string
+                                enum:
+                                    - AVAILABLE
+                                    - PENDING
+                                    - RENTED
+                                    - EXPIRED
+                                    - MAINTENANCE
+                                example: "AVAILABLE"
+                pageCount:
+                    type: integer
+                    example: 1
+                page:
+                    type: integer
+                    example: 1
+                pageSize:
+                    type: integer
+                    example: 10
+                total:
+                    type: integer
+                    example: 3
+
+        HouseWithRoomsGroupByFloor:
+            type: object
+            properties:
                 id:
                     type: string
                     format: uuid
@@ -586,6 +638,17 @@ components:
                 collectionCycle:
                     type: integer
                     example: 1
+                contact:
+                    properties:
+                        fullName:
+                            type: string
+                            example: "John Doe"
+                        phoneNumber:
+                            type: string
+                            example: "0123456789"
+                        email:
+                            type: string
+                            example: landlord@renthub.com
                 floors:
                     type: array
                     items:
@@ -653,6 +716,40 @@ components:
                                                     quantity:
                                                         type: number
                                                         example: 1
+                                        equipment:
+                                            type: array
+                                            items:
+                                                properties:
+                                                    id:
+                                                        type: string
+                                                        format: uuid
+                                                        example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
+                                                    name:
+                                                        type: string
+                                                        example: "Air conditioner"
+                                                    quantity:
+                                                        type: number
+                                                        example: 1
+                                                    description:
+                                                        type: string
+                                                        nullable: true
+                                                        example: "Air conditioner"
+                                        images:
+                                            type: array
+                                            items:
+                                                type: object
+                                                properties:
+                                                    id:
+                                                        type: string
+                                                        format: uuid
+                                                        example: 1acbc7c2-5723-4ac7-8515-8fc585c0d7f1
+                                                    imageUrl:
+                                                        type: string
+                                                        example: "https://via.placeholder.com/150"
+                                                    description:
+                                                        type: string
+                                                        nullable: true
+                                                        example: "Room image"
 
         HouseWithRoomsSuccess:
             type: object
@@ -661,11 +758,13 @@ components:
                     type: boolean
                     example: true
                 code:
-                    default: GET_HOUSE_DETAILS_SUCCESS
+                    default: GET_ROOMS_BY_HOUSE_SUCCESS
                 message:
-                    default: Get house details successful
+                    default: Rooms by house retrieved successfully
                 data:
-                    $ref: "#/components/schemas/HouseWithRooms"
+                    oneOf:
+                        - $ref: "#/components/schemas/HouseWithRooms"
+                        - $ref: "#/components/schemas/HouseWithRoomsGroupByFloor"
 
         HouseDetailsSuccess:
             type: object
@@ -983,6 +1082,8 @@ paths:
                 - House
             summary: Get rooms of a house
             description: Get all rooms of a house with the house ID. It is used for renter to view the rooms of a house
+            security:
+                - BearerAuth: []
             parameters:
                 - in: path
                   name: houseId
@@ -992,6 +1093,71 @@ paths:
                       type: string
                       format: uuid
                       example: 40ca663f-8dbe-4424-b52b-b949ace687ff
+                - in: query
+                  name: isSelect
+                  schema:
+                      type: boolean
+                      example: true
+                      description: Data for select input
+                - in: query
+                  name: filter[]
+                  description: Filter criteria array with field, operator, and value
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the filter on, e.g. houses.name"
+                              operator:
+                                  type: string
+                                  example: "ew"
+                                  description: "The operator to apply (e.g., 'ew' for endsWith, 'eq' for equals, etc.)"
+                              value:
+                                  type: string
+                                  example: "qui"
+                                  description: "The value to filter by, e.g. 'qui'"
+                - in: query
+                  name: sort[]
+                  description: Sort criteria array with field and order
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the sort on, e.g. houses.name"
+                              direction:
+                                  type: string
+                                  enum:
+                                      - "asc"
+                                      - "desc"
+                                  example: "asc"
+                                  description: "The order to sort by (asc or desc)"
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      example: 1
+                  description: Current page number
+                  required: false
+                - in: query
+                  name: pageSize
+                  schema:
+                      type: integer
+                      example: 10
+                  description: Number of items per page
+                  required: false
             responses:
                 "200":
                     description: Get rooms of a house successful
@@ -1114,63 +1280,63 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/NoHouseFound"
 
-    /houses/{houseId}/delete:
-        delete:
-            tags:
-                - House
-            summary: Delete a house
-            security:
-                - BearerAuth: []
-            parameters:
-                - in: path
-                  name: houseId
-                  required: true
-                  description: The ID of the house
-                  schema:
-                      type: string
-                      format: uuid
-            responses:
-                "200":
-                    description: House deleted successfully
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    success:
-                                        type: boolean
-                                        example: true
-                                    code:
-                                        default: DELETE_HOUSE_SUCCESS
-                                    message:
-                                        default: House deleted successfully
+    # /houses/{houseId}/delete:
+    #     delete:
+    #         tags:
+    #             - House
+    #         summary: Delete a house
+    #         security:
+    #             - BearerAuth: []
+    #         parameters:
+    #             - in: path
+    #               name: houseId
+    #               required: true
+    #               description: The ID of the house
+    #               schema:
+    #                   type: string
+    #                   format: uuid
+    #         responses:
+    #             "200":
+    #                 description: House deleted successfully
+    #                 content:
+    #                     application/json:
+    #                         schema:
+    #                             type: object
+    #                             properties:
+    #                                 success:
+    #                                     type: boolean
+    #                                     example: true
+    #                                 code:
+    #                                     default: DELETE_HOUSE_SUCCESS
+    #                                 message:
+    #                                     default: House deleted successfully
 
-                "401":
-                    description: Unauthorized
-                    content:
-                        applicationjson:
-                            schema:
-                                oneOf:
-                                    - $ref: "#/components/schemas/TokenInvalid"
-                                    - $ref: "#/components/schemas/TokenExpired"
+    #             "401":
+    #                 description: Unauthorized
+    #                 content:
+    #                     applicationjson:
+    #                         schema:
+    #                             oneOf:
+    #                                 - $ref: "#/components/schemas/TokenInvalid"
+    #                                 - $ref: "#/components/schemas/TokenExpired"
 
-                "404":
-                    description: House not found
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/NoHouseFound"
-                "500":
-                    description: Delete house failed
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    success:
-                                        type: boolean
-                                        example: false
-                                    code:
-                                        default: DELETE_HOUSE_FAIL
-                                    message:
-                                        default: Delete house failed
+    #             "404":
+    #                 description: House not found
+    #                 content:
+    #                     application/json:
+    #                         schema:
+    #                             $ref: "#/components/schemas/NoHouseFound"
+    #             "500":
+    #                 description: Delete house failed
+    #                 content:
+    #                     application/json:
+    #                         schema:
+    #                             type: object
+    #                             properties:
+    #                                 success:
+    #                                     type: boolean
+    #                                     example: false
+    #                                 code:
+    #                                     default: DELETE_HOUSE_FAIL
+    #                                 message:
+    #                                     default: Delete house failed

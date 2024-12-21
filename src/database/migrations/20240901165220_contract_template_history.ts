@@ -11,12 +11,12 @@ export async function up(knex: Knex): Promise<void> {
             .onUpdate("CASCADE");
         table.uuid("house_id").references("id").inTable("houses").onDelete("CASCADE").onUpdate("CASCADE");
         table.string("name").nullable();
-        table.specificType("content", "text").nullable();
+        table.specificType("content", "longtext").nullable();
         table.boolean("is_active").nullable();
         table.string("action", 10).notNullable();
-        table.uuid("created_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
+        table.uuid("created_by");
         table.datetime("created_at").nullable();
-        table.uuid("updated_by").references("id").inTable("users").onDelete("SET NULL").onUpdate("CASCADE");
+        table.uuid("updated_by");
         table.datetime("updated_at").nullable();
         table.datetime("action_at").defaultTo(knex.fn.now());
     });

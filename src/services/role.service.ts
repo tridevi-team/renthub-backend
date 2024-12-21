@@ -1,8 +1,10 @@
 import Objection from "objection";
-import { EPagination, messageResponse } from "../enums";
+import { EPagination, messageResponse, NotificationType } from "../enums";
 import type { Filter, Role } from "../interfaces";
 import { Roles, UserRoles } from "../models";
 import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
+import HouseService from "./house.service";
+import NotificationService from "./notification.service";
 
 class RoleService {
     static async create(houseId: string, data: Role) {
@@ -19,6 +21,14 @@ class RoleService {
         const createRole = await Roles.query().insert(camelToSnake(data));
 
         return createRole;
+    }
+
+    static async getHouseId(roleId: string) {
+        const role = await Roles.query().findById(roleId);
+
+        if (!role) throw new ApiException(messageResponse.ROLE_NOT_FOUND, 404);
+
+        return role.houseId;
     }
 
     static async getById(roleId: string) {
@@ -65,6 +75,19 @@ class RoleService {
         };
     }
 
+    static async getRolesByUser(userId: string, houseId: string) {
+        const roles = await Roles.query()
+            .join("user_roles", "roles.id", "user_roles.role_id")
+            .where("user_id", userId)
+            .andWhere("roles.house_id", houseId)
+            .select("roles.permissions")
+            .first();
+
+        if (!roles) throw new ApiException(messageResponse.ROLE_NOT_FOUND, 404);
+
+        return roles;
+    }
+
     static async update(roleId: string, data: Role) {
         const roleDetails = await this.getById(roleId);
         // check name by house
@@ -99,6 +122,16 @@ class RoleService {
         }
     }
 
+    static async removeAssignedRole(userId: string, houseId: string) {
+        const deletedRow = await UserRoles.query().delete().where(camelToSnake({ userId, houseId }));
+
+        const isDeleted = deletedRow > 0;
+
+        if (!isDeleted) throw new ApiException(messageResponse.REMOVE_ROLE_ERROR, 500);
+
+        return true;
+    }
+
     static async updateStatus(roleId: string, status: boolean) {
         const roleDetails = await this.getById(roleId);
 
@@ -127,7 +160,7 @@ class RoleService {
                 })
             );
 
-        return await UserRoles.query().insertAndFetch(
+        const assigned = await UserRoles.query().insertAndFetch(
             camelToSnake({
                 userId,
                 houseId,
@@ -135,40 +168,24 @@ class RoleService {
                 createdBy,
             })
         );
-    }
 
-    static async isAccessible(userId: string, roleId: string, action: string): Promise<boolean> {
-        const role = await Roles.query().findById(roleId);
+        const roleDetails = await this.getById(roleId);
+        const houseDetails = await HouseService.getHouseById(houseId);
 
-        if (!role) throw new ApiException(messageResponse.ROLE_NOT_FOUND, 404);
-        // get houseId
-        const houseDetails = await Roles.query()
-            .join("houses", "roles.house_id", "houses.id")
-            .where("roles.id", roleId)
-            .select("houses.created_by")
-            .first();
-        if (!houseDetails) throw new ApiException(messageResponse.HOUSE_NOT_FOUND, 404);
-
-        if (houseDetails.createdBy === userId) return true;
-
-        // get house permissions
-        const housePermissions = await Roles.query()
-            .leftJoin("user_roles", "roles.id", "user_roles.role_id")
-            .where("roles.id", roleId)
-            .andWhere("user_id", userId)
-            .select("roles.permissions")
-            .first();
-
-        if (!housePermissions?.permissions) return false;
-        else if (action === "read") {
-            return (
-                housePermissions.permissions.role.read ||
-                housePermissions.permissions.role.update ||
-                housePermissions.permissions.role.delete
-            );
+        if (assigned) {
+            await NotificationService.create({
+                title: "Phân quyền",
+                content: `Bạn đã được phân quyền ${roleDetails.name} trong nhà ${houseDetails.name}`,
+                type: NotificationType.SYSTEM,
+                recipients: [userId],
+                data: {
+                    path: `/`,
+                },
+                createdBy: createdBy,
+            });
         }
 
-        return true;
+        return assigned;
     }
 }
 

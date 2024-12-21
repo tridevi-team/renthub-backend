@@ -1,0 +1,43 @@
+title Xóa tầng
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+activate Landlord
+activate Client
+
+Landlord -> Client: Chọn tầng cần xóa
+
+Client --> Landlord: Hiển thị xác nhận xóa
+
+Landlord -> Client: Xác nhận xóa tầng
+
+activate Backend
+Client -> Backend: Gửi yêu cầu xóa tầng
+
+activate Database
+Backend -> Database: Kiểm tra ràng buộc dữ liệu liên quan
+
+alt Không có ràng buộc
+  Database --> Backend: Xác nhận không có ràng buộc
+  Backend -> Database: Yêu cầu xóa tầng
+  Database -> Database: Xóa bản ghi tầng
+  Database --> Backend: Xác nhận xóa thành công
+  Backend --> Client: Xác nhận xóa thành công
+  Client --> Landlord: Gửi thông báo xóa tầng thành công
+
+else Có ràng buộc
+  Database --> Backend: Trả về thông tin ràng buộc
+  Backend --> Client: Thông báo lỗi (có ràng buộc, không thể xóa)
+  Client --> Landlord: Hiển thị thông báo lỗi
+
+end
+
+deactivate Database
+deactivate Backend
+deactivate Client
+deactivate Landlord

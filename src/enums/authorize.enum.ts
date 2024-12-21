@@ -1,5 +1,6 @@
 export enum Module {
     HOUSE = "house",
+    FLOOR = "floor",
     ROLE = "role",
     ROOM = "room",
     RENTER = "renter",
@@ -8,6 +9,7 @@ export enum Module {
     EQUIPMENT = "equipment",
     PAYMENT = "payment",
     ISSUE = "issue",
+    NOTIFICATION = "notification",
 }
 
 export enum Action {

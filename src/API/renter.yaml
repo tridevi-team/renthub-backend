@@ -13,6 +13,16 @@ components:
                     format: uuid
                     description: Renter ID
                     example: 1fa091e7-c977-44be-ae41-efa38958851f
+                houseId:
+                    type: string
+                    format: uuid
+                    description: House ID
+                    example: 13251603-a1b5-488a-8a06-44c9bbed67e0
+                floorId:
+                    type: string
+                    format: uuid
+                    description: Floor ID
+                    example: 36f9a639-5cc7-437d-a228-1305521a4b06
                 roomId:
                     type: string
                     format: uuid
@@ -49,9 +59,25 @@ components:
                     description: Renter phone number
                     example: 0397847806
                 address:
-                    type: string
+                    type: object
                     description: Renter address
-                    example: Ha Noi
+                    properties:
+                        city:
+                            type: string
+                            description: City
+                            example: Ha Noi
+                        district:
+                            type: string
+                            description: District
+                            example: Cau Giay
+                        ward:
+                            type: string
+                            description: Ward
+                            example: Nghia Tan
+                        street:
+                            type: string
+                            description: Street
+                            example: Nguyen Trai
                 tempReg:
                     type: boolean
                     description: Temporary registration
@@ -118,6 +144,104 @@ components:
                 - code
                 - message
                 - data
+
+        RenterLoginSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Request status
+                    example: true
+                code:
+                    type: string
+                    description: Response code
+                    example: LOGIN_SUCCESS
+                message:
+                    type: string
+                    description: Response message
+                    example: Login successful
+                data:
+                    type: object
+                    properties:
+                        id:
+                            type: string
+                            format: uuid
+                            description: Renter ID
+                            example: 1fa091e7-c977-44be-ae41-efa38958851f
+                        roomId:
+                            type: string
+                            format: uuid
+                            description: Room ID
+                            example: 02ebde3d-ac50-4c2a-afa9-4da1adc52f5b
+                        name:
+                            type: string
+                            description: Renter name
+                            example: Juana Lockman
+                        citizenId:
+                            type: string
+                            description: Renter citizen ID
+                            example: 026203002093
+                        birthday:
+                            type: string
+                            format: date
+                            description: Renter birthday
+                            example: 1990-01-01 00:00:00
+                        gender:
+                            type: string
+                            enum:
+                                - male
+                                - female
+                                - other
+                        email:
+                            type: string
+                            format: email
+                            description: Renter email
+                            example: renter.demo@gmail.com
+                        phoneNumber:
+                            type: string
+                            description: Renter phone number
+                            example: 0397847806
+                        address:
+                            type: object
+                            description: Renter address
+                            properties:
+                                city:
+                                    type: string
+                                    description: City
+                                    example: Ha Noi
+                                district:
+                                    type: string
+                                    description: District
+                                    example: Cau Giay
+                                ward:
+                                    type: string
+                                    description: Ward
+                                    example: Nghia Tan
+                                street:
+                                    type: string
+                                    description: Street
+                                    example: Nguyen Trai
+                        tempReg:
+                            type: boolean
+                            description: Temporary registration
+                            example: true
+                        moveInDate:
+                            type: string
+                            format: date-time
+                            description: Move in date
+                            example: 2023-12-31T17:00:00.000Z
+                        represent:
+                            type: boolean
+                            description: Set as representative of room
+                            example: true
+                        accessToken:
+                            type: string
+                            description: Access token
+                            example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFmYTA5MWU3LWM5NzctNDRiZS1hZTQxLWVmYTM4OTU4ODUxZiIsImVtYWlsIjoidG1xdWFuZzAyMDkuaHVodUBnbWFpbC5jb20iLCJwaG9uZU51bWJlciI6IjAxMjM0NTY3ODkiLCJyb29tX2lkIjoiMDJlYmRlM2QtYWM1MC00YzJhLWFmYTktNGRhMWFkYzUyZjViIiwidHlwZSI6InJlbnRlciIsImlhdCI6MTczMDU1OTc1OCwiZXhwIjoxNzMwNTYzMzU4fQ.9gedafM0xSPV7jGqacrVdH60i9__6sk8cogD04DGYSE
+                        refreshToken:
+                            type: string
+                            description: Refresh token
+                            example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFmYTA5MWU3LWM5NzctNDRiZS1hZTQxLWVmYTM4OTU4ODUxZiIsIm5hbWUiOiJKdWFuYSBMb2NrbWFuIiwicm9vbV9pZCI6IjAyZWJkZTNkLWFjNTAtNGMyYS1hZmE5LTRkYTFhZGM1MmY1YiIsInR5cGUiOiJyZW50ZXIiLCJpYXQiOjE3MzA1NTk3NTgsImV4cCI6MTczMTE2NDU1OH0.9Vgtd2XI3nN-JaQGBSZVOiYZzxa2hXCnX44JJ-wJ9sI
 
         RentersListByRoomResponse:
             type: object
@@ -220,9 +344,25 @@ components:
                                         description: Renter phone number
                                         example: 0397847806
                                     address:
-                                        type: string
+                                        type: object
                                         description: Renter address
-                                        example: Ha Noi
+                                        properties:
+                                            city:
+                                                type: string
+                                                description: City
+                                                example: Ha Noi
+                                            district:
+                                                type: string
+                                                description: District
+                                                example: Cau Giay
+                                            ward:
+                                                type: string
+                                                description: Ward
+                                                example: Nghia Tan
+                                            street:
+                                                type: string
+                                                description: Street
+                                                example: Nguyen Trai
                                     tempReg:
                                         type: boolean
                                         description: Temporary registration
@@ -308,9 +448,25 @@ components:
                     description: Renter phone number
                     example: 0397847806
                 address:
-                    type: string
+                    type: object
                     description: Renter address
-                    example: Ha Noi
+                    properties:
+                        city:
+                            type: string
+                            description: City
+                            example: Ha Noi
+                        district:
+                            type: string
+                            description: District
+                            example: Cau Giay
+                        ward:
+                            type: string
+                            description: Ward
+                            example: Nghia Tan
+                        street:
+                            type: string
+                            description: Street
+                            example: Nguyen Trai
                 tempReg:
                     type: boolean
                     description: Temporary registration
@@ -483,9 +639,25 @@ components:
                     description: Renter phone number
                     example: 0397847806
                 address:
-                    type: string
+                    type: object
                     description: Renter address
-                    example: Ha Noi
+                    properties:
+                        city:
+                            type: string
+                            description: City
+                            example: Ha Noi
+                        district:
+                            type: string
+                            description: District
+                            example: Cau Giay
+                        ward:
+                            type: string
+                            description: Ward
+                            example: Nghia Tan
+                        street:
+                            type: string
+                            description: Street
+                            example: Nguyen Trai
                 birthday:
                     type: string
                     format: date
@@ -650,9 +822,25 @@ components:
                                         description: Renter phone number
                                         example: 0397847806
                                     address:
-                                        type: string
+                                        type: object
                                         description: Renter address
-                                        example: Ha Noi
+                                        properties:
+                                            city:
+                                                type: string
+                                                description: City
+                                                example: Ha Noi
+                                            district:
+                                                type: string
+                                                description: District
+                                                example: Cau Giay
+                                            ward:
+                                                type: string
+                                                description: Ward
+                                                example: Nghia Tan
+                                            street:
+                                                type: string
+                                                description: Street
+                                                example: Nguyen Trai
                                     tempReg:
                                         type: boolean
                                         description: Temporary registration
@@ -715,16 +903,18 @@ paths:
                     application/json:
                         schema:
                             type: object
-                            properties:
-                                email:
-                                    type: string
-                                    format: email
-                                    description: Renter email
-                                    example: renter.mail@gmail.com
-                                phoneNumber:
-                                    type: string
-                                    description: Renter phone number
-                                    example: 0397847806
+                            oneOf:
+                                - properties:
+                                      email:
+                                          type: string
+                                          format: email
+                                          description: Renter email
+                                          example: renter.mail@gmail.com
+                                - properties:
+                                      phoneNumber:
+                                          type: string
+                                          description: Renter phone number
+                                          example: 0397847806
             responses:
                 "200":
                     description: Login successfully
@@ -757,20 +947,26 @@ paths:
                     application/json:
                         schema:
                             type: object
-                            properties:
-                                email:
-                                    type: string
-                                    format: email
-                                    description: Renter email
-                                    example: renter.mail@gmail.com
-                                phoneNumber:
-                                    type: string
-                                    description: Renter phone number
-                                    example: 0397847806
-                                code:
-                                    type: string
-                                    description: Verification code
-                                    example: 123456
+                            oneOf:
+                                - properties:
+                                      email:
+                                          type: string
+                                          format: email
+                                          description: Renter email
+                                          example: renter.mail@gmail.com
+                                      code:
+                                          type: string
+                                          description: Verification code
+                                          example: 123456
+                                - properties:
+                                      phoneNumber:
+                                          type: string
+                                          description: Renter phone number
+                                          example: 0397847806
+                                      code:
+                                          type: string
+                                          description: Verification code
+                                          example: 1234
                             required:
                                 - code
             responses:
@@ -779,7 +975,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: "#/components/schemas/LoginSuccess"
+                                $ref: "#/components/schemas/RenterLoginSuccess"
                 "400":
                     description: Validation error
                     content:
@@ -792,6 +988,36 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/InvalidVerificationCode"
+
+    /renters/info:
+        get:
+            tags:
+                - Renter
+            summary: Get renter info by token
+            description: Get renter info by token
+            security:
+                - BearerAuth: []
+            responses:
+                "200":
+                    description: Renter info retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterInfoResponse"
+                "401":
+                    description: Invalid token
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                                    - $ref: "#/components/schemas/TokenExpired"
+                "404":
+                    description: Renter not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RenterNotFound"
 
     /renters/{roomId}/add:
         post:

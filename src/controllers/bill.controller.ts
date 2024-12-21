@@ -1,9 +1,17 @@
 import "dotenv/config";
-import { BillStatus, messageResponse, ServiceTypes } from "../enums";
+import { Model } from "objection";
+import { BillStatus, messageResponse, NotificationType, ServiceTypes } from "../enums";
 import { BillInfo } from "../interfaces";
 import { Bills } from "../models";
-import { BillService, HouseService, PaymentService, RoomService } from "../services";
-import { ApiException, apiResponse, camelToSnake, Exception, RedisUtils } from "../utils";
+import {
+    BillService,
+    HouseService,
+    NotificationService,
+    PaymentService,
+    RenterService,
+    RoomService,
+} from "../services";
+import { ApiException, apiResponse, camelToSnake, Exception, RedisUtils, removeVietnameseTones } from "../utils";
 
 const { RETURN_URL, CANCEL_URL } = process.env;
 const prefix = "bills";
@@ -31,7 +39,7 @@ class BillController {
     static async getBills(req, res) {
         const { houseId } = req.params;
         const { filter = [], sort = [], pagination } = req.query;
-        const cacheKey = RedisUtils.generateCacheKeyWithFilter(prefix, {
+        const cacheKey = RedisUtils.generateCacheKeyWithFilter(`${prefix}:house_${houseId}`, {
             filter,
             sort,
             pagination,
@@ -83,10 +91,11 @@ class BillController {
         const { data } = req.body;
         const user = req.user;
 
-        const trx = await Bills.startTransaction(); // Start a new transaction
+        const trx = await Model.startTransaction(); // Start a new transaction
 
         try {
             const houseDetails = await HouseService.getHouseById(houseId);
+            const paymentMethod = await PaymentService.getDefaultPaymentMethod(houseId);
 
             for (const bill of data) {
                 // check if room exists in house
@@ -94,10 +103,11 @@ class BillController {
                 if (!isRoomExists) throw new ApiException(messageResponse.ROOM_NOT_FOUND, 404);
 
                 // check if services exist in room
-                const roomServices = await RoomService.getRoomServices(bill.roomId);
-                const serviceIds = roomServices.map((service) => service.id);
-                const isServicesExists = bill.services.every((service) => serviceIds.includes(service.id));
-                if (!isServicesExists) throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
+                const roomServices = await RoomService.getServicesInContract(bill.roomId);
+                // console.log("🚀 ~ BillController ~ createBill ~ roomServices:", roomServices)
+                // const serviceIds = roomServices.map((service) => service.id);
+                // const isServicesExists = bill.services.every((service) => serviceIds.includes(service.id));
+                // if (!isServicesExists) throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
 
                 const billMonth = new Date(bill.endDate).getMonth() + 1;
                 const billYear = new Date(bill.endDate).getFullYear();
@@ -105,6 +115,7 @@ class BillController {
 
                 const bilLData: BillInfo = {
                     roomId: bill.roomId,
+                    paymentMethodId: paymentMethod?.id,
                     title: bill.title || defaultTitle,
                     date: {
                         from: bill.startDate,
@@ -126,13 +137,15 @@ class BillController {
                 const items: {
                     name: string;
                     unitPrice: number;
-                    amount: number;
-                    totalPrice: number;
+                    quantity: number;
+                    price: number;
                 }[] = [];
 
                 const detailsData = {
                     billId: newBill.id,
                     name: "Tiền phòng",
+                    oldValue: 0,
+                    newValue: 0,
                     amount: 1,
                     unitPrice: roomPrice,
                     totalPrice: roomPrice,
@@ -141,16 +154,21 @@ class BillController {
                     updatedBy: user.id,
                 };
 
-                total += detailsData.totalPrice;
-
                 // Create bill details within the transaction
-                await BillService.createDetails(newBill.id, detailsData, trx);
+                const findRoomPrice = roomServices.find(
+                    (service) =>
+                        service.name === "Tiền phòng" && service.type === ServiceTypes.ROOM && service.id === ""
+                );
+                if (!findRoomPrice) {
+                    await BillService.createDetails(newBill.id, detailsData, trx);
+                    total += detailsData.totalPrice;
+                }
 
                 items.push({
                     name: "Tiền phòng",
                     unitPrice: roomPrice,
-                    amount: 1,
-                    totalPrice: roomPrice,
+                    quantity: 1,
+                    price: roomPrice,
                 });
                 const detailsList: {
                     billId: string;
@@ -171,7 +189,11 @@ class BillController {
                             newValue = 0,
                             amount = 0,
                             totalPrice = 0;
-                        if (service.type === ServiceTypes.AMOUNT) {
+                        if (
+                            [ServiceTypes.ELECTRICITY_CONSUMPTION, ServiceTypes.WATER_CONSUMPTION].includes(
+                                service.type as ServiceTypes
+                            )
+                        ) {
                             const serviceInput = bill.services.find((item) => item.id === service.id);
                             oldValue = serviceInput?.oldValue || 0;
                             newValue = serviceInput?.newValue || 0;
@@ -203,38 +225,69 @@ class BillController {
                         items.push({
                             name: service.name,
                             unitPrice: service.unitPrice,
-                            amount,
-                            totalPrice,
+                            quantity: amount,
+                            price: totalPrice,
                         });
 
                         detailsList.push(detailsData);
 
                         total += detailsData.totalPrice;
+
                         await BillService.createDetails(newBill.id, detailsData, trx);
                     })
                 );
 
-                if (data.paymentMethodId) {
-                    const orderCode = (new Date().getTime() + Math.floor(Math.random() * 1000)).toString();
-                    const description = `${roomDetails.name} ${houseDetails.name}`;
+                if (paymentMethod) {
+                    // Generate orderCode
+                    let orderCode: number | string = Date.now() * 1000 + Math.floor(Math.random() * 1000);
+
+                    // Ensure orderCode does not exceed the maximum safe integer
+                    if (orderCode > 9007199254740991) {
+                        orderCode = 9007199254740991;
+                    }
+
+                    const description = removeVietnameseTones(
+                        roomDetails.name.replace("Phòng ", "") + " " + houseDetails.name
+                    )
+                        .substring(0, 23)
+                        .replace("Phong", "");
+
                     const expiredDate = Math.floor(
                         (new Date().getTime() + houseDetails.numCollectDays * 24 * 60 * 60 * 1000) / 1000
                     );
+
                     const payosRequest = {
                         orderCode,
-                        amount: total,
+                        // amount: 5000 || total,
+                        amount: 5000,
                         description,
                         items,
                         returnUrl: RETURN_URL,
                         cancelUrl: CANCEL_URL,
                         expiredAt: expiredDate,
                     };
-                    await PaymentService.createPaymentLink(data.paymentMethodId, payosRequest);
+                    await PaymentService.createPaymentLink(paymentMethod.id, payosRequest);
 
                     await newBill.$query(trx).patch(camelToSnake({ amount: total, payosRequest }));
                 }
 
                 await newBill.$query(trx).patch(camelToSnake({ amount: total }));
+
+                // get renter in room
+                const renters = await RenterService.listByRoom(bill.roomId);
+                const renterIds = renters.results.map((renter) => renter.id);
+
+                await NotificationService.create(
+                    {
+                        title: newBill.title,
+                        content: `Hóa đơn ${newBill.title} đã được tạo. Vui lòng kiểm tra thông tin và thanh toán.`,
+                        type: NotificationType.REMINDER,
+                        data: { billId: newBill.id },
+                        recipients: renterIds,
+                        createdBy: user.id,
+                    },
+                    trx
+                );
             }
 
             await trx.commit(); // Commit the transaction if everything succeeds
@@ -266,10 +319,13 @@ class BillController {
                     const trx = await Bills.startTransaction(); // Start a new transaction
                     try {
                         if (service.serviceId) {
-                            const serviceDetails = await HouseService.getServiceDetails(service.serviceId);
+                            const services = await RoomService.getServicesInContract(billDetails.roomId);
+                            const serviceDetails = services.find((item) => item.id === service.serviceId);
+                            if (!serviceDetails) throw new ApiException(messageResponse.SERVICE_NOT_FOUND, 404);
 
                             switch (serviceDetails.type) {
-                                case ServiceTypes.AMOUNT:
+                                case ServiceTypes.WATER_CONSUMPTION:
+                                case ServiceTypes.ELECTRICITY_CONSUMPTION:
                                     let serviceAmount = 0;
                                     let unitPrice = 0;
                                     let totalPrice = 0;
@@ -368,6 +424,23 @@ class BillController {
                         }
 
                         await BillService.updateInfo(bill.id, { amount: total }, trx);
+
+                        // create notification
+                        const renters = await RenterService.listByRoom(billDetails.roomId);
+
+                        const renterIds = renters.results.map((renter) => renter.id);
+
+                        await NotificationService.create(
+                            {
+                                title: billDetails.title,
+                                content: `Hóa đơn ${billDetails.title} đã được cập nhật. Vui lòng kiểm tra lại thông tin và thanh toán.`,
+                                type: NotificationType.REMINDER,
+                                data: { billId: billDetails.id },
+                                recipients: renterIds,
+                                createdBy: user.id,
+                            },
+                            trx
+                        );
 
                         await trx.commit();
                     } catch (err) {

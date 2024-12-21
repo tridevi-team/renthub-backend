@@ -8,9 +8,22 @@ import { houseValidator } from "../middlewares/validator";
 const houseRouter = express.Router();
 
 houseRouter.post("/create", authentication, houseValidator.createHouse, handleErrors, HouseController.createHouse);
+
 houseRouter.get("/list", authentication, HouseController.getHouseList);
+
 houseRouter.get("/:houseId/details", houseValidator.houseIdValidator, handleErrors, HouseController.getHouseDetails);
-houseRouter.get("/:houseId/rooms", houseValidator.houseIdValidator, handleErrors, HouseController.getHouseWithRooms);
+
+houseRouter.get(
+    "/:houseId/rooms",
+    (req, res, next) => {
+        if (req.isApp) next();
+        else authentication(req, res, next);
+    },
+    houseValidator.houseIdValidator,
+    handleErrors,
+    HouseController.getHouseWithRooms
+);
+
 houseRouter.put(
     "/:houseId/update",
     authentication,
@@ -19,6 +32,7 @@ houseRouter.put(
     handleErrors,
     HouseController.updateHouseDetails
 );
+
 houseRouter.patch(
     "/:houseId/update-status",
     authentication,
@@ -27,14 +41,23 @@ houseRouter.patch(
     handleErrors,
     HouseController.updateHouseStatus
 );
-houseRouter.delete(
-    "/:houseId/delete",
-    authentication,
-    authorize(Module.HOUSE, Action.DELETE),
-    HouseController.deleteHouse
-);
+
+// houseRouter.delete(
+//     "/:houseId/delete",
+//     authentication,
+//     authorize(Module.HOUSE, Action.DELETE),
+//     HouseController.deleteHouse
+// );
 
 // api for renter
 houseRouter.get("/search", HouseController.searchHouse);
+
+houseRouter.post("/signup-receive-information", HouseController.signupReceiveInfo);
+
+houseRouter.get("/:houseId/receive-information", authentication, HouseController.getSignupReceiveInfo);
+
+houseRouter.patch("/:signupId/update-receive-information", authentication, HouseController.updateSignupReceiveInfo);
+
+houseRouter.get("/:houseId/room-create-bill", authentication, HouseController.getRoomCreateBill);
 
 export default houseRouter;

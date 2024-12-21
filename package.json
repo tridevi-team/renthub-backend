@@ -4,7 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "nodemon index.ts",
+        "start": "ts-node index.ts",
+        "dev": "ts-node-dev --respawn --transpile-only --clear -r tsconfig-paths/register ./index.ts",
         "test": "echo \"Error: no test specified\" && exit 1",
         "format:check": "prettier --check .",
         "format:write": "prettier --write .",
@@ -25,10 +26,13 @@
         "body-parser": "^1.20.3",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
+        "cron": "^3.3.0",
         "crypto-js": "^4.2.0",
+        "dayjs": "^1.11.13",
         "dotenv": "^16.4.5",
         "express": "^4.21.0",
         "express-rate-limit": "^7.2.0",
+        "express-useragent": "^1.0.15",
         "express-validator": "^7.0.1",
         "firebase": "^10.14.1",
         "firebase-admin": "^12.6.0",
@@ -39,20 +43,19 @@
         "knex": "^3.1.0",
         "moment-timezone": "^0.5.45",
         "multer": "^1.4.5-lts.1",
-        "mysql": "^2.18.1",
         "mysql2": "^3.11.2",
         "nodemailer": "^6.9.12",
-        "nodemon": "^3.1.0",
         "objection": "^3.1.4",
         "qrcode": "^1.5.4",
         "redis": "^4.7.0",
-        "renthouse": "file:",
+        "sharp": "^0.33.5",
         "ssh2": "^1.15.0",
         "swagger-jsdoc": "^6.2.8",
         "swagger-ui-express": "^5.0.1",
         "ts-node": "^10.9.2",
         "typescript": "^5.4.5",
-        "uuid": "^10.0.0"
+        "uuid": "^10.0.0",
+        "vn-num2words": "^1.0.4"
     },
     "devDependencies": {
         "@eslint/compat": "^1.1.1",
@@ -73,6 +76,8 @@
         "eslint-config-prettier": "^9.1.0",
         "globals": "^15.10.0",
         "prettier": "^3.3.3",
+        "ts-node-dev": "^2.0.0",
+        "tsconfig-paths": "^4.2.0",
         "typescript-eslint": "^8.8.0"
     }
 }

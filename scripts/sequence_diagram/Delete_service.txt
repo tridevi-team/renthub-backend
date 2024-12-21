@@ -1,0 +1,33 @@
+title Xóa dịch vụ (bao gồm xóa trong dịch vụ phòng)
+
+bottomparticipants
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn dịch vụ cần xóa
+activate Landlord
+activate Client
+
+Client -> Backend: Gửi ID dịch vụ cần xóa
+activate Backend
+
+Backend -> Backend: Kiểm tra quyền
+alt Quyền hợp lệ
+    activate Database
+    Backend -> Database: Xóa dịch vụ nhà
+    Database -> Database: Thực hiện xóa dịch vụ phòng
+    Database --> Backend: Xác nhận xóa thành công
+    Backend --> Client: Thông báo xóa thành công
+    Client --> Landlord: Hiển thị thông báo thành công
+else Quyền không hợp lệ
+    Backend --> Client: Thông báo lỗi quyền truy cập
+    Client --> Landlord: Hiển thị thông báo thất bại
+end
+
+deactivate Backend
+deactivate Client
+deactivate Landlord
+deactivate Database

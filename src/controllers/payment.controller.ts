@@ -5,9 +5,10 @@ import "dotenv/config";
 import { BillStatus, messageResponse } from "../enums";
 import { Bills } from "../models";
 import { BillService, HouseService, PaymentService } from "../services";
-import { apiResponse, Exception, isValidData, RedisUtils } from "../utils";
+import { ApiException, apiResponse, Exception, isValidData, RedisUtils, removeVietnameseTones } from "../utils";
 
 const HOOK_URL = process.env.WEBHOOK_URL || "";
+const { RETURN_URL, CANCEL_URL } = process.env;
 const prefix = "paymentMethods";
 class PaymentController {
     static async createNewPaymentMethod(req, res) {
@@ -90,8 +91,8 @@ class PaymentController {
     }
 
     static async getPaymentMethodDetails(req, res) {
-        const { paymentMethodId } = req.params;
-        const cacheKey = RedisUtils.generateCacheKeyWithId(prefix, paymentMethodId, "details");
+        const { paymentId } = req.params;
+        const cacheKey = RedisUtils.generateCacheKeyWithId(prefix, paymentId, "details");
         try {
             const isExistsCache = await RedisUtils.isExists(cacheKey);
             if (isExistsCache) {
@@ -101,7 +102,7 @@ class PaymentController {
                 );
             }
 
-            const paymentMethod = await PaymentService.getById(paymentMethodId);
+            const paymentMethod = await PaymentService.getById(paymentId);
 
             // set cache
             await RedisUtils.setAddMember(cacheKey, JSON.stringify(paymentMethod));
@@ -113,7 +114,7 @@ class PaymentController {
     }
 
     static async updatePaymentMethod(req, res) {
-        const { paymentMethodId } = req.params;
+        const { paymentId } = req.params;
         const {
             houseId,
             name,
@@ -127,7 +128,7 @@ class PaymentController {
             payosChecksum,
         } = req.body;
         try {
-            const paymentMethod = await PaymentService.updatePaymentMethod(paymentMethodId, {
+            const paymentMethod = await PaymentService.updatePaymentMethod(paymentId, {
                 houseId,
                 name,
                 accountNumber,
@@ -158,11 +159,11 @@ class PaymentController {
     }
 
     static async deletePaymentMethod(req, res) {
-        const { paymentMethodId } = req.params;
+        const { paymentId } = req.params;
         const user = req.user;
         const cacheKey = `${prefix}:*`;
         try {
-            await PaymentService.deletePaymentMethod(user.id, paymentMethodId);
+            await PaymentService.deletePaymentMethod(user.id, paymentId);
 
             // delete cache
             await RedisUtils.deletePattern(cacheKey);
@@ -174,13 +175,13 @@ class PaymentController {
     }
 
     static async updateStatus(req, res) {
-        const { paymentMethodId } = req.params;
+        const { paymentId } = req.params;
         const { status } = req.body;
         const user = req.user;
         const cacheKey = `${prefix}:*`;
 
         try {
-            const paymentMethod = await PaymentService.updateStatus(user.id, paymentMethodId, status);
+            const paymentMethod = await PaymentService.updateStatus(user.id, paymentId, status);
 
             // delete cache
             await RedisUtils.deletePattern(cacheKey);
@@ -192,13 +193,13 @@ class PaymentController {
     }
 
     static async updateDefault(req, res) {
-        const { paymentMethodId } = req.params;
+        const { paymentId } = req.params;
         const { isDefault } = req.body;
         const user = req.user;
         const cacheKey = `${prefix}:*`;
 
         try {
-            const paymentMethod = await PaymentService.updateDefault(user.id, paymentMethodId, isDefault);
+            const paymentMethod = await PaymentService.updateDefault(user.id, paymentId, isDefault);
 
             // delete cache
             await RedisUtils.deletePattern(cacheKey);
@@ -234,9 +235,155 @@ class PaymentController {
                 await BillService.updatePayOS(webhookData.data.orderCode, BillStatus.UNPAID, webhookData, trx);
             }
             await trx.commit();
+
+            // delete cache
+            const cacheKey = `${prefix}:*`;
+            await RedisUtils.deletePattern(cacheKey);
+            await RedisUtils.deletePattern("bills:*");
+
             return res.json({ message: "success" });
         } catch (err) {
             await trx.rollback();
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async createPaymentLink(req, res) {
+        const { billId } = req.body;
+
+        try {
+            const result = await Bills.query().findById(String(billId)).withGraphJoined("[details, payment, room]");
+            if (!result) {
+                throw new ApiException(messageResponse.BILL_NOT_FOUND, 404);
+            }
+
+            const houseDetails = await HouseService.getHouseByRoomId(result.room.id);
+
+            if (result && result.payment) {
+                if (!result.payment.payosClientId || !result.payment.payosApiKey || !result.payment.payosChecksum) {
+                    return res.json(apiResponse(messageResponse.CREATE_PAYMENT_LINK_SUCCESS, true, { paymentUrl: "" }));
+                }
+                const payos = new PayOS(
+                    result.payment.payosClientId,
+                    result.payment.payosApiKey,
+                    result.payment.payosChecksum
+                );
+                let request: {
+                    order_code: string;
+                    amount: number;
+                    description: string;
+                    items: {
+                        name: string;
+                        quantity: number;
+                        price: number;
+                    }[];
+                    cancelUrl: string;
+                    returnUrl: string;
+                } = {
+                    order_code: "",
+                    amount: 0,
+                    description: "",
+                    items: [
+                        {
+                            name: "",
+                            quantity: 0,
+                            price: 0,
+                        },
+                    ],
+                    cancelUrl: "",
+                    returnUrl: "",
+                };
+
+                if (result.payosRequest) {
+                    request =
+                        typeof result.payosRequest === "string" ? JSON.parse(result.payosRequest) : result.payosRequest;
+                } else {
+                    const orderCode = (new Date().getTime() + Math.floor(Math.random() * 1000)).toString();
+
+                    const services = result.details.map((service) => {
+                        return {
+                            name: service.name,
+                            amount: service.amount,
+                            price: service.totalPrice,
+                        };
+                    });
+
+                    // create description less than 25 characters
+                    const subDescription = removeVietnameseTones(
+                        result.room.name.replace("Phòng ", "") + " " + houseDetails.name
+                    )
+                        .substring(0, 23)
+                        .replace("Phong", "");
+
+                    request = {
+                        order_code: orderCode,
+                        amount: 5000,
+                        description: subDescription,
+                        items: services,
+                        cancelUrl: CANCEL_URL || "",
+                        returnUrl: RETURN_URL || "",
+                    };
+                }
+
+                try {
+                    const payosResponse = await payos.getPaymentLinkInformation(request.order_code);
+
+                    if (payosResponse.status === "CANCELLED")
+                        throw new ApiException(messageResponse.PAYMENT_CANCELLED, 409);
+
+                    return res.json(
+                        apiResponse(messageResponse.CREATE_PAYMENT_LINK_SUCCESS, true, {
+                            paymentUrl: `https://pay.payos.vn/web/${payosResponse.id}`,
+                        })
+                    );
+                } catch (error) {
+                    const orderCode = (new Date().getTime() + Math.floor(Math.random() * 1000)).toString();
+
+                    const services = result.details.map((service) => {
+                        return {
+                            name: service.name,
+                            quantity: service.amount,
+                            price: service.totalPrice,
+                        };
+                    });
+
+                    // create description less than 25 characters
+                    const subDescription = removeVietnameseTones(result.room.name + " " + houseDetails.name)
+                        .substring(0, 23)
+                        .replace("Phong", "");
+
+                    request = {
+                        order_code: orderCode,
+                        amount: 5000,
+                        description: subDescription,
+                        items: services,
+                        cancelUrl: CANCEL_URL || "",
+                        returnUrl: RETURN_URL || "",
+                    };
+
+                    await BillService.updateInfo(String(billId), {
+                        payosRequest: request,
+                    });
+
+                    const data = await payos.createPaymentLink({
+                        orderCode: Number(request.order_code),
+                        amount: request.amount,
+                        description: request.description,
+                        items: request.items,
+                        cancelUrl: request.cancelUrl,
+                        returnUrl: request.returnUrl,
+                    });
+
+                    return res.json(
+                        apiResponse(messageResponse.GET_PAYMENT_LINK_SUCCESS, true, {
+                            paymentUrl: data.checkoutUrl,
+                        })
+                    );
+                }
+            }
+
+            return res.json(apiResponse(messageResponse.CREATE_PAYMENT_LINK_SUCCESS, true, { paymentUrl: "" }));
+        } catch (err) {
             Exception.handle(err, req, res);
         }
     }

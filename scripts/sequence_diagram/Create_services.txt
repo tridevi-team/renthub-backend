@@ -1,0 +1,30 @@
+title Tạo dịch vụ theo nhà
+
+bottomparticipants 
+
+actor Landlord
+entity Client
+entity Backend
+database Database
+
+Landlord -> Client: Chọn nhà và nhập thông tin dịch vụ
+activate Landlord
+activate Client
+
+Client -> Backend: Gửi thông tin nhà và dịch vụ
+activate Backend
+
+Backend -> Backend: Kiểm tra quyền
+alt Quyền hợp lệ
+    Backend -> Database: Thêm dịch vụ mới cho nhà
+    Database --> Backend: Xác nhận tạo dịch vụ thành công
+    Backend --> Client: Thông báo dịch vụ đã được tạo
+    Client --> Landlord: Hiển thị thông báo thành công
+else Quyền không hợp lệ
+    Backend --> Client: Thông báo lỗi quyền truy cập
+    Client --> Landlord: Hiển thị thông báo thất bại
+end
+
+deactivate Backend
+deactivate Client
+deactivate Landlord

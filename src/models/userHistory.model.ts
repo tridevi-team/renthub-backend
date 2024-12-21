@@ -29,7 +29,7 @@ class UserHistory extends Model {
                 full_name: { type: "string", maxLength: 50 },
                 gender: { type: "string", maxLength: 6 },
                 phone_number: { type: "string", maxLength: 11 },
-                address: { type: "string", maxLength: 255 },
+                address: { type: "object" },
                 birthday: { type: "string", format: "date" },
                 role: { type: "string", maxLength: 10 },
                 type: { type: "string", maxLength: 10 },

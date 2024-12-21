@@ -34,13 +34,19 @@ class FloorService {
         return floor;
     }
 
-    static async listByHouse(houseId: string, filterData?: Filter) {
+    static async listByHouse(houseId: string, filterData?: Filter, isSelect: boolean = false) {
         const { filter = [], sort = [], pagination } = filterData || {};
 
         const page = pagination?.page || EPagination.DEFAULT_PAGE;
         const pageSize = pagination?.pageSize || EPagination.DEFAULT_LIMIT;
 
-        let query = HouseFloors.query().where("house_id", houseId);
+        let query = HouseFloors.query().alias("floors").where("house_id", houseId);
+
+        if (isSelect === true) {
+            query = query.select("id", "name");
+            const floors = await query;
+            return floors;
+        }
 
         // filter
         query = filterHandler(query, filter);
@@ -69,6 +75,11 @@ class FloorService {
         };
     }
 
+    static async floorIdsByHouse(houseId: string) {
+        const floors = await HouseFloors.query().where("house_id", houseId).select("id");
+        return floors.map((floor) => floor.id);
+    }
+
     static async updateFloor(floorId: string, data: Floor) {
         const floor = await this.getFloorById(floorId);
         const updatedFloor = await floor.$query().patchAndFetch(camelToSnake(data));
@@ -81,6 +92,14 @@ class FloorService {
         await floor.$query().patch(camelToSnake({ updatedBy: deletedBy }));
         const deletedFloor = await floor.$query().delete();
         return deletedFloor;
+    }
+
+    static async deleteFloorsByHouse(houseId: string, floorIds: string[], deletedBy: string) {
+        await HouseFloors.query().patch({ updatedBy: deletedBy }).whereIn("id", floorIds).andWhere("house_id", houseId);
+
+        const deletedFloors = await HouseFloors.query().delete().whereIn("id", floorIds).andWhere("house_id", houseId);
+
+        return deletedFloors;
     }
 }
 

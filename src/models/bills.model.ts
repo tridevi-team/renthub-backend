@@ -1,4 +1,5 @@
-import type { QueryContext } from "objection";
+import { currentDateTime } from "@utils/currentTime";
+import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { BillDetails, PaymentMethods, Rooms } from "./";
@@ -29,6 +30,15 @@ class Bills extends Model {
     payosRequest: any;
     payosResponse: any;
     payment: PaymentMethods;
+    houseId: string;
+    payosClientId: string;
+    payosApiKey: string;
+    payosChecksum: string;
+    count: number;
+    totalPrice: number;
+    details: any;
+    month: number;
+    year: number;
 
     static get tableName() {
         return "bills";
@@ -40,6 +50,14 @@ class Bills extends Model {
 
     $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
+    }
+
+    $beforeUpdate(_opt: ModelOptions, _queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
+    }
+
+    $beforeDelete(_queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
     }
 
     static get jsonSchema() {

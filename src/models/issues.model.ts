@@ -1,4 +1,5 @@
-import type { QueryContext } from "objection";
+import { currentDateTime } from "@utils/currentTime";
+import type { ModelOptions, QueryContext } from "objection";
 import { Model } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { Equipment, HouseFloors, Houses, Rooms, Users } from "./";
@@ -13,7 +14,11 @@ class Issues extends Model {
     content: string;
     status: string;
     description?: string;
-    files: any;
+    files: {
+        image: string[];
+        video: string[];
+        file: string[];
+    };
     assign_to: string;
     created_by: string;
     created_at: string;
@@ -28,6 +33,7 @@ class Issues extends Model {
     createdAt: string;
     updatedBy: string;
     updatedAt: string;
+    count: number;
 
     static get tableName() {
         return "issues";
@@ -39,6 +45,14 @@ class Issues extends Model {
 
     $beforeInsert(_queryContext: QueryContext): Promise<any> | void {
         this.id = this.id || uuidv4();
+    }
+
+    $beforeUpdate(_opt: ModelOptions, _queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
+    }
+
+    $beforeDelete(_queryContext: QueryContext): Promise<any> | void {
+        this.updated_at = currentDateTime();
     }
 
     static get jsonSchema() {
@@ -53,7 +67,7 @@ class Issues extends Model {
                 equipment_id: { type: "string", format: "uuid" },
                 title: { type: "string", maxLength: 255 },
                 content: { type: "string" },
-                status: { type: "string", maxLength: 10 },
+                status: { type: "string", maxLength: 20 },
                 description: { type: "string" },
                 files: { type: "object" },
                 assign_to: { type: "string", format: "uuid" },

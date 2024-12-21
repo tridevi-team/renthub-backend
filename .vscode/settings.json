@@ -1,23 +1,3 @@
-{
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSaveMode": "file",
-    "editor.codeActionsOnSave": {
-        "source.sortImports": "always",
-        "source.organizeImports": "always",
-        "source.fixAll.eslint": "always"
-    },
-    "[yaml]": {
-        "editor.insertSpaces": true,
-        "editor.tabSize": 2,
-        "editor.formatOnPaste": true,
-        "editor.formatOnSave": true,
-        "editor.autoIndent": "keep",
-        "diffEditor.ignoreTrimWhitespace": false,
-        "editor.quickSuggestions": {
-            "other": true,
-            "comments": false,
-            "strings": true
-        }
-    }
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:f2596f8d4010ba0a5650445572a9ec04e6b07cb8c8447fd40102068fc5b5f59b
+size 682

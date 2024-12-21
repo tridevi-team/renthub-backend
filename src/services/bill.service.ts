@@ -2,9 +2,21 @@ import { raw, TransactionOrKnex } from "objection";
 import { BillStatus, EPagination, messageResponse } from "../enums";
 import { BillDetailRequest, BillInfo, BillUpdate, Filter } from "../interfaces";
 import { BillDetails, Bills, Houses } from "../models";
-import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../utils";
+import { ApiException, camelToSnake, currentDateTime, filterHandler, sortingHandler } from "../utils";
 
 class BillService {
+    static async getLatestBill(roomId: string) {
+        const bill = await Bills.query()
+            .where("room_id", roomId)
+            .withGraphJoined("details")
+            .orderBy("created_at", "desc")
+            .first();
+
+        if (!bill) throw new ApiException(messageResponse.BILL_NOT_FOUND, 404);
+
+        return bill;
+    }
+
     static async getById(id: string) {
         const bill = await Bills.query()
             .findById(id)
@@ -31,6 +43,28 @@ class BillService {
         return bill;
     }
 
+    static async getHouseId(billId: string) {
+        const bill = await Bills.query()
+            .join("rooms", "bills.room_id", "rooms.id")
+            .join("house_floors", "rooms.floor_id", "house_floors.id")
+            .select("house_floors.house_id")
+            .findById(billId);
+
+        if (!bill) {
+            throw new ApiException(messageResponse.BILL_NOT_FOUND, 404);
+        }
+
+        return bill.houseId;
+    }
+
+    static async getRoomId(billId: string) {
+        const bill = await Bills.query().findById(billId).select("room_id");
+        if (!bill) {
+            throw new ApiException(messageResponse.BILL_NOT_FOUND, 404);
+        }
+        return bill.roomId;
+    }
+
     static async getServicesInBill(billId: string, trx: TransactionOrKnex | undefined = undefined) {
         const bill = await BillDetails.query(trx)
             .where("bill_id", billId)
@@ -47,6 +81,15 @@ class BillService {
         if (!bill) throw new ApiException(messageResponse.BILL_NOT_FOUND, 404);
 
         return bill.payosRequest;
+    }
+
+    static async getPayOSKey(billId: string) {
+        const bill = await Bills.query()
+            .findById(billId)
+            .joinRelated("payment")
+            .select("payment.payos_client_id", "payment.payos_api_key", "payment.payos_checksum");
+        if (!bill) throw new ApiException(messageResponse.BILL_NOT_FOUND, 404);
+        return bill;
     }
 
     static async dataListForUpdate(ids: string[]) {
@@ -158,6 +201,7 @@ class BillService {
     }
 
     static async createDetails(billId: string, details: BillDetailRequest, trx) {
+        console.log("🚀 ~ BillService ~ createDetails ~ details:", details);
         // Fetch the bill within the transaction to ensure it exists
         const bill = await Bills.query(trx).findById(billId);
 
@@ -207,7 +251,14 @@ class BillService {
             return null;
         }
 
-        const updated = await bill.$query(trx).patch(camelToSnake({ status, payosResponse }));
+        const updateData =
+            status === BillStatus.PAID
+                ? { status, payosResponse, paymentDate: currentDateTime() }
+                : { status, payosResponse };
+
+        console.log("🚀 ~ file: bill.service.ts ~ line 268 ~ BillService ~ updatePayOS ~ updateData", updateData);
+
+        const updated = await bill.$query(trx).patch(camelToSnake(updateData));
         return updated;
     }
 

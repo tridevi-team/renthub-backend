@@ -190,6 +190,22 @@ components:
                 message:
                     type: string
                     example: "Floor deleted successfully"
+        GetRoomsByFloorSuccess:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                code:
+                    type: string
+                    default: GET_ROOMS_BY_FLOOR_SUCCESS
+                message:
+                    type: string
+                    example: "Rooms retrieved successfully"
+                data:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/RoomBasicInfo"
 
 paths:
     /floors/{houseId}/create:
@@ -258,6 +274,12 @@ paths:
                   schema:
                       type: string
                       format: uuid
+                - in: query
+                  name: isSelect
+                  schema:
+                      type: boolean
+                      example: true
+                      description: For select dropdown
                 - in: query
                   name: filter[]
                   description: Filter criteria array with field, operator, and value
@@ -340,6 +362,108 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/NoFloorsFound"
+
+    /floors/{floorId}/rooms:
+        get:
+            tags:
+                - Floor
+            summary: Get rooms by floor
+            description: Get rooms in a floor of the house
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: floorId
+                  in: path
+                  description: ID of the floor
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                - in: query
+                  name: isSelect
+                  schema:
+                      type: boolean
+                      example: true
+                - in: query
+                  name: filter[]
+                  description: Filter criteria array with field, operator, and value
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the filter on, e.g. houses.name"
+                              operator:
+                                  type: string
+                                  example: "ew"
+                                  description: "The operator to apply (e.g., 'ew' for endsWith, 'eq' for equals, etc.)"
+                              value:
+                                  type: string
+                                  example: "qui"
+                                  description: "The value to filter by, e.g. 'qui'"
+                - in: query
+                  name: sort[]
+                  description: Sort criteria array with field and order
+                  required: false
+                  style: deepObject
+                  explode: true
+                  schema:
+                      type: array
+                      items:
+                          type: object
+                          properties:
+                              field:
+                                  type: string
+                                  example: "houses.name"
+                                  description: "The field to apply the sort on, e.g. houses.name"
+                              direction:
+                                  type: string
+                                  enum:
+                                      - "asc"
+                                      - "desc"
+                                  example: "asc"
+                                  description: "The order to sort by (asc or desc)"
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      example: 1
+                  description: Current page number
+                  required: false
+                - in: query
+                  name: pageSize
+                  schema:
+                      type: integer
+                      example: 10
+                  description: Number of items per page
+                  required: false
+            responses:
+                "200":
+                    description: Rooms retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/GetRoomsByFloorSuccess"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "404":
+                    description: No rooms found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoRoomsFound"
 
     /floors/{floorId}/details:
         get:
@@ -445,6 +569,57 @@ paths:
                   schema:
                       type: string
                       format: uuid
+            responses:
+                "200":
+                    description: Floor deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FloorDeleteSuccess"
+                "401":
+                    description: Unauthorized
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/TokenExpired"
+                                    - $ref: "#/components/schemas/TokenInvalid"
+                "404":
+                    description: Floor not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/FloorNotFound"
+
+    /floors/{houseId}/delete-floors:
+        delete:
+            tags:
+                - Floor
+            summary: Delete multiple floors by house
+            description: Delete multiple floors in the house
+            security:
+                - BearerAuth: []
+            parameters:
+                - name: houseId
+                  in: path
+                  description: ID of the house
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                ids:
+                                    type: array
+                                    items:
+                                        type: string
+                                        format: uuid
+                                    example: ["a586fbd5-6f97-49dc-bd60-a79a709fee4c"]
             responses:
                 "200":
                     description: Floor deleted successfully

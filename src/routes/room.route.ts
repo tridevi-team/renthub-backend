@@ -23,6 +23,15 @@ roomRouter.post(
 //     handleErrors,
 //     RoomController.getRoomsByHouse
 // );
+
+roomRouter.get(
+    "/:roomId/latest-services",
+    authentication,
+    roomsValidator.roomId,
+    handleErrors,
+    RoomController.getServicesInContract
+);
+
 roomRouter.get("/:roomId/details", roomsValidator.roomId, handleErrors, RoomController.getRoomDetails);
 
 roomRouter.put(
@@ -40,6 +49,14 @@ roomRouter.delete(
     roomsValidator.roomId,
     handleErrors,
     RoomController.deleteRoom
+);
+roomRouter.delete(
+    "/:houseId/delete-rooms",
+    authentication,
+    authorize(Module.ROOM, Action.DELETE),
+    houseValidator.houseIdValidator,
+    handleErrors,
+    RoomController.deleteRoomsByHouse
 );
 
 export default roomRouter;

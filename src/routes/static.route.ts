@@ -2,6 +2,7 @@ import PayOS from "@payos/node";
 import { CheckoutRequestType } from "@payos/node/lib/type";
 import "dotenv/config";
 import express from "express";
+import path from "path";
 import { Bills } from "../models";
 import { BillService } from "../services";
 import { aesEncrypt } from "../utils";
@@ -9,6 +10,12 @@ import { aesEncrypt } from "../utils";
 const { RETURN_URL, CANCEL_URL } = process.env;
 
 const staticRouter = express.Router();
+
+const rootDir = process.cwd();
+
+const UPLOADS_DIR = rootDir.includes("dist") ? `${rootDir}/../uploads` : `${rootDir}/uploads`;
+
+staticRouter.use("/uploads", express.static(path.join(UPLOADS_DIR)));
 
 staticRouter.get("/lookup", (_req, res) => {
     res.render("lookup", {
@@ -41,7 +48,8 @@ staticRouter.get("/getInvoice", async (req, res) => {
                 result.payment.payosApiKey,
                 result.payment.payosChecksum
             );
-            const parsedRequest = JSON.parse(result.payosRequest);
+            const parsedRequest =
+                typeof result.payosRequest === "string" ? JSON.parse(result.payosRequest) : result.payosRequest;
             // const cancel = await payos.cancelPaymentLink(parsedRequest.order_code);
             // console.log("🚀 ~ staticRouter.get ~ cancel:", cancel);
             try {
@@ -62,10 +70,10 @@ staticRouter.get("/getInvoice", async (req, res) => {
                     orderCode: orderCode,
                     // amount: 5000 || parsedRequest.amount,
                     amount: 5000,
-                    description: parsedRequest.description || "Thanh toán hóa đơn",
+                    description: parsedRequest?.description || "Thanh toán hóa đơn",
                     // items: parsedRequest.items,
-                    cancelUrl: parsedRequest.cancel_url || CANCEL_URL,
-                    returnUrl: parsedRequest.return_url || RETURN_URL,
+                    cancelUrl: parsedRequest?.cancel_url || CANCEL_URL,
+                    returnUrl: parsedRequest?.return_url || RETURN_URL,
                     // expiredAt: parsedRequest.expired_at,
                     // Add other necessary properties here
                 };
@@ -80,6 +88,8 @@ staticRouter.get("/getInvoice", async (req, res) => {
                 error: `Không tìm thấy hóa đơn với mã: ${invoiceId}`,
             });
         }
+        console.log(result);
+
         return res.render("lookup", {
             invoice: result,
             paymentUrl,

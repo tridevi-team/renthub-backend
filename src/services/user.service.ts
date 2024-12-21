@@ -1,12 +1,79 @@
 import "dotenv/config";
 import redisConfig from "../config/redis.config";
-import { messageResponse } from "../enums";
-import type { AccessTokenPayload, RefreshTokenPayload, UserCreate, UserUpdate } from "../interfaces";
-import { Users } from "../models";
-import { ApiException, bcrypt, camelToSnake, jwtToken } from "../utils";
-import { HouseService } from "./";
+import { EPagination, messageResponse, NotificationType } from "../enums";
+import type { AccessTokenPayload, Filter, RefreshTokenPayload, UserCreate, UserUpdate } from "../interfaces";
+import { UserRoles, Users } from "../models";
+import { ApiException, bcrypt, camelToSnake, filterHandler, jwtToken, sortingHandler } from "../utils";
+import { HouseService, NotificationService } from "./";
 
 class UserService {
+    static async getAllUsers() {
+        const users = await Users.query();
+        if (users.length === 0) {
+            throw new ApiException(messageResponse.NO_USERS_FOUND, 404);
+        }
+        return users;
+    }
+
+    static async search(q: string) {
+        const users = await Users.query()
+            .where("email", "=", q)
+            .orWhere("phone_number", "=", q)
+            .select("id", "full_name");
+        if (users.length === 0) {
+            throw new ApiException(messageResponse.NO_USERS_FOUND, 404);
+        }
+        return users;
+    }
+
+    static async getUserInHouse(houseId: string, filterData: Filter) {
+        const {
+            filter = [],
+            sort = [],
+            pagination: { page = EPagination.DEFAULT_PAGE, pageSize = EPagination.DEFAULT_LIMIT } = {},
+        } = filterData || {};
+
+        let query = UserRoles.query()
+            .where("roles.house_id", houseId)
+            .join("users", "user_roles.userId", "users.id")
+            .join("roles", "user_roles.roleId", "roles.id")
+            .select(
+                "users.id",
+                "users.full_name",
+                "users.gender",
+                "users.email",
+                "users.phone_number",
+                "users.address",
+                "users.birthday",
+                "users.verify",
+                "roles.id as roleId",
+                "roles.name as role"
+            );
+
+        query = filterHandler(query, filter);
+
+        query = sortingHandler(query, sort);
+
+        const cloneQuery = query.clone();
+        const total = await cloneQuery.resultSize();
+        const totalPages = Math.ceil(total / pageSize);
+
+        if (total === 0) throw new ApiException(messageResponse.NO_USERS_FOUND, 404);
+
+        if (page === -1 && pageSize === -1) await query.page(0, total);
+        else await query.page(page - 1, pageSize);
+
+        const fetchData = await query;
+
+        return {
+            ...fetchData,
+            total,
+            page,
+            pageCount: totalPages,
+            pageSize,
+        };
+    }
+
     static async getUserById(id: string) {
         const user = await Users.query().findById(id);
         if (!user) {
@@ -32,7 +99,7 @@ class UserService {
         const user = await Users.query().findOne({ email: username }).orWhere({ phone_number: username });
 
         if (!user) {
-            throw new ApiException(messageResponse.INVALID_USER, 401);
+            throw new ApiException(messageResponse.INVALID_USER, 400);
         } else if (!user.verify) {
             throw new ApiException(messageResponse.VERIFY_ACCOUNT_FIRST, 403);
         } else if (!user.status) {
@@ -40,11 +107,11 @@ class UserService {
         } else {
             const checkPassword = await bcrypt.compare(password, user.password);
             if (!checkPassword) {
-                throw new ApiException(messageResponse.INVALID_USER, 401);
+                throw new ApiException(messageResponse.INVALID_USER, 400);
             }
         }
 
-        const housePermissions = await HouseService.getHouseByUser(user.id);
+        const housePermissions = await HouseService.getHousePermissions(user.id);
         const { accessToken, refreshToken } = await this.generateToken({
             id: user.id,
             email: user.email,
@@ -78,8 +145,8 @@ class UserService {
     }
 
     static async generateToken(user: AccessTokenPayload) {
-        const accessToken = this.generateAccessToken(user);
-        const refreshToken = this.generateRefreshToken(user);
+        const accessToken = await this.generateAccessToken(user);
+        const refreshToken = await this.generateRefreshToken(user);
         return { accessToken, refreshToken };
     }
 
@@ -99,6 +166,17 @@ class UserService {
             .insertAndFetch(camelToSnake(data))
             .select("id", "email", "full_name", "phone_number", "birthday");
 
+        // create notification for new user
+        await NotificationService.create({
+            title: "Chào mừng bạn đến với RentHub",
+            content: `Chào mừng ${user.full_name} đến với RentHub, hãy cùng khám phá các dịch vụ mà chúng tôi cung cấp.`,
+            type: NotificationType.SYSTEM,
+            data: {
+                path: "/",
+            },
+            recipients: [user.id],
+        });
+
         return user;
     }
 
@@ -113,10 +191,21 @@ class UserService {
         } else if (user.verify) {
             throw new ApiException(messageResponse.ACCOUNT_PREVIOUSLY_VERIFIED, 409);
         } else if (code !== String(data.verifyCode)) {
-            throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 401);
+            throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 400);
         }
         await redis.del(`verify-account:${data.email}`);
         await user.$query().patch({ verify: true });
+
+        // send notification
+        await NotificationService.create({
+            title: "Xác thực tài khoản thành công",
+            content: `Tài khoản ${data.email} đã được xác thực thành công.`,
+            type: NotificationType.SYSTEM,
+            data: {
+                path: "/",
+            },
+            recipients: [user.id],
+        });
         return user;
     }
 
@@ -135,6 +224,17 @@ class UserService {
             throw new ApiException(messageResponse.INVALID_VERIFICATION_CODE, 401);
         }
         this.changePassword(data.email, data.password);
+
+        // send notification
+        await NotificationService.create({
+            title: "Thay đổi mật khẩu thành công",
+            content: `Mật khẩu của tài khoản ${data.email} đã được thay đổi thành công.`,
+            type: NotificationType.WARNING,
+            data: {
+                path: "/",
+            },
+            recipients: [data.email],
+        });
         return true;
     }
 
@@ -161,6 +261,14 @@ class UserService {
             throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 404);
         }
         await user.$query().patch({ first_login: false });
+        return user;
+    }
+
+    static async getSystemUser() {
+        const user = await Users.query().findOne({ role: "system" });
+        if (!user) {
+            throw new ApiException(messageResponse.GET_USER_NOT_FOUND, 404);
+        }
         return user;
     }
 }

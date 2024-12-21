@@ -1,5 +1,6 @@
 "use strict";
 
+import { Model } from "objection";
 import { messageResponse, RoomStatus } from "../enums";
 import { RoomService } from "../services";
 import { ApiException, apiResponse, Exception, RedisUtils } from "../utils";
@@ -20,35 +21,57 @@ class RoomController {
     //     }
     // }
 
+    static async getServicesInContract(req, res) {
+        const { roomId } = req.params;
+        try {
+            const services = await RoomService.getServicesInContract(roomId);
+            return res.json(apiResponse(messageResponse.GET_SERVICES_LIST_SUCCESS, true, services));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
     static async createRoom(req, res) {
         const { houseId } = req.params;
-        const { name, floor, maxRenters, price, services, images, description, status } = req.body;
+        const { name, floor, roomArea, maxRenters, price, services, images, description, status } = req.body;
         const userId = req.user.id;
+        const trx = await Model.startTransaction();
         try {
-            const newRoom = await RoomService.create(houseId, {
-                name,
-                floorId: floor,
-                maxRenters,
-                price,
-                description,
-                status: status || RoomStatus.AVAILABLE,
-                createdBy: userId,
-                updatedBy: userId,
-            });
+            const newRoom = await RoomService.create(
+                houseId,
+                {
+                    name,
+                    floorId: floor,
+                    maxRenters,
+                    price,
+                    roomArea,
+                    services,
+                    images,
+                    description,
+                    status: status || RoomStatus.AVAILABLE,
+                    createdBy: userId,
+                    updatedBy: userId,
+                },
+                trx
+            );
 
             if (newRoom) {
-                await RoomService.addServiceToRoom(newRoom.id, services, userId);
-                await RoomService.addImagesToRoom(newRoom.id, images, userId);
-
-                const room = await RoomService.getRoomById(newRoom.id);
+                // await RoomService.addServiceToRoom(newRoom.id, services, userId, trx);
+                // await RoomService.addImagesToRoom(newRoom.id, images, userId, trx);
 
                 // delete cache
                 await RedisUtils.deletePattern(`${prefix}:*`);
+                await RedisUtils.deletePattern(`houses:getRooms_*`);
+
+                await trx.commit();
+
+                const room = await RoomService.getRoomById(newRoom.id);
 
                 return res.json(apiResponse(messageResponse.CREATE_ROOM_SUCCESS, true, room));
             }
             throw new ApiException(messageResponse.CREATE_ROOM_FAIL, 400);
         } catch (err) {
+            await trx.rollback();
             Exception.handle(err, req, res);
         }
     }
@@ -75,24 +98,36 @@ class RoomController {
 
     static async updateRoom(req, res) {
         const { roomId } = req.params;
-        const { name, floor, maxRenters, price, services, images } = req.body;
+        const { name, floor, roomArea, maxRenters, price, services, images } = req.body;
         const userId = req.user.id;
+        const trx = await Model.startTransaction();
         try {
-            const updatedRoom = await RoomService.updateRoom(roomId, {
-                name,
-                floorId: floor,
-                maxRenters,
-                price,
-                services,
-                images,
-                updatedBy: userId,
-            });
+            const updatedRoom = await RoomService.updateRoom(
+                roomId,
+                {
+                    name,
+                    floorId: floor,
+                    maxRenters,
+                    roomArea,
+                    price,
+                    updatedBy: userId,
+                },
+                trx
+            );
+
+            await RoomService.updateServicesInRoom(roomId, services, userId, trx);
+
+            await RoomService.addImagesToRoom(roomId, images, userId, trx);
 
             // delete cache
             await RedisUtils.deletePattern(`${prefix}`);
+            await RedisUtils.deletePattern(`houses:getRooms_*`);
+
+            await trx.commit();
 
             return res.json(apiResponse(messageResponse.UPDATE_ROOM_SUCCESS, true, updatedRoom));
         } catch (err) {
+            await trx.rollback();
             Exception.handle(err, req, res);
         }
     }
@@ -105,6 +140,28 @@ class RoomController {
 
             // delete cache
             await RedisUtils.deletePattern(`${prefix}:*`);
+            await RedisUtils.deletePattern(`houses:getRooms_*`);
+
+            return res.json(apiResponse(messageResponse.DELETE_ROOM_SUCCESS, true));
+        } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async deleteRoomsByHouse(req, res) {
+        const { houseId } = req.params;
+        const { ids } = req.body;
+        const userId = req.user.id;
+        try {
+            const roomIds = await RoomService.roomIdsByHouse(houseId);
+
+            // valid room ids
+            const validIds = ids.filter((id) => roomIds.includes(id));
+            await RoomService.deleteRoomsByHouse(validIds, userId);
+
+            // delete cache
+            await RedisUtils.deletePattern(`${prefix}:*`);
+            await RedisUtils.deletePattern(`houses:getRooms_*`);
 
             return res.json(apiResponse(messageResponse.DELETE_ROOM_SUCCESS, true));
         } catch (err) {

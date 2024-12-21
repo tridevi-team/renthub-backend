@@ -1,8 +1,9 @@
 "use strict";
 
+import { Model } from "objection";
 import { messageResponse } from "../enums";
 import { EquipmentService } from "../services";
-import { apiResponse, Exception } from "../utils";
+import { apiResponse, Exception, RedisUtils } from "../utils";
 
 class EquipmentController {
     static async addEquipment(req, res) {
@@ -23,6 +24,11 @@ class EquipmentController {
                 updatedBy: userInfo.id,
             };
             const equipment = await EquipmentService.create(data);
+
+            await RedisUtils.deletePattern("rooms:*");
+            await RedisUtils.deletePattern("floors:*");
+            await RedisUtils.deletePattern("houses:*");
+
             return res.json(apiResponse(messageResponse.CREATE_EQUIPMENT_SUCCESS, true, equipment));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -70,6 +76,11 @@ class EquipmentController {
                 updatedBy: userInfo.id,
             };
             const equipment = await EquipmentService.update(userInfo.id, equipmentId, data);
+
+            await RedisUtils.deletePattern("rooms:*");
+            await RedisUtils.deletePattern("floors:*");
+            await RedisUtils.deletePattern("houses:*");
+
             return res.json(apiResponse(messageResponse.UPDATE_EQUIPMENT_SUCCESS, true, equipment));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -98,8 +109,35 @@ class EquipmentController {
         const user = req.user;
         try {
             await EquipmentService.delete(user.id, equipmentId);
+
+            await RedisUtils.deletePattern("rooms:*");
+            await RedisUtils.deletePattern("floors:*");
+            await RedisUtils.deletePattern("houses:*");
+
             return res.json(apiResponse(messageResponse.DELETE_EQUIPMENT_SUCCESS, true));
         } catch (err) {
+            Exception.handle(err, req, res);
+        }
+    }
+
+    static async deleteEquipmentInHouse(req, res) {
+        const { houseId } = req.params;
+        const { ids } = req.body;
+        const trx = await Model.startTransaction();
+        try {
+            await EquipmentService.deleteMany(req.user.id, houseId, ids, trx);
+
+            // commit transaction
+            await trx.commit();
+
+            await RedisUtils.deletePattern("rooms:*");
+            await RedisUtils.deletePattern("floors:*");
+            await RedisUtils.deletePattern("houses:*");
+
+            return res.json(apiResponse(messageResponse.DELETE_EQUIPMENT_SUCCESS, true));
+        } catch (err) {
+            // rollback transaction
+            await trx.rollback();
             Exception.handle(err, req, res);
         }
     }
