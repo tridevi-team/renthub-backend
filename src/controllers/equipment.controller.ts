@@ -3,7 +3,7 @@
 import { Model } from "objection";
 import { messageResponse } from "../enums";
 import { EquipmentService } from "../services";
-import { apiResponse, Exception } from "../utils";
+import { apiResponse, Exception, RedisUtils } from "../utils";
 
 class EquipmentController {
     static async addEquipment(req, res) {
@@ -24,6 +24,11 @@ class EquipmentController {
                 updatedBy: userInfo.id,
             };
             const equipment = await EquipmentService.create(data);
+
+            await RedisUtils.deletePattern("rooms:*");
+            await RedisUtils.deletePattern("floors:*");
+            await RedisUtils.deletePattern("houses:*");
+
             return res.json(apiResponse(messageResponse.CREATE_EQUIPMENT_SUCCESS, true, equipment));
         } catch (err) {
             Exception.handle(err, req, res);
@@ -71,6 +76,11 @@ class EquipmentController {
                 updatedBy: userInfo.id,
             };
             const equipment = await EquipmentService.update(userInfo.id, equipmentId, data);
+
+            await RedisUtils.deletePattern("rooms:*");
+            await RedisUtils.deletePattern("floors:*");
+            await RedisUtils.deletePattern("houses:*");
+
             return res.json(apiResponse(messageResponse.UPDATE_EQUIPMENT_SUCCESS, true, equipment));
         } catch (err) {
             Exception.handle(err, req, res);
