@@ -587,6 +587,11 @@ class ContractService {
             status: status === ApprovalStatus.APPROVED ? ContractStatus.ACTIVE : details.status,
         });
 
+        const contractDetails = await this.findOneRoomContract(id);
+
+        // update room status if contract status is active => rented
+        await RoomService.updateStatusByContract(details.roomId, contractDetails.status, contractDetails.createdBy);
+
         const house = await HouseService.getHouseByRoomId(details.roomId);
 
         // sent notification to landlord

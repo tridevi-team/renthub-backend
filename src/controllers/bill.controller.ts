@@ -161,15 +161,15 @@ class BillController {
                 );
                 if (!findRoomPrice) {
                     await BillService.createDetails(newBill.id, detailsData, trx);
+                    items.push({
+                        name: "Tiền phòng",
+                        unitPrice: roomPrice,
+                        quantity: 1,
+                        price: roomPrice,
+                    });
                     total += detailsData.totalPrice;
                 }
 
-                items.push({
-                    name: "Tiền phòng",
-                    unitPrice: roomPrice,
-                    quantity: 1,
-                    price: roomPrice,
-                });
                 const detailsList: {
                     billId: string;
                     serviceId?: string;

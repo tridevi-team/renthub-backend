@@ -3,7 +3,7 @@
         // Project options
         "allowJs": true, // Allow JavaScript files to be imported inside your project, instead of just .ts and .tsx files
         "declaration": false, // Generate .d.ts files for every TypeScript or JavaScript file inside your project
-        "lib": ["es2019", "es2020", "es2021", "esnext"], // Specifies which default set of type definitions to use ("DOM", "ES6", etc)
+        "lib": ["es2019", "es2020", "es2021", "esnext", "DOM"], // Specifies which default set of type definitions to use ("DOM", "ES6", etc)
         "module": "commonjs", // Sets the module system for the program. "CommonJS" for node projects.
         "noEmit": false, // Do not emit compiler output files like JavaScript source code, source-maps or declarations.
         "outDir": "./dist", // .js (as well as .d.ts, .js.map, etc.) files will be emitted into this directory

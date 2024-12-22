@@ -8,7 +8,7 @@ import { ApiException, camelToSnake, filterHandler, sortingHandler } from "../ut
 class EquipmentService {
     static async create(data: EquipmentInfo) {
         // check code is unique
-        const details = await Equipment.query().findOne({ code: data.code });
+        const details = await Equipment.query().findOne({ code: data.code, houseId: data.houseId });
         if (details) {
             throw new ApiException(messageResponse.EQUIPMENT_ALREADY_EXISTS, 400);
         }
