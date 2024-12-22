@@ -161,17 +161,17 @@ app.get("/generate-pdf", async (req, res) => {
     const { contractId } = req.query;
     try {
         if (!contractId) throw new ApiException(messageResponse.UNKNOWN_ERROR, 500, false);
-        const pdfName = "puppeteer-example.pdf";
         // Launch the browser and open a new blank page
         const browser = await puppeteer.launch({
-            executablePath: "/snap/bin/chromium",
-            headless: true,
-            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+            // executablePath: "/snap/bin/chromium",
+            // headless: true,
+            // args: ["--no-sandbox", "--disable-setuid-sandbox"],
         });
         const page = await browser.newPage();
         const contractDetails = await ContractService.findOneRoomContract(contractId as string);
         const roomDetails = await RoomService.getRoomById(contractDetails.roomId);
 
+        const pdfName = `HopDongThuePhong_${roomDetails.name}_${roomDetails.house.name}.pdf`;
         let html = contractDetails.content;
 
         const replaceKeyData = await ContractService.findKeyData(contractId as string);
@@ -185,13 +185,13 @@ app.get("/generate-pdf", async (req, res) => {
                     REPAIRING: "Đang sửa chữa",
                     DISPOSED: "Đã thanh lý",
                 };
-                let equipmentList = `<table style="width: 100%; border-collapse: collapse; border: 1px solid black;">
-                    <tr><th>Mã thiết bị</th><th style="border: 1px solid black;">Tên thiết bị</th><th style="border: 1px solid black;">Trạng thái</th></tr>`;
+                let equipmentList = `<table style="width: 100%; border-collapse: collapse; border: 1px solid black; padding: 2px 5px;">
+                    <tr><th style="border: 1px solid black; padding: 2px 5px;">Mã thiết bị</th><th style="border: 1px solid black; padding: 2px 5px;">Tên thiết bị</th><th style="border: 1px solid black; padding: 2px 5px;">Trạng thái</th></tr>`;
                 replaceKeyData[key].forEach((item: any) => {
                     equipmentList += `<tr>
-                        <td style="border: 1px solid black;">${item.code}</td>
-                        <td style="border: 1px solid black;">${item.name}</td>
-                        <td style="border: 1px solid black;">${vi[item.status]}</td></tr>`;
+                        <td style="border: 1px solid black; padding: 2px 5px; text-align: center;">${item.code}</td>
+                        <td style="border: 1px solid black; padding: 2px 5px; text-align: center;">${item.name}</td>
+                        <td style="border: 1px solid black; padding: 2px 5px; text-align: center;">${vi[item.status]}</td></tr>`;
                 });
                 equipmentList += `</table>`;
                 html = html.replace(new RegExp(`{{${key}}}`, "g"), equipmentList);
@@ -202,15 +202,22 @@ app.get("/generate-pdf", async (req, res) => {
                     WATER_CONSUMPTION: "m3",
                     ELECTRICITY_CONSUMPTION: "kWh",
                 };
-                let servicesList = `<table style="width: 100%; border-collapse: collapse; border: 1px solid black;">
-                    <tr><th>Tên dịch vụ</th><th style="border: 1px solid black;">Đơn giá</th><th style="border: 1px solid black;">Loại</th>
-                    <th>Chỉ số đầu</th></tr>`;
+                let servicesList = `<table style="width: 100%; border-collapse: collapse; border: 1px solid black; padding: 2px 5px;">
+                    <tr><th style="border: 1px solid black; padding: 2px 5px;">Tên dịch vụ</th><th style="border: 1px solid black; padding: 2px 5px;">Đơn giá</th><th style="border: 1px solid black; padding: 2px 5px;">Loại</th>
+                    <th style="border: 1px solid black; padding: 2px 5px;">Chỉ số đầu</th></tr>`;
                 replaceKeyData[key].forEach((item: any) => {
                     servicesList += `<tr>
-                        <td style="border: 1px solid black;">${item.name}</td>
-                        <td style="border: 1px solid black;">${item.unitPrice}</td>
-                        <td style="border: 1px solid black;">${vi[item.type]}</td>
-                        <td style="border: 1px solid black;">${item.startIndex}</td></tr>`;
+                        <td style="border: 1px solid black; padding: 2px 5px; text-align: center;">${item.name}</td>
+                        <td style="border: 1px solid black; padding: 2px 5px; text-align: center;">${Intl.NumberFormat(
+                            "vi-VN",
+                            {
+                                style: "currency",
+                                currency: "VND",
+                            }
+                        ).format(item.unitPrice || 0)}</td>
+                        </td>
+                        <td style="border: 1px solid black; padding: 2px 5px; text-align: center;">${vi[item.type]}</td>
+                        <td style="border: 1px solid black; padding: 2px 5px; text-align: center;">${item.startIndex}</td></tr>`;
                 });
                 servicesList += `</table>`;
                 html = html.replace(new RegExp(`{{${key}}}`, "g"), servicesList);
@@ -228,7 +235,16 @@ app.get("/generate-pdf", async (req, res) => {
         }, roomDetails);
 
         // Save the page into a PDF and call it 'puppeteer-example.pdf'
-        await page.pdf({ path: `./${pdfName}` });
+        await page.pdf({
+            path: `./${pdfName}`,
+            format: "A4",
+            margin: {
+                top: "50px",
+                right: "50px",
+                bottom: "40px",
+                left: "50px",
+            },
+        });
 
         // When everything's done, close the browser instance
         await browser.close();
